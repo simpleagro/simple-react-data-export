@@ -1,3 +1,28 @@
-.pull-right{
-  float:right;
+.ant-menu-dark, .ant-menu-dark .ant-menu-sub{
+  background: rgb(75, 76, 73);
 }
+
+.logo{
+  height: 100px;
+  background-size: 130px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: white;
+  margin-top: 5px;
+}
+
+.ant-layout-sider.ant-layout-sider-collapsed .logo{
+  background-size: 70px;
+}
+
+.trigger{
+    font-size: 18px;
+    line-height: 64px;
+    padding: 0 24px;
+    cursor: pointer;
+    transition: color .3s;
+}
+.trigger::hover{
+    color: #1890ff;
+}
+

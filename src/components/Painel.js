@@ -1,34 +1,24 @@
 import React, { Component } from 'react';
-import styled from 'styled-components';
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
-import { Layout, Menu, Icon } from 'antd';
+import { Link, withRouter } from 'react-router-dom'
+import { Layout, Menu, Icon, Dropdown, Button } from 'antd';
 import { withCookies, Cookies } from 'react-cookie';
 import { instanceOf } from 'prop-types';
+import { connect } from 'react-redux';
 
-
-import LoginForm from './LoginForm';
-import Home from './Home';
-import Teste from './Teste';
+import "../styles/painel.css";
 
 const { Header, Content, Footer, Sider } = Layout;
 
-const StyledLayout = styled(Layout) `
-    .logo{
-        height: 32px;
-        background: rgba(255,255,255,.2);
-        margin:16px;
-    }
-    .trigger{
-        font-size: 18px;
-        line-height: 64px;
-        padding: 0 24px;
-        cursor: pointer;
-        transition: color .3s;
-    }
-    .trigger::hover{
-        color: #1890ff;
-    }
-`;
+const menu = (
+  <Menu>
+    <Menu.Item>
+      <Link to="/meu-perfil"> <Icon type="user" /> Meu Perfil</Link>
+    </Menu.Item>
+    <Menu.Item>
+      <Link to="/logout"> <Icon type="logout" /> Sair </Link>
+    </Menu.Item>
+  </Menu>
+);
 
 class Painel extends Component {
 
@@ -52,43 +42,62 @@ class Painel extends Component {
   }
 
   render() {
+    const { pathname: location } = window.location;
+    console.log(location);
     return (
-        <StyledLayout>
-          <Layout>
-            <Sider trigger={null}
-              collapsible
-              collapsed={this.state.collapsed}
-              style={{ overflow: 'auto', height: '100vh' }}>
-              <div className='logo' />
-              <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
-                <Menu.Item key="1">
-                  <Icon type="user" />
-                  <span className="nav-text">nav 1</span>
-                </Menu.Item>
-              </Menu>
-            </Sider>
-            <Layout>
-              <Header style={{ background: '#fff', padding: 0 }}>
-                <Icon
-                  className="trigger"
-                  type={this.state.collapsed ? 'menu-unfold' : 'menu-fold'}
-                  onClick={this.toggle}
-                />
-              </Header>
-              <Content style={{ margin: '24px 16px', padding: 24, background: '#fff', minHeight: 280 }}>
-                {/* <Router> */}
-                <Route path="/" exact component={Home} />
-                <Route path="/teste" component={Teste}/>
-                {/* </Router> */}
-              </Content>
-              <Footer style={{ textAlign: 'center' }}>
-                Ant Design ©2016 Created by Ant UED
-                        </Footer>
-            </Layout>
-          </Layout>
-        </StyledLayout>
+      <Layout>
+        <Sider trigger={null}
+          collapsible
+          collapsed={this.state.collapsed}
+          style={{ overflow: 'auto', height: '100vh' }}>
+          <div className='logo' style={{ backgroundImage: 'url(logo.png)' }} />
+          <Menu theme="dark" mode="inline" defaultSelectedKeys={['/']}
+            selectedKeys={[location]}>
+            <Menu.Item key="/entidades">
+              <Link to="/entidades">
+                <Icon type="file" />
+                <span className="nav-text">Entidades</span>
+              </Link>
+            </Menu.Item>
+            <Menu.Item key="/modulos">
+              <Link to="/modulos">
+                <Icon type="appstore-o" />
+                <span className="nav-text">Módulos</span>
+              </Link>
+            </Menu.Item>
+          </Menu>
+        </Sider>
+        <Layout>
+          <Header style={{ background: '#fff', padding: 0 }}>
+            <div style={{ float: 'left' }}>
+              <Icon
+                className="trigger"
+                type={this.state.collapsed ? 'menu-unfold' : 'menu-fold'}
+                onClick={this.toggle}
+              />
+            </div>
+            <div style={{ float: 'right', marginRight: 15 }}>
+              <Dropdown overlay={menu} placement="bottomRight">
+                <Button><Icon type="smile-o" />{this.props.username}</Button>
+              </Dropdown>
+            </div>
+          </Header>
+          <Content style={{ margin: '24px 16px', padding: 24, background: '#fff', minHeight: 280 }}>
+            {/* <Router> */}
+            {this.props.children}
+            {/* </Router> */}
+          </Content>
+          <Footer style={{ textAlign: 'center' }}>
+            SimpleAgro ©2018
+            </Footer>
+        </Layout>
+      </Layout>
     );
   }
 }
 
-export default withCookies(Painel);
+const mapStateToProps = ({ painelState }) => ({
+  username: painelState.username
+});
+
+export default withRouter(connect(mapStateToProps)(withCookies(Painel)));

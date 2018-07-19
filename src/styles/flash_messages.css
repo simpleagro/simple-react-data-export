@@ -1,0 +1,9 @@
+.simpleNotifySuccess{
+  background: #009e54 !important;
+  color: white;
+}
+.simpleNotifySuccess .ant-notification-notice-icon-success,
+.simpleNotifySuccess .ant-notification-notice-message,
+.simpleNotifySuccess .ant-notification-notice-close{
+  color: white !important;
+}

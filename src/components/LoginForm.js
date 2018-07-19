@@ -3,8 +3,12 @@ import { Form, Icon, Input, Button, Card } from 'antd';
 import axios from "axios";
 import { withCookies, Cookies } from 'react-cookie';
 import { instanceOf } from 'prop-types';
-import { API_URL } from "../config";
+import { bindActionCreators } from 'redux';
+import { connect } from "react-redux";
+import { userLoggedIn } from '../actions/painelActions';
 
+
+import { API_URL } from "../config";
 import '../styles/login.css';
 
 const FormItem = Form.Item;
@@ -53,12 +57,16 @@ class LoginForm extends Component {
           this.setState({ token: response.data.token });
           console.log(this.state.from.pathname);
           this.props.history.push(this.state.from.pathname);
-          axios.get(API_URL + "/entidades");
+          this.props.userLoggedIn(response.data.username);
         })
           .catch(err => alert(err.response.data));
       }
 
     });
+  }
+
+  submitWithEnterKey(e) {
+    if (e.keyCode === 13) this.handleSubmit(e);
   }
 
   render() {
@@ -80,7 +88,7 @@ class LoginForm extends Component {
               {getFieldDecorator('login', {
                 rules: [{ required: true, message: 'Por favor, informe seu login ou email.' }],
               })(
-                <Input addonBefore={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Usuário" />
+                <Input autoFocus addonBefore={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Usuário" />
               )}
             </FormItem>
             <FormItem
@@ -90,7 +98,7 @@ class LoginForm extends Component {
               {getFieldDecorator('senha', {
                 rules: [{ required: true, message: 'Por favor, informe sua senha.' }],
               })(
-                <Input addonBefore={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Senha" onKeyDown={(e) => { e.keyCode === 13 ? this.handleSubmit(e) : "" }} />
+                <Input addonBefore={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Senha" onKeyDown={(e) => this.submitWithEnterKey(e)} />
               )}
             </FormItem>
             <FormItem>
@@ -105,4 +113,9 @@ class LoginForm extends Component {
   }
 }
 
-export default withCookies(Form.create()(LoginForm));
+const mapDispatchToProps = dispatch =>
+  bindActionCreators({
+    userLoggedIn
+  }, dispatch);
+
+export default connect(null, mapDispatchToProps)(withCookies(Form.create()(LoginForm)));
