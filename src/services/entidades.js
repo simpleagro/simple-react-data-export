@@ -1,14 +1,22 @@
 import axios from "axios";
 import { API_URL } from "../config";
+import Cookies from "universal-cookie";
 
-const base_url = API_URL + "/entidades";
+const cookies = new Cookies();
 
-export const list = () => {
-  return axios.get(base_url)
+const api = axios.create({
+  baseURL: API_URL + '/entities',
+  headers: {
+    'Authorization': 'Bearer ' + cookies.get("token")
+  }
+})
+
+export const list = async () => {
+  return await api.get()
     .then(response => response.data);
 };
 
 export const update = (entidade) => {
-  return axios.put(`${base_url}/${entidade._id}`, entidade)
+  return api.put(entidade._id, entidade)
     .then(response => response.data);
 };

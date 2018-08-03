@@ -6,6 +6,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import Login from "./components/LoginForm";
 import Painel from "./components/Painel";
 import Entidades from "./components/Entidades";
+import Modulos from "./components/Modulos";
 
 import { logout } from "./services/auth";
 
@@ -38,7 +39,7 @@ const Routes = () => (
           <Switch>
             <PrivateRoute exact path="/" component={EmptyStatePainel} />
             <PrivateRoute exact path="/entidades" component={Entidades} />
-            <PrivateRoute exact path="/modulos" component={() => (<h2>MÓDULOS</h2>)} />
+            <PrivateRoute exact path="/modulos" component={Modulos} />
           </Switch>
         </Painel>
         {/* <Route component={ () => (<div>404</div>)} /> */}

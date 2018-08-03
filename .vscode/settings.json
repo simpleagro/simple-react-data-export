@@ -1,0 +1,26 @@
+{
+  "eslint.enable": false,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "simpleagro_apiold": true,
+    "deprecated": true,
+    "**/node_modules": true
+  },
+  "editor.wordWrap": "wordWrapColumn",
+  "editor.wordWrapColumn": 100,
+  "editor.tabSize": 2,
+  "editor.detectIndentation": false,
+  "files.eol": "\n",
+  "workbench.colorTheme": "Dracula",
+  "editor.fontSize": 16,
+  "editor.lineHeight": 30,
+  "editor.fontLigatures": false,
+  "editor.fontFamily": "Fira Code",
+  "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
+  "javascript.format.insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces": true,
+  "javascript.format.insertSpaceAfterConstructor": true,
+}
