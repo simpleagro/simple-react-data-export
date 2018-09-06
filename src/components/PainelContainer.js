@@ -11,6 +11,8 @@ import { withCookies, Cookies } from 'react-cookie';
 import PrivateRoute from "./PrivateRoute";
 import LoginForm from "./LoginForm";
 import Painel from "./Painel";
+import { isAuthenticated } from "../services/auth";
+
 
 class PainelContainer extends Component {
   render() {
@@ -18,7 +20,7 @@ class PainelContainer extends Component {
       <Router>
         <div>
           <Route path="/" render={() => (
-            false ? (
+            isAuthenticated() ? (
               <Painel />
             ) : (
                 <LoginForm />

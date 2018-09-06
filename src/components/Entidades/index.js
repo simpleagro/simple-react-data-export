@@ -39,7 +39,7 @@ class Entidades extends Component {
       this.formValidate = formRef.props.form;
   }
 
-  //#region  Modal 
+  //#region  Modal
   handleOk = (e) => {
 
     this.formValidate.validateFields((err) => {
