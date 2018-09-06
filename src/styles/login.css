@@ -1,33 +1,36 @@
-#loginView {
-  background: #ECECEC;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-}
-
-#loginView .ant-card {
-  width: 100%;
-  /* padding-right: 15px; */
-  /* padding-left: 15px; */
-  margin-right: auto;
-  margin-left: auto;
-  justify-content: center;
-}
-
-#loginView .ant-card .ant-card-head-title {
-  font-size: 26px;
-  padding-bottom: 0px;
-}
-
-#loginView .ant-card .ant-card-head{
-  border: none;
-}
-
-#loginView .ant-input-group-addon{
+.login-form .ant-input-group-addon{
   background: #009E54;
 }
 
-#loginView .ant-input-group-addon i{
+.login-form .ant-input-group-addon i{
   color: #fff !important;
+}
+
+.container {
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+.boxLeft {
+  width: 40%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.boxRight {
+  background: #009d55;
+  width: 60%;
+  height: 100%;
+  background-image: url("../assets/pontos.png");
+  background-position: center;
+
+}
+.login-logo {
+  width: 280px;
+  height: auto;
+  margin-bottom: 20px;
 }

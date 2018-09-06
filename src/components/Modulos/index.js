@@ -85,7 +85,11 @@ class Modulos extends Component {
   };
 
   handleFormState = event => {
-    if (!event.target.name) event.target.name = event.target.id;
+    if (event.target.type === 'checkbox'){
+      event.target.name = event.target.id;
+      event.target.value = event.target.checked;
+    }
+
     let form = Object.assign({}, this.state.form, {
       [event.target.name]: event.target.value
     });

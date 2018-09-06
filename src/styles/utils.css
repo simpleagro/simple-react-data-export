@@ -1,5 +1,8 @@
-.pull-right{
-  float:right;
+.pull-right {
+  float: right;
+}
+.text-center {
+  text-align: center;
 }
 
 .Aligner {
@@ -17,7 +20,7 @@
   justify-content: center;
 }
 
-.Aligner > .center > img{
+.Aligner > .center > img {
   -webkit-filter: opacity(30%); /* Safari 6.0 - 9.0 */
 }
 

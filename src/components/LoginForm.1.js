@@ -1,6 +1,7 @@
 import React, { Component } from "react";
-import { instanceOf } from "prop-types";
-import { Form, Icon, Input, Button } from "antd";
+import PropTypes, { instanceOf } from "prop-types";
+
+import { Form, Icon, Input, Button, Card } from "antd";
 import axios from "axios";
 import { withCookies, Cookies } from "react-cookie";
 import { bindActionCreators } from "redux";
@@ -15,9 +16,10 @@ const FormItem = Form.Item;
 function hasErrors(fieldsError) {
   return Object.keys(fieldsError).some(field => fieldsError[field]);
 }
+
 class LoginForm extends Component {
   static propTypes = {
-    cookies: instanceOf(Cookies).isRequired
+    cookies: instanceOf(Cookies).isRequired,
   };
 
   constructor(props) {
@@ -80,9 +82,8 @@ class LoginForm extends Component {
     const senhaError = isFieldTouched("senha") && getFieldError("senha");
 
     return (
-      <div className="container">
-        <div className="boxLeft">
-          <img className="login-logo" src="logo.png" />
+      <div id="loginView">
+        <Card title="Login" bordered style={{ width: 300 }}>
           <Form onSubmit={this.handleSubmit} className="login-form">
             <FormItem
               validateStatus={loginError ? "error" : ""}
@@ -120,25 +121,26 @@ class LoginForm extends Component {
                   }
                   type="password"
                   placeholder="Senha"
+                  onKeyDown={e => this.submitWithEnterKey(e)}
                 />
               )}
             </FormItem>
             <FormItem>
+              <a className="login-form-forgot" href="">
+                Esqueceu sua senha?
+              </a>
               <Button
-                htmlType="submit"
-                disabled={hasErrors(getFieldsError())}
                 type="primary"
-                style={{ width: "100%" }}
+                htmlType="submit"
+                className="login-form-button pull-right"
+                disabled={hasErrors(getFieldsError())}
               >
-                Entrar
+                Ok{" "}
               </Button>
             </FormItem>
-            {/* <FormItem className="text-center">
-              <a href="">Esqueceu sua senha?</a>
-            </FormItem> */}
           </Form>
-        </div>
-        <div className="boxRight" />
+        </Card>
+        <Card bordered style={{width: 670}}>TESTE</Card>
       </div>
     );
   }

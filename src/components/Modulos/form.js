@@ -49,10 +49,10 @@ class ModuloForm extends Component {
               {Object.keys(configuracoes).map(k => (
                 <Fragment key={k}>
                   <Form.Item>
-                    {getFieldDecorator(k, {
+                    {getFieldDecorator(`configuracoes.${k}.ativo`, {
                       valuePropName: "checked",
                       initialValue: configuracoes[k].ativo
-                    })(<Checkbox onChange={this.setConfig} />)}
+                    })(<Checkbox onChange={this.setConfig}>{configuracoes[k].nome}</Checkbox>)}
                     <br />
                   </Form.Item>
                 </Fragment>
