@@ -4,11 +4,12 @@ import { CookiesProvider } from "react-cookie";
 
 import PrivateRoute from "./components/PrivateRoute";
 import Login from "./components/LoginForm";
-import PageNotFound from "./components/PageNotFound";
+import PageNotFound from "./components/errors/PageNotFound";
 import Entidades from "./components/Entidades";
 import Modulos from "./components/Modulos";
 
 import { logout } from "./services/auth";
+import emptyStateImage from "../src/assets/keep-explore.svg"
 
 //desta forma consigo usar uma rota para fazer logout
 //pois o withRouter e Route dependem de um objeto que neste
@@ -18,12 +19,10 @@ const Logout = withRouter(({ history }) => {
   return null;
 });
 
-
-
 const EmptyStatePainel = () => (
   <div className="Aligner emptyState">
     <div className="center">
-      <img alt="Seja bem vindo" width="120" src="../assets/keep-explore.svg" />
+      <img alt="Seja bem vindo" width="120" src={emptyStateImage} />
       <br />
       <br />
       <p>Seja bem vindo! Continue explorando!</p>
