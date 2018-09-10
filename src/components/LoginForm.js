@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { instanceOf } from "prop-types";
-import { Form, Icon, Input, Button } from "antd";
+import { Form, Icon, Input, Button, notification } from "antd";
 import axios from "axios";
 import { withCookies, Cookies } from "react-cookie";
 import { bindActionCreators } from "redux";
@@ -56,8 +56,18 @@ class LoginForm extends Component {
           console.log(this.state.from.pathname);
           this.props.history.push(this.state.from.pathname);
           this.props.userLoggedIn(response.data);
+          notification.success({
+            message: `Seja bem vindo, ${response.data.user.nome}`
+          });
         } catch (error) {
-          console.log(error.toString());
+          if (
+            error &&
+            error.response &&
+            error.response.data &&
+            error.response.data.error
+          )
+            notification.error({ message: error.response.data.error });
+          else notification.error({ message: error.toString() });
         }
       }
     });

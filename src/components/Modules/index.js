@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Row, Col, Divider, Button, Icon, Modal } from "antd";
 
-import * as ModuloService from "../../services/modulos";
+import * as ModuloService from "../../services/modules";
 import SimpleTable from "../SimpleTable";
 import ModuloForm from "./form";
 import { flashWithSuccess } from "../FlashMessages";

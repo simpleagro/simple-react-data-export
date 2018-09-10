@@ -7,8 +7,7 @@ import { connect } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "../styles/painel.css";
-import Menus from "../config/menus";
-console.log(Menus);
+import { menus } from "../config/menus";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -48,9 +47,9 @@ class Painel extends Component {
     });
   };
 
-  showMenu = m => {
-    if (m.onlyAccess && m.onlyAccess.length > 0)
-      return !!m.onlyAccess.find(access => access === this.props.userType);
+  showMenu = mOnlyAccess => {
+    if (mOnlyAccess && mOnlyAccess.length > 0)
+      return !!mOnlyAccess.find(access => access === this.props.userType);
 
     return true;
   };
@@ -59,12 +58,12 @@ class Painel extends Component {
     const { pathname: location } = window.location;
     return (
       <Layout>
-        <Sider
+        <Sider id="menuLeft"
           trigger={null}
           width="236px"
           collapsible
           collapsed={this.state.collapsed}
-          style={{ overflow: "auto", height: "100vh" }}
+          style={{ overflow: "auto", height: "100vhmax" }}
         >
           <div
             className="logo"
@@ -77,17 +76,31 @@ class Painel extends Component {
             defaultSelectedKeys={["/"]}
             selectedKeys={[location]}
           >
-            {Menus.map(
+            {Object.keys(menus).map(mKey => {
+              const { path: mPath, icon: mIcon, label: mLbl } = menus[mKey];
+
+              return (
+                !!this.showMenu(menus[mKey].onlyAccess) && (
+                  <Menu.Item key={mKey}>
+                    <Link to={mPath}>
+                      <FontAwesomeIcon icon={mIcon} size="lg" />
+                      <span className="nav-text">{mLbl}</span>
+                    </Link>
+                  </Menu.Item>
+                )
+              );
+            })}
+            {/* {menus.map(
               m =>
                 !!this.showMenu(m) && (
                   <Menu.Item key={m.key}>
-                    <Link to={m.link}>
+                    <Link to={m.path}>
                       <FontAwesomeIcon icon={m.icon} size="lg" />
                       <span className="nav-text">{m.label}</span>
                     </Link>
                   </Menu.Item>
                 )
-            )}
+            )} */}
           </Menu>
         </Sider>
         <Layout>
@@ -135,8 +148,8 @@ class Painel extends Component {
 }
 
 const mapStateToProps = ({ painelState }) => ({
-  username: painelState.username,
-  userType: painelState.userData.user.usertype
+  username: painelState.userData.user.nome,
+  userType: painelState.userData.user.usertype,
 });
 
 export default withRouter(connect(mapStateToProps)(withCookies(Painel)));

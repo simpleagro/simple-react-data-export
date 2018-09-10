@@ -36,23 +36,23 @@
 .nav-text {
   font-size: 16px;
 }
-.svg-inline--fa {
+#menuLeft .svg-inline--fa {
   margin-right: 5px;
 }
 /* Custom ScrollBars */
-::-webkit-scrollbar {
-  width: 12px;
+#menuLeft::-webkit-scrollbar {
+  width: 12px !important;
 }
 /* Track */
-::-webkit-scrollbar-track {
+#menuLeft::-webkit-scrollbar-track {
   background: #606062;
 }
 /* Handle */
-::-webkit-scrollbar-thumb {
+#menuLeft::-webkit-scrollbar-thumb {
   background: #838386;
 }
 /* Handle */
-::-webkit-scrollbar-thumb:hover {
+#menuLeft::-webkit-scrollbar-thumb:hover {
   background: #9f9faa;
 }
 .painel-header {

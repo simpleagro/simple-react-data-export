@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Row, Col, Divider, Button, Icon, Modal } from 'antd';
 
-import * as EntidadeService from "../../services/entidades";
+import * as EntidadeService from "../../services/entities";
 import SimpleTable from "../SimpleTable";
 import EntidadeForm from './form';
 import { flashWithSuccess } from "../FlashMessages";
