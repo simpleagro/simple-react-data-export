@@ -48,6 +48,13 @@ class Painel extends Component {
     });
   };
 
+  showMenu = m => {
+    if (m.onlyAccess && m.onlyAccess.length > 0)
+      return !!m.onlyAccess.find(access => access === this.props.userType);
+
+    return true;
+  };
+
   render() {
     const { pathname: location } = window.location;
     return (
@@ -59,7 +66,10 @@ class Painel extends Component {
           collapsed={this.state.collapsed}
           style={{ overflow: "auto", height: "100vh" }}
         >
-          <div className="logo" style={{ backgroundImage: "url(logo-branca.png)" }} />
+          <div
+            className="logo"
+            style={{ backgroundImage: "url(logo-branca.png)" }}
+          />
 
           <Menu
             theme="dark"
@@ -67,14 +77,17 @@ class Painel extends Component {
             defaultSelectedKeys={["/"]}
             selectedKeys={[location]}
           >
-            {Menus.map(m => (
-              <Menu.Item key={m.key}>
-                <Link to={m.link}>
-                  <FontAwesomeIcon icon={m.icon} size="lg" />
-                  <span className="nav-text">{m.label}</span>
-                </Link>
-              </Menu.Item>
-            ))}
+            {Menus.map(
+              m =>
+                !!this.showMenu(m) && (
+                  <Menu.Item key={m.key}>
+                    <Link to={m.link}>
+                      <FontAwesomeIcon icon={m.icon} size="lg" />
+                      <span className="nav-text">{m.label}</span>
+                    </Link>
+                  </Menu.Item>
+                )
+            )}
           </Menu>
         </Sider>
         <Layout>
@@ -122,7 +135,8 @@ class Painel extends Component {
 }
 
 const mapStateToProps = ({ painelState }) => ({
-  username: painelState.username
+  username: painelState.username,
+  userType: painelState.userData.user.usertype
 });
 
 export default withRouter(connect(mapStateToProps)(withCookies(Painel)));

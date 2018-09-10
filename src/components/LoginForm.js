@@ -55,7 +55,7 @@ class LoginForm extends Component {
           this.setState({ token: response.data.token });
           console.log(this.state.from.pathname);
           this.props.history.push(this.state.from.pathname);
-          this.props.userLoggedIn(response.data.user.nome);
+          this.props.userLoggedIn(response.data);
         } catch (error) {
           console.log(error.toString());
         }

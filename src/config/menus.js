@@ -9,19 +9,22 @@ export default [
     key: "/empresas",
     link: "/empresas",
     label: "Empresas",
-    icon: "building"
+    icon: "building",
+    onlyAccess: ["SuperUser"]
   },
   {
     key: "/modulos",
     link: "/modulos",
     label: "Módulos",
-    icon: "bezier-curve"
+    icon: "bezier-curve",
+    onlyAccess: ["SuperUser"]
   },
   {
     key: "/entidades",
     link: "/entidades",
     label: "Entidades",
-    icon: "file"
+    icon: "file",
+    onlyAccess: ["SuperUser"]
   },
   {
     key: "/usuarios",
