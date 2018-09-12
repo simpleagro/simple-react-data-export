@@ -51,14 +51,14 @@ class LoginForm extends Component {
 
           if (!response) throw new Error("Houve um erro ao logar");
 
-          this.props.cookies.set("token", response.data.token, { path: "/" });
-          this.setState({ token: response.data.token });
+          await this.props.cookies.set("token", response.data.token, { path: "/" });
+          await this.setState({ token: response.data.token });
           console.log(this.state.from.pathname);
-          this.props.history.push(this.state.from.pathname);
-          this.props.userLoggedIn(response.data);
+          await this.props.userLoggedIn(response.data);
           notification.success({
             message: `Seja bem vindo, ${response.data.user.nome}`
           });
+          this.props.history.push(this.state.from.pathname);
         } catch (error) {
           if (
             error &&

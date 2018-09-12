@@ -11,7 +11,7 @@ import { menus } from "../config/menus";
 
 const { Header, Content, Footer, Sider } = Layout;
 
-const menu = (
+const MenuHeader = () => (
   <Menu>
     <Menu.Item>
       <Link to="/meu-perfil">
@@ -33,7 +33,10 @@ class Painel extends Component {
     super(props);
 
     this.state = {
-      collapsed: false
+      collapsed: false,
+      siderWidth: 236,
+      marginContent: 236,
+      headerContent: 236
     };
   }
 
@@ -43,7 +46,9 @@ class Painel extends Component {
 
   toggle = () => {
     this.setState({
-      collapsed: !this.state.collapsed
+      collapsed: !this.state.collapsed,
+      marginContent: this.state.collapsed ? 236 : 80,
+      headerContent: this.state.collapsed ? 236 : 80
     });
   };
 
@@ -57,13 +62,19 @@ class Painel extends Component {
   render() {
     const { pathname: location } = window.location;
     return (
-      <Layout>
-        <Sider id="menuLeft"
+      <Layout style={{ minHeight: "100vh" }}>
+        <Sider
+          id="menuLeft"
           trigger={null}
-          width="236px"
+          width={this.state.siderWidth}
           collapsible
           collapsed={this.state.collapsed}
-          style={{ overflow: "auto", height: "100vhmax" }}
+          style={{
+            overflow: "auto",
+            height: "100vh",
+            position: "fixed",
+            left: 0
+          }}
         >
           <div
             className="logo"
@@ -90,23 +101,12 @@ class Painel extends Component {
                 )
               );
             })}
-            {/* {menus.map(
-              m =>
-                !!this.showMenu(m) && (
-                  <Menu.Item key={m.key}>
-                    <Link to={m.path}>
-                      <FontAwesomeIcon icon={m.icon} size="lg" />
-                      <span className="nav-text">{m.label}</span>
-                    </Link>
-                  </Menu.Item>
-                )
-            )} */}
           </Menu>
         </Sider>
-        <Layout>
+        <Layout style={{ marginLeft: this.state.marginContent }}>
           <Header
             className="painel-header"
-            style={{ background: "#fff", padding: 0 }}
+            style={{ marginLeft: this.state.headerContent }}
           >
             <div style={{ float: "left" }}>
               <Icon
@@ -116,7 +116,7 @@ class Painel extends Component {
               />
             </div>
             <div style={{ float: "right", marginRight: 15 }}>
-              <Dropdown overlay={menu}>
+              <Dropdown overlay={<MenuHeader />}>
                 <Button className="no-border" ghost>
                   {this.props.username}
                   <FontAwesomeIcon
@@ -130,10 +130,9 @@ class Painel extends Component {
           </Header>
           <Content
             style={{
-              margin: "24px 16px",
+              margin: "85px 16px 0",
               padding: 24,
-              background: "#fff",
-              minHeight: 280
+              background: "#fff"
             }}
           >
             {/* <Router> */}
@@ -147,9 +146,12 @@ class Painel extends Component {
   }
 }
 
-const mapStateToProps = ({ painelState }) => ({
-  username: painelState.userData.user.nome,
-  userType: painelState.userData.user.usertype,
-});
+const mapStateToProps = ({ painelState }) => {
+  console.log("PAINE", painelState);
+  return {
+    username: painelState.userData.user.nome,
+    userType: "SuperUser"
+  };
+};
 
 export default withRouter(connect(mapStateToProps)(withCookies(Painel)));

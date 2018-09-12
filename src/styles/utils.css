@@ -33,3 +33,11 @@
 .no-border {
   border: 0 !important;
 }
+
+.bg-green{
+  background-color: #009e54
+}
+
+.green{
+  color: #009e54
+}

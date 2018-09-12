@@ -52,28 +52,11 @@ class Clients extends Component {
       if (err) return;
       else {
         if (!this.state.editMode) {
-          ClientService.create(this.state.form)
-            .then(response => {
-              this.initializeList();
-              this.setState({
-                openForm: false,
-                form: {}
-              });
-              flashWithSuccess();
-            })
-            .catch(err => {
-              const { error } = err.response.data;
-
-              const msg = (props) => {
-                return (
-                <ul>
-                  {for (let i in error) msg += "<li>" + error[i].message + "</li>";
-                </ul>
-                )
-              };
-
-              message.error(msg);
-            });
+          this.setState({
+            openForm: false,
+            list: [...this.state.list, this.state.form],
+            form: {}
+          });
         } else {
           ClientService.update(this.state.form).then(response => {
             this.initializeList();
@@ -85,6 +68,11 @@ class Clients extends Component {
           });
         }
       }
+    });
+
+    this.setState({
+      openForm: false,
+      form: {}
     });
   };
 
@@ -209,7 +197,6 @@ class Clients extends Component {
           handleFormState={this.handleFormState}
           openForm={this.state.openForm}
           closeForm={this.closeForm}
-          saveForm={this.handleOk}
         />
       </Fragment>
     );
