@@ -6,6 +6,7 @@ import * as ClientService from "../../services/clients";
 import SimpleTable from "../SimpleTable";
 import Form from "./form";
 import { flashWithSuccess } from "../FlashMessages";
+import parseErrors from "../../lib/parseErrors";
 import { PainelHeader } from "../PainelHeader";
 
 class Clients extends Component {
@@ -43,38 +44,35 @@ class Clients extends Component {
   }
 
   saveFormRef = formRef => {
-    if (formRef) this.formValidate = formRef.props.form;
+    if (formRef) this.formRef = formRef.props.form;
   };
 
   //#region  Modal
-  handleOk = e => {
-    this.formValidate.validateFields(err => {
+  handleOk = async e => {
+    this.formRef.validateFields(async err => {
       if (err) return;
       else {
         if (!this.state.editMode) {
-          ClientService.create(this.state.form)
-            .then(response => {
-              this.initializeList();
-              this.setState({
-                openForm: false,
-                form: {}
-              });
-              flashWithSuccess();
-            })
-            .catch(err => {
-              const { error } = err.response.data;
+          if (Object.keys(this.state.form).length === 0)
+            flashWithSuccess("Sem alterações para salvar", " ");
 
-              const msg = (props) => {
-                return (
-                <ul>
-                  {for (let i in error) msg += "<li>" + error[i].message + "</li>";
-                </ul>
-                )
-              };
-
-              message.error(msg);
+          try {
+            const created = await ClientService.create(this.state.form);
+            this.setState({
+              openForm: false,
+              form: {},
+              formData: {}
             });
+            flashWithSuccess();
+            this.formRef.resetFields();
+            this.initializeList();
+          } catch (err) {
+            if (err && err.response && err.response.data) parseErrors(err);
+            console.log("Erro interno ", err);
+          }
         } else {
+          console.log(this.state.form);
+          return;
           ClientService.update(this.state.form).then(response => {
             this.initializeList();
             this.setState({
@@ -100,7 +98,7 @@ class Clients extends Component {
     let form = Object.assign({}, this.state.form, {
       [event.target.name]: event.target.value
     });
-    this.setState({ form });
+    this.setState(prev => ({ ...prev, form }));
   };
 
   openForm = editData => {
@@ -116,7 +114,7 @@ class Clients extends Component {
   changeStatus = async (id, newStatus) => {
     await ClientService.changeStatus(id, newStatus);
     await this.initializeList();
-    message.success("Alterado com sucesso");
+    flashWithSuccess("Alterado com sucesso!");
   };
 
   tableConfig = () => [

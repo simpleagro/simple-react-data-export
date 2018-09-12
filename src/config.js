@@ -10,7 +10,7 @@ export const baseApi = axios.create({
   headers: {
     Authorization: {
       toString() {
-        return `Bearer ${cookies.get("token")}`;
+        return `${cookies.get("token")}`;
       }
     }
   }
