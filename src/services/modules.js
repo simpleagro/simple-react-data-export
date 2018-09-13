@@ -1,19 +1,6 @@
-import axios from "axios";
-import Cookies from "universal-cookie";
-import { API_URL } from "../config";
+import { baseApi as api } from "../config";
 
-const cookies = new Cookies();
-
-const api = axios.create({
-  baseURL: `${API_URL}/modules`,
-  headers: {
-    Authorization: {
-      toString() {
-        return `Bearer ${cookies.get("token")}`;
-      }
-    }
-  }
-});
+api.defaults.baseURL = api.defaults.baseURL + "/modules";
 
 export const list = async () => await api.get().then(response => response.data);
 
