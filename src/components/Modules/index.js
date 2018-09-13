@@ -2,9 +2,9 @@ import React, { Component } from "react";
 import { Row, Col, Divider, Button, Icon, Modal } from "antd";
 
 import * as ModuloService from "../../services/modules";
-import SimpleTable from "../SimpleTable";
+import SimpleTable from "../common/SimpleTable";
 import ModuloForm from "./form";
-import { flashWithSuccess } from "../FlashMessages";
+import { flashWithSuccess } from "../common/FlashMessages";
 
 class Modulos extends Component {
   constructor(props) {
@@ -85,7 +85,7 @@ class Modulos extends Component {
   };
 
   handleFormState = event => {
-    if (event.target.type === 'checkbox'){
+    if (event.target.type === "checkbox") {
       event.target.name = event.target.id;
       event.target.value = event.target.checked;
     }

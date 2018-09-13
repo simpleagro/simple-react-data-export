@@ -1,11 +1,21 @@
 import React, { Component } from "react";
-import { Breadcrumb, Button, Icon, Input, Form, Select, Tabs } from "antd";
+import {
+  Breadcrumb,
+  Button,
+  Icon,
+  Input,
+  Form,
+  Select,
+  Tabs,
+  Steps
+} from "antd";
 import styled from "styled-components";
 
-import { PainelHeader } from "../PainelHeader";
+import { PainelHeader } from "../../common/PainelHeader";
 
 const { TabPane } = Tabs;
 const Option = Select.Option;
+const Step = Steps.Step;
 
 const BreadcrumbStyled = styled(Breadcrumb)`
   background: #eeeeee;
@@ -18,12 +28,18 @@ class ClientForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      openForm: this.props.openForm
+      openForm: true
     };
   }
 
-  hideForm() {
-    this.setState(prev => ({ ...prev, openForm: false }));
+  componentDidUpdate(newProps) {
+    // somente se for abrir o form setar o focus no input
+    if (newProps.openForm === true && this.state.openForm === false) {
+      setTimeout(() => {
+        this.titleInput.focus();
+      }, 0);
+      this.setState(prev => ({ ...prev, openForm: true }));
+    }
   }
 
   render() {
@@ -43,20 +59,24 @@ class ClientForm extends Component {
             </Button>
           </Breadcrumb.Item>
         </BreadcrumbStyled>
-        <PainelHeader title="Novo Cliente">
+        <PainelHeader
+          title="Novo Cliente"
+          extra={
+            <Steps current={0} progressDot>
+              <Step title="Dados do Cliente" />
+              <Step title="Propriedades" />
+            </Steps>
+          }
+        >
           <Button
             type="primary"
-            icon="plus"
+            icon="save"
             onClick={() => this.props.saveForm()}
           >
             Salvar Cliente
           </Button>
         </PainelHeader>
-        <Form
-          style={this.props.style}
-          layout={this.props.layout}
-          onChange={this.props.handleFormState}
-        >
+        <Form onChange={this.props.handleFormState}>
           <Form.Item label="Nome" {...formItemLayout}>
             {getFieldDecorator("nome", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
@@ -75,9 +95,16 @@ class ClientForm extends Component {
               initialValue: this.props.formData.tipo
             })(
               <Select
+                name="tipo"
+                showAction={["focus", "click"]}
                 showSearch
                 style={{ width: 200 }}
                 placeholder="Selecione um tipo..."
+                onChange={e =>
+                  this.props.handleFormState({
+                    target: { name: "tipo", value: e }
+                  })
+                }
               >
                 <Option value="PRODUTOR">Produtor</Option>
                 <Option value="COOPERADO">Cooperado</Option>
