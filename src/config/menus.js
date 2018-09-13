@@ -53,7 +53,7 @@ const menus = {
     icon: "user-tie"
   },
   "/clientes": {
-    component: loadable(() => import("../components/Clients")),
+    component: loadable(() => import("../components/Clients/DadosBasicos")),
     key: "/clientes",
     path: "/clientes",
     label: "Clientes",

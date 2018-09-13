@@ -1,13 +1,13 @@
 import React, { Component, Fragment } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Divider, Button, Icon, Popconfirm, message } from "antd";
+import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
 
-import * as ClientService from "../../services/clients";
-import SimpleTable from "../SimpleTable";
+import * as ClientService from "../../../services/clients";
+import SimpleTable from "../../common/SimpleTable";
 import Form from "./form";
-import { flashWithSuccess } from "../FlashMessages";
-import parseErrors from "../../lib/parseErrors";
-import { PainelHeader } from "../PainelHeader";
+import { flashWithSuccess } from "../../common/FlashMessages";
+import parseErrors from "../../../lib/parseErrors";
+import { PainelHeader } from "../../common/PainelHeader";
 
 class Clients extends Component {
   constructor(props) {
@@ -116,19 +116,16 @@ class Clients extends Component {
     }));
   };
 
-  removeRecord = async ({_id, nome}) => {
+  removeRecord = async ({ _id, nome }) => {
     try {
       await ClientService.remove(_id);
-      let _list = this.state.list.filter((record) => record._id !== _id);
+      let _list = this.state.list.filter(record => record._id !== _id);
 
-        this.setState({
-            list: _list,
-        });
+      this.setState({
+        list: _list
+      });
 
-        flashWithSuccess(
-          "",
-          `O cliente, ${nome}, foi removido com sucesso!`
-        );
+      flashWithSuccess("", `O cliente, ${nome}, foi removido com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover um cliente", err);
@@ -200,9 +197,11 @@ class Clients extends Component {
             okText="Sim"
             cancelText="Não"
           >
-            <Button size="small">
-              <FontAwesomeIcon icon={statusBtn} size="lg" />
-            </Button>
+            <Tooltip title={`${statusTxt.toUpperCase()} o cliente`}>
+              <Button size="small">
+                <FontAwesomeIcon icon={statusBtn} size="lg" />
+              </Button>
+            </Tooltip>
           </Popconfirm>
         );
       }
@@ -220,7 +219,6 @@ class Clients extends Component {
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
-
             <Popconfirm
               title={`Tem certeza em excluir o cliente?`}
               onConfirm={e => this.removeRecord(record)}
@@ -231,6 +229,15 @@ class Clients extends Component {
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
             </Popconfirm>
+            <Divider
+              style={{ fontSize: "10px", padding: 0, margin: 2 }}
+              type="vertical"
+            />
+            <Tooltip title="Veja as propriedades do cliente">
+              <Button size="small">
+                <FontAwesomeIcon icon="list" size="lg" />
+              </Button>
+            </Tooltip>
           </span>
         );
       }

@@ -11,7 +11,7 @@ import {
 } from "antd";
 import styled from "styled-components";
 
-import { PainelHeader } from "../PainelHeader";
+import { PainelHeader } from "../../common/PainelHeader";
 
 const { TabPane } = Tabs;
 const Option = Select.Option;

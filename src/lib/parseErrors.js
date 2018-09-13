@@ -1,4 +1,4 @@
-import { flashWithError } from "../components/FlashMessages";
+import { flashWithError } from "../components/common/FlashMessages";
 export default err => {
   const { error, errors } = err.response.data;
 

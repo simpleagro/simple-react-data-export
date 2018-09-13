@@ -1,14 +1,10 @@
 import React from "react";
 import { BrowserRouter, Route, Switch, withRouter } from "react-router-dom";
 import { CookiesProvider } from "react-cookie";
-import Loadable from "react-loadable";
 
 import PrivateRoute from "./components/PrivateRoute";
 import Login from "./components/LoginForm";
 import PageNotFound from "./components/errors/PageNotFound";
-import Entities from "./components/Entities";
-import Modules from "./components/Modules";
-import Clients from "./components/Clients";
 
 import { logout } from "./services/auth";
 import emptyStateImage from "../src/assets/keep-explore.svg";

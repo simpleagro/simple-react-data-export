@@ -1,5 +1,5 @@
 import { notification } from "antd";
-import "../styles/flash_messages.css";
+import "../../styles/flash_messages.css";
 
 export const flashWithSuccess = (message, description, ...options) => {
   notification.success({
