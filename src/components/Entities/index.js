@@ -1,12 +1,13 @@
-import React, { Component } from "react";
-import { Row, Col, Divider, Button, Icon, Modal } from "antd";
+import React, { Component } from 'react';
+import { Row, Col, Divider, Button, Icon, Modal } from 'antd';
 
-import * as ModuloService from "../../services/modulos";
-import SimpleTable from "../SimpleTable";
-import ModuloForm from "./form";
-import { flashWithSuccess } from "../FlashMessages";
+import * as EntidadeService from "../../services/entities";
+import SimpleTable from "../common/SimpleTable";
+import EntidadeForm from './form';
+import { flashWithSuccess } from "../common/FlashMessages";
 
-class Modulos extends Component {
+class Entidades extends Component {
+
   constructor(props) {
     super(props);
     this.state = {
@@ -22,7 +23,7 @@ class Modulos extends Component {
   initializeList() {
     this.setState(...this.state, { loadingData: true });
     setTimeout(() => {
-      ModuloService.list().then(data => {
+      EntidadeService.list().then(data => {
         this.setState(...this.state, {
           entidades: data,
           loadingData: false,
@@ -59,7 +60,7 @@ class Modulos extends Component {
           //   return item;
           // });
 
-          ModuloService.update(this.state.form).then(response => {
+          EntidadeService.update(this.state.form).then(response => {
             this.initializeList();
             this.setState({
               modalVisible: false,
@@ -85,11 +86,6 @@ class Modulos extends Component {
   };
 
   handleFormState = event => {
-    if (event.target.type === 'checkbox'){
-      event.target.name = event.target.id;
-      event.target.value = event.target.checked;
-    }
-
     let form = Object.assign({}, this.state.form, {
       [event.target.name]: event.target.value
     });
@@ -143,7 +139,7 @@ class Modulos extends Component {
       <div>
         <Row type="flex" justify="space-between">
           <Col>
-            <h3 style={{ fontWeight: 400 }}>Módulos</h3>
+            <h3 style={{ fontWeight: 400 }}>Entidades</h3>
           </Col>
           <Col>
             <Button
@@ -176,7 +172,7 @@ class Modulos extends Component {
             </Button>
           }
         >
-          <ModuloForm
+          <EntidadeForm
             wrappedComponentRef={this.saveFormRef}
             formData={this.state.form}
             handleFormState={this.handleFormState}
@@ -187,4 +183,4 @@ class Modulos extends Component {
   }
 }
 
-export default Modulos;
+export default Entidades;

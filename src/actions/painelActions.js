@@ -1,6 +1,6 @@
-export const userLoggedIn = username => ({
+export const userLoggedIn = userData => ({
   type: 'USER_LOGGED_IN',
   payload: {
-    username
+    userData
   }
 });

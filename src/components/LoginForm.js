@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { instanceOf } from "prop-types";
-import { Form, Icon, Input, Button } from "antd";
+import { Form, Icon, Input, Button, notification } from "antd";
 import axios from "axios";
 import { withCookies, Cookies } from "react-cookie";
 import { bindActionCreators } from "redux";
@@ -51,13 +51,23 @@ class LoginForm extends Component {
 
           if (!response) throw new Error("Houve um erro ao logar");
 
-          this.props.cookies.set("token", response.data.token, { path: "/" });
-          this.setState({ token: response.data.token });
+          await this.props.cookies.set("token", response.data.token, { path: "/" });
+          await this.setState({ token: response.data.token });
           console.log(this.state.from.pathname);
+          await this.props.userLoggedIn(response.data);
+          notification.success({
+            message: `Seja bem vindo, ${response.data.user.nome}`
+          });
           this.props.history.push(this.state.from.pathname);
-          this.props.userLoggedIn(response.data.user.nome);
         } catch (error) {
-          console.log(error.toString());
+          if (
+            error &&
+            error.response &&
+            error.response.data &&
+            error.response.data.error
+          )
+            notification.error({ message: error.response.data.error });
+          else notification.error({ message: error.toString() });
         }
       }
     });

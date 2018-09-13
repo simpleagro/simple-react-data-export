@@ -1,28 +1,90 @@
-.ant-menu-dark, .ant-menu-dark .ant-menu-sub{
-  background: rgb(75, 76, 73);
+.ant-layout {
+  background: #eeeeee;
 }
-
-.logo{
-  height: 100px;
-  background-size: 130px;
+.ant-menu-dark {
+  background-image: url(../assets/pontos.png);
+  background-color: #606062;
+  padding-bottom: 130px;
+  background-position: bottom right;
+  background-size: 540px;
+  background-repeat: no-repeat;
+}
+.ant-menu-dark .ant-menu-sub {
+  background: #606062;
+}
+.logo {
+  height: 129px;
+  background-size: 206px;
   background-position: center;
   background-repeat: no-repeat;
-  background-color: white;
-  margin-top: 5px;
+  margin-top: 30px;
+  margin-bottom: 30px;
 }
-
-.ant-layout-sider.ant-layout-sider-collapsed .logo{
+.ant-layout-sider.ant-layout-sider-collapsed .logo {
   background-size: 70px;
 }
-
-.trigger{
-    font-size: 18px;
-    line-height: 64px;
-    padding: 0 24px;
-    cursor: pointer;
-    transition: color .3s;
+.trigger {
+  font-size: 18px;
+  line-height: 64px;
+  padding: 0 24px;
+  cursor: pointer;
+  transition: color 0.3s;
 }
-.trigger::hover{
-    color: #1890ff;
+.trigger::hover {
+  color: #1890ff;
 }
-
+.nav-text {
+  font-size: 16px;
+}
+#menuLeft .svg-inline--fa {
+  margin-right: 5px;
+}
+/* Custom ScrollBars */
+#menuLeft::-webkit-scrollbar {
+  width: 12px !important;
+}
+/* Track */
+#menuLeft::-webkit-scrollbar-track {
+  background: #606062;
+}
+/* Handle */
+#menuLeft::-webkit-scrollbar-thumb {
+  background: #838386;
+}
+/* Handle */
+#menuLeft::-webkit-scrollbar-thumb:hover {
+  background: #9f9faa;
+}
+.painel-header {
+  background-image: url(../assets/pontos.png) !important;
+  background-color: #009e54 !important;
+  color: white;
+  background-position: -40px -175px !important;
+  background-size: 88% !important;
+  background-repeat: no-repeat !important;
+  padding: 0px;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 1;
+}
+.painel-header .ant-btn-background-ghost:hover {
+  color: #fff;
+}
+.ant-layout-sider .logo,
+.ant-layout-sider .nav-text,
+.ant-layout-sider .ant-menu-item {
+  transition: all 300ms ease;
+}
+.ant-layout-sider-collapsed .logo {
+  background-image: url(../assets/logo-folha.png) !important;
+  background-size: 48px !important;
+  height: 50px;
+}
+.ant-layout-sider-collapsed .nav-text {
+  opacity: 0;
+}
+.ant-layout-sider-collapsed .ant-menu-item {
+  padding: 0 24px !important;
+}
