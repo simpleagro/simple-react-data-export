@@ -83,12 +83,6 @@ class ClientForm extends Component {
               initialValue: this.props.formData.nome
             })(<Input name="nome" ref={input => (this.titleInput = input)} />)}
           </Form.Item>
-          <Form.Item label="Sobrenome" {...formItemLayout}>
-            {getFieldDecorator("sobrenome", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.props.formData.sobrenome
-            })(<Input name="sobrenome" />)}
-          </Form.Item>
           <Form.Item label="Tipo do Cliente" {...formItemLayout}>
             {getFieldDecorator("tipo", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
