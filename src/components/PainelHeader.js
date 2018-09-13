@@ -8,6 +8,6 @@ export const PainelHeader = props => (
     </Col>
     <Col>{props.extra}</Col>
     <Col>{props.children}</Col>
-    <Divider style={{ margin: 0, marginBottom: 20 }} />
+    <Divider />
   </Row>
 );

@@ -29,25 +29,24 @@ class Clients extends Component {
 
     const data = await ClientService.list();
 
-    await this.setState(previousState => {
-      return {
-        ...previousState,
-        list: data,
-        loadingData: false,
-        pagination: data.lenght > 10
-      };
-    });
+    this.setState(prev => ({
+      ...prev,
+      list: data,
+      loadingData: false,
+      pagination: data.lenght > 10
+    }));
   }
 
   async componentDidMount() {
     await this.initializeList();
   }
 
+  //#region  Form
+
   saveFormRef = formRef => {
     if (formRef) this.formRef = formRef.props.form;
   };
 
-  //#region  Modal
   handleOk = async e => {
     this.formRef.validateFields(async err => {
       if (err) return;
@@ -61,26 +60,30 @@ class Clients extends Component {
             this.setState({
               openForm: false,
               form: {},
-              formData: {}
+              editMode: false
             });
             flashWithSuccess();
             this.formRef.resetFields();
             this.initializeList();
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ", err);
+            console.log("Erro interno ao adicionar um cliente", err);
           }
         } else {
-          console.log(this.state.form);
-          return;
-          ClientService.update(this.state.form).then(response => {
-            this.initializeList();
+          try {
+            const updated = await ClientService.update(this.state.form);
             this.setState({
               openForm: false,
-              form: {}
+              form: {},
+              editMode: false
             });
             flashWithSuccess();
-          });
+            this.formRef.resetFields();
+            this.initializeList();
+          } catch (err) {
+            if (err && err.response && err.response.data) parseErrors(err);
+            console.log("Erro interno ao atualizar um cliente ", err);
+          }
         }
       }
     });
@@ -90,8 +93,11 @@ class Clients extends Component {
     this.setState(prev => ({
       ...prev,
       openForm: false,
-      form: {}
+      form: {},
+      editMode: false
     }));
+
+    this.formRef.resetFields();
   };
 
   handleFormState = event => {
@@ -109,12 +115,56 @@ class Clients extends Component {
       form: editData || {}
     }));
   };
+
+  removeRecord = async ({_id, nome}) => {
+    try {
+      await ClientService.remove(_id);
+      let _list = this.state.list.filter((record) => record._id !== _id);
+
+        this.setState({
+            list: _list,
+        });
+
+        flashWithSuccess(
+          "",
+          `O cliente, ${nome}, foi removido com sucesso!`
+        );
+    } catch (err) {
+      if (err && err.response && err.response.data) parseErrors(err);
+      console.log("Erro interno ao remover um cliente", err);
+    }
+  };
   //#endregion
 
   changeStatus = async (id, newStatus) => {
-    await ClientService.changeStatus(id, newStatus);
-    await this.initializeList();
-    flashWithSuccess("Alterado com sucesso!");
+    try {
+      await ClientService.changeStatus(id, newStatus);
+
+      let recordName = "";
+
+      let _list = this.state.list.map(item => {
+        if (item._id === id) {
+          item.status = newStatus;
+          recordName = item.nome;
+        }
+        return item;
+      });
+
+      this.setState(prev => ({
+        ...prev,
+        list: _list
+      }));
+
+      flashWithSuccess(
+        "",
+        `O cliente, ${recordName}, foi ${
+          newStatus ? "ativado" : "bloqueado"
+        } com sucesso!`
+      );
+    } catch (err) {
+      if (err && err.response && err.response.data) parseErrors(err);
+      console.log("Erro interno ao mudar status do cliente", err);
+    }
   };
 
   tableConfig = () => [
@@ -170,9 +220,17 @@ class Clients extends Component {
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
-            <Button size="small" onClick={this.openForm}>
-              <Icon type="delete" style={{ fontSize: "16px" }} />
-            </Button>
+
+            <Popconfirm
+              title={`Tem certeza em excluir o cliente?`}
+              onConfirm={e => this.removeRecord(record)}
+              okText="Sim"
+              cancelText="Não"
+            >
+              <Button size="small">
+                <Icon type="delete" style={{ fontSize: "16px" }} />
+              </Button>
+            </Popconfirm>
           </span>
         );
       }

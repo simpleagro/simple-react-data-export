@@ -1,11 +1,21 @@
 import React, { Component } from "react";
-import { Breadcrumb, Button, Icon, Input, Form, Select, Tabs } from "antd";
+import {
+  Breadcrumb,
+  Button,
+  Icon,
+  Input,
+  Form,
+  Select,
+  Tabs,
+  Steps
+} from "antd";
 import styled from "styled-components";
 
 import { PainelHeader } from "../PainelHeader";
 
 const { TabPane } = Tabs;
 const Option = Select.Option;
+const Step = Steps.Step;
 
 const BreadcrumbStyled = styled(Breadcrumb)`
   background: #eeeeee;
@@ -18,28 +28,17 @@ class ClientForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      openForm: true,
-      formData: this.props.formData
+      openForm: true
     };
   }
 
-  componentDidMount() {
-    console.log(this.state);
-  }
-
-  componentWillUpdate(newProps) {
+  componentDidUpdate(newProps) {
     // somente se for abrir o form setar o focus no input
     if (newProps.openForm === true && this.state.openForm === false) {
       setTimeout(() => {
         this.titleInput.focus();
       }, 0);
       this.setState(prev => ({ ...prev, openForm: true }));
-    }
-
-    // fechando o form
-    if (newProps.openForm === false && this.state.openForm === true) {
-      this.setState(prev => ({ ...prev, openForm: false }));
-      // this.props.form.resetFields();
     }
   }
 
@@ -60,37 +59,40 @@ class ClientForm extends Component {
             </Button>
           </Breadcrumb.Item>
         </BreadcrumbStyled>
-        <PainelHeader title="Novo Cliente">
+        <PainelHeader
+          title="Novo Cliente"
+          extra={
+            <Steps current={0} progressDot>
+              <Step title="Dados do Cliente" />
+              <Step title="Propriedades" />
+            </Steps>
+          }
+        >
           <Button
             type="primary"
-            icon="plus"
+            icon="save"
             onClick={() => this.props.saveForm()}
           >
             Salvar Cliente
           </Button>
         </PainelHeader>
-        <Form
-          style={this.props.style}
-          layout={this.props.layout}
-          onChange={this.props.handleFormState}
-          ref={form => (this.form = form)}
-        >
+        <Form onChange={this.props.handleFormState}>
           <Form.Item label="Nome" {...formItemLayout}>
             {getFieldDecorator("nome", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.nome
+              initialValue: this.props.formData.nome
             })(<Input name="nome" ref={input => (this.titleInput = input)} />)}
           </Form.Item>
           <Form.Item label="Sobrenome" {...formItemLayout}>
             {getFieldDecorator("sobrenome", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.sobrenome
+              initialValue: this.props.formData.sobrenome
             })(<Input name="sobrenome" />)}
           </Form.Item>
           <Form.Item label="Tipo do Cliente" {...formItemLayout}>
             {getFieldDecorator("tipo", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.tipo
+              initialValue: this.props.formData.tipo
             })(
               <Select
                 name="tipo"
@@ -100,7 +102,7 @@ class ClientForm extends Component {
                 placeholder="Selecione um tipo..."
                 onChange={e =>
                   this.props.handleFormState({
-                     target: { name: "tipo", value: e }
+                    target: { name: "tipo", value: e }
                   })
                 }
               >
@@ -113,28 +115,28 @@ class ClientForm extends Component {
           <Form.Item label="CPF / CNPJ" {...formItemLayout}>
             {getFieldDecorator("cpf_cnpj", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.cpf_cnpj
+              initialValue: this.props.formData.cpf_cnpj
             })(<Input name="cpf_cnpj" />)}
           </Form.Item>
           <Form.Item label="Tel. Fixo" {...formItemLayout}>
             {getFieldDecorator("tel_fixo", {
-              initialValue: this.state.formData.tel_fixo
+              initialValue: this.props.formData.tel_fixo
             })(<Input name="tel_fixo" />)}
           </Form.Item>
           <Form.Item label="Tel. Cel." {...formItemLayout}>
             {getFieldDecorator("tel_cel", {
-              initialValue: this.state.formData.tel_cel
+              initialValue: this.props.formData.tel_cel
             })(<Input name="tel_cel" />)}
           </Form.Item>
           <Form.Item label="Email" {...formItemLayout}>
             {getFieldDecorator("email", {
-              initialValue: this.state.formData.email
+              initialValue: this.props.formData.email
             })(<Input name="email" />)}
           </Form.Item>
           <Form.Item label="Lim. Crédito" {...formItemLayout}>
             {getFieldDecorator("credito", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.credito
+              initialValue: this.props.formData.credito
             })(<Input name="credito" />)}
           </Form.Item>
         </Form>
