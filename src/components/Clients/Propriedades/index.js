@@ -2,24 +2,20 @@ import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
 
-import * as ClientService from "../../../services/clients";
+import * as ClientsPropertyService from "../../../services/clients.properties";
 import SimpleTable from "../../common/SimpleTable";
 // import Form from "./form";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
 
-class Clients extends Component {
+class Properties extends Component {
   constructor(props) {
     super(props);
     this.state = {
       list: [],
       loadingData: true,
-      pagination: {
-        showSizeChanger: true,
-        defaultPageSize: 10,
-        pageSizeOptions: ["10", "25", "50", "100"]
-      }
+      pagination: false,
     };
   }
 
@@ -28,15 +24,12 @@ class Clients extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await ClientService.list(aqp);
+    const data = await ClientsPropertyService.list(this.props.match.params.client_id)(aqp);
 
     this.setState(prev => ({
       ...prev,
-      list: data.docs,
+      list: data,
       loadingData: false,
-      pagination: {
-        total: data.total
-      }
     }));
   }
 
@@ -46,7 +39,7 @@ class Clients extends Component {
 
   changeStatus = async (id, newStatus) => {
     try {
-      await ClientService.changeStatus(id, newStatus);
+      await ClientsPropertyService.changeStatus(id, newStatus);
 
       let recordName = "";
 
@@ -65,29 +58,29 @@ class Clients extends Component {
 
       flashWithSuccess(
         "",
-        `O cliente, ${recordName}, foi ${
+        `O propriedade, ${recordName}, foi ${
           newStatus ? "ativado" : "bloqueado"
         } com sucesso!`
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao mudar status do cliente", err);
+      console.log("Erro interno ao mudar status do propriedade", err);
     }
   };
 
   removeRecord = async ({ _id, nome }) => {
     try {
-      await ClientService.remove(_id);
+      await ClientsPropertyService.remove(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
 
       this.setState({
         list: _list
       });
 
-      flashWithSuccess("", `O cliente, ${nome}, foi removido com sucesso!`);
+      flashWithSuccess("", `O propriedade, ${nome}, foi removido com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover um cliente", err);
+      console.log("Erro interno ao remover um propriedade", err);
     }
   };
 
@@ -102,22 +95,22 @@ class Clients extends Component {
       }
     },
     {
-      title: "CPF / CNPJ",
-      dataIndex: "cpf_cnpj",
-      key: "cpf_cnpj",
+      title: "Inscrição Estadual",
+      dataIndex: "inscricao_estadual",
+      key: "inscricao_estadual",
       render: text => text
     },
     {
-      title: "Tipo",
-      dataIndex: "tipo",
-      key: "tipo",
+      title: "Cidade",
+      dataIndex: "cidade",
+      key: "cidade",
       render: text => text,
-      filters: [
-        { text: "Produtor", value: "PRODUTOR" },
-        { text: "Cooperado", value: "COOPERADO" },
-        { text: "Distribuidor", value: "DISTRIBUIDOR" }
-      ],
-      onFilter: (value, record) => record.tipo === value,
+    },
+    {
+      title: "Estado",
+      dataIndex: "estado",
+      key: "estado",
+      render: text => text,
     },
     {
       title: "Status",
@@ -128,12 +121,12 @@ class Clients extends Component {
         const statusBtn = record.status ? "unlock" : "lock";
         return (
           <Popconfirm
-            title={`Tem certeza em ${statusTxt} o cliente?`}
+            title={`Tem certeza em ${statusTxt} o propriedade?`}
             onConfirm={e => this.changeStatus(record._id, !record.status)}
             okText="Sim"
             cancelText="Não"
           >
-            <Tooltip title={`${statusTxt.toUpperCase()} o cliente`}>
+            <Tooltip title={`${statusTxt.toUpperCase()} o propriedade`}>
               <Button size="small">
                 <FontAwesomeIcon icon={statusBtn} size="lg" />
               </Button>
@@ -148,7 +141,7 @@ class Clients extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/clientes/${record._id}/edit`}>
+            <Button size="small" href={`/propriedades/${record._id}/edit`}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
             <Divider
@@ -156,7 +149,7 @@ class Clients extends Component {
               type="vertical"
             />
             <Popconfirm
-              title={`Tem certeza em excluir o cliente?`}
+              title={`Tem certeza em excluir o propriedade?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
               cancelText="Não"
@@ -169,12 +162,12 @@ class Clients extends Component {
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
-            <Tooltip title="Veja as propriedades do cliente">
+            <Tooltip title="Veja os talhões da propriedade">
               <Button
                 size="small"
-                href={`/clientes/${record._id}/propriedades`}
+                href={`/clientes/${this.props.match.params.client_id}/propriedades/${record._id}`}
               >
-                <FontAwesomeIcon icon="list" size="lg" />
+                <FontAwesomeIcon icon="map-marked-alt" size="lg" />
               </Button>
             </Tooltip>
           </span>
@@ -183,26 +176,14 @@ class Clients extends Component {
     }
   ];
 
-  handleTableChange = (pagination, filter, sorter) => {
-    const pager = { ...this.state.pagination };
-    pager.current = pagination.current;
-    this.setState({
-      pagination: pager
-    });
-    this.initializeList({
-      page: pagination.current,
-      limit: pagination.pageSize
-    });
-  };
-
   render() {
     return (
       <div>
-        <PainelHeader title="Clientes">
+        <PainelHeader title="Propriedades">
           <Button
             type="primary"
             icon="plus"
-            href="/clientes/new"
+            href="/propriedades/new"
           >
             Adicionar
           </Button>
@@ -213,11 +194,10 @@ class Clients extends Component {
           rowKey="_id"
           columns={this.tableConfig()}
           dataSource={this.state.list}
-          onChange={this.handleTableChange}
         />
       </div>
     );
   }
 }
 
-export default Clients;
+export default Properties;

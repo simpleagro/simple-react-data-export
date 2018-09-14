@@ -88,10 +88,13 @@ class Painel extends Component {
             selectedKeys={[location]}
           >
             {Object.keys(menus).map(mKey => {
-              const { path: mPath, icon: mIcon, label: mLbl } = menus[mKey];
+              const { path: mPath, icon: mIcon, label: mLbl, showMenu } = menus[
+                mKey
+              ];
 
               return (
-                !!this.showMenu(menus[mKey].onlyAccess) && (
+                !!this.showMenu(menus[mKey].onlyAccess) &&
+                showMenu === true && (
                   <Menu.Item key={mKey}>
                     <Link to={mPath}>
                       <FontAwesomeIcon icon={mIcon} size="lg" />
