@@ -7,7 +7,7 @@ import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { userLoggedIn } from "../actions/painelActions";
 
-import { API_URL } from "../config";
+import { API_URL } from "../config/api";
 import "../styles/login.css";
 
 const FormItem = Form.Item;

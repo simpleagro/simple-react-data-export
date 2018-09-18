@@ -86,6 +86,22 @@ const menus = {
     icon: "users",
     showMenu: false
   },
+  "/clientes/:client_id/propriedades/new": {
+    component: loadable(() => import("../components/Clients/Propriedades/form")),
+    key: "/clientes/propriedades/new",
+    path: "/clientes/:client_id/propriedades/new",
+    label: "Clientes",
+    icon: "users",
+    showMenu: false
+  },
+  "/clientes/:client_id/propriedades/:id/edit": {
+    component: loadable(() => import("../components/Clients/Propriedades/form")),
+    key: "/clientes/propriedades/edit",
+    path: "/clientes/:client_id/propriedades/:id/edit",
+    label: "Clientes",
+    icon: "users",
+    showMenu: false
+  },
   "/carteira-clientes": {
     component: loadable(() => false),
     key: "/carteira-clientes",

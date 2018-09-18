@@ -66,19 +66,22 @@ class ClientForm extends Component {
       if (err) return;
       else {
         if (!this.state.editMode) {
-          if (Object.keys(this.state.form).length === 0)
+          if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
 
           try {
-            const created = await ClientService.create(this.state.form);
+            const created = await ClientService.create(this.state.formData);
             this.setState({
               openForm: false,
-              form: {},
               editMode: false
             });
             flashWithSuccess();
-            this.formRef.resetFields();
-            this.initializeList();
+            // a chamada do formulário pode vir por fluxos diferentes
+            // então usamos o returnTo para verificar para onde ir
+            // ou ir para o fluxo padrão
+            if (this.props.location.state && this.props.location.state.returnTo)
+              this.props.history.push(this.props.location.state.returnTo);
+            else this.props.history.push("/clientes");
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar um cliente", err);
@@ -87,7 +90,12 @@ class ClientForm extends Component {
           try {
             const updated = await ClientService.update(this.state.formData);
             flashWithSuccess();
-            this.props.history.push("/clientes");
+            // a chamada do formulário pode vir por fluxos diferentes
+            // então usamos o returnTo para verificar para onde ir
+            // ou ir para o fluxo padrão
+            if (this.props.location.state && this.props.location.state.returnTo)
+              this.props.history.push(this.props.location.state.returnTo);
+            else this.props.history.push("/clientes");
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar um cliente ", err);
@@ -108,20 +116,20 @@ class ClientForm extends Component {
       <div>
         <BreadcrumbStyled>
           <Breadcrumb.Item>
-            <Button href="/clientes">
+            <Button
+              href={
+                this.props.location.state && this.props.location.state.returnTo
+                  ? this.props.location.state.returnTo.pathname
+                  : "/clientes"
+              }
+            >
               <Icon type="arrow-left" />
-              Voltar para a listagem de clientes
+              Voltar para tela anterior
             </Button>
           </Breadcrumb.Item>
         </BreadcrumbStyled>
         <PainelHeader
           title={this.state.editMode ? "Editando Cliente" : "Novo Cliente"}
-          extra={
-            <Steps current={0} progressDot>
-              <Step title="Dados do Cliente" />
-              <Step title="Propriedades" />
-            </Steps>
-          }
         >
           <Button type="primary" icon="save" onClick={() => this.saveForm()}>
             Salvar Cliente
@@ -146,7 +154,7 @@ class ClientForm extends Component {
                 style={{ width: 200 }}
                 placeholder="Selecione um tipo..."
                 onChange={e =>
-                  this.props.handleFormState({
+                  this.handleFormState({
                     target: { name: "tipo", value: e }
                   })
                 }
@@ -180,7 +188,7 @@ class ClientForm extends Component {
           </Form.Item>
           <Form.Item label="Lim. Crédito" {...formItemLayout}>
             {getFieldDecorator("credito", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.credito
             })(<Input name="credito" />)}
           </Form.Item>

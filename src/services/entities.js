@@ -1,4 +1,4 @@
-import { baseApi as api } from "../config";
+import { baseApi as api } from "../config/api";
 
 const baseURL = "/entities";
 

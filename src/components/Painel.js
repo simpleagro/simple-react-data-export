@@ -60,7 +60,9 @@ class Painel extends Component {
   };
 
   render() {
-    const { pathname: location } = window.location;
+    let { pathname: location } = window.location;
+    location = `/${location.split("/")[1]}`;
+
     return (
       <Layout style={{ minHeight: "100vh" }}>
         <Sider
@@ -150,10 +152,9 @@ class Painel extends Component {
 }
 
 const mapStateToProps = ({ painelState }) => {
-  console.log("PAINE", painelState);
   return {
     username: painelState.userData.user.nome,
-    userType: "SuperUser"
+    userType: painelState.userData.user.usertype
   };
 };
 

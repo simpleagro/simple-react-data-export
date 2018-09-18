@@ -1,6 +1,6 @@
 import querystring from "querystring";
 
-import { baseApi as api } from "../config";
+import { baseApi as api } from "../config/api";
 
 const baseURL = "/clients";
 
