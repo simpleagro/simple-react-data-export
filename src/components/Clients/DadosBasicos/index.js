@@ -4,7 +4,6 @@ import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
 
 import * as ClientService from "../../../services/clients";
 import SimpleTable from "../../common/SimpleTable";
-// import Form from "./form";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
@@ -117,7 +116,7 @@ class Clients extends Component {
         { text: "Cooperado", value: "COOPERADO" },
         { text: "Distribuidor", value: "DISTRIBUIDOR" }
       ],
-      onFilter: (value, record) => record.tipo === value,
+      onFilter: (value, record) => record.tipo === value
     },
     {
       title: "Status",
@@ -199,11 +198,7 @@ class Clients extends Component {
     return (
       <div>
         <PainelHeader title="Clientes">
-          <Button
-            type="primary"
-            icon="plus"
-            href="/clientes/new"
-          >
+          <Button type="primary" icon="plus" href="/clientes/new">
             Adicionar
           </Button>
         </PainelHeader>

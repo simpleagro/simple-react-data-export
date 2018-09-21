@@ -82,24 +82,36 @@ const menus = {
     component: loadable(() => import("../components/Clients/Propriedades")),
     key: "/clientes/propriedades",
     path: "/clientes/:client_id/propriedades",
-    label: "Clientes",
-    icon: "users",
     showMenu: false
   },
   "/clientes/:client_id/propriedades/new": {
     component: loadable(() => import("../components/Clients/Propriedades/form")),
     key: "/clientes/propriedades/new",
     path: "/clientes/:client_id/propriedades/new",
-    label: "Clientes",
-    icon: "users",
     showMenu: false
   },
   "/clientes/:client_id/propriedades/:id/edit": {
     component: loadable(() => import("../components/Clients/Propriedades/form")),
     key: "/clientes/propriedades/edit",
     path: "/clientes/:client_id/propriedades/:id/edit",
-    label: "Clientes",
-    icon: "users",
+    showMenu: false
+  },
+  "/clientes/:client_id/propriedades/:property_id/talhoes": {
+    component: loadable(() => import("../components/Clients/Talhoes")),
+    key: "/clientes/propriedades/talhoes",
+    path: "/clientes/:client_id/propriedades/:property_id/talhoes",
+    showMenu: false
+  },
+  "/clientes/:client_id/propriedades/:property_id/talhoes/new": {
+    component: loadable(() => import("../components/Clients/Talhoes/form")),
+    key: "/clientes/propriedades/talhoes/new",
+    path: "/clientes/:client_id/propriedades/:property_id/talhoes/new",
+    showMenu: false
+  },
+  "/clientes/:client_id/propriedades/:property_id/talhoes/:id/edit": {
+    component: loadable(() => import("../components/Clients/Talhoes/form")),
+    key: "/clientes/propriedades/talhoes/edit",
+    path: "/clientes/:client_id/propriedades/:property_id/talhoes/:id/edit",
     showMenu: false
   },
   "/carteira-clientes": {

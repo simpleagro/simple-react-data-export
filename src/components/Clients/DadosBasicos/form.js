@@ -79,9 +79,10 @@ class ClientForm extends Component {
             // a chamada do formulário pode vir por fluxos diferentes
             // então usamos o returnTo para verificar para onde ir
             // ou ir para o fluxo padrão
-            if (this.props.location.state && this.props.location.state.returnTo)
-              this.props.history.push(this.props.location.state.returnTo);
-            else this.props.history.push("/clientes");
+            // if (this.props.location.state && this.props.location.state.returnTo)
+            //   this.props.history.push(this.props.location.state.returnTo);
+            // else this.props.history.push("/clientes");
+            this.props.history.push("/clientes/"+created._id+"/propriedades");
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar um cliente", err);

@@ -14,9 +14,11 @@ import {
 import styled from "styled-components";
 
 import * as ClientsPropertyService from "../../../services/clients.properties";
-import * as ClientsService from "../../../services/clients";
+import * as ClientsPlotsService from "../../../services/clients.plots";
+// import * as TalhoesService from "../../../services/clients.talhoes";
 import SimpleTable from "../../common/SimpleTable";
-import { flashWithSuccess } from "../../common/FlashMessages";
+// import Form from "./form";
+import { flashWithSuccess, flashWithError } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 
 const BreadcrumbStyled = styled(Breadcrumb)`
@@ -26,15 +28,16 @@ const BreadcrumbStyled = styled(Breadcrumb)`
   margin-bottom: 30px;
 `;
 
-class Properties extends Component {
+class Plots extends Component {
   constructor(props) {
     super(props);
     this.state = {
       list: [],
       loadingData: true,
       pagination: false,
+      property_id: this.props.match.params.property_id,
       client_id: this.props.match.params.client_id,
-      client_data: {}
+      property_data: {}
     };
   }
 
@@ -43,15 +46,28 @@ class Properties extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await ClientsPropertyService.list(this.state.client_id)(aqp);
-    const clientData = await ClientsService.get(this.state.client_id);
+    try {
+      const data = await ClientsPlotsService.list(this.state.client_id)(
+        this.props.match.params.property_id
+      )(aqp);
+      const propertyData = await ClientsPropertyService.get(
+        this.state.client_id
+      )(this.props.match.params.property_id);
+      this.setState(prev => ({
+        ...prev,
+        list: data,
+        loadingData: false,
+        property_data: propertyData
+      }));
+    } catch (err) {
+      const {
+        error = "Houve um erro ao visualizar os dados"
+      } = err.response.data;
 
-    this.setState(prev => ({
-      ...prev,
-      list: data,
-      loadingData: false,
-      client_data: clientData
-    }));
+      flashWithError(error);
+
+      this.props.history.push(`/clientes/${this.state.client_id}/propriedades`);
+    }
   }
 
   async componentDidMount() {
@@ -60,10 +76,9 @@ class Properties extends Component {
 
   changeStatus = async (id, newStatus) => {
     try {
-      await ClientsPropertyService.changeStatus(this.state.client_id)(
-        id,
-        newStatus
-      );
+      await ClientsPlotsService.changeStatus(this.state.client_id)(
+        this.state.property_id
+      )(id, newStatus);
 
       let recordName = "";
 
@@ -82,29 +97,29 @@ class Properties extends Component {
 
       flashWithSuccess(
         "",
-        `A propriedade, ${recordName}, foi ${
-          newStatus ? "ativada" : "bloqueada"
+        `O talhão, ${recordName}, foi ${
+          newStatus ? "ativado" : "bloqueado"
         } com sucesso!`
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao mudar status da propriedade", err);
+      console.log("Erro interno ao mudar status do talhão", err);
     }
   };
 
   removeRecord = async ({ _id, nome }) => {
     try {
-      await ClientsPropertyService.remove(this.state.client_id)(_id);
+      await ClientsPlotsService.remove(this.state.client_id)(this.state.property_id)(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
 
       this.setState({
         list: _list
       });
 
-      flashWithSuccess("", `A propriedade, ${nome}, foi removida com sucesso!`);
+      flashWithSuccess("", `O talhão, ${nome}, foi removido com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover uma propriedade", err);
+      console.log("Erro interno ao remover um talhão", err);
     }
   };
 
@@ -119,24 +134,6 @@ class Properties extends Component {
       }
     },
     {
-      title: "Inscrição Estadual",
-      dataIndex: "ie",
-      key: "ie",
-      render: text => text
-    },
-    {
-      title: "Cidade",
-      dataIndex: "cidade",
-      key: "cidade",
-      render: text => text
-    },
-    {
-      title: "Estado",
-      dataIndex: "estado",
-      key: "estado",
-      render: text => text
-    },
-    {
       title: "Status",
       dataIndex: "status",
       key: "status",
@@ -145,12 +142,12 @@ class Properties extends Component {
         const statusBtn = record.status ? "unlock" : "lock";
         return (
           <Popconfirm
-            title={`Tem certeza em ${statusTxt} o propriedade?`}
+            title={`Tem certeza em ${statusTxt} o talhão?`}
             onConfirm={e => this.changeStatus(record._id, !record.status)}
             okText="Sim"
             cancelText="Não"
           >
-            <Tooltip title={`${statusTxt.toUpperCase()} a propriedade`}>
+            <Tooltip title={`${statusTxt.toUpperCase()} o talhão`}>
               <Button size="small">
                 <FontAwesomeIcon icon={statusBtn} size="lg" />
               </Button>
@@ -167,7 +164,9 @@ class Properties extends Component {
           <span>
             <Button
               size="small"
-              href={`/clientes/${this.state.client_id}/propriedades/${record._id}/edit`}
+              href={`/clientes/${this.state.client_id}/propriedades/${
+                this.state.property_id
+              }/talhoes/${record._id}/edit`}
             >
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
@@ -176,7 +175,7 @@ class Properties extends Component {
               type="vertical"
             />
             <Popconfirm
-              title={`Tem certeza em excluir a propriedade?`}
+              title={`Tem certeza em excluir o talhão?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
               cancelText="Não"
@@ -189,15 +188,6 @@ class Properties extends Component {
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
-            <Tooltip title="Veja os talhões da propriedade">
-              <Button
-                size="small"
-                href={`/clientes/${this.state.client_id}/propriedades/${
-                  record._id}/talhoes`}
-              >
-                <FontAwesomeIcon icon="map-marked-alt" size="lg" />
-              </Button>
-            </Tooltip>
           </span>
         );
       }
@@ -210,10 +200,21 @@ class Properties extends Component {
         <BreadcrumbStyled>
           <Breadcrumb.Item>
             <Button onClick={() => this.props.history.push("/clientes")}>
-              <Icon type="arrow-left" />
-              Voltar para a tela anterior
+              Clientes
             </Button>
           </Breadcrumb.Item>
+          <Breadcrumb.Item>
+            <Button
+              onClick={() =>
+                this.props.history.push(
+                  `/clientes/${this.state.client_id}/propriedades`
+                )
+              }
+            >
+              Propriedades
+            </Button>
+          </Breadcrumb.Item>
+          <Breadcrumb.Item>Talhões</Breadcrumb.Item>
         </BreadcrumbStyled>
         <Row gutter={24}>
           <Col span={5}>
@@ -224,8 +225,14 @@ class Properties extends Component {
                 color: "#009d55"
               }}
             >
-              <p>{`Cliente: ${this.state.client_data.nome}`}</p>
-              <p>{`CPF/CNPJ: ${this.state.client_data.cpf_cnpj}`}</p>
+              <p>{`Propriedade: ${this.state.property_data.nome}`}</p>
+              <p>{`I.E: ${this.state.property_data.ie}`}</p>
+              <p>
+                Cidade/Estado: <br />
+                {`${this.state.property_data.cidade}/${
+                  this.state.property_data.estado
+                }`}
+              </p>
               <Button
                 style={{ width: "100%" }}
                 onClick={() => {
@@ -241,13 +248,15 @@ class Properties extends Component {
           </Col>
           <Col span={19}>
             <Card
-              title="Propriedades"
+              title="Talhões"
               bordered={false}
               extra={
                 <Button
                   type="primary"
                   icon="plus"
-                  href={`/clientes/${this.state.client_id}/propriedades/new`}
+                  href={`/clientes/${this.state.client_id}/propriedades/${
+                    this.state.property_id
+                  }/talhoes/new`}
                 >
                   Adicionar
                 </Button>
@@ -268,4 +277,4 @@ class Properties extends Component {
   }
 }
 
-export default Properties;
+export default Plots;
