@@ -125,7 +125,7 @@ class ClientPropertyForm extends Component {
             this.props.history.push(
               `/clientes/${this.props.match.params.client_id}/propriedades/${
                 created._id
-              }`
+              }/talhoes`
             );
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
@@ -138,7 +138,9 @@ class ClientPropertyForm extends Component {
             )(this.state.formData);
             flashWithSuccess();
             this.props.history.push(
-              `/clientes/${this.props.match.params.client_id}/propriedades`
+              `/clientes/${this.props.match.params.client_id}/propriedades/${
+                updated._id
+              }/talhoes`
             );
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
@@ -420,14 +422,6 @@ class ClientPropertyForm extends Component {
                   setGPS={(latitude, longitude) =>
                     this.setGPS(latitude, longitude)
                   }
-                  markers={[
-                    {
-                      position: {
-                        lat: +this.state.formData.latitude,
-                        lng: +this.state.formData.longitude
-                      }
-                    }
-                  ]}
                 />
               </Col>
             </Row>
