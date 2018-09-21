@@ -60,7 +60,9 @@ class Painel extends Component {
   };
 
   render() {
-    const { pathname: location } = window.location;
+    let { pathname: location } = window.location;
+    location = `/${location.split("/")[1]}`;
+
     return (
       <Layout style={{ minHeight: "100vh" }}>
         <Sider
@@ -88,10 +90,13 @@ class Painel extends Component {
             selectedKeys={[location]}
           >
             {Object.keys(menus).map(mKey => {
-              const { path: mPath, icon: mIcon, label: mLbl } = menus[mKey];
+              const { path: mPath, icon: mIcon, label: mLbl, showMenu } = menus[
+                mKey
+              ];
 
               return (
-                !!this.showMenu(menus[mKey].onlyAccess) && (
+                !!this.showMenu(menus[mKey].onlyAccess) &&
+                showMenu === true && (
                   <Menu.Item key={mKey}>
                     <Link to={mPath}>
                       <FontAwesomeIcon icon={mIcon} size="lg" />
@@ -147,10 +152,9 @@ class Painel extends Component {
 }
 
 const mapStateToProps = ({ painelState }) => {
-  console.log("PAINE", painelState);
   return {
     username: painelState.userData.user.nome,
-    userType: "SuperUser"
+    userType: painelState.userData.user.usertype
   };
 };
 

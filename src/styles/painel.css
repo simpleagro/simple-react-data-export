@@ -1,3 +1,9 @@
+/* input,
+textarea,
+select,
+.ant-select-selection__choice__content {
+  text-transform: uppercase !important;
+} */
 .ant-layout {
   background: #eeeeee;
 }
