@@ -14,24 +14,30 @@ export const SimpleMap = compose(
     mapElement: <div style={{ height: `100%` }} />
   }),
   lifecycle({
+
     componentWillMount() {
       const refs = {};
-
+      this.props.setGPS(-17.79272, -50.91965849999997);
       this.setState({
         bounds: null,
-        center: {
-          lat: 0,
-          lng: 0
-        },
-        markers: [],
+        markers: [
+          {
+            position: {
+              lat: -17.79272, // padrão rio verde
+              lng: -50.91965849999997 // padrão rio verde
+            }
+          }
+        ],
         onMapMounted: ref => {
+          debugger
           refs.map = ref;
         },
         onBoundsChanged: () => {
-          this.setState({
+          this.setState(prev => ({
+            ...prev,
             bounds: refs.map.getBounds(),
             center: refs.map.getCenter()
-          });
+          }));
         },
         onSearchBoxMounted: ref => {
           refs.searchBox = ref;
@@ -56,10 +62,11 @@ export const SimpleMap = compose(
             this.state.center
           );
 
-          this.setState({
+          this.setState(prev => ({
+            ...prev,
             center: nextCenter,
             markers: nextMarkers
-          });
+          }));
           console.log(nextCenter, nextMarkers);
 
           this.props.setGPS(nextCenter.lat(), nextCenter.lng());
@@ -105,25 +112,13 @@ export const SimpleMap = compose(
       />
     </SearchBox>
 
-    {props.markers &&
-      props.markers.length === 0 && (
-        <Marker
-          draggable
-          key={0}
-          position={new google.maps.LatLng(props.latitude, props.longitude)}
-          onDragEnd={e => props.setGPS(e.latLng.lat(), e.latLng.lng())}
-        />
-      )}
-
-    {props.markers &&
-      props.markers.length === 0 &&
-      props.markers.map((marker, index) => (
-        <Marker
-          draggable
-          key={index}
-          position={marker.position}
-          onDragEnd={e => props.setGPS(e.latLng.lat(), e.latLng.lng())}
-        />
-      ))}
+    {props.markers.map((marker, index) => (
+      <Marker
+        draggable
+        key={index}
+        position={marker.position}
+        onDragEnd={e => props.setGPS(e.latLng.lat(), e.latLng.lng())}
+      />
+    ))}
   </GoogleMap>
 ));
