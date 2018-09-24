@@ -1,23 +1,16 @@
 import React, { Component } from "react";
-import {
-  Breadcrumb,
-  Button,
-  Icon,
-  Input,
-  Form,
-  Select,
-  Affix,
-  Steps
-} from "antd";
+import locale from "antd/lib/date-picker/locale/pt_BR";
+import moment from "moment";
+import "moment/locale/pt-br";
+
+import { Breadcrumb, Button, Icon, Input, Form, Affix, DatePicker } from "antd";
 import styled from "styled-components";
 
-import { flashWithSuccess } from "../../common/FlashMessages";
-import parseErrors from "../../../lib/parseErrors";
-import { PainelHeader } from "../../common/PainelHeader";
-import * as ClientService from "../../../services/clients";
-
-const Option = Select.Option;
-const Step = Steps.Step;
+import { flashWithSuccess } from "../common/FlashMessages";
+import parseErrors from "../../lib/parseErrors";
+import { PainelHeader } from "../common/PainelHeader";
+import * as SeasonService from "../../services/seasons";
+const { MonthPicker, RangePicker, WeekPicker } = DatePicker;
 
 const BreadcrumbStyled = styled(Breadcrumb)`
   background: #eeeeee;
@@ -26,7 +19,7 @@ const BreadcrumbStyled = styled(Breadcrumb)`
   margin-bottom: 30px;
 `;
 
-class ClientForm extends Component {
+class SeasonForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -39,7 +32,7 @@ class ClientForm extends Component {
     const { id } = this.props.match.params;
 
     if (id) {
-      const formData = await ClientService.get(id);
+      const formData = await SeasonService.get(id);
 
       if (formData)
         this.setState(prev => ({
@@ -70,7 +63,7 @@ class ClientForm extends Component {
             flashWithSuccess("Sem alterações para salvar", " ");
 
           try {
-            const created = await ClientService.create(this.state.formData);
+            const created = await SeasonService.create(this.state.formData);
             this.setState({
               openForm: false,
               editMode: false
@@ -81,27 +74,25 @@ class ClientForm extends Component {
             // ou ir para o fluxo padrão
             // if (this.props.location.state && this.props.location.state.returnTo)
             //   this.props.history.push(this.props.location.state.returnTo);
-            // else this.props.history.push("/clientes");
-            this.props.history.push(
-              "/clientes/" + created._id + "/propriedades"
-            );
+            // else this.props.history.push("/safras");
+            this.props.history.push("/safras");
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao adicionar um cliente", err);
+            console.log("Erro interno ao adicionar a safra", err);
           }
         } else {
           try {
-            const updated = await ClientService.update(this.state.formData);
+            const updated = await SeasonService.update(this.state.formData);
             flashWithSuccess();
             // a chamada do formulário pode vir por fluxos diferentes
             // então usamos o returnTo para verificar para onde ir
             // ou ir para o fluxo padrão
             if (this.props.location.state && this.props.location.state.returnTo)
               this.props.history.push(this.props.location.state.returnTo);
-            else this.props.history.push("/clientes");
+            else this.props.history.push("/safras");
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao atualizar um cliente ", err);
+            console.log("Erro interno ao atualizar a safra ", err);
           }
         }
       }
@@ -123,7 +114,7 @@ class ClientForm extends Component {
               href={
                 this.props.location.state && this.props.location.state.returnTo
                   ? this.props.location.state.returnTo.pathname
-                  : "/clientes"
+                  : "/safras"
               }
             >
               <Icon type="arrow-left" />
@@ -133,69 +124,58 @@ class ClientForm extends Component {
         </BreadcrumbStyled>
         <Affix offsetTop={65}>
           <PainelHeader
-            title={this.state.editMode ? "Editando Cliente" : "Novo Cliente"}
+            title={this.state.editMode ? "Editando Safra" : "Nova Safra"}
           >
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
-              Salvar Cliente
+              Salvar Safra
             </Button>
           </PainelHeader>
         </Affix>
         <Form onChange={this.handleFormState}>
-          <Form.Item label="Nome" {...formItemLayout}>
-            {getFieldDecorator("nome", {
+          <Form.Item label="Descrição" {...formItemLayout}>
+            {getFieldDecorator("descricao", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.nome
-            })(<Input name="nome" ref={input => (this.titleInput = input)} />)}
-          </Form.Item>
-          <Form.Item label="Tipo do Cliente" {...formItemLayout}>
-            {getFieldDecorator("tipo", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.tipo
+              initialValue: this.state.formData.descricao
             })(
-              <Select
-                name="tipo"
-                showAction={["focus", "click"]}
-                showSearch
-                style={{ width: 200 }}
-                placeholder="Selecione um tipo..."
-                onChange={e =>
-                  this.handleFormState({
-                    target: { name: "tipo", value: e }
-                  })
-                }
-              >
-                <Option value="PRODUTOR">Produtor</Option>
-                <Option value="COOPERADO">Cooperado</Option>
-                <Option value="DISTRIBUIDOR">Distribuidor</Option>
-              </Select>
+              <Input
+                name="descricao"
+                ref={input => (this.titleInput = input)}
+              />
             )}
           </Form.Item>
-          <Form.Item label="CPF / CNPJ" {...formItemLayout}>
-            {getFieldDecorator("cpf_cnpj", {
+          <Form.Item label="Data de início" {...formItemLayout}>
+            {getFieldDecorator("inicio", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.cpf_cnpj
-            })(<Input name="cpf_cnpj" />)}
+              initialValue: this.state.formData.inicio
+            })(
+              <DatePicker
+                format="DD/MM/YYYY"
+                locale={locale}
+                onChange={e =>
+                  this.handleFormState({
+                    target: { name: "inicio", value: e }
+                  })
+                }
+                name="inicio"
+              />
+            )}
           </Form.Item>
-          <Form.Item label="Tel. Fixo" {...formItemLayout}>
-            {getFieldDecorator("tel_fixo", {
-              initialValue: this.state.formData.tel_fixo
-            })(<Input name="tel_fixo" />)}
-          </Form.Item>
-          <Form.Item label="Tel. Cel." {...formItemLayout}>
-            {getFieldDecorator("tel_cel", {
-              initialValue: this.state.formData.tel_cel
-            })(<Input name="tel_cel" />)}
-          </Form.Item>
-          <Form.Item label="Email" {...formItemLayout}>
-            {getFieldDecorator("email", {
-              initialValue: this.state.formData.email
-            })(<Input name="email" />)}
-          </Form.Item>
-          <Form.Item label="Lim. Crédito" {...formItemLayout}>
-            {getFieldDecorator("credito", {
-              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.credito
-            })(<Input name="credito" />)}
+          <Form.Item label="Data de fim" {...formItemLayout}>
+            {getFieldDecorator("fim", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.fim
+            })(
+              <DatePicker
+                format="DD/MM/YYYY"
+                locale={locale}
+                onChange={e =>
+                  this.handleFormState({
+                    target: { name: "fim", value: e }
+                  })
+                }
+                name="fim"
+              />
+            )}
           </Form.Item>
         </Form>
       </div>
@@ -203,6 +183,6 @@ class ClientForm extends Component {
   }
 }
 
-const WrappepClientForm = Form.create()(ClientForm);
+const WrappepSeasonForm = Form.create()(SeasonForm);
 
-export default WrappepClientForm;
+export default WrappepSeasonForm;
