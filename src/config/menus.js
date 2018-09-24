@@ -69,12 +69,16 @@ const menus = {
     showMenu: true
   },
   "/clientes/:id/edit": {
-    component: loadable(() => import("../components/Clients/DadosBasicos/form")),
+    component: loadable(() =>
+      import("../components/Clients/DadosBasicos/form")
+    ),
     path: "/clientes/:id/edit",
     showMenu: false
   },
   "/clientes/new": {
-    component: loadable(() => import("../components/Clients/DadosBasicos/form")),
+    component: loadable(() =>
+      import("../components/Clients/DadosBasicos/form")
+    ),
     path: "/clientes/new",
     showMenu: false
   },
@@ -85,13 +89,17 @@ const menus = {
     showMenu: false
   },
   "/clientes/:client_id/propriedades/new": {
-    component: loadable(() => import("../components/Clients/Propriedades/form")),
+    component: loadable(() =>
+      import("../components/Clients/Propriedades/form")
+    ),
     key: "/clientes/propriedades/new",
     path: "/clientes/:client_id/propriedades/new",
     showMenu: false
   },
   "/clientes/:client_id/propriedades/:id/edit": {
-    component: loadable(() => import("../components/Clients/Propriedades/form")),
+    component: loadable(() =>
+      import("../components/Clients/Propriedades/form")
+    ),
     key: "/clientes/propriedades/edit",
     path: "/clientes/:client_id/propriedades/:id/edit",
     showMenu: false
@@ -147,12 +155,26 @@ const menus = {
     showMenu: true
   },
   "/safras": {
-    component: loadable(() => false),
+    component: loadable(() => import("../components/Seasons")),
     key: "/safras",
     path: "/safras",
     label: "Safras",
     icon: "circle-notch",
     showMenu: true
+  },
+  "/safras/:id/edit": {
+    component: loadable(() =>
+      import("../components/Seasons/form")
+    ),
+    path: "/safras/:id/edit",
+    showMenu: false
+  },
+  "/safras/new": {
+    component: loadable(() =>
+      import("../components/Seasons/form")
+    ),
+    path: "/safras/new",
+    showMenu: false
   },
   "/etapas-cultura": {
     component: loadable(() => false),

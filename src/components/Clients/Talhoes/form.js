@@ -6,10 +6,9 @@ import {
   Input,
   Form,
   Select,
-  Steps,
+  Affix,
   Card,
   InputNumber,
-  Tooltip,
   Spin
 } from "antd";
 import styled from "styled-components";
@@ -170,13 +169,15 @@ class ClientPropertySpotForm extends Component {
             </Button>
           </Breadcrumb.Item>
         </BreadcrumbStyled>
-        <PainelHeader
-          title={this.state.editMode ? "Editando Talhão" : "Novo Talhão"}
-        >
-          <Button type="primary" icon="save" onClick={() => this.saveForm()}>
-            Salvar Talhão
-          </Button>
-        </PainelHeader>
+        <Affix offsetTop={65}>
+          <PainelHeader
+            title={this.state.editMode ? "Editando Talhão" : "Novo Talhão"}
+          >
+            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+              Salvar Talhão
+            </Button>
+          </PainelHeader>
+        </Affix>
         <Form onChange={this.handleFormState}>
           <Form.Item label="Nome" {...formItemLayout}>
             {getFieldDecorator("nome", {

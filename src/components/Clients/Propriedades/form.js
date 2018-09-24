@@ -6,7 +6,7 @@ import {
   Input,
   Form,
   Select,
-  Steps,
+  Affix,
   Card,
   InputNumber,
   Tooltip,
@@ -15,8 +15,6 @@ import {
   Col
 } from "antd";
 import styled from "styled-components";
-import { withGoogleMap, GoogleMap, Marker } from "react-google-maps";
-import { SearchBox } from "react-google-maps/lib/components/places/SearchBox";
 
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
@@ -181,15 +179,17 @@ class ClientPropertyForm extends Component {
             </Button>
           </Breadcrumb.Item>
         </BreadcrumbStyled>
-        <PainelHeader
-          title={
-            this.state.editMode ? "Editando Propriedade" : "Nova propriedade"
-          }
-        >
-          <Button type="primary" icon="save" onClick={() => this.saveForm()}>
-            Salvar Propriedade
-          </Button>
-        </PainelHeader>
+        <Affix offsetTop={65}>
+          <PainelHeader
+            title={
+              this.state.editMode ? "Editando Propriedade" : "Nova propriedade"
+            }
+          >
+            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+              Salvar Propriedade
+            </Button>
+          </PainelHeader>
+        </Affix>
         <Form onChange={this.handleFormState}>
           <Form.Item label="Nome" {...formItemLayout}>
             {getFieldDecorator("nome", {
