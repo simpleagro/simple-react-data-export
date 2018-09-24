@@ -1,8 +1,19 @@
-import { baseApi as api } from "../config";
+import querystring from "querystring";
+
+import { baseApi as api } from "../config/api";
 
 const baseURL = "/clients";
 
-export const list = () => api.get(baseURL).then(response => response.data);
+export const list = aqp => {
+  return api
+    .get(baseURL, {
+      params: aqp
+    })
+    .then(response => response.data);
+};
+
+export const get = _id =>
+  api.get(`${baseURL}/${_id}`).then(response => response.data);
 
 export const create = obj =>
   api.post(baseURL, obj).then(response => response.data);

@@ -11,9 +11,11 @@ import {
 } from "antd";
 import styled from "styled-components";
 
+import { flashWithSuccess } from "../../common/FlashMessages";
+import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
+import * as ClientService from "../../../services/clients";
 
-const { TabPane } = Tabs;
 const Option = Select.Option;
 const Step = Steps.Step;
 
@@ -28,19 +30,81 @@ class ClientForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      openForm: true
+      editMode: false,
+      formData: {}
     };
   }
 
-  componentDidUpdate(newProps) {
-    // somente se for abrir o form setar o focus no input
-    if (newProps.openForm === true && this.state.openForm === false) {
-      setTimeout(() => {
-        this.titleInput.focus();
-      }, 0);
-      this.setState(prev => ({ ...prev, openForm: true }));
+  async componentDidMount() {
+    const { id } = this.props.match.params;
+
+    if (id) {
+      const formData = await ClientService.get(id);
+
+      if (formData)
+        this.setState(prev => ({
+          ...prev,
+          formData,
+          editMode: id ? true : false
+        }));
     }
+
+    setTimeout(() => {
+      this.titleInput.focus();
+    }, 0);
   }
+
+  handleFormState = event => {
+    let form = Object.assign({}, this.state.formData, {
+      [event.target.name]: event.target.value
+    });
+    this.setState(prev => ({ ...prev, formData: form }));
+  };
+
+  saveForm = async e => {
+    this.props.form.validateFields(async err => {
+      if (err) return;
+      else {
+        if (!this.state.editMode) {
+          if (Object.keys(this.state.formData).length === 0)
+            flashWithSuccess("Sem alterações para salvar", " ");
+
+          try {
+            const created = await ClientService.create(this.state.formData);
+            this.setState({
+              openForm: false,
+              editMode: false
+            });
+            flashWithSuccess();
+            // a chamada do formulário pode vir por fluxos diferentes
+            // então usamos o returnTo para verificar para onde ir
+            // ou ir para o fluxo padrão
+            // if (this.props.location.state && this.props.location.state.returnTo)
+            //   this.props.history.push(this.props.location.state.returnTo);
+            // else this.props.history.push("/clientes");
+            this.props.history.push("/clientes/"+created._id+"/propriedades");
+          } catch (err) {
+            if (err && err.response && err.response.data) parseErrors(err);
+            console.log("Erro interno ao adicionar um cliente", err);
+          }
+        } else {
+          try {
+            const updated = await ClientService.update(this.state.formData);
+            flashWithSuccess();
+            // a chamada do formulário pode vir por fluxos diferentes
+            // então usamos o returnTo para verificar para onde ir
+            // ou ir para o fluxo padrão
+            if (this.props.location.state && this.props.location.state.returnTo)
+              this.props.history.push(this.props.location.state.returnTo);
+            else this.props.history.push("/clientes");
+          } catch (err) {
+            if (err && err.response && err.response.data) parseErrors(err);
+            console.log("Erro interno ao atualizar um cliente ", err);
+          }
+        }
+      }
+    });
+  };
 
   render() {
     const { getFieldDecorator } = this.props.form;
@@ -50,43 +114,39 @@ class ClientForm extends Component {
     };
 
     return (
-      <div style={{ display: this.props.openForm ? "block" : "none" }}>
+      <div>
         <BreadcrumbStyled>
           <Breadcrumb.Item>
-            <Button onClick={this.props.closeForm}>
+            <Button
+              href={
+                this.props.location.state && this.props.location.state.returnTo
+                  ? this.props.location.state.returnTo.pathname
+                  : "/clientes"
+              }
+            >
               <Icon type="arrow-left" />
-              Voltar para a listagem de clientes
+              Voltar para tela anterior
             </Button>
           </Breadcrumb.Item>
         </BreadcrumbStyled>
         <PainelHeader
-          title="Novo Cliente"
-          extra={
-            <Steps current={0} progressDot>
-              <Step title="Dados do Cliente" />
-              <Step title="Propriedades" />
-            </Steps>
-          }
+          title={this.state.editMode ? "Editando Cliente" : "Novo Cliente"}
         >
-          <Button
-            type="primary"
-            icon="save"
-            onClick={() => this.props.saveForm()}
-          >
+          <Button type="primary" icon="save" onClick={() => this.saveForm()}>
             Salvar Cliente
           </Button>
         </PainelHeader>
-        <Form onChange={this.props.handleFormState}>
+        <Form onChange={this.handleFormState}>
           <Form.Item label="Nome" {...formItemLayout}>
             {getFieldDecorator("nome", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.props.formData.nome
+              initialValue: this.state.formData.nome
             })(<Input name="nome" ref={input => (this.titleInput = input)} />)}
           </Form.Item>
           <Form.Item label="Tipo do Cliente" {...formItemLayout}>
             {getFieldDecorator("tipo", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.props.formData.tipo
+              initialValue: this.state.formData.tipo
             })(
               <Select
                 name="tipo"
@@ -95,7 +155,7 @@ class ClientForm extends Component {
                 style={{ width: 200 }}
                 placeholder="Selecione um tipo..."
                 onChange={e =>
-                  this.props.handleFormState({
+                  this.handleFormState({
                     target: { name: "tipo", value: e }
                   })
                 }
@@ -109,28 +169,28 @@ class ClientForm extends Component {
           <Form.Item label="CPF / CNPJ" {...formItemLayout}>
             {getFieldDecorator("cpf_cnpj", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.props.formData.cpf_cnpj
+              initialValue: this.state.formData.cpf_cnpj
             })(<Input name="cpf_cnpj" />)}
           </Form.Item>
           <Form.Item label="Tel. Fixo" {...formItemLayout}>
             {getFieldDecorator("tel_fixo", {
-              initialValue: this.props.formData.tel_fixo
+              initialValue: this.state.formData.tel_fixo
             })(<Input name="tel_fixo" />)}
           </Form.Item>
           <Form.Item label="Tel. Cel." {...formItemLayout}>
             {getFieldDecorator("tel_cel", {
-              initialValue: this.props.formData.tel_cel
+              initialValue: this.state.formData.tel_cel
             })(<Input name="tel_cel" />)}
           </Form.Item>
           <Form.Item label="Email" {...formItemLayout}>
             {getFieldDecorator("email", {
-              initialValue: this.props.formData.email
+              initialValue: this.state.formData.email
             })(<Input name="email" />)}
           </Form.Item>
           <Form.Item label="Lim. Crédito" {...formItemLayout}>
             {getFieldDecorator("credito", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.props.formData.credito
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.credito
             })(<Input name="credito" />)}
           </Form.Item>
         </Form>
