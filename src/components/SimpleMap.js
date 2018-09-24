@@ -14,7 +14,6 @@ export const SimpleMap = compose(
     mapElement: <div style={{ height: `100%` }} />
   }),
   lifecycle({
-
     componentWillMount() {
       const refs = {};
       this.props.setGPS(-17.79272, -50.91965849999997);
@@ -29,7 +28,6 @@ export const SimpleMap = compose(
           }
         ],
         onMapMounted: ref => {
-          debugger
           refs.map = ref;
         },
         onBoundsChanged: () => {
