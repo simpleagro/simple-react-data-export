@@ -12,7 +12,7 @@ import {
   Spin
 } from "antd";
 import styled from "styled-components";
-import { MapWithASearchBox } from "../../Map";
+
 
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
@@ -233,7 +233,7 @@ class ClientPropertySpotForm extends Component {
             </Form.Item>
           </CardStyled>
           <CardStyled type="inner" title="Mapa do Talhão" bordered>
-            <MapWithASearchBox setGPS={this.setGPS.bind(this)} />
+
           </CardStyled>
         </Form>
       </div>

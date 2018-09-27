@@ -84,10 +84,10 @@ class CustomersWallet extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `A safra, ${descricao}, foi removida com sucesso!`);
+      flashWithSuccess("", `A carteira, ${descricao}, foi removida com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover um safra", err);
+      console.log("Erro interno ao remover uma carteira", err);
     }
   };
 
@@ -147,7 +147,7 @@ class CustomersWallet extends Component {
               type="vertical"
             />
             <Popconfirm
-              title={`Tem certeza em excluir esta safra?`}
+              title={`Tem certeza em excluir esta carteira?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
               cancelText="Não"

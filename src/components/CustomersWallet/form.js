@@ -18,7 +18,7 @@ import {
 } from "antd";
 import styled from "styled-components";
 
-import { flashWithSuccess } from "../common/FlashMessages";
+import { flashWithSuccess, flashWithError } from "../common/FlashMessages";
 import parseErrors from "../../lib/parseErrors";
 import { PainelHeader } from "../common/PainelHeader";
 import * as CustomerWalletService from "../../services/customerswallet";
@@ -45,7 +45,7 @@ class CustomerWalletForm extends Component {
       selectedClient: {},
       walletTree: [],
       walletTreeCheckeds: [],
-      errorOnWalletTree: false
+      errorOnWalletTree: []
     };
   }
 
@@ -107,6 +107,13 @@ class CustomerWalletForm extends Component {
   };
 
   saveForm = async e => {
+    if (this.state.errorOnWalletTree.length > 0) {
+      flashWithError(
+        "Pelo menos uma propriedade por cliente precisa ser selecionado"
+      );
+      return;
+    }
+
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
@@ -222,19 +229,26 @@ class CustomerWalletForm extends Component {
     if (!e.checked) {
       _formDataClientes = _formDataClientes.map(cli => {
         if (cli.client_id === e.node.props["data-client-id"]) {
-          this.setState(prev => ({
-            ...prev,
-            errorOnWalletTree: false
-          }));
           cli.propriedades = cli.propriedades.filter(
             prop => prop !== e.node.props["data-prop-id"]
           );
           if (cli.propriedades.length === 0) {
             this.setState(prev => ({
               ...prev,
-              errorOnWalletTree: e.node.props.dataRef.nome
+              errorOnWalletTree: [
+                ...prev.errorOnWalletTree,
+                this.state.clients.find(el => el._id === cli.client_id).nome
+              ]
             }));
-          }
+          } else
+            this.setState(prev => ({
+              ...prev,
+              errorOnWalletTree: this.state.errorOnWalletTree.filter(
+                e =>
+                  e !==
+                  this.state.clients.find(el => el._id === cli.client_id).nome
+              )
+            }));
         }
         return cli;
       });
@@ -242,21 +256,42 @@ class CustomerWalletForm extends Component {
       _formDataClientes = _formDataClientes.map(cli => {
         if (cli.client_id === e.node.props["data-client-id"]) {
           cli.propriedades.push(e.node.props["data-prop-id"]);
+          if (cli.propriedades.length === 0) {
+            this.setState(prev => ({
+              ...prev,
+              errorOnWalletTree: [
+                ...prev.errorOnWalletTree,
+                this.state.clients.find(el => el._id === cli.client_id).nome
+              ]
+            }));
+          } else
+            this.setState(prev => ({
+              ...prev,
+              errorOnWalletTree: this.state.errorOnWalletTree.filter(
+                e =>
+                  e !==
+                  this.state.clients.find(el => el._id === cli.client_id).nome
+              )
+            }));
         }
         return cli;
       });
     }
 
-    _formDataClientes.map(cli => {
-      if (cli.propriedades.length === 0) {
-        this.setState(prev => ({
-          ...prev,
-          errorOnWalletTree: this.state.clients.find(
-            el => el._id === cli.client_id
-          ).nome
-        }));
-      }
-    });
+    // _formDataClientes.map(cli => {
+    //   if (cli.propriedades.length === 0) {
+    //     this.setState(prev => ({
+    //       ...prev,
+    //       errorOnWalletTree: this.state.clients.find(
+    //         el => el._id === cli.client_id
+    //       ).nome
+    //     }));
+    //   } else
+    //     this.setState(prev => ({
+    //       ...prev,
+    //       errorOnWalletTree: false
+    //     }));
+    // });
 
     this.setState(prev => ({
       ...prev,
@@ -376,16 +411,17 @@ class CustomerWalletForm extends Component {
                 title={
                   <span>
                     <p> Selecione um cliente para adicionar a carteira: </p>
-                    {!!this.state.errorOnWalletTree && (
-                      <Alert
-                        style={{ marginBottom: 20 }}
-                        message="Erro"
-                        description={`É necessário que o cliente: ${this.state.errorOnWalletTree.toUpperCase()}
+                    {this.state.errorOnWalletTree.length > 0 &&
+                      this.state.errorOnWalletTree.map(err => (
+                        <Alert
+                          style={{ marginBottom: 20 }}
+                          message="Erro"
+                          description={`É necessário que o cliente: ${err.toUpperCase()}
                           tenha pelo menos 1 propriedade selecionada`}
-                        type="error"
-                        showIcon
-                      />
-                    )}
+                          type="error"
+                          showIcon
+                        />
+                      ))}
                     <Select
                       value={this.state.selectedClient._id}
                       name="cliente"
