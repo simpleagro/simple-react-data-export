@@ -176,6 +176,18 @@ class Clients extends Component {
                 <FontAwesomeIcon icon="list" size="lg" />
               </Button>
             </Tooltip>
+            <Divider
+              style={{ fontSize: "10px", padding: 0, margin: 2 }}
+              type="vertical"
+            />
+            <Tooltip title="Veja os planejamentos de plantio do cliente">
+              <Button
+                size="small"
+                href={`/clientes/${record._id}/plantio`}
+              >
+                <FontAwesomeIcon icon="seedling" size="lg" />
+              </Button>
+            </Tooltip>
           </span>
         );
       }
