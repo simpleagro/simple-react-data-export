@@ -75,8 +75,9 @@ class Painel extends Component {
             overflow: "auto",
             height: "100vh",
             position: "fixed",
-            left: 0
+            left: 0,
           }}
+          className="ant-menu-image"
         >
           <div
             className="logo"
