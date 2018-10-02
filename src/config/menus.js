@@ -22,20 +22,20 @@ const loadable = loader =>
   });
 
 const menus = {
-  ...dashboard,
-  ...empresas,
-  ...modulos,
-  ...entidades,
-  ...usuarios,
-  ...consultores,
+  // ...dashboard,
+  // ...empresas,
+  // ...modulos,
+  // ...entidades,
+  // ...usuarios,
+  // ...consultores,
   ...clientes,
   ...carteiraDeClientes,
-  ...caracteristicasProdutos,
-  ...gruposDeProdutos,
-  ...produtos,
+  // ...caracteristicasProdutos,
+  // ...gruposDeProdutos,
+  // ...produtos,
   ...safras,
-  ...etapasCultura,
-  ...unidadesMedida
+  // ...etapasCultura,
+  // ...unidadesMedida
 };
 
 export { menus };
