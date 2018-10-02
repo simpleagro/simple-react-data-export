@@ -16,7 +16,7 @@ const menus = {
     component: loadable(() => import("../../components/Clients/Plantings/form")),
     showMenu: false
   },
-  "/clientes/:client_id/plantio/new/edit": {
+  "/clientes/:client_id/plantio/new": {
     component: loadable(() => import("../../components/Clients/Plantings/form")),
     showMenu: false
   }

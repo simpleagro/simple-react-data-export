@@ -29,7 +29,7 @@ const BreadcrumbStyled = styled(Breadcrumb)`
   margin-bottom: 30px;
 `;
 
-class Properties extends Component {
+class Plantings extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -71,7 +71,6 @@ class Properties extends Component {
 
   changeStatus = async (id, newStatus) => {
     try {
-
       await PlantingService.changeStatus(this.state.client_id)(id, newStatus);
 
       let recordName = "";
@@ -97,11 +96,14 @@ class Properties extends Component {
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao mudar status do planejamento de plantio para a propriedade", err);
+      console.log(
+        "Erro interno ao mudar status do planejamento de plantio para a propriedade",
+        err
+      );
     }
   };
 
-  removeRecord = async ({ _id, nome }) => {
+  removeRecord = async ({ _id, propriedade: { nome, ie } }) => {
     try {
       await PlantingService.remove(this.state.client_id)(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
@@ -110,10 +112,13 @@ class Properties extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `A propriedade, ${nome}, foi removida com sucesso!`);
+      flashWithSuccess(
+        "",
+        `O planejamento de plantio para a propriedade, ${nome} - ${ie}, foi removida com sucesso!`
+      );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover uma propriedade", err);
+      console.log("Erro interno ao remover o planejamento de plantio para a propriedade", err);
     }
   };
 
@@ -168,7 +173,9 @@ class Properties extends Component {
             okText="Sim"
             cancelText="Não"
           >
-            <Tooltip title={`${statusTxt.toUpperCase()} planejamento de plantio`}>
+            <Tooltip
+              title={`${statusTxt.toUpperCase()} planejamento de plantio`}
+            >
               <Button size="small">
                 <FontAwesomeIcon icon={statusBtn} size="lg" />
               </Button>
@@ -185,7 +192,7 @@ class Properties extends Component {
           <span>
             <Button
               size="small"
-              href={`/clientes/${this.state.client_id}/propriedades/${
+              href={`/clientes/${this.state.client_id}/plantios/${
                 record._id
               }/edit`}
             >
@@ -196,7 +203,7 @@ class Properties extends Component {
               type="vertical"
             />
             <Popconfirm
-              title={`Tem certeza em excluir a propriedade?`}
+              title={`Tem certeza em excluir este planejamento de plantio?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
               cancelText="Não"
@@ -292,7 +299,7 @@ class Properties extends Component {
                 <Button
                   type="primary"
                   icon="plus"
-                  href={`/clientes/${this.state.client_id}/propriedades/new`}
+                  href={`/clientes/${this.state.client_id}/plantio/new`}
                 >
                   Adicionar
                 </Button>
@@ -313,4 +320,4 @@ class Properties extends Component {
   }
 }
 
-export default Properties;
+export default Plantings;

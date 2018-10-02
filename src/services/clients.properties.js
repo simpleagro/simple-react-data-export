@@ -9,7 +9,7 @@ export const list = client_id => aqp =>
     })
     .then(response => response.data);
 
-export const changeStatus = client_id => property_id => (_id, status) => {
+export const changeStatus = client_id => (_id, status) => {
   api
     .put(`${baseURL.replace(":client_id", client_id)}/${_id}`, { status })
     .then(response => response.data);

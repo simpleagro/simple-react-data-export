@@ -50,6 +50,7 @@ class Plots extends Component {
       const data = await ClientsPlotsService.list(this.state.client_id)(
         this.props.match.params.property_id
       )(aqp);
+
       const propertyData = await ClientsPropertyService.get(
         this.state.client_id
       )(this.props.match.params.property_id);
@@ -109,7 +110,9 @@ class Plots extends Component {
 
   removeRecord = async ({ _id, nome }) => {
     try {
-      await ClientsPlotsService.remove(this.state.client_id)(this.state.property_id)(_id);
+      await ClientsPlotsService.remove(this.state.client_id)(
+        this.state.property_id
+      )(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
 
       this.setState({
