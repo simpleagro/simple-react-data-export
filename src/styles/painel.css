@@ -7,13 +7,16 @@ select,
 .ant-layout {
   background: #eeeeee;
 }
-.ant-menu-dark {
+.ant-menu-image {
   background-image: url(../assets/pontos.png);
   background-color: #606062;
   padding-bottom: 130px;
   background-position: bottom right;
   background-size: 540px;
   background-repeat: no-repeat;
+}
+.ant-menu-dark {
+  background-color: #606062;
 }
 .ant-menu-dark .ant-menu-sub {
   background: #606062;
