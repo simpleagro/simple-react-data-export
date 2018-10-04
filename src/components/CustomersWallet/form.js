@@ -55,7 +55,7 @@ class CustomerWalletForm extends Component {
     const consultants = await ConsultantsServiceList();
     const clients = await ClientsServiceList({
       limit: 99999999,
-      fields: "nome _id propriedades gerenciarCarteiraPorPropriedade",
+      fields: "nome,_id,propriedades,gerenciarCarteiraPorPropriedade",
       status: true
     });
 
@@ -499,7 +499,7 @@ class CustomerWalletForm extends Component {
                           </div>
                         }
                       >
-                        {data.propriedades.map(prop => (
+                        {data.propriedades && data.propriedades.map(prop => (
                           <TreeNode
                             dataRef={data}
                             selectable={false}
