@@ -1,6 +1,6 @@
 import { baseApi as api } from "../config/api";
 
-const baseURL = "/clients/:client_id/properties";
+const baseURL = "/clients/:client_id/plantings";
 
 export const list = client_id => aqp =>
   api

@@ -7,7 +7,7 @@ import {
   Form,
   Select,
   Affix,
-  Steps
+  Checkbox
 } from "antd";
 import styled from "styled-components";
 
@@ -17,7 +17,6 @@ import { PainelHeader } from "../../common/PainelHeader";
 import * as ClientService from "../../../services/clients";
 
 const Option = Select.Option;
-const Step = Steps.Step;
 
 const BreadcrumbStyled = styled(Breadcrumb)`
   background: #eeeeee;
@@ -55,6 +54,7 @@ class ClientForm extends Component {
   }
 
   handleFormState = event => {
+    if (!event.target.name) return;
     let form = Object.assign({}, this.state.formData, {
       [event.target.name]: event.target.value
     });
@@ -196,6 +196,30 @@ class ClientForm extends Component {
               // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.credito
             })(<Input name="credito" />)}
+          </Form.Item>
+          <Form.Item
+            label="Gerenciar Cateira por Propriedade?"
+            labelCol={{ span: 4 }}
+            wrapperCol={{ span: 12 }}
+          >
+            {getFieldDecorator("gerenciarCarteiraPorPropriedade", {
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.gerenciarCarteiraPorPropriedade
+            })(
+              <Checkbox
+                checked={this.state.formData.gerenciarCarteiraPorPropriedade}
+                onChange={e =>
+                  this.handleFormState({
+                    target: {
+                      name: "gerenciarCarteiraPorPropriedade",
+                      value: e.target.checked
+                    }
+                  })
+                }
+              >
+                Sim
+              </Checkbox>
+            )}
           </Form.Item>
         </Form>
       </div>
