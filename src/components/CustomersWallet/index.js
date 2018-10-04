@@ -23,7 +23,7 @@ class CustomersWallet extends Component {
     };
   }
 
-  async initializeList(aqp) {
+  async initializeList(aqp = { fields: "nome, consultor_id, status" }) {
     this.setState(previousState => {
       return { ...previousState, loadingData: true };
     });
@@ -84,7 +84,10 @@ class CustomersWallet extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `A carteira, ${descricao}, foi removida com sucesso!`);
+      flashWithSuccess(
+        "",
+        `A carteira, ${descricao}, foi removida com sucesso!`
+      );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover uma carteira", err);
@@ -103,8 +106,8 @@ class CustomersWallet extends Component {
     },
     {
       title: "Consultor",
-      dataIndex: "consultor.nome",
-      key: "consultor.nome",
+      dataIndex: "consultor_id.nome",
+      key: "consultor_id.nome",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
@@ -139,7 +142,10 @@ class CustomersWallet extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/carteiras-de-clientes/${record._id}/edit`}>
+            <Button
+              size="small"
+              href={`/carteiras-de-clientes/${record._id}/edit`}
+            >
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
             <Divider
