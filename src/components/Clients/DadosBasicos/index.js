@@ -119,6 +119,17 @@ class Clients extends Component {
       onFilter: (value, record) => record.tipo === value
     },
     {
+      title: "Gerenciamento de Carteira",
+      dataIndex: "gerenciarCarteiraPorPropriedade",
+      key: "gerenciarCarteiraPorPropriedade",
+      render: text => ( text === true ? 'Por Propriedade' : 'Por Cliente' ),
+      filters: [
+        { text: "Por Propriedade", value: true },
+        { text: "Por Cliente", value: false }
+      ],
+      onFilter: (value, record) => record.gerenciarCarteiraPorPropriedade.toString() === value
+    },
+    {
       title: "Status",
       dataIndex: "status",
       key: "status",
@@ -181,10 +192,7 @@ class Clients extends Component {
               type="vertical"
             />
             <Tooltip title="Veja os planejamentos de plantio do cliente">
-              <Button
-                size="small"
-                href={`/clientes/${record._id}/plantio`}
-              >
+              <Button size="small" href={`/clientes/${record._id}/plantio`}>
                 <FontAwesomeIcon icon="seedling" size="lg" />
               </Button>
             </Tooltip>
