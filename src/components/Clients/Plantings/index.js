@@ -8,18 +8,19 @@ import {
   Popconfirm,
   Breadcrumb,
   Tooltip,
+  Select,
   Row,
   Col
 } from "antd";
 import styled from "styled-components";
 
-import * as ClientsPropertyService from "../../../services/clients.properties";
-import * as ClientsPlotsService from "../../../services/clients.plots";
-// import * as TalhoesService from "../../../services/clients.talhoes";
+import * as PlantingService from "../../../services/clients.plantings";
+import * as ClientsService from "../../../services/clients";
 import SimpleTable from "../../common/SimpleTable";
-// import Form from "./form";
-import { flashWithSuccess, flashWithError } from "../../common/FlashMessages";
+import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
+
+const Option = Select.Option;
 
 const BreadcrumbStyled = styled(Breadcrumb)`
   background: #eeeeee;
@@ -28,47 +29,40 @@ const BreadcrumbStyled = styled(Breadcrumb)`
   margin-bottom: 30px;
 `;
 
-class Plots extends Component {
+class Plantings extends Component {
   constructor(props) {
     super(props);
     this.state = {
       list: [],
       loadingData: true,
       pagination: false,
-      property_id: this.props.match.params.property_id,
       client_id: this.props.match.params.client_id,
-      property_data: {}
+      client_data: {},
+      filtro_safras: [],
+      safra_selecionada: null
     };
   }
 
   async initializeList(aqp) {
     this.setState(previousState => {
-      return { ...previousState, loadingData: true };
+      return {
+        ...previousState,
+        loadingData: true,
+        safra_selecionada: aqp && aqp.safra ? aqp.safra : null
+      };
     });
 
-    try {
-      const data = await ClientsPlotsService.list(this.state.client_id)(
-        this.props.match.params.property_id
-      )(aqp);
+    const data = await PlantingService.list(this.state.client_id)(aqp);
+    const clientData = await ClientsService.get(this.state.client_id);
 
-      const propertyData = await ClientsPropertyService.get(
-        this.state.client_id
-      )(this.props.match.params.property_id);
-      this.setState(prev => ({
-        ...prev,
-        list: data,
-        loadingData: false,
-        property_data: propertyData
-      }));
-    } catch (err) {
-      const {
-        error = "Houve um erro ao visualizar os dados"
-      } = err.response.data;
-
-      flashWithError(error);
-
-      this.props.history.push(`/clientes/${this.state.client_id}/propriedades`);
-    }
+    this.setState(prev => ({
+      ...prev,
+      list: data.docs,
+      filtro_safras: data.safrasFiltro,
+      safra_selecionada: data.safraSelecionada,
+      loadingData: false,
+      client_data: clientData
+    }));
   }
 
   async componentDidMount() {
@@ -77,16 +71,14 @@ class Plots extends Component {
 
   changeStatus = async (id, newStatus) => {
     try {
-      await ClientsPlotsService.changeStatus(this.state.client_id)(
-        this.state.property_id
-      )(id, newStatus);
+      await PlantingService.changeStatus(this.state.client_id)(id, newStatus);
 
       let recordName = "";
 
       let _list = this.state.list.map(item => {
         if (item._id === id) {
           item.status = newStatus;
-          recordName = item.nome;
+          recordName = `${item.nome} - ${item.propriedade.ie}`;
         }
         return item;
       });
@@ -98,39 +90,70 @@ class Plots extends Component {
 
       flashWithSuccess(
         "",
-        `O talhão, ${recordName}, foi ${
-          newStatus ? "ativado" : "bloqueado"
+        `O planejamento de plantio para a propriedade, ${recordName}, foi ${
+          newStatus ? "ativada" : "bloqueada"
         } com sucesso!`
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao mudar status do talhão", err);
+      console.log(
+        "Erro interno ao mudar status do planejamento de plantio para a propriedade",
+        err
+      );
     }
   };
 
-  removeRecord = async ({ _id, nome }) => {
+  removeRecord = async ({ _id, propriedade: { nome, ie } }) => {
     try {
-      await ClientsPlotsService.remove(this.state.client_id)(
-        this.state.property_id
-      )(_id);
+      await PlantingService.remove(this.state.client_id)(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
 
       this.setState({
         list: _list
       });
 
-      flashWithSuccess("", `O talhão, ${nome}, foi removido com sucesso!`);
+      flashWithSuccess(
+        "",
+        `O planejamento de plantio para a propriedade, ${nome} - ${ie}, foi removido com sucesso!`
+      );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover um talhão", err);
+      console.log("Erro interno ao remover o planejamento de plantio para a propriedade", err);
     }
   };
 
   tableConfig = () => [
     {
-      title: "Nome",
-      dataIndex: "nome",
-      key: "nome",
+      title: "Propriedade",
+      dataIndex: "propriedade.nome",
+      key: "propriedade.nome",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      }
+    },
+    {
+      title: "Inscrição Estadual",
+      dataIndex: "propriedade.ie",
+      key: "propriedade.ie",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      }
+    },
+    {
+      title: "Talhão",
+      dataIndex: "talhao.nome",
+      key: "talhao.nome",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      }
+    },
+    {
+      title: "Produto",
+      dataIndex: "produto.nome",
+      key: "produto.nome",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
@@ -145,12 +168,14 @@ class Plots extends Component {
         const statusBtn = record.status ? "unlock" : "lock";
         return (
           <Popconfirm
-            title={`Tem certeza em ${statusTxt} o talhão?`}
+            title={`Tem certeza em ${statusTxt} este planejamento de plantio?`}
             onConfirm={e => this.changeStatus(record._id, !record.status)}
             okText="Sim"
             cancelText="Não"
           >
-            <Tooltip title={`${statusTxt.toUpperCase()} o talhão`}>
+            <Tooltip
+              title={`${statusTxt.toUpperCase()} planejamento de plantio`}
+            >
               <Button size="small">
                 <FontAwesomeIcon icon={statusBtn} size="lg" />
               </Button>
@@ -167,9 +192,9 @@ class Plots extends Component {
           <span>
             <Button
               size="small"
-              href={`/clientes/${this.state.client_id}/propriedades/${
-                this.state.property_id
-              }/talhoes/${record._id}/edit`}
+              href={`/clientes/${this.state.client_id}/plantios/${
+                record._id
+              }/edit`}
             >
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
@@ -178,7 +203,7 @@ class Plots extends Component {
               type="vertical"
             />
             <Popconfirm
-              title={`Tem certeza em excluir o talhão?`}
+              title={`Tem certeza em excluir este planejamento de plantio?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
               cancelText="Não"
@@ -191,6 +216,16 @@ class Plots extends Component {
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
+            <Tooltip title="Veja os talhões da propriedade">
+              <Button
+                size="small"
+                href={`/clientes/${this.state.client_id}/propriedades/${
+                  record._id
+                }/talhoes`}
+              >
+                <FontAwesomeIcon icon="map-marked-alt" size="lg" />
+              </Button>
+            </Tooltip>
           </span>
         );
       }
@@ -203,21 +238,10 @@ class Plots extends Component {
         <BreadcrumbStyled>
           <Breadcrumb.Item>
             <Button onClick={() => this.props.history.push("/clientes")}>
-              Clientes
+              <Icon type="arrow-left" />
+              Voltar para a tela anterior
             </Button>
           </Breadcrumb.Item>
-          <Breadcrumb.Item>
-            <Button
-              onClick={() =>
-                this.props.history.push(
-                  `/clientes/${this.state.client_id}/propriedades`
-                )
-              }
-            >
-              Propriedades
-            </Button>
-          </Breadcrumb.Item>
-          <Breadcrumb.Item>Talhões</Breadcrumb.Item>
         </BreadcrumbStyled>
         <Row gutter={24}>
           <Col span={5}>
@@ -228,14 +252,8 @@ class Plots extends Component {
                 color: "#009d55"
               }}
             >
-              <p>{`Propriedade: ${this.state.property_data.nome}`}</p>
-              <p>{`I.E: ${this.state.property_data.ie}`}</p>
-              <p>
-                Cidade/Estado: <br />
-                {`${this.state.property_data.cidade}/${
-                  this.state.property_data.estado
-                }`}
-              </p>
+              <p>{`Cliente: ${this.state.client_data.nome}`}</p>
+              <p>{`CPF/CNPJ: ${this.state.client_data.cpf_cnpj}`}</p>
               <Button
                 style={{ width: "100%" }}
                 onClick={() => {
@@ -251,15 +269,37 @@ class Plots extends Component {
           </Col>
           <Col span={19}>
             <Card
-              title="Talhões"
+              title={
+                <span>
+                  Planejamentos de Plantio - para o período de:
+                  <Select
+                    showAction={["focus", "click"]}
+                    showSearch
+                    style={{ width: 150, marginLeft: 10 }}
+                    value={this.state.safra_selecionada}
+                    onChange={e => this.initializeList({ safra: e })}
+                    placeholder="Selecione a safra..."
+                    filterOption={(input, option) =>
+                      option.props.children
+                        .toLowerCase()
+                        .indexOf(input.toLowerCase()) >= 0
+                    }
+                    // onSelect={e => this.listaCidadesPorEstado(e)}
+                  >
+                    {this.state.filtro_safras.map(s => (
+                      <Option key={s} value={s}>
+                        {s}
+                      </Option>
+                    ))}
+                  </Select>
+                </span>
+              }
               bordered={false}
               extra={
                 <Button
                   type="primary"
                   icon="plus"
-                  href={`/clientes/${this.state.client_id}/propriedades/${
-                    this.state.property_id
-                  }/talhoes/new`}
+                  href={`/clientes/${this.state.client_id}/plantio/new`}
                 >
                   Adicionar
                 </Button>
@@ -280,4 +320,4 @@ class Plots extends Component {
   }
 }
 
-export default Plots;
+export default Plantings;

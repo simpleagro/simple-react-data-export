@@ -13,6 +13,7 @@ import produtos from "./Menus/produtos";
 import safras from "./Menus/safras";
 import etapasCultura from "./Menus/etapas-cultura";
 import unidadesMedida from "./Menus/unidades-medidas";
+import plantio from "./Menus/plantio";
 
 const loadable = loader =>
   Loadable({
@@ -29,13 +30,14 @@ const menus = {
   ...usuarios,
   ...consultores,
   ...clientes,
+  ...plantio,
   ...carteiraDeClientes,
   ...caracteristicasProdutos,
   ...gruposDeProdutos,
   ...produtos,
   ...safras,
   ...etapasCultura,
-  ...unidadesMedida
+  ...unidadesMedida,
 };
 
 export { menus };

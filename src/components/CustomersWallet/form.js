@@ -55,25 +55,31 @@ class CustomerWalletForm extends Component {
     const consultants = await ConsultantsServiceList();
     const clients = await ClientsServiceList({
       limit: 99999999,
-      fields: "nome _id propriedades",
+      fields: "nome _id propriedades gerenciarCarteiraPorPropriedade",
       status: true
     });
 
     if (id) {
       const formData = await CustomerWalletService.get(id);
+
       if (formData) {
         let _walletTreeCheckeds = [];
         const _walletTree = formData.clientes
           ? formData.clientes.map(c => {
               let cli = Object.assign(
                 {},
-                clients.docs.find(c2 => c2._id === c.client_id)
+                clients.docs.find(c2 => c2._id === c.cliente_id)
               );
 
-              c.propriedades.forEach(propEl => {
-                const p = cli.propriedades.find(c3 => c3._id === propEl);
-                if (p) _walletTreeCheckeds.push(`${cli._id}-${p._id}`);
-              });
+
+              if (c.gerenciarCarteiraPorPropriedade)
+                c.propriedades.forEach(propEl => {
+                  const p = cli.propriedades.find(c3 => c3._id === propEl);
+                  if (p) _walletTreeCheckeds.push(`${cli._id}-${p._id}`);
+                });
+              else {
+                _walletTreeCheckeds.push(`${c.cliente_id}`);
+              }
               return cli;
             })
           : [];
@@ -165,8 +171,8 @@ class CustomerWalletForm extends Component {
     });
   };
 
-  async selectedClient(client_id) {
-    const selectedClient = this.state.clients.find(c => c._id === client_id);
+  async selectedClient(cliente_id) {
+    const selectedClient = this.state.clients.find(c => c._id === cliente_id);
     await this.setState(prev => ({ ...prev, selectedClient }));
   }
 
@@ -178,19 +184,30 @@ class CustomerWalletForm extends Component {
     if (Object.keys(selectedClient).length === 0) return;
 
     if (!this.state.walletTree.find(w => w._id === selectedClient._id)) {
-      _walletTree.push(selectedClient);
-      // _walletTreeCheckeds.push(selectedClient._id);
+      if (selectedClient.gerenciarCarteiraPorPropriedade)
+        _walletTree.push(selectedClient);
+      else {
+        selectedClient.propriedades = [];
+        _walletTree.push(selectedClient);
+      }
 
       let _formDataClientes = this.state.formData.clientes || [];
 
       if (!_formDataClientes.find(c => c._id === selectedClient._id)) {
-        _formDataClientes.push({
-          client_id: selectedClient._id,
-          propriedades: selectedClient.propriedades.map(p => p._id)
-        });
-        selectedClient.propriedades.forEach(el => {
-          _walletTreeCheckeds.push(`${selectedClient._id}-${el._id}`);
-        });
+        if (selectedClient.gerenciarCarteiraPorPropriedade) {
+          _formDataClientes.push({
+            cliente_id: selectedClient._id,
+            propriedades: selectedClient.propriedades.map(p => p._id)
+          });
+          selectedClient.propriedades.forEach(el => {
+            _walletTreeCheckeds.push(`${selectedClient._id}-${el._id}`);
+          });
+        } else {
+          _formDataClientes.push({
+            cliente_id: selectedClient._id
+          });
+          _walletTreeCheckeds.push(`${selectedClient._id}`);
+        }
       }
 
       await this.setState(prev => ({
@@ -203,11 +220,11 @@ class CustomerWalletForm extends Component {
     }
   }
 
-  removeClient(client_id) {
+  removeClient(cliente_id) {
     // debugger
-    let _walletTree = this.state.walletTree.filter(c => c._id !== client_id);
+    let _walletTree = this.state.walletTree.filter(c => c._id !== cliente_id);
     let _formDataClientes = this.state.formData.clientes.filter(
-      c => c.client_id !== client_id
+      c => c.cliente_id !== cliente_id
     );
 
     this.setState(prev => ({
@@ -228,7 +245,7 @@ class CustomerWalletForm extends Component {
     // se n estiver mais marcado remover
     if (!e.checked) {
       _formDataClientes = _formDataClientes.map(cli => {
-        if (cli.client_id === e.node.props["data-client-id"]) {
+        if (cli.cliente_id === e.node.props["data-client-id"]) {
           cli.propriedades = cli.propriedades.filter(
             prop => prop !== e.node.props["data-prop-id"]
           );
@@ -237,7 +254,7 @@ class CustomerWalletForm extends Component {
               ...prev,
               errorOnWalletTree: [
                 ...prev.errorOnWalletTree,
-                this.state.clients.find(el => el._id === cli.client_id).nome
+                this.state.clients.find(el => el._id === cli.cliente_id).nome
               ]
             }));
           } else
@@ -246,7 +263,7 @@ class CustomerWalletForm extends Component {
               errorOnWalletTree: this.state.errorOnWalletTree.filter(
                 e =>
                   e !==
-                  this.state.clients.find(el => el._id === cli.client_id).nome
+                  this.state.clients.find(el => el._id === cli.cliente_id).nome
               )
             }));
         }
@@ -254,14 +271,14 @@ class CustomerWalletForm extends Component {
       });
     } else {
       _formDataClientes = _formDataClientes.map(cli => {
-        if (cli.client_id === e.node.props["data-client-id"]) {
+        if (cli.cliente_id === e.node.props["data-client-id"]) {
           cli.propriedades.push(e.node.props["data-prop-id"]);
           if (cli.propriedades.length === 0) {
             this.setState(prev => ({
               ...prev,
               errorOnWalletTree: [
                 ...prev.errorOnWalletTree,
-                this.state.clients.find(el => el._id === cli.client_id).nome
+                this.state.clients.find(el => el._id === cli.cliente_id).nome
               ]
             }));
           } else
@@ -270,7 +287,7 @@ class CustomerWalletForm extends Component {
               errorOnWalletTree: this.state.errorOnWalletTree.filter(
                 e =>
                   e !==
-                  this.state.clients.find(el => el._id === cli.client_id).nome
+                  this.state.clients.find(el => el._id === cli.cliente_id).nome
               )
             }));
         }
@@ -283,7 +300,7 @@ class CustomerWalletForm extends Component {
     //     this.setState(prev => ({
     //       ...prev,
     //       errorOnWalletTree: this.state.clients.find(
-    //         el => el._id === cli.client_id
+    //         el => el._id === cli.cliente_id
     //       ).nome
     //     }));
     //   } else
@@ -414,6 +431,7 @@ class CustomerWalletForm extends Component {
                     {this.state.errorOnWalletTree.length > 0 &&
                       this.state.errorOnWalletTree.map(err => (
                         <Alert
+                          key={"err-" + err}
                           style={{ marginBottom: 20 }}
                           message="Erro"
                           description={`É necessário que o cliente: ${err.toUpperCase()}
@@ -436,24 +454,11 @@ class CustomerWalletForm extends Component {
                       placeholder="Selecione..."
                       onChange={e => this.selectedClient(e)}
                     >
-                      {this.state.clients.map(c => {
-                        return (
-                          c.propriedades &&
-                          c.propriedades.length > 0 && (
-                            <Option
-                              // disabled={
-                              //   !!this.state.walletTree.find(
-                              //     w => w._id === c._id
-                              //   )
-                              // }
-                              key={c._id}
-                              value={c._id}
-                            >
-                              {c.nome}
-                            </Option>
-                          )
-                        );
-                      })}
+                      {this.state.clients.map(c => (
+                        <Option key={c._id} value={c._id}>
+                          {c.nome}
+                        </Option>
+                      ))}
                     </Select>
                     <Divider type="vertical" />
                     <Button

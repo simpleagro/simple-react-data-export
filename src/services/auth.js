@@ -7,8 +7,8 @@ export const isAuthenticated = () => {
   return token && token !== "" ? true : false;
 };
 
-export const logout = (cb) => {
-  cookies.remove("token");
+export const logout = async (cb) => {
+  await cookies.remove("token");
   if (cb)
     setTimeout(cb, 100);
 };
