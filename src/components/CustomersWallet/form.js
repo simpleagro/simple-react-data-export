@@ -66,20 +66,23 @@ class CustomerWalletForm extends Component {
         let _walletTreeCheckeds = [];
         const _walletTree = formData.clientes
           ? formData.clientes.map(c => {
+              // recuperando dados do cliente
               let cli = Object.assign(
                 {},
                 clients.docs.find(c2 => c2._id === c.cliente_id)
               );
 
+              if (Object.keys(cli).length === 0) cli = c;
 
-              if (c.gerenciarCarteiraPorPropriedade)
-                c.propriedades.forEach(propEl => {
-                  const p = cli.propriedades.find(c3 => c3._id === propEl);
-                  if (p) _walletTreeCheckeds.push(`${cli._id}-${p._id}`);
+              if (cli.gerenciarCarteiraPorPropriedade) {
+                cli.propriedades.forEach(propEl => {
+                  const p = c.propriedades.find(c3 => c3 === propEl._id);
+                  if (p) _walletTreeCheckeds.push(`${cli._id}-${propEl._id}`);
                 });
-              else {
-                _walletTreeCheckeds.push(`${c.cliente_id}`);
+              } else {
+                _walletTreeCheckeds.push(`${cli._id}`);
               }
+
               return cli;
             })
           : [];
@@ -423,7 +426,7 @@ class CustomerWalletForm extends Component {
           </Form.Item>
 
           <Row>
-            <Col span={13} offset={2}>
+            <Col>
               <Card
                 title={
                   <span>
@@ -435,7 +438,7 @@ class CustomerWalletForm extends Component {
                           style={{ marginBottom: 20 }}
                           message="Erro"
                           description={`É necessário que o cliente: ${err.toUpperCase()}
-                          tenha pelo menos 1 propriedade selecionada`}
+                          tenha pelo menos 1 propriedade selecionada ou esteja selecionado (caso não seja por propriedade)`}
                           type="error"
                           showIcon
                         />
@@ -481,12 +484,22 @@ class CustomerWalletForm extends Component {
                   >
                     {this.state.walletTree.map(data => (
                       <TreeNode
-                        selectable={false}
                         data-client-id={`${data._id}`}
                         key={`${data._id}`}
                         title={
                           <div>
-                            {data.nome}
+                            {data.nome || data.cliente_id}
+                            {data.gerenciarCarteiraPorPropriedade ? (
+                              <span style={{ fontSize: 10 }}>
+                                {" "}
+                                (Por propriedade)
+                              </span>
+                            ) : (
+                              <span style={{ fontSize: 10 }}>
+                                {" "}
+                                (Por Cliente)
+                              </span>
+                            )}
                             <Button
                               style={{ border: "none", marginLeft: 5 }}
                               size="small"
@@ -499,16 +512,17 @@ class CustomerWalletForm extends Component {
                           </div>
                         }
                       >
-                        {data.propriedades && data.propriedades.map(prop => (
-                          <TreeNode
-                            dataRef={data}
-                            selectable={false}
-                            data-client-id={`${data._id}`}
-                            data-prop-id={`${prop._id}`}
-                            title={prop.nome}
-                            key={`${data._id}-${prop._id}`}
-                          />
-                        ))}
+                        {data.propriedades &&
+                          data.propriedades.map(prop => (
+                            <TreeNode
+                              dataRef={data}
+                              data-client-id={`${data._id || data}`}
+                              data-prop-id={`${prop._id || prop}`}
+                              title={prop.nome || prop}
+                              key={`${data._id || data.cliente_id}-${prop._id ||
+                                prop}`}
+                            />
+                          ))}
                       </TreeNode>
                     ))}
                   </Tree>
