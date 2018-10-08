@@ -56,7 +56,8 @@ class CustomerWalletForm extends Component {
     const clients = await ClientsServiceList({
       limit: 99999999,
       fields: "nome,_id,propriedades,gerenciarCarteiraPorPropriedade",
-      status: true
+      status: true,
+      validarClientesNaCarteira: true
     });
 
     if (id) {
@@ -247,10 +248,11 @@ class CustomerWalletForm extends Component {
 
     // se n estiver mais marcado remover
     if (!e.checked) {
+
       _formDataClientes = _formDataClientes.map(cli => {
         if (cli.cliente_id === e.node.props["data-client-id"]) {
           cli.propriedades = cli.propriedades.filter(
-            prop => prop !== e.node.props["data-prop-id"]
+            prop => prop._id !== e.node.props["data-prop-id"]
           );
           if (cli.propriedades.length === 0) {
             this.setState(prev => ({
