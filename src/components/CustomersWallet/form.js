@@ -71,10 +71,9 @@ class CustomerWalletForm extends Component {
                 clients.docs.find(c2 => c2._id === c.cliente_id)
               );
 
-
               if (c.gerenciarCarteiraPorPropriedade)
                 c.propriedades.forEach(propEl => {
-                  const p = cli.propriedades.find(c3 => c3._id === propEl);
+                  const p = cli.propriedades.find(c3 => c3._id === propEl._id);
                   if (p) _walletTreeCheckeds.push(`${cli._id}-${p._id}`);
                 });
               else {
@@ -244,10 +243,11 @@ class CustomerWalletForm extends Component {
 
     // se n estiver mais marcado remover
     if (!e.checked) {
+
       _formDataClientes = _formDataClientes.map(cli => {
         if (cli.cliente_id === e.node.props["data-client-id"]) {
           cli.propriedades = cli.propriedades.filter(
-            prop => prop !== e.node.props["data-prop-id"]
+            prop => prop._id !== e.node.props["data-prop-id"]
           );
           if (cli.propriedades.length === 0) {
             this.setState(prev => ({
