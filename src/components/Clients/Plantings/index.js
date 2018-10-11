@@ -114,7 +114,7 @@ class Plantings extends Component {
 
       flashWithSuccess(
         "",
-        `O planejamento de plantio para a propriedade, ${nome} - ${ie}, foi removida com sucesso!`
+        `O planejamento de plantio para a propriedade, ${nome} - ${ie}, foi removido com sucesso!`
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
