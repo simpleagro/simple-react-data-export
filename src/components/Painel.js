@@ -10,6 +10,8 @@ import "../styles/painel.css";
 import { menus } from "../config/menus";
 
 const { Header, Content, Footer, Sider } = Layout;
+const SubMenu = Menu.SubMenu;
+const MenuItemGroup = Menu.ItemGroup;
 
 const MenuHeader = () => (
   <Menu>
@@ -75,7 +77,7 @@ class Painel extends Component {
             overflow: "auto",
             height: "100vh",
             position: "fixed",
-            left: 0,
+            left: 0
           }}
           className="ant-menu-image"
         >
@@ -91,21 +93,57 @@ class Painel extends Component {
             selectedKeys={[location]}
           >
             {Object.keys(menus).map(mKey => {
-              const { path: mPath, icon: mIcon, label: mLbl, showMenu } = menus[
-                mKey
-              ];
+              const {
+                path: mPath,
+                icon: mIcon,
+                label: mLbl,
+                showMenu,
+                submenu = false,
+                subKey,
+                subIcon,
+                subTitle,
+                subs = []
+              } = menus[mKey];
 
-              return (
+              if (
+                submenu &&
                 !!this.showMenu(menus[mKey].onlyAccess) &&
-                showMenu === true && (
+                showMenu === true
+              )
+                return (
+                  <SubMenu
+                    key={subKey}
+                    title={
+                      <span>
+                        <FontAwesomeIcon icon={subIcon} size="lg" />
+                        <span className="nav-text">{subTitle}</span>
+                      </span>
+                    }
+                  >
+                    {subs.map(sub => (
+                      <Menu.Item key={sub.key}>
+                        <Link to={sub.path}>
+                          <FontAwesomeIcon icon="angle-right" />
+                          <span className="nav-text">{sub.label}</span>
+                        </Link>
+                      </Menu.Item>
+                    ))}
+                  </SubMenu>
+                );
+
+              if (
+                !submenu &&
+                !!this.showMenu(menus[mKey].onlyAccess) &&
+                showMenu === true
+              )
+                return (
                   <Menu.Item key={mKey}>
                     <Link to={mPath}>
                       <FontAwesomeIcon icon={mIcon} size="lg" />
                       <span className="nav-text">{mLbl}</span>
                     </Link>
                   </Menu.Item>
-                )
-              );
+                );
             })}
           </Menu>
         </Sider>

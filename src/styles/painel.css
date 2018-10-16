@@ -95,5 +95,5 @@ select,
   opacity: 0;
 }
 .ant-layout-sider-collapsed .ant-menu-item {
-  padding: 0 24px !important;
+  padding: 0 30px !important;
 }
