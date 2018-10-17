@@ -28,9 +28,9 @@ const BreadcrumbStyled = styled(Breadcrumb)`
 `;
 
 class ConsultantForm extends Component {
- 
+
   constructor(props) {
-    
+
     super(props);
     this.state = {
       editMode: false,
@@ -125,7 +125,7 @@ class ConsultantForm extends Component {
   setUser = nome => {
     console.log(this.state)
     this.state.listUser.map((fDNome) =>
-      fDNome.nome === nome 
+      fDNome.nome === nome
         ? this.setState({ formData: {
             nome: fDNome.nome,
             email: fDNome.email,
@@ -138,7 +138,7 @@ class ConsultantForm extends Component {
 
    if ((ev.name === "nome") && (!this.state.editMode))
       this.setState(prev => ({ ...prev, formData: {usuario_id: ev.value}}))
-    
+
     console.log(this.state)
   }
 
@@ -194,8 +194,8 @@ class ConsultantForm extends Component {
                   //}))
                 }
               >
-                { this.state.listUser 
-                  ? this.state.listUser.map((user, index) => 
+                { this.state.listUser
+                  ? this.state.listUser.map((user, index) =>
                     <Option key={index} value={user.nome}> {user.nome} </Option>)
                   : null
                 }
@@ -245,7 +245,7 @@ class ConsultantForm extends Component {
                 onChange={e =>
                   (this.handleFormState({
                     target: { name: "cargo", value: e }
-                  }), 
+                  }),
                   e === "GERENTE" ? this.setState({ isGerent: true }) : this.setState({ isGerent: false }) )
                 }
               >
@@ -273,15 +273,15 @@ class ConsultantForm extends Component {
                 onChange={e =>
                   this.handleFormState({
                     target: { name: "gerente_id", value: e }
-                  }) 
+                  })
                 }
               >
                 { this.state.listCargo
                   ? this.state.listCargo.map((cargo, index) =>
                     cargo.cargo === "GERENTE" && !this.state.isGerent
                       ? <Option key={index} value={cargo.nome}>{cargo.nome}</Option>
-                      : null )
-                  : null
+                      : "" )
+                  : ""
                 }
               </Select>
             )}
