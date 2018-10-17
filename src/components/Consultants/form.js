@@ -234,7 +234,7 @@ class ConsultantForm extends Component {
           <Form.Item label="Cargo" {...formItemLayout}>
             {getFieldDecorator("cargo", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.cargo[0]
+              initialValue: this.state.formData.cargo ? this.state.formData.cargo[0] : ""
             })(
               <Select
                 name="cargo"
