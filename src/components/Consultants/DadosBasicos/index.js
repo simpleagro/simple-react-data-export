@@ -2,13 +2,13 @@ import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
 
-import * as ClientService from "../../../services/clients";
+import * as ConsultantService from "../../../services/consultants";
 import SimpleTable from "../../common/SimpleTable";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
 
-class Clients extends Component {
+class Consultants extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -27,7 +27,7 @@ class Clients extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await ClientService.list(aqp);
+    const data = await ConsultantService.list(aqp);
 
     this.setState(prev => ({
       ...prev,
@@ -45,7 +45,7 @@ class Clients extends Component {
 
   changeStatus = async (id, newStatus) => {
     try {
-      await ClientService.changeStatus(id, newStatus);
+      await ConsultantService.changeStatus(id, newStatus);
 
       let recordName = "";
 
@@ -64,29 +64,29 @@ class Clients extends Component {
 
       flashWithSuccess(
         "",
-        `O cliente, ${recordName}, foi ${
+        `O consultor, ${recordName}, foi ${
           newStatus ? "ativado" : "bloqueado"
         } com sucesso!`
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao mudar status do cliente", err);
+      console.log("Erro interno ao mudar status do consultor", err);
     }
   };
 
   removeRecord = async ({ _id, nome }) => {
     try {
-      await ClientService.remove(_id);
+      await ConsultantService.remove(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
 
       this.setState({
         list: _list
       });
 
-      flashWithSuccess("", `O cliente, ${nome}, foi removido com sucesso!`);
+      flashWithSuccess("", `O consultor, ${nome}, foi removido com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover um cliente", err);
+      console.log("Erro interno ao remover um consultor", err);
     }
   };
 
@@ -101,22 +101,26 @@ class Clients extends Component {
       }
     },
     {
-      title: "CPF / CNPJ",
-      dataIndex: "cpf_cnpj",
-      key: "cpf_cnpj",
+      title: "Cargo",
+      dataIndex: "cargo",
+      key: "cargo",
       render: text => text
     },
     {
       title: "Tipo",
       dataIndex: "tipo",
       key: "tipo",
-      render: text => text,
-      filters: [
-        { text: "Produtor", value: "PRODUTOR" },
-        { text: "Cooperado", value: "COOPERADO" },
-        { text: "Distribuidor", value: "DISTRIBUIDOR" }
-      ],
-      onFilter: (value, record) => record.tipo === value
+      render: text => text
+    },
+    {
+      title: "Gerente",
+      dataIndex: "gerente_id",
+      key: "gerente_id",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        return 1;
+      },
+      render: text => text
     },
     {
       title: "Status",
@@ -127,12 +131,12 @@ class Clients extends Component {
         const statusBtn = record.status ? "unlock" : "lock";
         return (
           <Popconfirm
-            title={`Tem certeza em ${statusTxt} o cliente?`}
+            title={`Tem certeza em ${statusTxt} o consultor?`}
             onConfirm={e => this.changeStatus(record._id, !record.status)}
             okText="Sim"
             cancelText="Não"
           >
-            <Tooltip title={`${statusTxt.toUpperCase()} o cliente`}>
+            <Tooltip title={`${statusTxt.toUpperCase()} o consultor`}>
               <Button size="small">
                 <FontAwesomeIcon icon={statusBtn} size="lg" />
               </Button>
@@ -147,15 +151,17 @@ class Clients extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/clientes/${record._id}/edit`}>
+            <Button size="small" href={`/consultores/${record._id}/edit`}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
+            
             <Divider
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
+            
             <Popconfirm
-              title={`Tem certeza em excluir o cliente?`}
+              title={`Tem certeza em excluir o consultor?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
               cancelText="Não"
@@ -168,14 +174,6 @@ class Clients extends Component {
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
-            <Tooltip title="Veja as propriedades do cliente">
-              <Button
-                size="small"
-                href={`/clientes/${record._id}/propriedades`}
-              >
-                <FontAwesomeIcon icon="list" size="lg" />
-              </Button>
-            </Tooltip>
           </span>
         );
       }
@@ -197,8 +195,8 @@ class Clients extends Component {
   render() {
     return (
       <div>
-        <PainelHeader title="Clientes">
-          <Button type="primary" icon="plus" href="/clientes/new">
+        <PainelHeader title="Consultores">
+          <Button type="primary" icon="plus" href="/consultores/new">
             Adicionar
           </Button>
         </PainelHeader>
@@ -215,4 +213,4 @@ class Clients extends Component {
   }
 }
 
-export default Clients;
+export default Consultants;
