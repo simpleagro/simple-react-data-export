@@ -141,12 +141,14 @@ class ClientForm extends Component {
           </PainelHeader>
         </Affix>
         <Form onChange={this.handleFormState}>
+
           <Form.Item label="Nome" {...formItemLayout}>
             {getFieldDecorator("nome", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.nome
             })(<Input name="nome" ref={input => (this.titleInput = input)} />)}
           </Form.Item>
+
           <Form.Item label="Tipo do Cliente" {...formItemLayout}>
             {getFieldDecorator("tipo", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
@@ -170,27 +172,32 @@ class ClientForm extends Component {
               </Select>
             )}
           </Form.Item>
+
           <Form.Item label="CPF / CNPJ" {...formItemLayout}>
             {getFieldDecorator("cpf_cnpj", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.cpf_cnpj
             })(<Input name="cpf_cnpj" />)}
           </Form.Item>
+
           <Form.Item label="Tel. Fixo" {...formItemLayout}>
             {getFieldDecorator("tel_fixo", {
               initialValue: this.state.formData.tel_fixo
             })(<Input name="tel_fixo" />)}
           </Form.Item>
+
           <Form.Item label="Tel. Cel." {...formItemLayout}>
             {getFieldDecorator("tel_cel", {
               initialValue: this.state.formData.tel_cel
             })(<Input name="tel_cel" />)}
           </Form.Item>
+
           <Form.Item label="Email" {...formItemLayout}>
             {getFieldDecorator("email", {
               initialValue: this.state.formData.email
             })(<Input name="email" />)}
           </Form.Item>
+
           <Form.Item label="Lim. Crédito" {...formItemLayout}>
             {getFieldDecorator("credito", {
               // rules: [{ required: true, message: "Este campo é obrigatório!" }],
