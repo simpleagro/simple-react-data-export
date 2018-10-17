@@ -234,7 +234,7 @@ class ConsultantForm extends Component {
           <Form.Item label="Cargo" {...formItemLayout}>
             {getFieldDecorator("cargo", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.cargo
+              initialValue: this.state.formData.cargo[0]
             })(
               <Select
                 name="cargo"
@@ -260,10 +260,10 @@ class ConsultantForm extends Component {
           <Form.Item label="Gerente" {...formItemLayout}>
             {getFieldDecorator("gerente_id", {
               initialValue: this.state.isGerent ? null : this.state.formData.gerente_id,
-              rules: [{ required: this.state.formData.cargo === "GERENTE" ? false : true, message: "Este campo é obrigatório!" }]
+              rules: [{ required: this.state.formData.cargo && this.state.formData.cargo.includes("GERENTE") ? false : true, message: "Este campo é obrigatório!" }]
             })(
               <Select
-                disabled={this.state.formData.cargo === "GERENTE" ? true : false}
+                disabled={this.state.formData.cargo && this.state.formData.cargo.includes("GERENTE") ? true : false}
                 name="gerente"
                 showAction={["focus", "click"]}
                 showSearch
@@ -278,7 +278,7 @@ class ConsultantForm extends Component {
               >
                 { this.state.listCargo
                   ? this.state.listCargo.map((cargo, index) =>
-                    cargo.cargo === "GERENTE" && !this.state.isGerent
+                  cargo.cargo && cargo.cargo.includes("GERENTE") && !this.state.isGerent
                       ? <Option key={index} value={cargo.nome}>{cargo.nome}</Option>
                       : "" )
                   : ""
