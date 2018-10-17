@@ -191,11 +191,11 @@ class Clients extends Component {
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
-            <Tooltip title="Veja os planejamentos de plantio do cliente">
+            {/* <Tooltip title="Veja os planejamentos de plantio do cliente">
               <Button size="small" href={`/clientes/${record._id}/plantio`}>
                 <FontAwesomeIcon icon="seedling" size="lg" />
               </Button>
-            </Tooltip>
+            </Tooltip> */}
           </span>
         );
       }

@@ -24,22 +24,21 @@ const loadable = loader =>
   });
 
 const menus = {
-  ...dashboard,
-  ...empresas,
-  ...modulos,
-  ...entidades,
-  ...usuarios,
+  // ...dashboard,
+  // ...empresas,
+  // ...modulos,
+  // ...entidades,
+  // ...usuarios,
   ...consultores,
   ...clientes,
-  ...plantio,
+  // ...plantio,
   ...carteiraDeClientes,
-  ...gestaoDeProjetosAgricolas,
-  ...caracteristicasProdutos,
-  ...gruposDeProdutos,
-  ...produtos,
+  // ...caracteristicasProdutos,
+  // ...gruposDeProdutos,
+  // ...produtos,
   ...safras,
-  ...etapasCultura,
-  ...unidadesMedida,
+  // ...etapasCultura,
+  // ...unidadesMedida
 };
 
 export { menus };
