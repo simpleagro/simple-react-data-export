@@ -63,7 +63,8 @@ class CustomerWalletForm extends Component {
       limit: 99999999,
       fields: "nome,_id,propriedades,gerenciarCarteiraPorPropriedade",
       status: true,
-      validarClientesNaCarteira: true
+      validarClientesNaCarteira: true,
+      flags: "validarClientesNaCarteira"
     });
 
     if (id) {
@@ -655,9 +656,11 @@ class CustomerWalletForm extends Component {
                                   dataRef={prop}
                                   title={
                                     <Tooltip
-                                      title={`Pertence a carteira.: ${prop.propriedadeJaExisteEmOutraCarteira}`}
+                                      title={`Pertence a carteira.: ${
+                                        prop.propriedadeJaExisteEmOutraCarteira
+                                      }`}
                                     >
-                                     {prop.nome}
+                                      {prop.nome}
                                     </Tooltip>
                                   }
                                   key={`${cliente.cliente_id || cliente._id}-${
