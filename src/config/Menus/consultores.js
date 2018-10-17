@@ -9,13 +9,23 @@ const loadable = loader =>
 
 const menus = {
   "/consultores": {
-    component: loadable(() => false),
+    component: loadable(() => import("../../components/Consultants")),
     key: "/consultores",
     path: "/consultores",
     label: "Consultores",
     icon: "user-tie",
     showMenu: true
   },
-};
+  "/consultores/:id/edit": {
+    component: loadable(() => import("../../components/Consultants/form")),
+    path: "/consultores/:id/edit",
+    showMenu: false
+  },
+  "/consultores/new": {
+    component: loadable(() => import("../../components/Consultants/form")),
+    path: "/consultores/new",
+    showMenu: false
+  },
+}; 
 
 export default menus;
