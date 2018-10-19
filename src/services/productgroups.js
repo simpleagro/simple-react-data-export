@@ -1,13 +1,14 @@
 import { baseApi as api } from "../config/api";
 
-const baseURL = "/seasons";
+const baseURL = "/productgroups";
 
 export const list = aqp => {
   return api
     .get(baseURL, {
       params: aqp
     })
-    .then(response => response.data);
+    .then(response => response.data)
+    .then(response => response.docs);
 };
 
 export const get = _id =>

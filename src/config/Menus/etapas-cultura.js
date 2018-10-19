@@ -1,15 +1,8 @@
-import Loadable from "react-loadable";
-
-const loadable = loader =>
-  Loadable({
-    loader,
-    delay: false,
-    loading: () => null
-  });
+import SimpleLoadable from "../../components/common/SimpleLoadable";
 
 const menus = {
   "/etapas-cultura": {
-    component: loadable(() => false),
+    component: SimpleLoadable(() => false),
     key: "/etapas-cultura",
     path: "/etapas-cultura",
     label: "Etapas de Cultura",

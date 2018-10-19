@@ -1,11 +1,4 @@
-import Loadable from "react-loadable";
-
-const loadable = loader =>
-  Loadable({
-    loader,
-    delay: false,
-    loading: () => null
-  });
+import SimpleLoadable from "../../components/common/SimpleLoadable";
 
 const menus = {
   "/visitas": {
@@ -15,7 +8,7 @@ const menus = {
     subIcon: "clipboard-list",
     subs: [
       {
-        component: loadable(() => import("../../components/Clients/DadosBasicos")),
+        component: SimpleLoadable(() => import("../../components/Clients/DadosBasicos")),
         key: "/visitas",
         path: "/visitas",
         label: "Visitas",

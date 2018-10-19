@@ -1,15 +1,8 @@
-import Loadable from "react-loadable";
-
-const loadable = loader =>
-  Loadable({
-    loader,
-    delay: false,
-    loading: () => null
-  });
+import SimpleLoadable from "../../components/common/SimpleLoadable";
 
 const menus = {
   "/modulos": {
-    component: loadable(() => import("../../components/Modules")),
+    component: SimpleLoadable(() => import("../../components/Modules")),
     path: "/modulos",
     label: "Módulos",
     icon: "bezier-curve",

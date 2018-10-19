@@ -5,6 +5,7 @@ import Routes from "./Routes";
 import "./components/common/FAIcons";
 import { LocaleProvider } from 'antd';
 import pt_BR from 'antd/lib/locale-provider/pt_BR';
+import 'moment/locale/pt-br';
 
 
 const App = () => <LocaleProvider locale={pt_BR}><Routes /></LocaleProvider>;

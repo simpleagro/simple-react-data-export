@@ -1,15 +1,8 @@
-import Loadable from "react-loadable";
-
-const loadable = loader =>
-  Loadable({
-    loader,
-    delay: false,
-    loading: () => null
-  });
+import SimpleLoadable from "../../components/common/SimpleLoadable";
 
 const menus = {
   "/unidades-medidas": {
-    component: loadable(() => false),
+    component: SimpleLoadable(() => false),
     key: "/unidades-medidas",
     path: "/unidades-medidas",
     label: "Unidades de Medidas",

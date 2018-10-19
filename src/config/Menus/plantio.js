@@ -1,23 +1,20 @@
-import Loadable from "react-loadable";
-
-const loadable = loader =>
-  Loadable({
-    loader,
-    delay: false,
-    loading: () => null
-  });
+import SimpleLoadable from "../../components/common/SimpleLoadable";
 
 const menus = {
   "/clientes/:client_id/plantio": {
-    component: loadable(() => import("../../components/Clients/Plantings")),
+    component: SimpleLoadable(() => import("../../components/Clients/Plantings")),
     showMenu: false
   },
   "/clientes/:client_id/plantio/:id/edit": {
-    component: loadable(() => import("../../components/Clients/Plantings/form")),
+    component: SimpleLoadable(() =>
+      import("../../components/Clients/Plantings/form")
+    ),
     showMenu: false
   },
   "/clientes/:client_id/plantio/new": {
-    component: loadable(() => import("../../components/Clients/Plantings/form")),
+    component: SimpleLoadable(() =>
+      import("../../components/Clients/Plantings/form")
+    ),
     showMenu: false
   }
 };

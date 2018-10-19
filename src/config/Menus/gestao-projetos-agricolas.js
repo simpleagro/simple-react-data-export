@@ -1,15 +1,7 @@
-import Loadable from "react-loadable";
-
-const loadable = loader =>
-  Loadable({
-    loader,
-    delay: false,
-    loading: () => null
-  });
-
+import SimpleLoadable from "../../components/common/SimpleLoadable";
 const menus = {
   "/visitas": {
-    component: loadable(() => import("../../components/Visits")),
+    component: SimpleLoadable(() => import("../../components/Visits")),
     key: "/visitas",
     path: "/visitas",
     label: "Visitas",
@@ -17,7 +9,7 @@ const menus = {
     showMenu: true
   },
   "/visitas/:id": {
-    component: loadable(() => import("../../components/Visits/show")),
+    component: SimpleLoadable(() => import("../../components/Visits/show")),
     showMenu: false
   },
 };
