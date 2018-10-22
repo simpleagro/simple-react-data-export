@@ -9,6 +9,7 @@ export const isAuthenticated = () => {
 
 export const logout = async (cb) => {
   await cookies.remove("token");
-  if (cb)
+  if (cb){
     setTimeout(cb, 1000);
+  }
 };
