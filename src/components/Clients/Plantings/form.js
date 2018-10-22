@@ -541,10 +541,10 @@ class ClientPlantingForm extends Component {
           <Form.Item label="Data de Início" {...formItemLayout}>
             {getFieldDecorator("data_inicio", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: moment(
+              initialValue: this.state.formData.data_inicio ? moment(
                 this.state.formData.data_inicio,
                 "YYYY-MM-DD"
-              )
+              ) :  moment()
             })(
               <DatePicker
                 onChange={(data, dataString) =>
@@ -567,7 +567,7 @@ class ClientPlantingForm extends Component {
           <Form.Item label="Data de Fim" {...formItemLayout}>
             {getFieldDecorator("data_fim", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: moment(this.state.formData.data_fim, "YYYY-MM-DD")
+              initialValue: this.state.formData.data_fim ? moment(this.state.formData.data_fim, "YYYY-MM-DD") : moment()
             })(
               <DatePicker
                 onChange={(data, dataString) =>
