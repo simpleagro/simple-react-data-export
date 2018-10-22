@@ -159,7 +159,7 @@ class Consultants extends Component {
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
-            
+
             <Popconfirm
               title={`Tem certeza em excluir o consultor?`}
               onConfirm={() => this.removeRecord(record)}
