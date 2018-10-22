@@ -72,21 +72,22 @@ class ClientPlantingForm extends Component {
 
   async componentDidMount() {
     const { client_id, id } = this.props.match.params;
+    let talhoes = [];
 
     if (id) {
       const formData = await ClientPlantingService.get(client_id)(id);
 
-      const talhoes = this.state.propriedades.map(p => {
+      talhoes = this.state.propriedades.map(p => {
         if (p._id === formData.propriedade.id) return p.talhoes;
         return [];
-      });
+      })[0];
 
       if (formData)
         this.setState(prev => ({
           ...prev,
           formData,
           editMode: id ? true : false,
-          talhoes: talhoes[0]
+          talhoes
         }));
     }
 
