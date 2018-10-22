@@ -302,7 +302,7 @@ class ConsultantForm extends Component {
             )}
           </Form.Item>
 
-          {this.state.formData.cargo !== "GERENTE" && <Form.Item label="Gerente" {...formItemLayout}>
+          <Form.Item label="Gerente" {...formItemLayout}>
             {getFieldDecorator("gerente_id", {
               rules: [{ required: this.state.formData.cargo && this.state.formData.cargo.includes("GERENTE") ? false : true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.isGerent ? null : this.state.formData.gerente_id,
@@ -328,7 +328,7 @@ class ConsultantForm extends Component {
                 }
               </Select>
             )}
-          </Form.Item>}
+          </Form.Item>
 
           <Form.Item label="Tipo" {...formItemLayout}>
             {getFieldDecorator("tipo", {
