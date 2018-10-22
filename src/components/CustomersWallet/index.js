@@ -144,7 +144,12 @@ class CustomersWallet extends Component {
           <span>
             <Button
               size="small"
-              href={`/carteiras-de-clientes/${record._id}/edit`}
+              // href={`/carteiras-de-clientes/${record._id}/edit`}
+              onClick={() => {
+                this.props.history.push(
+                  `/carteiras-de-clientes/${record._id}/edit`
+                );
+              }}
             >
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
@@ -188,7 +193,15 @@ class CustomersWallet extends Component {
     return (
       <div>
         <PainelHeader title="Carteiras de Clientes">
-          <Button type="primary" icon="plus" href="/carteiras-de-clientes/new">
+          <Button
+            type="primary"
+            icon="plus"
+            onClick={() => {
+              this.props.history.push(
+                `/carteiras-de-clientes/new`
+              );
+            }}
+          >
             Adicionar
           </Button>
         </PainelHeader>
