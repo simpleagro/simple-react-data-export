@@ -60,7 +60,8 @@ class ClientPlantingForm extends Component {
   async componentWillMount() {
     const { client_id, id } = this.props.match.params;
     const clienteAtual = await ClientService.get(client_id, {
-      fields: "nome,propriedades"
+      fields: "nome,propriedades",
+      limit: 999999999999
     });
 
     this.setState(prev => ({
@@ -541,10 +542,12 @@ class ClientPlantingForm extends Component {
           <Form.Item label="Data de Início" {...formItemLayout}>
             {getFieldDecorator("data_inicio", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.data_inicio ? moment(
-                this.state.formData.data_inicio,
+              initialValue: moment(
+                this.state.formData.data_inicio
+                  ? this.state.formData.data_inicio
+                  : new Date(),
                 "YYYY-MM-DD"
-              ) :  moment()
+              )
             })(
               <DatePicker
                 onChange={(data, dataString) =>
@@ -567,7 +570,12 @@ class ClientPlantingForm extends Component {
           <Form.Item label="Data de Fim" {...formItemLayout}>
             {getFieldDecorator("data_fim", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.data_fim ? moment(this.state.formData.data_fim, "YYYY-MM-DD") : moment()
+              initialValue: moment(
+                this.state.formData.data_fim
+                  ? this.state.formData.data_fim
+                  : new Date(),
+                "YYYY-MM-DD"
+              )
             })(
               <DatePicker
                 onChange={(data, dataString) =>

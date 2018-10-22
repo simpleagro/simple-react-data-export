@@ -269,11 +269,12 @@ class Plantings extends Component {
                         .indexOf(input.toLowerCase()) >= 0
                     }
                   >
-                    {this.state.filtro_safras.map(s => (
-                      <Option key={s} value={s}>
-                        {s}
-                      </Option>
-                    ))}
+                    {this.state.filtro_safras &&
+                      this.state.filtro_safras.map(s => (
+                        <Option key={s} value={s}>
+                          {s}
+                        </Option>
+                      ))}
                   </Select>
                 </span>
               }
