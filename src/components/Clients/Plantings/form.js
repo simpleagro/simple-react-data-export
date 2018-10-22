@@ -178,20 +178,6 @@ class ClientPlantingForm extends Component {
     });
   };
 
-  generateHelper() {
-    if (this.state.formData.estado === undefined)
-      return "Selecione um estado primeiro";
-
-    if (this.state.fetchingCidade === true)
-      return (
-        <Spin
-          indicator={<Icon type="loading" style={{ fontSize: 24 }} spin />}
-        />
-      );
-
-    return null;
-  }
-
   async onChangeSelectCidade(cidade) {
     console.log(cidade);
     await this.setState(prev => ({
@@ -665,6 +651,23 @@ class ClientPlantingForm extends Component {
         </Form>
       </div>
     );
+  }
+
+  async onChangeSelectCidade(cidade) {
+    console.log(cidade);
+    await this.setState(prev => ({
+      ...prev,
+      fetchingCidade: false
+    }));
+    // await this.handleFormState({
+    //   target: { name: "cidade_codigo", value: e.key }
+    // });
+    // await this.handleFormState({
+    //   target: { name: "cidade", value: e.label }
+    // });
+    await this.handleFormState({
+      target: { name: "cidade", value: cidade }
+    });
   }
 }
 
