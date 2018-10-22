@@ -14,7 +14,9 @@ import { menus } from "./config/menus";
 //pois o withRouter e Route dependem de um objeto que neste
 //caso sera null
 const Logout = withRouter(({ history }) => {
-  logout(() => history.push("/login"));
+  logout(function logoutCB() {
+    history.push("/login");
+  });
   return null;
 });
 
