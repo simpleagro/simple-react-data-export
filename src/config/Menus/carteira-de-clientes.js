@@ -1,15 +1,8 @@
-import Loadable from "react-loadable";
-
-const loadable = loader =>
-  Loadable({
-    loader,
-    delay: false,
-    loading: () => null
-  });
+import SimpleLoadable from "../../components/common/SimpleLoadable";
 
 const menus = {
   "/carteiras-de-clientes": {
-    component: loadable(() => import("../../components/CustomersWallet")),
+    component: SimpleLoadable(() => import("../../components/CustomersWallet")),
     key: "/carteiras-de-clientes",
     path: "/carteiras-de-clientes",
     label: "Carteiras de Clientes",
@@ -17,12 +10,12 @@ const menus = {
     showMenu: true
   },
   "/carteiras-de-clientes/:id/edit": {
-    component: loadable(() => import("../../components/CustomersWallet/form")),
+    component: SimpleLoadable(() => import("../../components/CustomersWallet/form")),
     path: "/carteiras-de-clientes/:id/edit",
     showMenu: false
   },
   "/carteiras-de-clientes/new": {
-    component: loadable(() => import("../../components/CustomersWallet/form")),
+    component: SimpleLoadable(() => import("../../components/CustomersWallet/form")),
     path: "/carteiras-de-clientes/new",
     showMenu: false
   }

@@ -1,5 +1,3 @@
-import querystring from "querystring";
-
 import { baseApi as api } from "../config/api";
 
 const baseURL = "/clients";
@@ -12,8 +10,8 @@ export const list = aqp => {
     .then(response => response.data);
 };
 
-export const get = _id =>
-  api.get(`${baseURL}/${_id}`).then(response => response.data);
+export const get = (_id, aqp = {}) =>
+  api.get(`${baseURL}/${_id}`, { params: aqp }).then(response => response.data);
 
 export const create = obj =>
   api.post(baseURL, obj).then(response => response.data);

@@ -14,7 +14,10 @@ const Store = createStore(
 Store.subscribe(() => {
   // ver a lib redux-persist
   console.log("subscribe");
-  saveState({ painelState: Store.getState().painelState });
+  saveState({
+    painelState: Store.getState().painelState,
+    plantioState: Store.getState().plantioState
+  });
 });
 
 export default Store;

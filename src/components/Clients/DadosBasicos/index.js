@@ -1,12 +1,15 @@
 import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
 
 import * as ClientService from "../../../services/clients";
 import SimpleTable from "../../common/SimpleTable";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
+import { novoPlantio } from "../../../actions/plantioActions";
 
 class Clients extends Component {
   constructor(props) {
@@ -27,7 +30,7 @@ class Clients extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await ClientService.list(aqp);
+    const data = await ClientService.list();
 
     this.setState(prev => ({
       ...prev,
@@ -40,6 +43,7 @@ class Clients extends Component {
   }
 
   async componentDidMount() {
+    this.props.novoPlantio({});
     await this.initializeList();
   }
 
@@ -122,12 +126,13 @@ class Clients extends Component {
       title: "Gerenciamento de Carteira",
       dataIndex: "gerenciarCarteiraPorPropriedade",
       key: "gerenciarCarteiraPorPropriedade",
-      render: text => ( text === true ? 'Por Propriedade' : 'Por Cliente' ),
+      render: text => (text === true ? "Por Propriedade" : "Por Cliente"),
       filters: [
         { text: "Por Propriedade", value: true },
         { text: "Por Cliente", value: false }
       ],
-      onFilter: (value, record) => record.gerenciarCarteiraPorPropriedade.toString() === value
+      onFilter: (value, record) =>
+        record.gerenciarCarteiraPorPropriedade.toString() === value
     },
     {
       title: "Status",
@@ -191,11 +196,17 @@ class Clients extends Component {
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
-            {/* <Tooltip title="Veja os planejamentos de plantio do cliente">
-              <Button size="small" href={`/clientes/${record._id}/plantio`}>
+            <Tooltip title="Veja os planejamentos de plantio do cliente">
+              <Button
+                size="small"
+                onClick={() => {
+                  this.props.novoPlantio(record);
+                  this.props.history.push(`/clientes/${record._id}/plantio`);
+                }}
+              >
                 <FontAwesomeIcon icon="seedling" size="lg" />
               </Button>
-            </Tooltip> */}
+            </Tooltip>
           </span>
         );
       }
@@ -235,4 +246,15 @@ class Clients extends Component {
   }
 }
 
-export default Clients;
+const mapDispatchToProps = dispatch =>
+  bindActionCreators(
+    {
+      novoPlantio
+    },
+    dispatch
+  );
+
+export default connect(
+  null,
+  mapDispatchToProps
+)(Clients);

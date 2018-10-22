@@ -6,7 +6,6 @@ import {
   Button,
   Icon,
   Popconfirm,
-  Breadcrumb,
   Tooltip,
   Select,
   Row,
@@ -19,15 +18,9 @@ import * as ClientsService from "../../../services/clients";
 import SimpleTable from "../../common/SimpleTable";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
+import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 
 const Option = Select.Option;
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 class Plantings extends Component {
   constructor(props) {
@@ -118,7 +111,10 @@ class Plantings extends Component {
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover o planejamento de plantio para a propriedade", err);
+      console.log(
+        "Erro interno ao remover o planejamento de plantio para a propriedade",
+        err
+      );
     }
   };
 
@@ -185,14 +181,14 @@ class Plantings extends Component {
       }
     },
     {
-      title: "",
+      title: "Ações",
       dataIndex: "action",
       render: (text, record) => {
         return (
           <span>
             <Button
               size="small"
-              href={`/clientes/${this.state.client_id}/plantios/${
+              href={`/clientes/${this.state.client_id}/plantio/${
                 record._id
               }/edit`}
             >
@@ -216,16 +212,6 @@ class Plantings extends Component {
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
-            <Tooltip title="Veja os talhões da propriedade">
-              <Button
-                size="small"
-                href={`/clientes/${this.state.client_id}/propriedades/${
-                  record._id
-                }/talhoes`}
-              >
-                <FontAwesomeIcon icon="map-marked-alt" size="lg" />
-              </Button>
-            </Tooltip>
           </span>
         );
       }
@@ -235,14 +221,12 @@ class Plantings extends Component {
   render() {
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button onClick={() => this.props.history.push("/clientes")}>
-              <Icon type="arrow-left" />
-              Voltar para a tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          history={this.props.history}
+          className="breadcrumbStyled"
+          to="/clientes"
+        />
+
         <Row gutter={24}>
           <Col span={5}>
             <Card
@@ -284,13 +268,13 @@ class Plantings extends Component {
                         .toLowerCase()
                         .indexOf(input.toLowerCase()) >= 0
                     }
-                    // onSelect={e => this.listaCidadesPorEstado(e)}
                   >
-                    {this.state.filtro_safras.map(s => (
-                      <Option key={s} value={s}>
-                        {s}
-                      </Option>
-                    ))}
+                    {this.state.filtro_safras &&
+                      this.state.filtro_safras.map(s => (
+                        <Option key={s} value={s}>
+                          {s}
+                        </Option>
+                      ))}
                   </Select>
                 </span>
               }
@@ -299,7 +283,11 @@ class Plantings extends Component {
                 <Button
                   type="primary"
                   icon="plus"
-                  href={`/clientes/${this.state.client_id}/plantio/new`}
+                  onClick={() =>
+                    this.props.history.push(
+                      `/clientes/${this.state.client_id}/plantio/new`
+                    )
+                  }
                 >
                   Adicionar
                 </Button>
