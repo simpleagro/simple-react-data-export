@@ -43,7 +43,10 @@ class ClientPlantingForm extends Component {
     this.state = {
       loadingForm: true,
       editMode: false,
-      formData: {},
+      formData: {
+        data_inicio: moment(new Date(), "YYYY-MM-DD"),
+        data_fim: moment(new Date(), "YYYY-MM-DD")
+      },
       client_id: this.props.match.params.client_id,
       propriedades: [],
       talhoes: [],
@@ -66,7 +69,10 @@ class ClientPlantingForm extends Component {
 
     this.setState(prev => ({
       ...prev,
-      formData: { cliente: { id: clienteAtual._id, nome: clienteAtual.nome } },
+      formData: {
+        ...prev.formData,
+        cliente: { id: clienteAtual._id, nome: clienteAtual.nome }
+      },
       propriedades: clienteAtual.propriedades
     }));
   }
