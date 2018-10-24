@@ -16,7 +16,9 @@ export const SimpleMap = compose(
   lifecycle({
     componentWillMount() {
       const refs = {};
-      this.props.setGPS(-17.79272, -50.91965849999997);
+      {
+        this.props.setGPS && this.props.setGPS(-17.79272, -50.91965849999997);
+      }
       this.setState({
         bounds: null,
         markers: [
@@ -76,8 +78,9 @@ export const SimpleMap = compose(
   withGoogleMap
 )(props => (
   <GoogleMap
+    defaultMapTypeId="satellite"
     ref={props.onMapMounted}
-    defaultZoom={props.defaultZoom || 8}
+    defaultZoom={props.defaultZoom || 13}
     center={
       props.latitude && props.longitude
         ? new google.maps.LatLng(props.latitude, props.longitude)
