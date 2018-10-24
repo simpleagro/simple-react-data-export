@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { cloneDeep as _cloneDeep } from "lodash";
 import moment from "moment";
 import "moment/locale/pt-br";
-
 import {
   Breadcrumb,
   Button,
@@ -14,8 +13,10 @@ import {
   Radio,
   Tabs
 } from "antd";
+
 import styled from "styled-components";
 
+import { SimpleMap } from "../SimpleMap";
 import {
   flashWithSuccess,
   flashWithError,
@@ -27,6 +28,7 @@ import * as CustomerWalletService from "../../services/customerswallet";
 import { list as ConsultantsServiceList } from "../../services/consultants";
 import { list as ClientsServiceList } from "../../services/clients";
 import * as VisitsService from "../../services/visits";
+import { moneyFormat } from "../../lib/formatters";
 
 const TabPane = Tabs.TabPane;
 const TextArea = Input.TextArea;
@@ -138,7 +140,7 @@ class VisitForm extends Component {
               <Form.Item label="Potencial de Venda" {...formItemLayout}>
                 {getFieldDecorator("potencial_venda", {
                   initialValue: this.state.formData.potencial_venda
-                    ? this.state.formData.potencial_venda
+                    ? moneyFormat(this.state.formData.potencial_venda)
                     : ""
                 })(<Input readOnly />)}
               </Form.Item>
@@ -215,7 +217,16 @@ class VisitForm extends Component {
                 })(<Input readOnly />)}
               </Form.Item>
               <CardStyled type="inner" title="Geolocalização" bordered>
-                <Form.Item label="Latitude" {...formItemLayout}>
+                {this.state.formData.geolocalizacao && (
+                  <SimpleMap
+                    latitude={this.state.formData.geolocalizacao.latitude}
+                    longitude={this.state.formData.geolocalizacao.longitude}
+                    containerElement={<div style={{ height: `400px` }} />}
+                    mapElement={<div style={{ height: `100%` }} />}
+                    setGPS={null}
+                  />
+                )}
+                {/* <Form.Item label="Latitude" {...formItemLayout}>
                   {getFieldDecorator("geolocalizacao.latitude", {
                     initialValue: this.state.formData.geolocalizacao
                       ? this.state.formData.geolocalizacao.latitude
@@ -228,7 +239,7 @@ class VisitForm extends Component {
                       ? this.state.formData.geolocalizacao.longitude
                       : ""
                   })(<Input readOnly />)}
-                </Form.Item>
+                </Form.Item> */}
               </CardStyled>
             </TabPane>
             <TabPane tab="Diagnósticos e Recomendações" key="3">
