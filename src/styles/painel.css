@@ -109,3 +109,7 @@ select,
   margin: -24px !important;
   margin-bottom: 30px !important;
 }
+
+.white-close .ant-drawer-close-x {
+  color: white;
+}
