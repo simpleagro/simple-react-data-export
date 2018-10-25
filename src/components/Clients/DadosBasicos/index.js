@@ -30,16 +30,19 @@ class Clients extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await ClientService.list();
-
-    this.setState(prev => ({
-      ...prev,
-      list: data.docs,
-      loadingData: false,
-      pagination: {
-        total: data.total
-      }
-    }));
+    try {
+      const data = await ClientService.list();
+      this.setState(prev => ({
+        ...prev,
+        list: data.docs,
+        loadingData: false,
+        pagination: {
+          total: data.total
+        }
+      }));
+    } catch (err) {
+      if (err && err.response && err.response.data) parseErrors(err);
+    }
   }
 
   async componentDidMount() {

@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "../styles/painel.css";
 import { menus } from "../config/menus";
+import { logout } from "../services/auth";
 
 const { Header, Content, Footer, Sider } = Layout;
 const SubMenu = Menu.SubMenu;
@@ -22,7 +23,13 @@ const MenuHeader = () => (
       </Link>
     </Menu.Item>
     <Menu.Item>
-      <Link to="/logout">
+      <Link
+        to="#"
+        onClick={e => {
+          e.preventDefault();
+          logout();
+        }}
+      >
         {" "}
         <Icon type="logout" /> Sair{" "}
       </Link>
