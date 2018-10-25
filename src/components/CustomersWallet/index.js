@@ -122,7 +122,7 @@ class CustomersWallet extends Component {
     }
   };
 
-  removeRecord = async ({ _id, descricao }) => {
+  removeRecord = async ({ _id, nome }) => {
     try {
       await CustomerWalletService.remove(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
@@ -133,7 +133,7 @@ class CustomersWallet extends Component {
 
       flashWithSuccess(
         "",
-        `A carteira, ${descricao}, foi removida com sucesso!`
+        `A carteira, ${nome}, foi removida com sucesso!`
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
@@ -313,7 +313,7 @@ class CustomersWallet extends Component {
           onChange={this.handleTableChange}
         />
         <Drawer
-          width="40vw"
+          width="30vw"
           placement="right"
           closable={true}
           onClose={this.closeMoreInfo}
@@ -331,7 +331,7 @@ class CustomersWallet extends Component {
               <Row type="flex" justify="space-around" align="middle">
                 <Col span={12}>
                   Informações Extras Da Carteira -{" "}
-                  {this.state.info && this.state.info.nome}
+                  {this.state.info.nome}
                 </Col>
                 <Col span={12}>
                   <Search
@@ -342,7 +342,7 @@ class CustomersWallet extends Component {
               </Row>
             </Layout.Header>
             <Layout.Content
-              style={{ padding: "0 20px", marginTop: 94, background: "#fff" }}
+              style={{ padding: "0 20px", marginTop: 35, background: "#fff" }}
             >
               <h2
                 style={{
