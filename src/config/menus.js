@@ -14,6 +14,7 @@ import safras from "./Menus/safras";
 import etapasCultura from "./Menus/etapas-cultura";
 import unidadesMedida from "./Menus/unidades-medidas";
 import plantio from "./Menus/plantio";
+import gestaoDeProjetosAgricolas from "./Menus/gestao-projetos-agricolas";
 
 const loadable = loader =>
   Loadable({
@@ -32,6 +33,7 @@ const menus = {
   ...clientes,
   ...plantio,
   ...carteiraDeClientes,
+  ...gestaoDeProjetosAgricolas,
   ...caracteristicasProdutos,
   ...gruposDeProdutos,
   ...produtos,

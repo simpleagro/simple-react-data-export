@@ -41,9 +41,9 @@ class LoginForm extends Component {
     e.preventDefault();
     const { form } = this.props;
     form.validateFields(async (err, values) => {
-      console.log(values);
+      // console.log(values);
       if (err) {
-        console.log("Error... received values of form: ", values);
+        // console.log("Error... received values of form: ", values);
       } else {
         try {
           const url = `${API_URL}/auth/login`;
@@ -53,7 +53,7 @@ class LoginForm extends Component {
 
           await this.props.cookies.set("token", response.data.token, { path: "/" });
           await this.setState({ token: response.data.token });
-          console.log(this.state.from.pathname);
+          // console.log(this.state.from.pathname);
           await this.props.userLoggedIn(response.data);
           notification.success({
             message: `Seja bem vindo, ${response.data.user.nome}`

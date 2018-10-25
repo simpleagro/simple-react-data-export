@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import "moment/locale/pt-br";
 import { cloneDeep as _cloneDeep } from "lodash";
-import debounce from "lodash/debounce";
 
 import {
   Breadcrumb,
@@ -17,8 +16,7 @@ import {
   Col,
   Tree,
   Alert,
-  Tooltip,
-  Spin
+  Tooltip
 } from "antd";
 import styled from "styled-components";
 
@@ -32,36 +30,24 @@ import { PainelHeader } from "../common/PainelHeader";
 import * as CustomerWalletService from "../../services/customerswallet";
 import { list as ConsultantsServiceList } from "../../services/consultants";
 import { list as ClientsServiceList } from "../../services/clients";
-import { SimpleBreadCrumb } from "../common/SimpleBreadCrumb";
-
 const Option = Select.Option;
 const TreeNode = Tree.TreeNode;
 
-const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
-
-// const LoadComponentView = loadedComponent => {
-//   const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
-
-//   return this.state.loadingForm ? (
-//     <Spin tip="Carregando..." size="large" indicator={antIcon} />
-//   ) : (
-//     <loadedComponent props={this.props} />
-//   );
-// };
-
+const BreadcrumbStyled = styled(Breadcrumb)`
+  background: #eeeeee;
+  height: 45px;
+  margin: -24px;
+  margin-bottom: 30px;
+`;
 
 class CustomerWalletForm extends Component {
   constructor(props) {
     super(props);
-    this.lastFetchClientId = 0;
-    this.searchClient = debounce(this.searchClient, 400);
     this.state = {
-      loadingForm: true,
       editMode: false,
       formData: {},
       consultants: [],
       clients: [],
-      fetchingClients: false,
       selectedClient: {},
       walletTree: [],
       walletTreeCheckeds: [],
@@ -73,10 +59,16 @@ class CustomerWalletForm extends Component {
     const { id } = this.props.match.params;
 
     const consultants = await ConsultantsServiceList();
+    const clients = await ClientsServiceList({
+      limit: 99999999,
+      fields: "nome,_id,propriedades,gerenciarCarteiraPorPropriedade",
+      status: true,
+      validarClientesNaCarteira: true
+    });
 
     if (id) {
       const formData = await CustomerWalletService.get(id);
-
+      console.log(formData);
       if (formData) {
         let _clientesChecados = [];
 
@@ -91,6 +83,7 @@ class CustomerWalletForm extends Component {
           } else _clientesChecados.push(c.cliente_id);
 
           delete c._id;
+          console.log("C", c);
           return c;
         });
 
@@ -98,6 +91,7 @@ class CustomerWalletForm extends Component {
           c.propriedades = c.propriedades.filter(
             p => p.fazParte && p.fazParte === true
           );
+          console.log("C222", c);
           delete c._id;
           return c;
         });
@@ -107,25 +101,24 @@ class CustomerWalletForm extends Component {
           formData: { ...formData, clientes: [..._formDataClientes] },
           walletTree: _walletTree,
           clientesChecados: _clientesChecados,
-          editMode: id ? true : false,
-          loadingForm: false
+          editMode: id ? true : false
         }));
       }
     }
 
-    const clients = await this.fetchClients();
-
     this.setState(prev => ({
       ...prev,
       consultants: consultants.docs,
-      clients: clients.docs,
-      loadingForm: true,
-      loadingForm: false
+      clients: clients.docs
     }));
 
     setTimeout(() => {
       this.titleInput.focus();
-    }, 100);
+    }, 0);
+
+    setTimeout(() => {
+      console.log("on EDIT", this.state);
+    }, 1000);
   }
 
   handleFormState = event => {
@@ -193,17 +186,6 @@ class CustomerWalletForm extends Component {
       }
     });
   };
-
-  async fetchClients(aqp = {}) {
-    return await ClientsServiceList({
-      limit: 25,
-      fields: "nome,_id,propriedades,gerenciarCarteiraPorPropriedade",
-      status: true,
-      validarClientesNaCarteira: true,
-      flags: "validarClientesNaCarteira",
-      ...aqp
-    });
-  }
 
   async selectedClient(cliente_id) {
     const selectedClient = Object.assign(
@@ -355,7 +337,7 @@ class CustomerWalletForm extends Component {
 
       //   console.log(this.state.formData);
     } else {
-      // debugger;
+      debugger;
       if (nodeProps.ehCliente) {
         clientes = clientes.filter(
           c =>
@@ -447,40 +429,29 @@ class CustomerWalletForm extends Component {
     }, 1000);
   }
 
-  searchClient = async value => {
-    console.log("fetching client", value);
-    this.lastFetchClientId += 1;
-    const fetchId = this.lastFetchClientId;
-    this.setState({ clients: [], fetchingClients: true });
-
-    const data = await this.fetchClients({ nome: `/${value}/i` });
-
-    if (fetchId !== this.lastFetchClientId) return;
-
-    const clients = data.docs;
-
-    this.setState({
-      clients,
-      fetchingClients: false
-    });
-  };
-
   render() {
-    const { fetchingClients } = this.state;
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
       labelCol: { span: 3 },
       wrapperCol: { span: 12 }
     };
 
-    return this.state.loadingForm ? (
-      <Spin tip="Carregando..." size="large" indicator={antIcon} />
-    ) : (
+    return (
       <div>
-        <SimpleBreadCrumb
-          to="/carteiras-de-clientes"
-          history={this.props.history}
-        />
+        <BreadcrumbStyled>
+          <Breadcrumb.Item>
+            <Button
+              href={
+                this.props.location.state && this.props.location.state.returnTo
+                  ? this.props.location.state.returnTo.pathname
+                  : "/carteiras-de-clientes"
+              }
+            >
+              <Icon type="arrow-left" />
+              Voltar para tela anterior
+            </Button>
+          </Breadcrumb.Item>
+        </BreadcrumbStyled>
         <Affix offsetTop={65}>
           <PainelHeader
             title={
@@ -600,12 +571,7 @@ class CustomerWalletForm extends Component {
                           .toLowerCase()
                           .indexOf(input.toLowerCase()) >= 0
                       }
-                      // filterOption={false}
-                      onSearch={this.searchClient}
                       showAction={["focus", "click"]}
-                      notFoundContent={
-                        fetchingClients ? <Spin size="small" /> : null
-                      }
                       showSearch
                       style={{ width: 200 }}
                       placeholder="Selecione..."
@@ -677,37 +643,27 @@ class CustomerWalletForm extends Component {
                             {cliente.propriedades &&
                               cliente.propriedades.map(prop => (
                                 <TreeNode
-                                    disableCheckbox={
-                                      prop.propriedadeJaExisteEmOutraCarteira &&
-                                      prop.propriedadeJaExisteEmOutraCarteira !==
-                                        ""
-                                        ? true
-                                        : false
-                                    }
-                                    clienteID={
-                                      cliente.cliente_id || cliente._id
-                                    }
-                                    clienteNome={cliente.nome}
-                                    gerenciarCarteiraPorPropriedade={
-                                      cliente.gerenciarCarteiraPorPropriedade
-                                    }
-                                    dataRef={prop}
-                                    title={
-                                      <Tooltip
-                                        title={
-                                          prop.propriedadeJaExisteEmOutraCarteira
-                                            ? `Pertence a carteira.: ${
-                                                prop.propriedadeJaExisteEmOutraCarteira
-                                              }`
-                                            : ""
-                                        }
-                                      >
-                                        {prop.nome}
-                                      </Tooltip>
-                                    }
-                                    key={`${cliente.cliente_id ||
-                                      cliente._id}-${prop._id}`}
-                                  />
+                                  disableCheckbox={
+                                    prop.propriedadeJaExisteEmOutraCarteira !==
+                                    ""
+                                  }
+                                  clienteID={cliente.cliente_id || cliente._id}
+                                  clienteNome={cliente.nome}
+                                  gerenciarCarteiraPorPropriedade={
+                                    cliente.gerenciarCarteiraPorPropriedade
+                                  }
+                                  dataRef={prop}
+                                  title={
+                                    <Tooltip
+                                      title={`Pertence a carteira.: ${prop.propriedadeJaExisteEmOutraCarteira}`}
+                                    >
+                                     {prop.nome}
+                                    </Tooltip>
+                                  }
+                                  key={`${cliente.cliente_id || cliente._id}-${
+                                    prop._id
+                                  }`}
+                                />
                               ))}
                           </TreeNode>
                         )
@@ -729,3 +685,21 @@ class CustomerWalletForm extends Component {
 const WrappepCustomerWalletForm = Form.create()(CustomerWalletForm);
 
 export default WrappepCustomerWalletForm;
+
+// WEBPACK FOOTER //
+// src/components/CustomersWallet/form.js
+
+// WEBPACK FOOTER //
+// src/components/CustomersWallet/form.js
+
+// WEBPACK FOOTER //
+// src/components/CustomersWallet/form.js
+
+// WEBPACK FOOTER //
+// src/components/CustomersWallet/form.js
+
+// WEBPACK FOOTER //
+// src/components/CustomersWallet/form.js
+
+// WEBPACK FOOTER //
+// src/components/CustomersWallet/form.js

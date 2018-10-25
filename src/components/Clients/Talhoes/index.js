@@ -134,6 +134,16 @@ class Plots extends Component {
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
+      },
+      render: (text, record) => {
+        return record.poligonos.length < 3 ? (
+          <Tooltip title="Este talhão ainda não possui pontos de mapeamento">
+            <FontAwesomeIcon icon="exclamation-triangle" size="1x" color="red" style={{marginRight: 8}}/>
+            {text}
+          </Tooltip>
+        ) : (
+          text
+        );
       }
     },
     {

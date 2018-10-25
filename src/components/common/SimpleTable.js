@@ -3,7 +3,8 @@ import { Table, Spin, Pagination } from "antd";
 
 const SimpleTable = ({ spinning, ...props }) => (
   <Spin spinning={spinning} tip="Carregando..." size="large">
-    <Table {...props} />
+    <Table  {...props} />
+    {/* scroll={{ y: 240 }} */}
   </Spin>
 );
 

@@ -1,15 +1,8 @@
-import Loadable from "react-loadable";
-
-const loadable = loader =>
-  Loadable({
-    loader,
-    delay: false,
-    loading: () => null
-  });
+import SimpleLoadable from "../../components/common/SimpleLoadable";
 
 const menus = {
   "/empresas": {
-    component: loadable(() => false),
+    component: SimpleLoadable(() => false),
     key: "/empresas",
     path: "/empresas",
     label: "Empresa",

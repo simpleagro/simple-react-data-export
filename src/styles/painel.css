@@ -95,5 +95,21 @@ select,
   opacity: 0;
 }
 .ant-layout-sider-collapsed .ant-menu-item {
-  padding: 0 24px !important;
+  padding: 0 30px !important;
+}
+
+.ant-table td {
+  white-space: nowrap;
+}
+
+/* so por enquanto a ideia eh ficar no component SimpleBreadCrumb */
+.ant-breadcrumb {
+  background: #eeeeee;
+  height: 45px;
+  margin: -24px !important;
+  margin-bottom: 30px !important;
+}
+
+.white-close .ant-drawer-close-x {
+  color: white;
 }

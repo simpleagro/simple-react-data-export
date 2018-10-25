@@ -1,6 +1,6 @@
 import { baseApi as api } from "../config/api";
 
-const baseURL = "/seasons";
+const baseURL = "/visits";
 
 export const list = aqp => {
   return api

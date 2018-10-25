@@ -1,5 +1,3 @@
-import querystring from "querystring";
-
 import { baseApi as api } from "../config/api";
 
 const baseURL = "/customers-wallets";
@@ -26,4 +24,10 @@ export const remove = _id =>
 
 export const changeStatus = (_id, status) => {
   api.put(`${baseURL}/${_id}`, { status }).then(response => response.data);
+};
+
+export const moreInfo = (walletID, status) => {
+  return api
+    .get(`${baseURL}/more-info/${walletID}`)
+    .then(response => response.data);
 };

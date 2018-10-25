@@ -1,20 +1,20 @@
+//#region IMPORTS
 import React, { Component } from "react";
 import {
-  Breadcrumb,
   Button,
+  InputNumber,
   Icon,
   Input,
   Form,
   Select,
   Affix,
   Card,
-  InputNumber,
-  Tooltip,
   Spin,
-  Row,
-  Col
+  DatePicker
 } from "antd";
 import styled from "styled-components";
+import { connect } from "react-redux";
+import moment from "moment";
 
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
@@ -24,15 +24,11 @@ import * as ClientService from "../../../services/clients";
 import * as SeasonService from "../../../services/seasons";
 import * as IBGEService from "../../../services/ibge";
 import * as ClientPlantingService from "../../../services/clients.plantings";
+import * as ProductGroupService from "../../../services/productgroups";
+import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
+//#endregion
 
 const Option = Select.Option;
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 const CardStyled = styled(Card)`
   background: #ececec;
@@ -45,50 +41,79 @@ class ClientPlantingForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      loadingForm: true,
       editMode: false,
-      formData: {},
+      formData: {
+        data_inicio: moment(new Date(), "YYYY-MM-DD"),
+        data_fim: moment(new Date(), "YYYY-MM-DD")
+      },
       client_id: this.props.match.params.client_id,
       propriedades: [],
       talhoes: [],
       safras: [],
-      clientes: [],
       fetchingCidade: false,
       estados: [],
-      cidades: []
+      cidades: [],
+      gruposDeProdutos: [],
+      produtos: [],
+      espacamentos: [45, 50]
     };
+  }
+
+  async componentWillMount() {
+    const { client_id, id } = this.props.match.params;
+    const clienteAtual = await ClientService.get(client_id, {
+      fields: "nome,propriedades",
+      limit: 999999999999
+    });
+
+    this.setState(prev => ({
+      ...prev,
+      formData: {
+        ...prev.formData,
+        cliente: { id: clienteAtual._id, nome: clienteAtual.nome }
+      },
+      propriedades: clienteAtual.propriedades
+    }));
   }
 
   async componentDidMount() {
     const { client_id, id } = this.props.match.params;
+    let talhoes = [];
 
     if (id) {
       const formData = await ClientPlantingService.get(client_id)(id);
+
+      talhoes = this.state.propriedades.map(p => {
+        if (p._id === formData.propriedade.id) return p.talhoes;
+        return [];
+      })[0];
 
       if (formData)
         this.setState(prev => ({
           ...prev,
           formData,
-          editMode: id ? true : false
+          editMode: id ? true : false,
+          talhoes
         }));
-      console.log(formData);
     }
 
+    const gruposDeProdutos = await ProductGroupService.list({
+      fields: "nome,produtos"
+    });
     const estados = await IBGEService.listaEstados();
     const safras = await SeasonService.list({
       limit: 999999999999,
       fields: "descricao"
     }).then(response => response.docs);
 
-    const clientes = await ClientService.list({
-      fields: "nome _id propriedades"
-    }).then(response => response.docs);
-
     this.setState(prev => ({
       ...prev,
       safras,
       estados,
-      clientes,
-      fetchingCidade: false
+      gruposDeProdutos,
+      fetchingCidade: false,
+      loadingForm: false
     }));
   }
 
@@ -97,24 +122,17 @@ class ClientPlantingForm extends Component {
     await this.handleFormState({
       target: { name: "estado", value: estado.label }
     });
-    // await this.handleFormState({
-    //   target: { name: "estado", value: estado.label}
-    // });
-    // await this.handleFormState({
-    //   target: { name: "estado_codigo", value: estado.key }
-    // });
     const cidades = await IBGEService.listaCidadesPorEstado(estado.key);
     this.setState(prev => ({ ...prev, cidades, fetchingCidade: false }));
   }
 
   handleFormState = async event => {
-    console.log(event);
     if (!event.target.name) return;
     let form = Object.assign({}, this.state.formData, {
       [event.target.name]: event.target.value
     });
     await this.setState(prev => ({ ...prev, formData: form }));
-    console.log(this.state.formData);
+    console.log(form);
   };
 
   saveForm = async e => {
@@ -136,13 +154,14 @@ class ClientPlantingForm extends Component {
             });
             flashWithSuccess();
             this.props.history.push(
-              `/clientes/${this.props.match.params.client_id}/propriedades/${
-                created._id
-              }/talhoes`
+              `/clientes/${this.props.match.params.client_id}/plantio`
             );
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao adicionar um cliente", err);
+            console.log(
+              "Erro interno ao adicionar um planejamento de plantio",
+              err
+            );
           }
         } else {
           try {
@@ -151,32 +170,19 @@ class ClientPlantingForm extends Component {
             )(this.state.formData);
             flashWithSuccess();
             this.props.history.push(
-              `/clientes/${this.props.match.params.client_id}/propriedades/${
-                updated._id
-              }/talhoes`
+              `/clientes/${this.props.match.params.client_id}/plantio`
             );
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao atualizar um cliente ", err);
+            console.log(
+              "Erro interno ao atualizar um planejamento de plantio",
+              err
+            );
           }
         }
       }
     });
   };
-
-  generateHelper() {
-    if (this.state.formData.estado === undefined)
-      return "Selecione um estado primeiro";
-
-    if (this.state.fetchingCidade === true)
-      return (
-        <Spin
-          indicator={<Icon type="loading" style={{ fontSize: 24 }} spin />}
-        />
-      );
-
-    return null;
-  }
 
   async onChangeSelectCidade(cidade) {
     console.log(cidade);
@@ -199,7 +205,7 @@ class ClientPlantingForm extends Component {
     const { _id: id, nome, propriedades } = JSON.parse(e);
     this.props.form.setFields({
       propriedade: { value: null },
-      talhao: { value: null },
+      talhao: { value: null }
     });
 
     await this.setState(prev => ({
@@ -225,7 +231,7 @@ class ClientPlantingForm extends Component {
   async selectPropriedade(e) {
     const { _id: id, nome, ie, cidade, estado, talhoes } = JSON.parse(e);
     this.props.form.setFields({
-      talhao: { value: null },
+      talhao: { value: null }
     });
     await this.handleFormState({
       target: {
@@ -249,7 +255,27 @@ class ClientPlantingForm extends Component {
       ...prev,
       talhoes: talhoes.filter(t => t.status === true)
     }));
+  }
 
+  async onSelectGrupoProduto(e) {
+    e = JSON.parse(e);
+    await this.handleFormState({
+      target: {
+        name: "grupo_produto",
+        value: { id: e._id, nome: e.nome }
+      }
+    });
+    await this.setState(prev => ({ ...prev, produtos: e.produtos }));
+  }
+
+  async onSelectProduto(e) {
+    e = JSON.parse(e);
+    await this.handleFormState({
+      target: {
+        name: "produto",
+        value: { id: e._id, nome: e.nome }
+      }
+    });
   }
 
   render() {
@@ -260,24 +286,25 @@ class ClientPlantingForm extends Component {
     };
     const { latitude, longitude } = this.state.formData;
 
-    return (
+    const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
+
+    return this.state.loadingForm ? (
+      <Spin tip="Carregando..." size="large" indicator={antIcon} />
+    ) : (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              href={`/clientes/${this.props.match.params.client_id}/plantio`}
-            >
-              <Icon type="arrow-left" />
-              Voltar para a tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={`/clientes/${this.props.match.params.client_id}/plantio`}
+          history={this.props.history}
+        />
         <Affix offsetTop={65}>
           <PainelHeader
             title={
               this.state.editMode
                 ? "Editando Planejamento de Plantio"
-                : "Novo Planejamento de Plantio"
+                : "Novo Planejamento de Plantio - " +
+                  (this.state.formData.cliente
+                    ? this.state.formData.cliente.nome
+                    : "")
             }
           >
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
@@ -303,7 +330,9 @@ class ClientPlantingForm extends Component {
                     .indexOf(input.toLowerCase()) >= 0
                 }
                 onChange={e =>
-                  this.handleFormState({ target: { name: "safra", value: e } })
+                  this.handleFormState({
+                    target: { name: "safra", value: e }
+                  })
                 }
               >
                 {this.state.safras.map(s => (
@@ -314,51 +343,28 @@ class ClientPlantingForm extends Component {
               </Select>
             )}
           </Form.Item>
-          <Form.Item label="Cliente" {...formItemLayout}>
-            {getFieldDecorator("cliente", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.cliente
-            })(
-              <Select
-                name="cliente"
-                showAction={["focus", "click"]}
-                showSearch
-                style={{ width: 200 }}
-                placeholder="Selecione..."
-                // labelInValue
-                filterOption={(input, option) =>
-                  option.props.children
-                    .toLowerCase()
-                    .indexOf(input.toLowerCase()) >= 0
-                }
-                onSelect={e => this.onChangeCliente(e)}
-              >
-                {this.state.clientes.map(c => (
-                  <Option key={c._id} value={JSON.stringify(c)}>
-                    {c.nome}
-                  </Option>
-                ))}
-              </Select>
-            )}
-          </Form.Item>
           <Form.Item
             label="Propriedade"
             {...formItemLayout}
             help={
-              this.state.formData.cliente === undefined
+              !this.state.formData.cliente
                 ? "Selecione primeiro um cliente!"
-                : ""
+                : this.state.propriedades.length <= 0
+                  ? "Este cliente não possui propriedades"
+                  : ""
             }
-            validateStatus={
-              this.state.formData.cliente === undefined ? "warning" : ""
-            }
+            validateStatus={!this.state.formData.cliente ? "warning" : ""}
           >
             {getFieldDecorator("propriedade", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.propriedade
+                ? `${this.state.formData.propriedade.nome} - ${
+                    this.state.formData.propriedade.ie
+                  }`
+                : ""
             })(
               <Select
-                disabled={this.state.formData.cliente === undefined}
+                disabled={!this.state.formData.cliente}
                 name="propriedade"
                 showAction={["focus", "click"]}
                 showSearch
@@ -372,13 +378,12 @@ class ClientPlantingForm extends Component {
                 }
                 onSelect={e => this.selectPropriedade(e)}
               >
-                {this.state.propriedades.length > 0
-                  ? this.state.propriedades.map(p => (
-                      <Option key={p._id} value={JSON.stringify(p)}>
-                        {p.nome} - {p.ie}
-                      </Option>
-                    ))
-                  : ""}
+                {this.state.propriedades.length > 0 &&
+                  this.state.propriedades.map(p => (
+                    <Option key={p._id} value={JSON.stringify(p)}>
+                      {p.nome} - {p.ie}
+                    </Option>
+                  ))}
               </Select>
             )}
           </Form.Item>
@@ -396,7 +401,8 @@ class ClientPlantingForm extends Component {
           >
             {getFieldDecorator("talhao", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.talhao
+              initialValue:
+                this.state.formData.talhao && this.state.formData.talhao.nome
             })(
               <Select
                 disabled={this.state.formData.propriedade === undefined}
@@ -411,18 +417,21 @@ class ClientPlantingForm extends Component {
                     .toLowerCase()
                     .indexOf(input.toLowerCase()) >= 0
                 }
-                onSelect={e =>
+                onSelect={e => {
+                  e = JSON.parse(e);
                   this.handleFormState({
                     target: {
                       name: "talhao",
                       value: { id: e._id, nome: e.nome }
                     }
-                  })
-                }
+                  });
+                }}
               >
-                {this.state.talhoes.length > 0
+                {this.state.talhoes && this.state.talhoes.length > 0
                   ? this.state.talhoes.map(t => (
-                      <Option key={t._id} value={JSON.stringify(t)}>{t.nome}</Option>
+                      <Option key={t._id} value={JSON.stringify(t)}>
+                        {t.nome}
+                      </Option>
                     ))
                   : ""}
               </Select>
@@ -448,12 +457,232 @@ class ClientPlantingForm extends Component {
               initialValue: this.state.formData.estado
             })(<Input style={{ width: 200 }} disabled name="estado" />)}
           </Form.Item>
+          <Form.Item label="Grupo de Produto" {...formItemLayout}>
+            {getFieldDecorator("grupo_produto", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.grupo_produto
+                ? this.state.formData.grupo_produto.nome
+                : ""
+            })(
+              <Select
+                name="grupo_produto"
+                showAction={["focus", "click"]}
+                showSearch
+                style={{ width: 200 }}
+                placeholder="Selecione..."
+                // labelInValue
+                filterOption={(input, option) =>
+                  option.props.children
+                    .toLowerCase()
+                    .indexOf(input.toLowerCase()) >= 0
+                }
+                onSelect={e => this.onSelectGrupoProduto(e)}
+              >
+                {this.state.gruposDeProdutos.length > 0
+                  ? this.state.gruposDeProdutos.map(t => (
+                      <Option key={t._id} value={JSON.stringify(t)}>
+                        {t.nome}
+                      </Option>
+                    ))
+                  : ""}
+              </Select>
+            )}
+          </Form.Item>
+          <Form.Item
+            label="Produto"
+            {...formItemLayout}
+            validateStatus={
+              this.state.formData.grupo_produto === undefined ? "warning" : ""
+            }
+            help={
+              this.state.formData.grupo_produto === undefined
+                ? "Selecione primeiro um grupo de produto!"
+                : ""
+            }
+          >
+            {getFieldDecorator("produto", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.produto
+                ? this.state.formData.produto.nome
+                : ""
+            })(
+              <Select
+                disabled={this.state.formData.grupo_produto === undefined}
+                name="produto"
+                showAction={["focus", "click"]}
+                showSearch
+                style={{ width: 200 }}
+                placeholder="Selecione..."
+                // labelInValue
+                filterOption={(input, option) =>
+                  option.props.children
+                    .toLowerCase()
+                    .indexOf(input.toLowerCase()) >= 0
+                }
+                onSelect={e => this.onSelectProduto(e)}
+              >
+                {this.state.produtos.length > 0
+                  ? this.state.produtos.map(t => (
+                      <Option key={t._id} value={JSON.stringify(t)}>
+                        {t.nome}
+                      </Option>
+                    ))
+                  : ""}
+              </Select>
+            )}
+          </Form.Item>
+          <Form.Item label="Data de Início" {...formItemLayout}>
+            {getFieldDecorator("data_inicio", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: moment(
+                this.state.formData.data_inicio
+                  ? this.state.formData.data_inicio
+                  : new Date(),
+                "YYYY-MM-DD"
+              )
+            })(
+              <DatePicker
+                onChange={(data, dataString) =>
+                  this.handleFormState({
+                    target: {
+                      name: "data_inicio",
+                      value: moment(dataString, "DD/MM/YYYY").format(
+                        "YYYY-MM-DD"
+                      )
+                    }
+                  })
+                }
+                allowClear
+                format={"DD/MM/YYYY"}
+                style={{ width: 200 }}
+                name="data_inicio"
+              />
+            )}
+          </Form.Item>
+          <Form.Item label="Data de Fim" {...formItemLayout}>
+            {getFieldDecorator("data_fim", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: moment(
+                this.state.formData.data_fim
+                  ? this.state.formData.data_fim
+                  : new Date(),
+                "YYYY-MM-DD"
+              )
+            })(
+              <DatePicker
+                onChange={(data, dataString) =>
+                  this.handleFormState({
+                    target: {
+                      name: "data_fim",
+                      value: moment(dataString, "DD/MM/YYYY").format(
+                        "YYYY-MM-DD"
+                      )
+                    }
+                  })
+                }
+                showToday
+                allowClear
+                format={"DD/MM/YYYY"}
+                style={{ width: 200 }}
+                name="data_fim"
+              />
+            )}
+          </Form.Item>
+
+          <Form.Item label="Espaçamento" {...formItemLayout}>
+            {getFieldDecorator("espacamento", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.espacamento
+            })(
+              <Select
+                name="espacamento"
+                showAction={["focus", "click"]}
+                showSearch
+                style={{ width: 200 }}
+                placeholder="Selecione..."
+                // labelInValue
+                filterOption={(input, option) =>
+                  option.props.children
+                    .toLowerCase()
+                    .indexOf(input.toLowerCase()) >= 0
+                }
+                onSelect={e =>
+                  this.handleFormState({
+                    target: { name: "espacamento", value: e }
+                  })
+                }
+              >
+                {this.state.espacamentos.length > 0
+                  ? this.state.espacamentos.map(opt => (
+                      <Option key={opt} value={opt}>
+                        {opt}
+                      </Option>
+                    ))
+                  : ""}
+              </Select>
+            )}
+          </Form.Item>
+          <Form.Item label="Sementes" {...formItemLayout}>
+            {getFieldDecorator("sementes", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.sementes
+            })(
+              <InputNumber
+                onChange={e =>
+                  this.handleFormState({
+                    target: { name: "sementes", value: e }
+                  })
+                }
+                style={{ width: 200 }}
+                name="sementes"
+              />
+            )}
+          </Form.Item>
+          <Form.Item label="Área" {...formItemLayout}>
+            {getFieldDecorator("area", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.area
+            })(
+              <InputNumber
+                onChange={e =>
+                  this.handleFormState({
+                    target: { name: "area", value: e }
+                  })
+                }
+                style={{ width: 200 }}
+                name="area"
+              />
+            )}
+          </Form.Item>
         </Form>
       </div>
     );
   }
+
+  async onChangeSelectCidade(cidade) {
+    console.log(cidade);
+    await this.setState(prev => ({
+      ...prev,
+      fetchingCidade: false
+    }));
+    // await this.handleFormState({
+    //   target: { name: "cidade_codigo", value: e.key }
+    // });
+    // await this.handleFormState({
+    //   target: { name: "cidade", value: e.label }
+    // });
+    await this.handleFormState({
+      target: { name: "cidade", value: cidade }
+    });
+  }
 }
+
+const mapStateToProps = ({ plantioState }) => {
+  return {
+    cliente: plantioState.plantioData
+  };
+};
 
 const WrappepClientPlantingForm = Form.create()(ClientPlantingForm);
 
-export default WrappepClientPlantingForm;
+export default connect(mapStateToProps)(WrappepClientPlantingForm);
