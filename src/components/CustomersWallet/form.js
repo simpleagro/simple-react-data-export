@@ -355,7 +355,7 @@ class CustomerWalletForm extends Component {
 
       //   console.log(this.state.formData);
     } else {
-      debugger;
+      // debugger;
       if (nodeProps.ehCliente) {
         clientes = clientes.filter(
           c =>
@@ -677,29 +677,37 @@ class CustomerWalletForm extends Component {
                             {cliente.propriedades &&
                               cliente.propriedades.map(prop => (
                                 <TreeNode
-                                  disableCheckbox={
-                                    prop.propriedadeJaExisteEmOutraCarteira !==
-                                    ""
-                                  }
-                                  clienteID={cliente.cliente_id || cliente._id}
-                                  clienteNome={cliente.nome}
-                                  gerenciarCarteiraPorPropriedade={
-                                    cliente.gerenciarCarteiraPorPropriedade
-                                  }
-                                  dataRef={prop}
-                                  title={
-                                    <Tooltip
-                                      title={`Pertence a carteira.: ${
-                                        prop.propriedadeJaExisteEmOutraCarteira
-                                      }`}
-                                    >
-                                      {prop.nome}
-                                    </Tooltip>
-                                  }
-                                  key={`${cliente.cliente_id || cliente._id}-${
-                                    prop._id
-                                  }`}
-                                />
+                                    disableCheckbox={
+                                      prop.propriedadeJaExisteEmOutraCarteira &&
+                                      prop.propriedadeJaExisteEmOutraCarteira !==
+                                        ""
+                                        ? true
+                                        : false
+                                    }
+                                    clienteID={
+                                      cliente.cliente_id || cliente._id
+                                    }
+                                    clienteNome={cliente.nome}
+                                    gerenciarCarteiraPorPropriedade={
+                                      cliente.gerenciarCarteiraPorPropriedade
+                                    }
+                                    dataRef={prop}
+                                    title={
+                                      <Tooltip
+                                        title={
+                                          prop.propriedadeJaExisteEmOutraCarteira
+                                            ? `Pertence a carteira.: ${
+                                                prop.propriedadeJaExisteEmOutraCarteira
+                                              }`
+                                            : ""
+                                        }
+                                      >
+                                        {prop.nome}
+                                      </Tooltip>
+                                    }
+                                    key={`${cliente.cliente_id ||
+                                      cliente._id}-${prop._id}`}
+                                  />
                               ))}
                           </TreeNode>
                         )

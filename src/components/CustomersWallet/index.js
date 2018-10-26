@@ -1,7 +1,18 @@
 import React, { Component } from "react";
-import moment from "moment";
+import debounce from "lodash/debounce";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Divider, Button, Icon, Popconfirm, Tooltip } from "antd";
+import {
+  Divider,
+  Button,
+  Icon,
+  Popconfirm,
+  Tooltip,
+  Drawer,
+  Col,
+  Row,
+  Layout,
+  Input
+} from "antd";
 
 import * as CustomerWalletService from "../../services/customerswallet";
 import SimpleTable from "../common/SimpleTable";
@@ -9,12 +20,48 @@ import { flashWithSuccess } from "../common/FlashMessages";
 import parseErrors from "../../lib/parseErrors";
 import { PainelHeader } from "../common/PainelHeader";
 
+const pStyle = {
+  fontSize: 16,
+  color: "rgba(0,0,0,0.85)",
+  lineHeight: "24px",
+  display: "block",
+  marginBottom: 16
+};
+
+const Search = Input.Search;
+
+const DescriptionItem = ({ title, content }) => (
+  <div
+    style={{
+      fontSize: 14,
+      lineHeight: "22px",
+      marginBottom: 7,
+      color: "rgba(0,0,0,0.65)"
+    }}
+  >
+    <p
+      style={{
+        marginRight: 8,
+        display: "inline-block",
+        color: "#333"
+      }}
+    >
+      {title}:
+    </p>
+    {content}
+  </div>
+);
+
 class CustomersWallet extends Component {
   constructor(props) {
     super(props);
+    this.filterInfoClients = debounce(this.filterInfoClients, 300);
     this.state = {
       list: [],
       loadingData: true,
+      walletID: null,
+      clientInfoIsVisible: false,
+      info: {},
       pagination: {
         showSizeChanger: true,
         defaultPageSize: 10,
@@ -75,7 +122,7 @@ class CustomersWallet extends Component {
     }
   };
 
-  removeRecord = async ({ _id, descricao }) => {
+  removeRecord = async ({ _id, nome }) => {
     try {
       await CustomerWalletService.remove(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
@@ -86,12 +133,54 @@ class CustomersWallet extends Component {
 
       flashWithSuccess(
         "",
-        `A carteira, ${descricao}, foi removida com sucesso!`
+        `A carteira, ${nome}, foi removida com sucesso!`
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover uma carteira", err);
     }
+  };
+
+  closeMoreInfo = () => {
+    this.setState({ clientInfoIsVisible: false });
+  };
+
+  showMoreInfo = async walletID => {
+    const info = await CustomerWalletService.moreInfo(walletID);
+
+    this.setState(prev => ({
+      ...prev,
+      clientInfoIsVisible: true,
+      info
+    }));
+  };
+
+  filterInfoClients = val => {
+    if (
+      !this.state.oldInfoClients ||
+      Object.keys(this.state.oldInfoClients).length <= 0
+    )
+      this.setState(prev => ({
+        ...prev,
+        oldInfoClients: this.state.info
+      }));
+
+    if (val === "")
+      this.setState(prev => ({
+        ...prev,
+        oldInfoClients: {},
+        info: this.state.oldInfoClients
+      }));
+    else
+      this.setState(prev => ({
+        ...prev,
+        info: {
+          ...prev.info,
+          clientes: this.state.oldInfoClients.clientes.filter(c =>
+            c.nome.toLowerCase().includes(val.toLowerCase())
+          )
+        }
+      }));
   };
 
   tableConfig = () => [
@@ -137,7 +226,7 @@ class CustomersWallet extends Component {
       }
     },
     {
-      title: "",
+      title: "Ações",
       dataIndex: "action",
       render: (text, record) => {
         return (
@@ -171,6 +260,18 @@ class CustomersWallet extends Component {
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
+            <Tooltip title="Informações estratégicas dos clientes da carteira">
+              <Button
+                size="small"
+                onClick={() => this.showMoreInfo(record._id)}
+              >
+                <FontAwesomeIcon icon="user" size="lg" />
+              </Button>
+            </Tooltip>
+            <Divider
+              style={{ fontSize: "10px", padding: 0, margin: 2 }}
+              type="vertical"
+            />
           </span>
         );
       }
@@ -197,9 +298,7 @@ class CustomersWallet extends Component {
             type="primary"
             icon="plus"
             onClick={() => {
-              this.props.history.push(
-                `/carteiras-de-clientes/new`
-              );
+              this.props.history.push(`/carteiras-de-clientes/new`);
             }}
           >
             Adicionar
@@ -213,6 +312,86 @@ class CustomersWallet extends Component {
           dataSource={this.state.list}
           onChange={this.handleTableChange}
         />
+        <Drawer
+          width="30vw"
+          placement="right"
+          closable={true}
+          onClose={this.closeMoreInfo}
+          visible={this.state.clientInfoIsVisible}
+          style={{ padding: 0 }}
+          className="white-close"
+        >
+          <Layout style={{ background: "#fff" }}>
+            <Layout.Header
+              style={{
+                color: "#fff",
+                paddingLeft: 20
+              }}
+            >
+              <Row type="flex" justify="space-around" align="middle">
+                <Col span={12}>
+                  Informações Extras Da Carteira -{" "}
+                  {this.state.info.nome}
+                </Col>
+                <Col span={12}>
+                  <Search
+                    placeholder="Pesquisar por cliente"
+                    onChange={e => this.filterInfoClients(e.target.value)}
+                  />
+                </Col>
+              </Row>
+            </Layout.Header>
+            <Layout.Content
+              style={{ padding: "0 20px", marginTop: 35, background: "#fff" }}
+            >
+              <h2
+                style={{
+                  textAlign: "center",
+                  border: "1px solid #c0c0c0",
+                  borderRadius: 10,
+                  padding: 5,
+                  marginBottom: 40
+                }}
+              >
+                Total em carteira: {`${this.state.info.totalAreaCarteira} ha`}
+              </h2>
+
+              {this.state.info &&
+                this.state.info.clientes &&
+                this.state.info.clientes.length > 0 &&
+                this.state.info.clientes.map(c => (
+                  <div key={c._id}>
+                    <Row>
+                      <Col span={12}>
+                        <DescriptionItem title="Nome" content={c.nome} />{" "}
+                      </Col>
+                      <Col span={12}>
+                        <Button
+                          block
+                          onClick={() =>
+                            this.props.history.push(`/clientes/${c._id}/edit`, {
+                              returnTo: this.props.history.location
+                            })
+                          }
+                        >
+                          Mais infos do cliente
+                        </Button>
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col span={12}>
+                        <DescriptionItem
+                          title="Total em área"
+                          content={`${c.totalAreaPropriedades}ha`}
+                        />{" "}
+                      </Col>
+                    </Row>
+                    <Divider />
+                  </div>
+                ))}
+            </Layout.Content>
+          </Layout>
+        </Drawer>
       </div>
     );
   }
