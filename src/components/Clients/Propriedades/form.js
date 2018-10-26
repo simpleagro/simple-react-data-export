@@ -45,6 +45,9 @@ class ClientPropertyForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      polygonData: [],
+      polyEdit: true,
+      editMapMode: null,
       editMode: false,
       formData: {},
       estados: [],
@@ -415,6 +418,11 @@ class ClientPropertyForm extends Component {
                   marcador em vermelho para pegar a latitude e longitude:
                 </p>
                 <SimpleMap
+                  polygonData={[]}
+                  editarMapa={() => this.editarMapa()}
+                  salvarMapa={latlng => this.salvarMapa(latlng)}
+                  polyEdit={this.state.polyEdit}
+                  editMapMode={this.state.editMapMode}
                   latitude={this.state.formData.latitude}
                   longitude={this.state.formData.longitude}
                   containerElement={<div style={{ height: `400px` }} />}
@@ -429,6 +437,23 @@ class ClientPropertyForm extends Component {
         </Form>
       </div>
     );
+  }
+
+  editarMapa() {
+    localStorage.setItem("polyEdit", true);
+    this.setState(prev => ({
+      ...prev,
+      editMapMode: google.maps.drawing.OverlayType.POLYGON
+    }));
+  }
+
+  salvarMapa(latlng) {
+    this.setState(prev => ({
+      ...prev,
+      editMapMode: null,
+      polyEdit: false,
+      polygonData: latlng
+    }));
   }
 
   generateHelper() {
