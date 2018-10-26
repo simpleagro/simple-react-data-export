@@ -284,7 +284,7 @@ class ClientPlantingForm extends Component {
     if (!espacamento || !plantasPorM) return 0;
 
     const calculo = espacamento == 45 ? plantasPorM * k45 : plantasPorM * k50;
-    return calculo.toString().slice(0, calculo.toString().indexOf(".") + 3);
+    return calculo.toFixed(3);
   }
 
   render() {
@@ -615,11 +615,19 @@ class ClientPlantingForm extends Component {
                     .toLowerCase()
                     .indexOf(input.toLowerCase()) >= 0
                 }
-                onSelect={e =>
+                onSelect={e => {
                   this.handleFormState({
                     target: { name: "espacamento", value: e }
-                  })
-                }
+                  });
+
+                  this.setState(prev => ({
+                    ...prev,
+                    populacaoFinal: this.calculaPopulacaoFinal(
+                      e,
+                      this.state.formData.plantas_metro
+                    )
+                  }));
+                }}
               >
                 {this.state.espacamentos.length > 0
                   ? this.state.espacamentos.map(opt => (
@@ -672,14 +680,20 @@ class ClientPlantingForm extends Component {
           </Form.Item>
           <Form.Item
             style={{
-              display: this.state.populacaoFinal > 0 ? "block" : "none"
+              display:
+                this.state.formData.populacao_final > 0 ||
+                this.state.populacaoFinal > 0
+                  ? "block"
+                  : "none"
             }}
             label="População Final"
             {...formItemLayout}
           >
             <Input
               readOnly
-              value={this.state.populacaoFinal}
+              value={
+                this.state.populacaoFinal || this.state.formData.populacao_final
+              }
               style={{ width: 200 }}
             />
           </Form.Item>
