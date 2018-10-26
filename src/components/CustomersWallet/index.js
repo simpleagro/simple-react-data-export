@@ -353,7 +353,7 @@ class CustomersWallet extends Component {
                   marginBottom: 40
                 }}
               >
-                Total em carteira: {`${this.state.info.totalAreaCarteira} ha`}
+                Total em carteira: {`${this.state.info.totalAreaCarteira || 0} ha`}
               </h2>
 
               {this.state.info &&
@@ -382,7 +382,7 @@ class CustomersWallet extends Component {
                       <Col span={12}>
                         <DescriptionItem
                           title="Total em área"
-                          content={`${c.totalAreaPropriedades}ha`}
+                          content={`${c.totalAreaPropriedades || 0} ha`}
                         />{" "}
                       </Col>
                     </Row>
