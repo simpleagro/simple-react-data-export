@@ -278,6 +278,15 @@ class ClientPlantingForm extends Component {
     });
   }
 
+  calculaPopulacaoFinal(espacamento, plantasPorM) {
+    const k45 = 22222.222;
+    const k50 = 20000;
+    if (!espacamento || !plantasPorM) return 0;
+
+    const calculo = espacamento == 45 ? plantasPorM * k45 : plantasPorM * k50;
+    return calculo.toFixed(3);
+  }
+
   render() {
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
@@ -606,11 +615,19 @@ class ClientPlantingForm extends Component {
                     .toLowerCase()
                     .indexOf(input.toLowerCase()) >= 0
                 }
-                onSelect={e =>
+                onSelect={e => {
                   this.handleFormState({
                     target: { name: "espacamento", value: e }
-                  })
-                }
+                  });
+
+                  this.setState(prev => ({
+                    ...prev,
+                    populacaoFinal: this.calculaPopulacaoFinal(
+                      e,
+                      this.state.formData.plantas_metro
+                    )
+                  }));
+                }}
               >
                 {this.state.espacamentos.length > 0
                   ? this.state.espacamentos.map(opt => (
@@ -622,21 +639,63 @@ class ClientPlantingForm extends Component {
               </Select>
             )}
           </Form.Item>
-          <Form.Item label="Sementes" {...formItemLayout}>
-            {getFieldDecorator("sementes", {
+          <Form.Item label="Sementes por Metro" {...formItemLayout}>
+            {getFieldDecorator("sementes_metro", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.sementes
+              initialValue: this.state.formData.sementes_metro
             })(
               <InputNumber
                 onChange={e =>
                   this.handleFormState({
-                    target: { name: "sementes", value: e }
+                    target: { name: "sementes_metro", value: e }
                   })
                 }
                 style={{ width: 200 }}
-                name="sementes"
+                name="sementes_metro"
               />
             )}
+          </Form.Item>
+          <Form.Item label="Plantas por Metro" {...formItemLayout}>
+            {getFieldDecorator("plantas_metro", {
+              initialValue: this.state.formData.plantas_metro
+            })(
+              <InputNumber
+                onChange={e => {
+                  this.handleFormState({
+                    target: { name: "plantas_metro", value: e }
+                  });
+
+                  this.setState(prev => ({
+                    ...prev,
+                    populacaoFinal: this.calculaPopulacaoFinal(
+                      this.state.formData.espacamento,
+                      e
+                    )
+                  }));
+                }}
+                style={{ width: 200 }}
+                name="plantas_metro"
+              />
+            )}
+          </Form.Item>
+          <Form.Item
+            style={{
+              display:
+                this.state.formData.populacao_final > 0 ||
+                this.state.populacaoFinal > 0
+                  ? "block"
+                  : "none"
+            }}
+            label="População Final"
+            {...formItemLayout}
+          >
+            <Input
+              readOnly
+              value={
+                this.state.populacaoFinal || this.state.formData.populacao_final
+              }
+              style={{ width: 200 }}
+            />
           </Form.Item>
           <Form.Item label="Área" {...formItemLayout}>
             {getFieldDecorator("area", {

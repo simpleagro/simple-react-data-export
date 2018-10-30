@@ -5,7 +5,8 @@ import {
   Icon,
   Input,
   Form,
-  Select,
+  Row,
+  Col,
   Affix,
   Card,
   InputNumber,
@@ -13,13 +14,13 @@ import {
 } from "antd";
 import styled from "styled-components";
 
-
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
 import * as ClientSpotService from "../../../services/clients.plots";
+import { SimpleMap } from "../../SimpleMap";
 
-const Option = Select.Option;
+const google = window.google; // é necessário para inicializar corretamente
 
 const BreadcrumbStyled = styled(Breadcrumb)`
   background: #eeeeee;
@@ -35,8 +36,6 @@ const CardStyled = styled(Card)`
   border: 1px solid #e3cccc;
 `;
 
-const google = window.google;
-
 class ClientPropertySpotForm extends Component {
   constructor(props) {
     super(props);
@@ -48,7 +47,9 @@ class ClientPropertySpotForm extends Component {
       client_id: this.props.match.params.client_id,
       property_id: this.props.match.params.property_id,
       fetchingCidade: false,
-      isMarkerShown: false
+      isMarkerShown: false,
+      drawingMap: false,
+      editingMap: false
     };
   }
 
@@ -64,9 +65,10 @@ class ClientPropertySpotForm extends Component {
         this.setState(prev => ({
           ...prev,
           formData,
-          editMode: id ? true : false
+          editMode: id ? true : false,
+          editingMap: id ? true : false
         }));
-      console.log(formData);
+      // console.log(formData);
     }
 
     setTimeout(() => {
@@ -140,9 +142,49 @@ class ClientPropertySpotForm extends Component {
     });
   };
 
+  adicionarPontosAoMapa() {
+
+    let draw = false;
+    let edit = false;
+
+    switch (this.state.editMode) {
+      case true:
+        if (
+          (this.state.formData.coordenadas &&
+          this.state.formData.coordenadas.length === 0) || this.state.formData.coordenadas === undefined
+        )
+          draw = true;
+        else edit = true;
+        break;
+      case false:
+        draw = true;
+        break;
+    }
+
+    this.setState(prev => ({
+      ...prev,
+      drawingMap: draw,
+      editingMap: edit
+    }));
+
+    // console.log("ADDDDDD",this.state);
+  }
+
+  salvarMapa(coordenadas) {
+    this.setState(prev => ({
+      ...prev,
+      drawingMap: false,
+      formData: {
+        ...prev.formData,
+        coordenadas
+      }
+    }));
+    // console.log("SAlvar mapa ", this.state);
+  }
+
   setGPS(latitude, longitude) {
     const _newState = this.state;
-    console.log(_newState);
+    // console.log(_newState);
     _newState.formData.latitude = latitude;
     _newState.formData.longitude = longitude;
     this.setState(prev => ({ ...prev, _newState }));
@@ -233,7 +275,37 @@ class ClientPropertySpotForm extends Component {
             </Form.Item>
           </CardStyled>
           <CardStyled type="inner" title="Mapa do Talhão" bordered>
-
+            <Row>
+              <Col span={24}>
+                <SimpleMap
+                  polygonData={
+                    this.state.formData.coordenadas &&
+                    this.state.formData.coordenadas.length > 0
+                      ? this.state.formData.coordenadas.map(
+                          c => new google.maps.LatLng(c.latitude, c.longitude)
+                        )
+                      : []
+                  }
+                  adicionarPontosAoMapa={() => this.adicionarPontosAoMapa()}
+                  salvarMapa={coordenadas => this.salvarMapa(coordenadas)}
+                  drawingMap={this.state.drawingMap}
+                  editingMap={this.state.editingMap}
+                  latitude={this.state.formData.latitude}
+                  longitude={this.state.formData.longitude}
+                  containerElement={<div style={{ height: `400px` }} />}
+                  mapElement={<div style={{ height: `100%` }} />}
+                  setGPS={(latitude, longitude) =>
+                    this.setGPS(latitude, longitude)
+                  }
+                  limparMapa={() =>
+                    this.setState(prev => ({
+                      ...prev,
+                      formData: { ...prev.formData, coordenadas: [] }
+                    }))
+                  }
+                />
+              </Col>
+            </Row>
           </CardStyled>
         </Form>
       </div>
@@ -255,7 +327,7 @@ class ClientPropertySpotForm extends Component {
   }
 
   async onChangeSelectCidade(cidade) {
-    console.log(cidade);
+    // console.log(cidade);
     await this.setState(prev => ({
       ...prev,
       fetchingCidade: false
