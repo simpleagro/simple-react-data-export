@@ -23,7 +23,7 @@ import * as ClientPropertyService from "../../../services/clients.properties";
 import * as IBGEService from "../../../services/ibge";
 import { SimpleMap } from "../../SimpleMap";
 
-const google = window.google; // é necessário para inicializar corretame
+const google = window.google; // é necessário para inicializar corretamente
 
 const Option = Select.Option;
 
@@ -45,15 +45,14 @@ class ClientPropertyForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      polygonData: [],
-      polyEdit: true,
-      editMapMode: null,
       editMode: false,
       formData: {},
       estados: [],
       cidades: [],
       client_id: this.props.match.params.client_id,
-      fetchingCidade: false
+      fetchingCidade: false,
+      drawingMap: false,
+      editingMap: false
     };
   }
 
@@ -67,9 +66,10 @@ class ClientPropertyForm extends Component {
         this.setState(prev => ({
           ...prev,
           formData,
-          editMode: id ? true : false
+          editMode: id ? true : false,
+          editingMap: id ? true : false
         }));
-      console.log(formData);
+      // console.log(formData);
     }
 
     setTimeout(() => {
@@ -96,13 +96,13 @@ class ClientPropertyForm extends Component {
   }
 
   handleFormState = async event => {
-    console.log(event);
+    // console.log(event);
     if (!event.target.name) return;
     let form = Object.assign({}, this.state.formData, {
       [event.target.name]: event.target.value
     });
     await this.setState(prev => ({ ...prev, formData: form }));
-    console.log(this.state.formData);
+    // console.log(this.state.formData);
   };
 
   saveForm = async e => {
@@ -130,7 +130,7 @@ class ClientPropertyForm extends Component {
             );
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao adicionar um cliente", err);
+            // console.log("Erro interno ao adicionar um cliente", err);
           }
         } else {
           try {
@@ -154,7 +154,7 @@ class ClientPropertyForm extends Component {
 
   setGPS(latitude, longitude) {
     const _newState = this.state;
-    console.log(_newState);
+    // console.log(_newState);
     _newState.formData.latitude = latitude;
     _newState.formData.longitude = longitude;
     this.setState(prev => ({ ...prev, _newState }));
@@ -417,12 +417,19 @@ class ClientPropertyForm extends Component {
                   Digite o nome da região ou cidade no campo abaixo e utilize o
                   marcador em vermelho para pegar a latitude e longitude:
                 </p>
+                <div style={{position: 'relative'}}>
                 <SimpleMap
-                  polygonData={[]}
-                  editarMapa={() => this.editarMapa()}
-                  salvarMapa={latlng => this.salvarMapa(latlng)}
-                  polyEdit={this.state.polyEdit}
-                  editMapMode={this.state.editMapMode}
+                  polygonData={
+                    this.state.formData.coordenadas
+                      ? this.state.formData.coordenadas.map(
+                          c => new google.maps.LatLng(c.latitude, c.longitude)
+                        )
+                      : []
+                  }
+                  adicionarPontosAoMapa={() => this.adicionarPontosAoMapa()}
+                  salvarMapa={coordenadas => this.salvarMapa(coordenadas)}
+                  drawingMap={this.state.drawingMap}
+                  editingMap={this.state.editingMap}
                   latitude={this.state.formData.latitude}
                   longitude={this.state.formData.longitude}
                   containerElement={<div style={{ height: `400px` }} />}
@@ -430,7 +437,14 @@ class ClientPropertyForm extends Component {
                   setGPS={(latitude, longitude) =>
                     this.setGPS(latitude, longitude)
                   }
+                  limparMapa={() =>
+                    this.setState(prev => ({
+                      ...prev,
+                      formData: { ...prev.formData, coordenadas: [] }
+                    }))
+                  }
                 />
+                </div>
               </Col>
             </Row>
           </CardStyled>
@@ -439,21 +453,41 @@ class ClientPropertyForm extends Component {
     );
   }
 
-  editarMapa() {
-    localStorage.setItem("polyEdit", true);
+  adicionarPontosAoMapa() {
+    let draw = false;
+    let edit = false;
+
+    switch (this.state.editMode) {
+      case true:
+        if (
+          this.state.formData.coordenadas &&
+          this.state.formData.coordenadas.length === 0
+        )
+          draw = true;
+        else edit = true;
+        break;
+      case false:
+        draw = true;
+        break;
+    }
+
     this.setState(prev => ({
       ...prev,
-      editMapMode: google.maps.drawing.OverlayType.POLYGON
+      drawingMap: draw,
+      editingMap: edit
     }));
   }
 
-  salvarMapa(latlng) {
+  salvarMapa(coordenadas) {
     this.setState(prev => ({
       ...prev,
-      editMapMode: null,
-      polyEdit: false,
-      polygonData: latlng
+      drawingMap: false,
+      formData: {
+        ...prev.formData,
+        coordenadas
+      }
     }));
+    // console.log("SAlvar mapa ", this.state);
   }
 
   generateHelper() {
@@ -471,7 +505,7 @@ class ClientPropertyForm extends Component {
   }
 
   async onChangeSelectCidade(cidade) {
-    console.log(cidade);
+    // console.log(cidade);
     await this.setState(prev => ({
       ...prev,
       fetchingCidade: false
