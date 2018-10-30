@@ -136,7 +136,7 @@ class Plots extends Component {
         else return 1;
       },
       render: (text, record) => {
-        return record.poligonos.length < 3 ? (
+        return record.coordenadas.length < 3 ? (
           <Tooltip title="Este talhão ainda não possui pontos de mapeamento">
             <FontAwesomeIcon icon="exclamation-triangle" size="1x" color="red" style={{marginRight: 8}}/>
             {text}
@@ -250,7 +250,7 @@ class Plots extends Component {
                 style={{ width: "100%" }}
                 onClick={() => {
                   this.props.history.push(
-                    `/clientes/${this.state.client_id}/edit`,
+                    `/clientes/${this.state.client_id}/propriedades/${this.state.property_id}/edit`,
                     { returnTo: this.props.history.location }
                   );
                 }}
