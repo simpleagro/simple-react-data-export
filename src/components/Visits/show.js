@@ -219,6 +219,8 @@ class VisitForm extends Component {
               <CardStyled type="inner" title="Geolocalização" bordered>
                 {this.state.formData.geolocalizacao && (
                   <SimpleMap
+                    polygonData={[]}
+                    showControl={false}
                     latitude={this.state.formData.geolocalizacao.latitude}
                     longitude={this.state.formData.geolocalizacao.longitude}
                     containerElement={<div style={{ height: `400px` }} />}
