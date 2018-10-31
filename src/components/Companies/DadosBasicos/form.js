@@ -6,15 +6,14 @@ import {
   Input,
   Form,
   Select,
-  Affix,
-  Checkbox
+  Affix
 } from "antd";
 import styled from "styled-components";
 
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
-import * as ClientService from "../../../services/clients";
+import * as CompanyService from "../../../services/companies";
 
 const Option = Select.Option;
 
@@ -25,7 +24,7 @@ const BreadcrumbStyled = styled(Breadcrumb)`
   margin-bottom: 30px;
 `;
 
-class ClientForm extends Component {
+class CompanyForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -38,7 +37,7 @@ class ClientForm extends Component {
     const { id } = this.props.match.params;
 
     if (id) {
-      const formData = await ClientService.get(id);
+      const formData = await CompanyService.get(id);
 
       if (formData)
         this.setState(prev => ({
@@ -54,7 +53,6 @@ class ClientForm extends Component {
   }
 
   handleFormState = event => {
-    if (!event.target.name) return;
     let form = Object.assign({}, this.state.formData, {
       [event.target.name]: event.target.value
     });
@@ -62,6 +60,10 @@ class ClientForm extends Component {
   };
 
   saveForm = async e => {
+
+    await this.getDatabase();
+    await this.setStatus();
+
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
@@ -70,7 +72,7 @@ class ClientForm extends Component {
             flashWithSuccess("Sem alterações para salvar", " ");
 
           try {
-            const created = await ClientService.create(this.state.formData);
+            const created = await CompanyService.create(this.state.formData);
             this.setState({
               openForm: false,
               editMode: false
@@ -81,32 +83,56 @@ class ClientForm extends Component {
             // ou ir para o fluxo padrão
             // if (this.props.location.state && this.props.location.state.returnTo)
             //   this.props.history.push(this.props.location.state.returnTo);
-            // else this.props.history.push("/clientes");
+            // else this.props.history.push("/empresas");
             this.props.history.push(
-              "/clientes/" + created._id + "/propriedades"
+              "/empresas/" + created._id + "/filiais"
             );
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao adicionar um cliente", err);
+            console.log("Erro interno ao adicionar uma empresa", err);
           }
         } else {
           try {
-            const updated = await ClientService.update(this.state.formData);
+            const updated = await CompanyService.update(this.state.formData);
             flashWithSuccess();
             // a chamada do formulário pode vir por fluxos diferentes
             // então usamos o returnTo para verificar para onde ir
             // ou ir para o fluxo padrão
             if (this.props.location.state && this.props.location.state.returnTo)
               this.props.history.push(this.props.location.state.returnTo);
-            else this.props.history.push("/clientes");
+            else this.props.history.push("/empresas");
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao atualizar um cliente ", err);
+            console.log("Erro interno ao atualizar uma empresa ", err);
           }
         }
       }
     });
   };
+
+  getDatabase = () => {
+    const link = window.location.href
+    const suffixRegex = /(([http]*[s]*[:][/][/])+)/g
+    const linkRegex = /((.simpleagro.com.br)+(:[0-9]*)([/a-z0-9]*)*)/g
+    
+    let newLink = link.replace(suffixRegex, "").replace(linkRegex, "")
+    
+    this.setState((prevState) => ({
+      formData: {
+        ...prevState.formData,
+        database: newLink
+      }
+    }))
+  }
+
+  setStatus = () => {
+    this.setState((prevState) => ({
+      formData: {
+        ...prevState.formData,
+        status: true
+      }
+    }))
+  }
 
   render() {
     const { getFieldDecorator } = this.props.form;
@@ -123,7 +149,7 @@ class ClientForm extends Component {
               href={
                 this.props.location.state && this.props.location.state.returnTo
                   ? this.props.location.state.returnTo.pathname
-                  : "/clientes"
+                  : "/empresas"
               }
             >
               <Icon type="arrow-left" />
@@ -133,108 +159,45 @@ class ClientForm extends Component {
         </BreadcrumbStyled>
         <Affix offsetTop={65}>
           <PainelHeader
-            title={this.state.editMode ? "Editando Cliente" : "Novo Cliente"}
+            title={
+              this.state.editMode ? "Editando Empresa" : "Nova Empresa"
+            }
           >
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
-              Salvar Cliente
+              Salvar Empresa
             </Button>
           </PainelHeader>
         </Affix>
+
         <Form onChange={this.handleFormState}>
 
-          <Form.Item label="Nome" {...formItemLayout}>
-            {getFieldDecorator("nome", {
+          <Form.Item label="Razão Social" {...formItemLayout}>
+            {getFieldDecorator("razao_social", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.nome
-            })(<Input name="nome" ref={input => (this.titleInput = input)} />)}
+              initialValue: this.state.formData.razao_social
+            })(<Input name="razao_social" ref={input => (this.titleInput = input)} />)}
           </Form.Item>
 
-          <Form.Item label="Tipo do Cliente" {...formItemLayout}>
-            {getFieldDecorator("tipo", {
+          <Form.Item label="Nome Fantasia" {...formItemLayout}>
+            {getFieldDecorator("nome_fantasia", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.tipo
-            })(
-              <Select
-                name="tipo"
-                showAction={["focus", "click"]}
-                showSearch
-                style={{ width: 200 }}
-                placeholder="Selecione um tipo..."
-                onChange={e =>
-                  this.handleFormState({
-                    target: { name: "tipo", value: e }
-                  })
-                }
-              >
-                <Option value="PRODUTOR">Produtor</Option>
-                <Option value="COOPERADO">Cooperado</Option>
-                <Option value="DISTRIBUIDOR">Distribuidor</Option>
-              </Select>
-            )}
+              initialValue: this.state.formData.nome_fantasia
+            })(<Input name="nome_fantasia" />)}
           </Form.Item>
 
-          <Form.Item label="CPF / CNPJ" {...formItemLayout}>
+          <Form.Item label="CPF/CNPJ" {...formItemLayout}>
             {getFieldDecorator("cpf_cnpj", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.cpf_cnpj
             })(<Input name="cpf_cnpj" />)}
           </Form.Item>
 
-          <Form.Item label="Tel. Fixo" {...formItemLayout}>
-            {getFieldDecorator("tel_fixo", {
-              initialValue: this.state.formData.tel_fixo
-            })(<Input name="tel_fixo" />)}
-          </Form.Item>
-
-          <Form.Item label="Tel. Cel." {...formItemLayout}>
-            {getFieldDecorator("tel_cel", {
-              initialValue: this.state.formData.tel_cel
-            })(<Input name="tel_cel" />)}
-          </Form.Item>
-
-          <Form.Item label="Email" {...formItemLayout}>
-            {getFieldDecorator("email", {
-              initialValue: this.state.formData.email
-            })(<Input name="email" />)}
-          </Form.Item>
-
-          <Form.Item label="Lim. Crédito" {...formItemLayout}>
-            {getFieldDecorator("credito", {
-              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.credito
-            })(<Input name="credito" />)}
-          </Form.Item>
-          <Form.Item
-            label="Gerenciar Cateira por Propriedade?"
-            labelCol={{ span: 4 }}
-            wrapperCol={{ span: 12 }}
-          >
-            {getFieldDecorator("gerenciarCarteiraPorPropriedade", {
-              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.gerenciarCarteiraPorPropriedade
-            })(
-              <Checkbox
-                checked={this.state.formData.gerenciarCarteiraPorPropriedade}
-                onChange={e =>
-                  this.handleFormState({
-                    target: {
-                      name: "gerenciarCarteiraPorPropriedade",
-                      value: e.target.checked
-                    }
-                  })
-                }
-              >
-                Sim
-              </Checkbox>
-            )}
-          </Form.Item>
         </Form>
-        {console.log("formData: ", this.state.formData)}
       </div>
     );
   }
 }
 
-const WrappepClientForm = Form.create()(ClientForm);
+const WrappepCompanyForm = Form.create()(CompanyForm);
 
-export default WrappepClientForm;
+export default WrappepCompanyForm;

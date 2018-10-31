@@ -25,10 +25,10 @@ const loadable = loader =>
 
 const menus = {
   // ...dashboard,
-  // ...empresas,
+  ...empresas,
   // ...modulos,
   // ...entidades,
-  // ...usuarios,
+  ...usuarios,
   ...consultores,
   ...clientes,
   ...plantio,
@@ -39,7 +39,7 @@ const menus = {
   // ...produtos,
   ...safras,
   // ...etapasCultura,
-  // ...unidadesMedida,
+   ...unidadesMedida,
 };
 
 export { menus };
