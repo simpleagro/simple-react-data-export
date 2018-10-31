@@ -202,7 +202,15 @@ class ClientForm extends Component {
             {getFieldDecorator("credito", {
               // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.credito
-            })(<Input name="credito" />)}
+            })(
+              <Input
+                onBlur={e => {
+                  this.parseCredito(e);
+                }}
+                name="credito"
+                addonBefore="R$"
+              />
+            )}
           </Form.Item>
           <Form.Item
             label="Gerenciar Cateira por Propriedade?"
@@ -231,6 +239,30 @@ class ClientForm extends Component {
         </Form>
       </div>
     );
+  }
+
+  parseCredito(e) {
+    const formatedVal =
+      e.target &&
+      e.target.value &&
+      e.target.value
+        .toString()
+        .replace(/[a-zA-Z|$|\s]+/, "")
+        .replace(/[.]/g, "")
+        .replace(/[,]/g, ".")
+        .replace(/(\d)(?=(\d{3})+\,)/g, "$1.");
+
+    this.props.form.setFieldsValue({
+      credito: formatedVal
+    });
+
+    this.setState(prev => ({
+      ...prev,
+      formData: {
+        ...prev.formData,
+        credito: formatedVal
+      }
+    }));
   }
 }
 
