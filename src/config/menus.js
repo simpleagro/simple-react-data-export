@@ -28,7 +28,7 @@ const menus = {
   // ...empresas,
   // ...modulos,
   // ...entidades,
-  // ...usuarios,
+  ...usuarios,
   ...consultores,
   ...clientes,
   ...plantio,
