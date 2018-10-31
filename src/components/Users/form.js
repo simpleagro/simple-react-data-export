@@ -61,7 +61,6 @@ class UserForm extends Component {
   };
 
   saveForm = async e => {
-
     await this.validateLogin(this.state.formData.login);
 
     this.props.form.validateFields(async err => {
@@ -72,9 +71,7 @@ class UserForm extends Component {
             flashWithSuccess("Sem alterações para salvar", " ");
 
           try {
-            const created = await UsersService.create(
-              this.state.formData
-            );
+            const created = await UsersService.create(this.state.formData);
             this.setState({
               openForm: false,
               editMode: false
@@ -93,9 +90,7 @@ class UserForm extends Component {
           }
         } else {
           try {
-            const updated = await UsersService.update(
-              this.state.formData
-            );
+            const updated = await UsersService.update(this.state.formData);
             flashWithSuccess();
             // a chamada do formulário pode vir por fluxos diferentes
             // então usamos o returnTo para verificar para onde ir
@@ -112,15 +107,18 @@ class UserForm extends Component {
     });
   };
 
-  validateLogin = async (login) => {
-    let newLogin = login.split(" ").join(".").toLowerCase();
-    this.setState((prevState) => ({
+  validateLogin = async login => {
+    let newLogin = login
+      .split(" ")
+      .join(".")
+      .toLowerCase();
+    this.setState(prevState => ({
       formData: {
         ...prevState.formData,
-        login: newLogin,
+        login: newLogin
       }
     }));
-  }
+  };
 
   render() {
     const { getFieldDecorator } = this.props.form;
@@ -147,9 +145,7 @@ class UserForm extends Component {
         </BreadcrumbStyled>
         <Affix offsetTop={65}>
           <PainelHeader
-            title={
-              this.state.editMode ? "Editando Usuário" : "Novo Usuário"
-            }
+            title={this.state.editMode ? "Editando Usuário" : "Novo Usuário"}
           >
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
               Salvar Usuário
@@ -157,7 +153,6 @@ class UserForm extends Component {
           </PainelHeader>
         </Affix>
         <Form onChange={this.handleFormState}>
-          
           <Form.Item label="Nome" {...formItemLayout}>
             {getFieldDecorator("nome", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
@@ -171,66 +166,70 @@ class UserForm extends Component {
               initialValue: this.state.formData.email
             })(<Input name="email" />)}
           </Form.Item>
-          
+
           <Form.Item label="Login" {...formItemLayout}>
             {getFieldDecorator("login", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.login
             })(<Input name="login" />)}
           </Form.Item>
-        
+
           <Form.Item label="Filial" {...formItemLayout}>
-              {getFieldDecorator("filiais", {
-                rules: [
-                  { required: true, message: "Este campo é obrigatório!" }
-                ],
-                initialValue: this.state.formData.filiais
-              })(
-                <Select
-                  name="filiais"
-                  showAction={["focus", "click"]}
-                  showSearch
-                  style={{ width: 200 }}
-                  mode="multiple"
-                  placeholder="Selecione uma filial..."
-                  onChange={e =>
-                    this.handleFormState({
-                      target: { name: "filiais", value: e }
-                    })
-                  }
-                >
-                  <Option value="F1">Filial 1</Option>
-                  <Option value="F2">Filial 2</Option>
-                </Select>
-                )}
+            {getFieldDecorator("filiais", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.filiais
+            })(
+              <Select
+                name="filiais"
+                showAction={["focus", "click"]}
+                showSearch
+                style={{ width: 200 }}
+                mode="multiple"
+                placeholder="Selecione uma filial..."
+                onChange={e =>
+                  this.handleFormState({
+                    target: { name: "filiais", value: e }
+                  })
+                }
+              >
+                <Option value="F1">Filial 1</Option>
+                <Option value="F2">Filial 2</Option>
+              </Select>
+            )}
           </Form.Item>
 
           <Form.Item label="Tipo de Login" {...formItemLayout}>
-              {getFieldDecorator("tipoLogin", {
-                rules: [
-                  { required: true, message: "Este campo é obrigatório!" }
-                ],
-                initialValue: "API"
-              })(
-                <Select
-                  name="tipoLogin"
-                  showAction={["focus", "click"]}
-                  showSearch
-                  style={{ width: 200 }}
-                  placeholder="Selecione um tipo de Login..."
-                  onChange={e =>
-                    this.handleFormState({
-                      target: { name: "tipoLogin", value: e }
-                    })
-                  }
-                >
-                  <Option value="API">API</Option>
-                  <Option value="AD">AD</Option>
-                </Select>
-              )}
+            {getFieldDecorator("tipoLogin", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: "API"
+            })(
+              <Select
+                name="tipoLogin"
+                showAction={["focus", "click"]}
+                showSearch
+                style={{ width: 200 }}
+                placeholder="Selecione um tipo de Login..."
+                onChange={e =>
+                  this.handleFormState({
+                    target: { name: "tipoLogin", value: e }
+                  })
+                }
+              >
+                <Option value="API">API</Option>
+                <Option value="AD">AD</Option>
+              </Select>
+            )}
           </Form.Item>
 
-          <Form.Item label="Senha" {...formItemLayout}>
+          <Form.Item
+            label="Senha"
+            {...formItemLayout}
+            help={
+              this.state.editMode
+                ? "Caso seja necessário trocar a senha, informe uma nova aqui."
+                : ""
+            }
+          >
             {getFieldDecorator("senha", {
               rules: [
                 { required: false, message: "Este campo é obrigatório!" }
@@ -238,7 +237,6 @@ class UserForm extends Component {
               initialValue: this.state.formData.senha
             })(<Input name="senha" />)}
           </Form.Item>
-
         </Form>
         {console.log(this.state.formData)}
       </div>
