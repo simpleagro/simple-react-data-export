@@ -7,19 +7,9 @@ import Login from "./components/LoginForm";
 import PageNotFound from "./components/errors/PageNotFound";
 import { logout } from "./services/auth";
 
-import emptyStateImage from "../src/assets/keep-explore.svg";
 import { menus } from "./config/menus";
 
-const EmptyStatePainel = () => (
-  <div className="Aligner emptyState">
-    <div className="center">
-      <img alt="Seja bem vindo" width="120" src={emptyStateImage} />
-      <br />
-      <br />
-      <p>Seja bem vindo! Continue explorando!</p>
-    </div>
-  </div>
-);
+import { EmptyStatePainel } from "./components/EmptyStatePainel";
 
 // this is the default behavior
 const getConfirmation = (message, callback) => {

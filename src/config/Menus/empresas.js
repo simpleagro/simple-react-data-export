@@ -11,21 +11,21 @@ const menus = {
     showMenu: true
   },
   "/empresas/:id/edit": {
-    component: SimpleLoadable(() => 
+    component: SimpleLoadable(() =>
       import("../../components/Companies/DadosBasicos/form")
     ),
     path: "/empresas/:id/edit",
     showMenu: false
   },
   "/empresas/new": {
-    component: SimpleLoadable(() => 
+    component: SimpleLoadable(() =>
       import("../../components/Companies/DadosBasicos/form")
     ),
     path: "/empresas/new",
     showMenu: false
   },
   "/empresas/:company_id/filiais": {
-    component: SimpleLoadable(() => 
+    component: SimpleLoadable(() =>
       import("../../components/Companies/Filiais")
     ),
     key: "/empresas/filiais",
@@ -33,7 +33,7 @@ const menus = {
     showMenu: false
   },
   "/empresas/:company_id/filiais/new": {
-    component: SimpleLoadable(() => 
+    component: SimpleLoadable(() =>
       import("../../components/Companies/Filiais/form")
     ),
     key: "/empresas/filiais/new",
@@ -41,7 +41,7 @@ const menus = {
     showMenu: false
   },
   "/empresas/:company_id/filiais/:id/edit": {
-    component: SimpleLoadable(() => 
+    component: SimpleLoadable(() =>
       import("../../components/Companies/Filiais/form")
     ),
     key: "/empresas/filiais/edit",
