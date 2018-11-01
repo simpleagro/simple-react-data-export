@@ -1,5 +1,10 @@
 const initialState = {
-  userData: {}
+  userData: {
+    user: {
+      usertype: '',
+      nome: ''
+    }
+  }
 };
 
 export const painelReducer = (state = initialState, action) => {
