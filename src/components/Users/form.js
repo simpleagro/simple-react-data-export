@@ -7,14 +7,14 @@ import {
   Form,
   Select,
   Affix,
-  Checkbox
+  Steps
 } from "antd";
 import styled from "styled-components";
 
-import { flashWithSuccess } from "../../common/FlashMessages";
-import parseErrors from "../../../lib/parseErrors";
-import { PainelHeader } from "../../common/PainelHeader";
-import * as ClientService from "../../../services/clients";
+import { flashWithSuccess } from "../common/FlashMessages";
+import parseErrors from "../../lib/parseErrors";
+import { PainelHeader } from "../common/PainelHeader";
+import * as UsersService from "../../services/users";
 
 const Option = Select.Option;
 
@@ -25,7 +25,7 @@ const BreadcrumbStyled = styled(Breadcrumb)`
   margin-bottom: 30px;
 `;
 
-class ClientForm extends Component {
+class UserForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -38,7 +38,7 @@ class ClientForm extends Component {
     const { id } = this.props.match.params;
 
     if (id) {
-      const formData = await ClientService.get(id);
+      const formData = await UsersService.get(id);
 
       if (formData)
         this.setState(prev => ({
@@ -54,7 +54,6 @@ class ClientForm extends Component {
   }
 
   handleFormState = event => {
-    if (!event.target.name) return;
     let form = Object.assign({}, this.state.formData, {
       [event.target.name]: event.target.value
     });
@@ -62,6 +61,8 @@ class ClientForm extends Component {
   };
 
   saveForm = async e => {
+    await this.validateLogin(this.state.formData.login);
+
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
@@ -70,7 +71,7 @@ class ClientForm extends Component {
             flashWithSuccess("Sem alterações para salvar", " ");
 
           try {
-            const created = await ClientService.create(this.state.formData);
+            const created = await UsersService.create(this.state.formData);
             this.setState({
               openForm: false,
               editMode: false
@@ -81,31 +82,42 @@ class ClientForm extends Component {
             // ou ir para o fluxo padrão
             // if (this.props.location.state && this.props.location.state.returnTo)
             //   this.props.history.push(this.props.location.state.returnTo);
-            // else this.props.history.push("/clientes");
-            this.props.history.push(
-              "/clientes/" + created._id + "/propriedades"
-            );
+            // else this.props.history.push("/usuarios");
+            this.props.history.push("/usuarios/");
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao adicionar um cliente", err);
+            console.log("Erro interno ao adicionar um usuário", err);
           }
         } else {
           try {
-            const updated = await ClientService.update(this.state.formData);
+            const updated = await UsersService.update(this.state.formData);
             flashWithSuccess();
             // a chamada do formulário pode vir por fluxos diferentes
             // então usamos o returnTo para verificar para onde ir
             // ou ir para o fluxo padrão
             if (this.props.location.state && this.props.location.state.returnTo)
               this.props.history.push(this.props.location.state.returnTo);
-            else this.props.history.push("/clientes");
+            else this.props.history.push("/usuarios");
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao atualizar um cliente ", err);
+            console.log("Erro interno ao atualizar um usuário ", err);
           }
         }
       }
     });
+  };
+
+  validateLogin = async login => {
+    let newLogin = login
+      .split(" ")
+      .join(".")
+      .toLowerCase();
+    this.setState(prevState => ({
+      formData: {
+        ...prevState.formData,
+        login: newLogin
+      }
+    }));
   };
 
   render() {
@@ -123,7 +135,7 @@ class ClientForm extends Component {
               href={
                 this.props.location.state && this.props.location.state.returnTo
                   ? this.props.location.state.returnTo.pathname
-                  : "/clientes"
+                  : "/usuarios"
               }
             >
               <Icon type="arrow-left" />
@@ -133,15 +145,14 @@ class ClientForm extends Component {
         </BreadcrumbStyled>
         <Affix offsetTop={65}>
           <PainelHeader
-            title={this.state.editMode ? "Editando Cliente" : "Novo Cliente"}
+            title={this.state.editMode ? "Editando Usuário" : "Novo Usuário"}
           >
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
-              Salvar Cliente
+              Salvar Usuário
             </Button>
           </PainelHeader>
         </Affix>
         <Form onChange={this.handleFormState}>
-
           <Form.Item label="Nome" {...formItemLayout}>
             {getFieldDecorator("nome", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
@@ -149,123 +160,90 @@ class ClientForm extends Component {
             })(<Input name="nome" ref={input => (this.titleInput = input)} />)}
           </Form.Item>
 
-          <Form.Item label="Tipo do Cliente" {...formItemLayout}>
-            {getFieldDecorator("tipo", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.tipo
-            })(
-              <Select
-                name="tipo"
-                showAction={["focus", "click"]}
-                showSearch
-                style={{ width: 200 }}
-                placeholder="Selecione um tipo..."
-                onChange={e =>
-                  this.handleFormState({
-                    target: { name: "tipo", value: e }
-                  })
-                }
-              >
-                <Option value="PRODUTOR">Produtor</Option>
-                <Option value="COOPERADO">Cooperado</Option>
-                <Option value="DISTRIBUIDOR">Distribuidor</Option>
-              </Select>
-            )}
-          </Form.Item>
-
-          <Form.Item label="CPF / CNPJ" {...formItemLayout}>
-            {getFieldDecorator("cpf_cnpj", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.cpf_cnpj
-            })(<Input name="cpf_cnpj" />)}
-          </Form.Item>
-
-          <Form.Item label="Tel. Fixo" {...formItemLayout}>
-            {getFieldDecorator("tel_fixo", {
-              initialValue: this.state.formData.tel_fixo
-            })(<Input name="tel_fixo" />)}
-          </Form.Item>
-
-          <Form.Item label="Tel. Cel." {...formItemLayout}>
-            {getFieldDecorator("tel_cel", {
-              initialValue: this.state.formData.tel_cel
-            })(<Input name="tel_cel" />)}
-          </Form.Item>
-
           <Form.Item label="Email" {...formItemLayout}>
             {getFieldDecorator("email", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.email
             })(<Input name="email" />)}
           </Form.Item>
 
-          <Form.Item label="Lim. Crédito" {...formItemLayout}>
-            {getFieldDecorator("credito", {
-              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.credito
-            })(
-              <Input
-                onBlur={e => {
-                  this.parseCredito(e);
-                }}
-                name="credito"
-                addonBefore="R$"
-              />
-            )}
+          <Form.Item label="Login" {...formItemLayout}>
+            {getFieldDecorator("login", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.login
+            })(<Input name="login" />)}
           </Form.Item>
-          <Form.Item
-            label="Gerenciar Cateira por Propriedade?"
-            labelCol={{ span: 4 }}
-            wrapperCol={{ span: 12 }}
-          >
-            {getFieldDecorator("gerenciarCarteiraPorPropriedade", {
-              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.gerenciarCarteiraPorPropriedade
+
+          <Form.Item label="Filial" {...formItemLayout}>
+            {getFieldDecorator("filiais", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.filiais
             })(
-              <Checkbox
-                checked={this.state.formData.gerenciarCarteiraPorPropriedade}
+              <Select
+                name="filiais"
+                showAction={["focus", "click"]}
+                showSearch
+                style={{ width: 200 }}
+                mode="multiple"
+                placeholder="Selecione uma filial..."
                 onChange={e =>
                   this.handleFormState({
-                    target: {
-                      name: "gerenciarCarteiraPorPropriedade",
-                      value: e.target.checked
-                    }
+                    target: { name: "filiais", value: e }
                   })
                 }
               >
-                Sim
-              </Checkbox>
+                <Option value="F1">Filial 1</Option>
+                <Option value="F2">Filial 2</Option>
+              </Select>
             )}
           </Form.Item>
+
+          <Form.Item label="Tipo de Login" {...formItemLayout}>
+            {getFieldDecorator("tipoLogin", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: "API"
+            })(
+              <Select
+                name="tipoLogin"
+                showAction={["focus", "click"]}
+                showSearch
+                style={{ width: 200 }}
+                placeholder="Selecione um tipo de Login..."
+                onChange={e =>
+                  this.handleFormState({
+                    target: { name: "tipoLogin", value: e }
+                  })
+                }
+              >
+                <Option value="API">API</Option>
+                <Option value="AD">AD</Option>
+              </Select>
+            )}
+          </Form.Item>
+
+          <Form.Item
+            label="Senha"
+            {...formItemLayout}
+            help={
+              this.state.editMode
+                ? "Caso seja necessário trocar a senha, informe uma nova aqui."
+                : ""
+            }
+          >
+            {getFieldDecorator("senha", {
+              rules: [
+                { required: false, message: "Este campo é obrigatório!" }
+              ],
+              initialValue: this.state.formData.senha
+            })(<Input name="senha" />)}
+          </Form.Item>
         </Form>
+        {console.log(this.state.formData)}
       </div>
     );
   }
-
-  parseCredito(e) {
-    const formatedVal =
-      e.target &&
-      e.target.value &&
-      e.target.value
-        .toString()
-        .replace(/[a-zA-Z|$|\s]+/, "")
-        .replace(/[.]/g, "")
-        .replace(/[,]/g, ".")
-        .replace(/(\d)(?=(\d{3})+\,)/g, "$1.");
-
-    this.props.form.setFieldsValue({
-      credito: formatedVal
-    });
-
-    this.setState(prev => ({
-      ...prev,
-      formData: {
-        ...prev.formData,
-        credito: formatedVal
-      }
-    }));
-  }
 }
 
-const WrappepClientForm = Form.create()(ClientForm);
+const WrappepUserForm = Form.create()(UserForm);
 
-export default WrappepClientForm;
+export default WrappepUserForm;

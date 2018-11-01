@@ -148,6 +148,7 @@ export const SimpleMap = compose(
         />
       )}
 
+      {props.showControl && (
       <SearchBox
         ref={props.onSearchBoxMounted}
         bounds={props.bounds}
@@ -172,6 +173,8 @@ export const SimpleMap = compose(
           }}
         />
       </SearchBox>
+      )}
+
       {props.markers.map((marker, index) => (
         <Marker
           draggable
@@ -180,12 +183,13 @@ export const SimpleMap = compose(
           onDragEnd={e => props.setGPS(e.latLng.lat(), e.latLng.lng())}
         />
       ))}
-      <BtnEditar
-        hasBounds={props.polygonData.length > 0}
-        active={props.drawingMap}
-        adicionarPontosAoMapa={props.adicionarPontosAoMapa}
-      />
-      <BtnLimparMapa limparMapa={props.limparMapa} />
+      {props.showControl && (
+          <BtnEditar
+            hasBounds={props.polygonData.length > 0}
+            active={props.drawingMap}
+            adicionarPontosAoMapa={props.adicionarPontosAoMapa}
+          />
+        ) && <BtnLimparMapa limparMapa={props.limparMapa} />}
     </GoogleMap>
   );
 });
