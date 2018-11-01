@@ -39,7 +39,7 @@ const menus = {
   // ...produtos,
   ...safras,
   // ...etapasCultura,
-  // ...unidadesMedida,
+  ...unidadesMedida,
 };
 
 export { menus };
