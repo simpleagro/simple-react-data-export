@@ -68,6 +68,7 @@ class UnitMeasureForm extends Component {
   };
 
   saveForm = async e => {
+
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
@@ -169,7 +170,7 @@ class UnitMeasureForm extends Component {
           <Form.Item label="Unidade Básica" {...formItemLayout}>
             {getFieldDecorator("unidade_basica_id", {
               rules: [{ required: false, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.unidade_basica_id
+              initialValue: this.state.formData.unidade_basica_id
             })(
               <Select
                 name="unidade_basica_id"
@@ -187,12 +188,11 @@ class UnitMeasureForm extends Component {
                 {this.state.listUnidade &&
                   this.state.listUnidade.map(
                     (unidade, index) =>
-                      unidade.nome &&
-                        <Option key={index} value={unidade.nome}>
-                          {unidade.nome}
-                        </Option>
-                      
-                  )}
+                      <Option key={index} value={unidade._id}>
+                        {unidade.nome}
+                      </Option>
+                  )
+                }
               </Select>
             )}
           </Form.Item>
@@ -203,9 +203,8 @@ class UnitMeasureForm extends Component {
               initialValue: this.state.formData.fator_conversao
             })(<Input name="fator_conversao" />)}
           </Form.Item>
-          
+          {console.log(this.state.formData)}
         </Form>
-        { console.log("state: ", this.state) }
       </div>
     );
   }

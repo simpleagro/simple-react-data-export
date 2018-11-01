@@ -22,12 +22,12 @@ class UnitMeasures extends Component {
     };
   }
 
-  async initializeList(aqp) {
+  async initializeList(aqp = {mostraUnidadeBase: true}) {
     this.setState(previousState => {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await UnitMeasureService.list({ 'mostraUnidadeBase': true});
+    const data = await UnitMeasureService.list(aqp);
 
     this.setState(prev => ({
       ...prev,
@@ -113,9 +113,9 @@ class UnitMeasures extends Component {
       render: text => text
     },
     {
-      title: "Unidade de Conversão",
-      dataIndex: "unidade_conversao",
-      key: "unidade_conversao",
+      title: "Fator de Conversão",
+      dataIndex: "fator_conversao",
+      key: "fator_conversao",
       render: text => text
     },
     {
