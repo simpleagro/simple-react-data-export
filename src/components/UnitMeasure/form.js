@@ -1,14 +1,5 @@
 import React, { Component } from "react";
-import {
-  Breadcrumb,
-  Button,
-  Icon,
-  Input,
-  Form,
-  Select,
-  Affix,
-  Steps
-} from "antd";
+import { Breadcrumb, Button, Icon, Input, Form, Select, Affix } from "antd";
 import styled from "styled-components";
 
 import { flashWithSuccess } from "../common/FlashMessages";
@@ -40,7 +31,10 @@ class UnitMeasureForm extends Component {
 
     this.setState(prev => ({
       ...prev,
-      listUnidade: dataUnitMeasures.docs
+      listUnidade: [
+        { _id: null, nome: "Nenhuma opção" },
+        ...dataUnitMeasures.docs
+      ]
     }));
 
     if (id) {
@@ -50,8 +44,7 @@ class UnitMeasureForm extends Component {
         this.setState(prev => ({
           ...prev,
           formData,
-          editMode: id ? true : false,
-          listUnidade: dataUnitMeasures.docs
+          editMode: id ? true : false
         }));
     }
 
@@ -68,7 +61,6 @@ class UnitMeasureForm extends Component {
   };
 
   saveForm = async e => {
-
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
@@ -142,9 +134,7 @@ class UnitMeasureForm extends Component {
         </BreadcrumbStyled>
         <Affix offsetTop={65}>
           <PainelHeader
-            title={
-              this.state.editMode ? "Editando Unidade" : "Nova Unidade"
-            }
+            title={this.state.editMode ? "Editando Unidade" : "Nova Unidade"}
           >
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
               Salvar unidade
@@ -152,7 +142,6 @@ class UnitMeasureForm extends Component {
           </PainelHeader>
         </Affix>
         <Form onChange={this.handleFormState}>
-          
           <Form.Item label="Nome" {...formItemLayout}>
             {getFieldDecorator("nome", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
@@ -169,7 +158,9 @@ class UnitMeasureForm extends Component {
 
           <Form.Item label="Unidade Básica" {...formItemLayout}>
             {getFieldDecorator("unidade_basica_id", {
-              rules: [{ required: false, message: "Este campo é obrigatório!" }],
+              rules: [
+                { required: false, message: "Este campo é obrigatório!" }
+              ],
               initialValue: this.state.formData.unidade_basica_id
             })(
               <Select
@@ -186,13 +177,11 @@ class UnitMeasureForm extends Component {
                 }
               >
                 {this.state.listUnidade &&
-                  this.state.listUnidade.map(
-                    (unidade, index) =>
-                      <Option key={index} value={unidade._id}>
-                        {unidade.nome}
-                      </Option>
-                  )
-                }
+                  this.state.listUnidade.map((unidade, index) => (
+                    <Option key={index} value={unidade._id}>
+                      {unidade.nome}
+                    </Option>
+                  ))}
               </Select>
             )}
           </Form.Item>

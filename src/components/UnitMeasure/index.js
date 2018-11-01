@@ -65,7 +65,7 @@ class UnitMeasures extends Component {
       flashWithSuccess(
         "",
         `A unidade, ${recordName}, foi ${
-          newStatus ? "ativado" : "bloqueado"
+          newStatus ? "ativada" : "bloqueada"
         } com sucesso!`
       );
     } catch (err) {
@@ -83,7 +83,7 @@ class UnitMeasures extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `A unidade, ${nome}, foi removido com sucesso!`);
+      flashWithSuccess("", `A unidade, ${nome}, foi removida com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover uma unidade", err);
@@ -121,13 +121,13 @@ class UnitMeasures extends Component {
     {
       title: "Ações",
       dataIndex: "action",
-      render: (text, record) => { 
+      render: (text, record) => {
         return (
           <span>
             <Button size="small" href={`/unidades-medidas/${record._id}/edit`}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
-            
+
             <Divider
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
