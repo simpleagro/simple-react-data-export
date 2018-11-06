@@ -1,186 +1,194 @@
 import React, { Component } from 'react';
-import { Row, Col, Divider, Button, Icon, Modal } from 'antd';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
 
-import * as EntidadeService from "../../services/entities";
+import * as EntityService from "../../services/entities";
 import SimpleTable from "../common/SimpleTable";
-import EntidadeForm from './form';
 import { flashWithSuccess } from "../common/FlashMessages";
+import parseErrors from "../../lib/parseErrors";
+import { PainelHeader } from "../common/PainelHeader";
 
-class Entidades extends Component {
-
+class Entities extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      entidades: [],
+      list: [],
       loadingData: true,
-      editMode: false,
-      modalVisible: false,
-      pagination: false,
-      form: {}
+      pagination: {
+        showSizeChanger: true,
+        defaultPageSize: 10,
+        pageSizeOptions: ["10", "25", "50", "100"]
+      }
     };
   }
 
-  initializeList() {
-    this.setState(...this.state, { loadingData: true });
-    setTimeout(() => {
-      EntidadeService.list().then(data => {
-        this.setState(...this.state, {
-          entidades: data,
-          loadingData: false,
-          pagination: data.lenght > 10
-        });
-      });
-    }, 1000);
-  }
+  async initializeList(aqp) {
+    this.setState(previousState => {
+      return { ...previousState, loadingData: true };
+    });
 
-  componentDidMount() {
-    this.initializeList();
-  }
+    const data = await EntityService.list(aqp);
 
-  saveFormRef = formRef => {
-    if (formRef) this.formValidate = formRef.props.form;
-  };
-
-  //#region  Modal
-  handleOk = e => {
-    this.formValidate.validateFields(err => {
-      if (err) return;
-      else {
-        if (!this.state.editMode) {
-          this.setState({
-            modalVisible: false,
-            entidades: [...this.state.entidades, this.state.form],
-            form: {}
-          });
-        } else {
-          // let _data = this.state.entidades.map((item) => {
-          //   if (item.id === this.state.form.id) {
-          //     item = this.state.form;
-          //   }
-          //   return item;
-          // });
-
-          EntidadeService.update(this.state.form).then(response => {
-            this.initializeList();
-            this.setState({
-              modalVisible: false,
-              form: {}
-            });
-            flashWithSuccess();
-          });
-        }
+    this.setState(prev => ({
+      ...prev,
+      list: data,
+      loadingData: false,
+      pagination: {
+        total: data.total
       }
-    });
+    }));
+  }
 
-    this.setState({
-      modalVisible: false,
-      form: {}
-    });
+  async componentDidMount() {
+    await this.initializeList();
+  }
+
+  changeStatus = async (id, newStatus) => {
+    try {
+      await EntityService.changeStatus(id, newStatus);
+
+      let recordName = "";
+
+      let _list = this.state.list.map(item => {
+        if (item._id === id) {
+          item.status = newStatus;
+          recordName = item.nome;
+        }
+        return item;
+      });
+
+      this.setState(prev => ({
+        ...prev,
+        list: _list
+      }));
+
+      flashWithSuccess(
+        "",
+        `A entidade, ${recordName}, foi ${
+          newStatus ? "ativado" : "bloqueado"
+        } com sucesso!`
+      );
+    } catch (err) {
+      if (err && err.response && err.response.data) parseErrors(err);
+      console.log("Erro interno ao mudar status da entidade", err);
+    }
   };
 
-  handleCancel = e => {
-    this.setState({
-      modalVisible: false,
-      form: {}
-    });
+  removeRecord = async ({ _id, nome }) => {
+    try {
+      await EntityService.remove(_id);
+      let _list = this.state.list.filter(record => record._id !== _id);
+
+      this.setState({
+        list: _list
+      });
+
+      flashWithSuccess("", `A entidade, ${nome}, foi removido com sucesso!`);
+    } catch (err) {
+      if (err && err.response && err.response.data) parseErrors(err);
+      console.log("Erro interno ao remover uma entidade", err);
+    }
   };
 
-  handleFormState = event => {
-    let form = Object.assign({}, this.state.form, {
-      [event.target.name]: event.target.value
-    });
-    this.setState({ form });
-  };
-
-  showModal = editData => {
-    this.setState(...this.state, {
-      modalVisible: true,
-      editMode: editData ? true : false,
-      form: editData || {}
-    });
-  };
-  //#endregion
-
-  render() {
-    const columns = [
-      {
-        title: "Nome",
-        dataIndex: "nome",
-        render: text => text
-      },
-      {
-        title: "Descrição",
-        dataIndex: "descricao",
-        render: text => text
-      },
-      {
-        title: "",
-        dataIndex: "action",
-        render: (text, record) => {
-          return (
-            <span>
-              <Button size="small" onClick={() => this.showModal(record)}>
-                <Icon type="edit" style={{ fontSize: "16px" }} />
+  tableConfig = () => [
+    {
+      title: "Nome",
+      dataIndex: "nome",
+      key: "nome",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      }
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (text, record) => {
+        const statusTxt = record.status ? "desativar" : "ativar";
+        const statusBtn = record.status ? "unlock" : "lock";
+        return (
+          <Popconfirm
+            title={`Tem certeza em ${statusTxt} a entidade?`}
+            onConfirm={e => this.changeStatus(record._id, !record.status)}
+            okText="Sim"
+            cancelText="Não"
+          >
+            <Tooltip title={`${statusTxt.toUpperCase()} a entidade`}>
+              <Button size="small">
+                <FontAwesomeIcon icon={statusBtn} size="lg" />
               </Button>
-              <Divider
-                style={{ fontSize: "10px", padding: 0, margin: 2 }}
-                type="vertical"
-              />
-              <Button size="small" onClick={this.showModal}>
+            </Tooltip>
+          </Popconfirm>
+        );
+      }
+    },
+    {
+      title: "Ações",
+      dataIndex: "action",
+      render: (text, record) => {
+        return (
+          <span>
+            <Button size="small" href={`/entidades/${record._id}/edit`}>
+              <Icon type="edit" style={{ fontSize: "16px" }} />
+            </Button>
+            
+            <Divider
+              style={{ fontSize: "10px", padding: 0, margin: 2 }}
+              type="vertical"
+            />
+
+            <Popconfirm
+              title={`Tem certeza em excluir a entidade?`}
+              onConfirm={() => this.removeRecord(record)}
+              okText="Sim"
+              cancelText="Não"
+            >
+              <Button size="small">
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
-            </span>
-          );
-        }
+            </Popconfirm>
+            <Divider
+              style={{ fontSize: "10px", padding: 0, margin: 2 }}
+              type="vertical"
+            />
+          </span>
+        );
       }
-    ];
+    }
+  ];
 
+  handleTableChange = (pagination, filter, sorter) => {
+    const pager = { ...this.state.pagination };
+    pager.current = pagination.current;
+    this.setState({
+      pagination: pager
+    });
+    this.initializeList({
+      page: pagination.current,
+      limit: pagination.pageSize
+    });
+  };
+
+  render() {
     return (
       <div>
-        <Row type="flex" justify="space-between">
-          <Col>
-            <h3 style={{ fontWeight: 400 }}>Entidades</h3>
-          </Col>
-          <Col>
-            <Button
-              type="primary"
-              icon="plus"
-              onClick={() => this.showModal(null)}
-            >
-              Adicionar
-            </Button>
-          </Col>
-          <Divider />
-          <SimpleTable
-            pagination={this.state.pagination}
-            spinning={this.state.loadingData}
-            rowKey="_id"
-            columns={columns}
-            dataSource={this.state.entidades}
-          />
-        </Row>
-        <Modal
-          bodyStyle={{ overflow: "scroll", height: "50vh" }}
-          width="99vmax"
-          destroyOnClose={true}
-          title={this.state.editMode ? "Editando Registro" : "Novo Registro"}
-          visible={this.state.modalVisible}
-          onCancel={this.handleCancel}
-          footer={
-            <Button type="primary" icon="save" onClick={this.handleOk}>
-              Salvar
-            </Button>
-          }
-        >
-          <EntidadeForm
-            wrappedComponentRef={this.saveFormRef}
-            formData={this.state.form}
-            handleFormState={this.handleFormState}
-          />
-        </Modal>
+        <PainelHeader title="Entidades">
+          <Button type="primary" icon="plus" href="/entidades/new">
+            Adicionar
+          </Button>
+        </PainelHeader>
+        <SimpleTable
+          pagination={this.state.pagination}
+          spinning={this.state.loadingData}
+          rowKey="_id"
+          columns={this.tableConfig()}
+          dataSource={this.state.list}
+          onChange={this.handleTableChange}
+        />
       </div>
     );
   }
 }
 
-export default Entidades;
+export default Entities;

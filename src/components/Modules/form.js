@@ -1,70 +1,202 @@
-import React, { Component, Fragment } from "react";
-import { Form, Input, Tabs, Checkbox } from "antd";
+import React, { Component } from "react";
+import {
+  Breadcrumb,
+  Button,
+  Icon,
+  Input,
+  Form,
+  Select,
+  Affix,
+  Steps
+} from "antd";
+import styled from "styled-components";
 
-const { TabPane } = Tabs;
+import { flashWithSuccess } from "../common/FlashMessages";
+import parseErrors from "../../lib/parseErrors";
+import { PainelHeader } from "../common/PainelHeader";
+import * as ModuleService from "../../services/modules";
+import * as EntityService from "../../services/entities";
 
-class ModuloForm extends Component {
-  componentDidMount() {
+const Option = Select.Option;
+
+const BreadcrumbStyled = styled(Breadcrumb)`
+  background: #eeeeee;
+  height: 45px;
+  margin: -24px;
+  margin-bottom: 30px;
+`;
+
+class ModuleForm extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      editMode: false,
+      formData: {}
+    };
+  }
+
+  async componentDidMount() {
+    const { id } = this.props.match.params;
+    const dataModule = await ModuleService.list();
+    const dataEntity = await EntityService.list();
+
+    this.setState(prev => ({
+      ...prev,
+      listModule: dataModule,
+      listEntity: dataEntity
+    }));
+
+    if (id) {
+      const formData = await ModuleService.get(id);
+
+      if (formData)
+        this.setState(prev => ({
+          ...prev,
+          formData,
+          editMode: id ? true : false,
+          listModule: dataModule,
+          listEntity: dataEntity
+        }));
+    }
+
     setTimeout(() => {
       this.titleInput.focus();
     }, 0);
   }
 
-  setConfig(e) {
-    console.log(e);
-  }
+  handleFormState = event => {
+    let form = Object.assign({}, this.state.formData, {
+      [event.target.name]: event.target.value
+    });
+    this.setState(prev => ({ ...prev, formData: form }));
+  };
+
+  saveForm = async e => {
+    this.props.form.validateFields(async err => {
+      if (err) return;
+      else {
+        if (!this.state.editMode) {
+          if (Object.keys(this.state.formData).length === 0)
+            flashWithSuccess("Sem alterações para salvar", " ");
+
+          try {
+            const created = await ModuleService.create(
+              this.state.formData
+            );
+            this.setState({
+              openForm: false,
+              editMode: false
+            });
+            flashWithSuccess();
+            // a chamada do formulário pode vir por fluxos diferentes
+            // então usamos o returnTo para verificar para onde ir
+            // ou ir para o fluxo padrão
+            // if (this.props.location.state && this.props.location.state.returnTo)
+            //   this.props.history.push(this.props.location.state.returnTo);
+            // else this.props.history.push("/modulos");
+            this.props.history.push("/modulos/");
+          } catch (err) {
+            if (err && err.response && err.response.data) parseErrors(err);
+            console.log("Erro interno ao adicionar um módulo", err);
+          }
+        } else {
+          try {
+            const updated = await ModuleService.update(
+              this.state.formData
+            );
+            flashWithSuccess();
+            // a chamada do formulário pode vir por fluxos diferentes
+            // então usamos o returnTo para verificar para onde ir
+            // ou ir para o fluxo padrão
+            if (this.props.location.state && this.props.location.state.returnTo)
+              this.props.history.push(this.props.location.state.returnTo);
+            else this.props.history.push("/modulos");
+          } catch (err) {
+            if (err && err.response && err.response.data) parseErrors(err);
+            console.log("Erro interno ao atualizar um módulo ", err);
+          }
+        }
+      }
+    });
+  };
 
   render() {
     const { getFieldDecorator } = this.props.form;
-    const { configuracoes } = this.props.formData;
+    const formItemLayout = {
+      labelCol: { span: 3 },
+      wrapperCol: { span: 12 }
+    };
 
     return (
       <div>
-        <Tabs defaultActiveKey="1">
-          <TabPane tab="Informações Básicas" key="1">
-            <Form onChange={this.props.handleFormState}>
-              <Form.Item label="Nome do módulo">
-                {getFieldDecorator("nome", {
-                  rules: [
-                    { required: true, message: "Este campo é obrigatório!" }
-                  ],
-                  initialValue: this.props.formData.nome
-                })(
-                  <Input
-                    disabled
-                    name="nome"
-                    ref={input => (this.titleInput = input)}
-                  />
-                )}
-              </Form.Item>
-              <Form.Item label="Descrição do módulo">
-                {getFieldDecorator("descricao", {
-                  initialValue: this.props.formData.descricao
-                })(<Input.TextArea name="descricao" />)}
-              </Form.Item>
-            </Form>
-          </TabPane>
-          <TabPane tab="Configurações" key="2">
-            <Form onChange={this.props.handleFormState}>
-              {Object.keys(configuracoes).map(k => (
-                <Fragment key={k}>
-                  <Form.Item>
-                    {getFieldDecorator(`configuracoes.${k}.ativo`, {
-                      valuePropName: "checked",
-                      initialValue: configuracoes[k].ativo
-                    })(<Checkbox onChange={this.setConfig}>{configuracoes[k].nome}</Checkbox>)}
-                    <br />
-                  </Form.Item>
-                </Fragment>
-              ))}
-            </Form>
-          </TabPane>
-        </Tabs>
+        <BreadcrumbStyled>
+          <Breadcrumb.Item>
+            <Button
+              href={
+                this.props.location.state && this.props.location.state.returnTo
+                  ? this.props.location.state.returnTo.pathname
+                  : "/modulos"
+              }
+            >
+              <Icon type="arrow-left" />
+              Voltar para tela anterior
+            </Button>
+          </Breadcrumb.Item>
+        </BreadcrumbStyled>
+        <Affix offsetTop={65}>
+          <PainelHeader
+            title={[ this.state.editMode ? "Editando" : "Novo", " Módulo" ]}
+          >
+            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+              Salvar módulo
+            </Button>
+          </PainelHeader>
+        </Affix>
+        <Form onChange={this.handleFormState}>
+
+          <Form.Item label="Nome" {...formItemLayout}>
+            {getFieldDecorator("nome", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.nome
+            })(<Input name="nome" ref={input => (this.titleInput = input)} />)}
+          </Form.Item>
+
+          <Form.Item label="Entidade" {...formItemLayout}>
+            {getFieldDecorator("entidades", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.entidades
+
+            })(
+              <Select
+                name="entidades"
+                showAction={["focus", "click"]}
+                showSearch
+                mode="multiple"
+                style={{ width: 200 }}
+                placeholder="Selecione uma entidade..."
+                onChange={e =>
+                  this.handleFormState({
+                    target: { name: "entidades", value: e}
+                  })
+                }
+              >
+                { this.state.listEntity &&
+                    this.state.listEntity.map(
+                      (ent, index) => (
+                        <Option key={index} value={ent._id}> {ent.nome} </Option>
+                      )
+                    )
+                }
+              </Select>
+            )}
+          </Form.Item>
+
+        </Form>
       </div>
     );
   }
 }
 
-const WrappedRegistrationForm = Form.create()(ModuloForm);
+const WrappepModuleForm = Form.create()(ModuleForm);
 
-export default WrappedRegistrationForm;
+export default WrappepModuleForm;

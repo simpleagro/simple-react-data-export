@@ -1,52 +1,186 @@
 import React, { Component } from 'react';
-import { Form, Input, Tabs, Affix } from 'antd';
+import {
+  Breadcrumb,
+  Button,
+  Icon,
+  Input,
+  Form,
+  Select,
+  Affix
+} from 'antd';
+import styled from 'styled-components';
 
-const { TabPane } = Tabs;
+import { flashWithSuccess } from '../common/FlashMessages';
+import parseErrors from '../../lib/parseErrors';
+import { PainelHeader } from '../common/PainelHeader';
+import * as EntityService from '../../services/entities';
 
-class EntidadeForm extends Component {
+const Option = Select.Option;
 
-  componentDidMount() {
+const BreadcrumbStyled = styled(Breadcrumb)`
+  background: #eeeeee;
+  height: 45px;
+  margin: -24px;
+  margin-bottom: 30px;
+`;
+
+class EntityForm extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      editMode: false,
+      formData: {},
+    };
+  }
+
+  async componentDidMount() {
+    const { id } = this.props.match.params;
+    const dataEntity = await EntityService.list();
+
+    this.setState(prev => ({
+      ...prev,
+      listCargo: dataEntity,
+    }));
+
+    if (id) {
+      const formData = await EntityService.get(id);
+
+      if (formData) {
+        this.setState(prev => ({
+          ...prev,
+          formData,
+          editMode: !!id,
+          listCargo: dataEntity,
+        }));
+      }
+    }
+
     setTimeout(() => {
       this.titleInput.focus();
     }, 0);
   }
 
-  onStatusChange = (value) => {
-    this.props.handleFormState({ target: { name: "status", value } })
-  }
+  handleFormState = (event) => {
+    const form = Object.assign({}, this.state.formData, {
+      [event.target.name]: event.target.value,
+    });
+    this.setState(prev => ({ ...prev, formData: form }));
+  };
+
+  saveForm = async (e) => {
+    this.props.form.validateFields(async (err) => {
+      if (err) return;
+
+      if (!this.state.editMode) {
+        if (Object.keys(this.state.formData).length === 0) {
+          flashWithSuccess('Sem alterações para salvar', ' ');
+        }
+
+        try {
+          const created = await EntityService.create(this.state.formData);
+          this.setState({
+            openForm: false,
+            editMode: false,
+          });
+          flashWithSuccess();
+          // a chamada do formulário pode vir por fluxos diferentes
+          // então usamos o returnTo para verificar para onde ir
+          // ou ir para o fluxo padrão
+          // if (this.props.location.state && this.props.location.state.returnTo)
+          //   this.props.history.push(this.props.location.state.returnTo);
+          // else this.props.history.push("/entidades");
+          this.props.history.push('/entidades/');
+        } catch (err) {
+          if (err && err.response && err.response.data) parseErrors(err);
+          console.log('Erro interno ao adicionar uma entidade', err);
+        }
+      } else {
+        try {
+          const updated = await EntityService.update(this.state.formData);
+          flashWithSuccess();
+          // a chamada do formulário pode vir por fluxos diferentes
+          // então usamos o returnTo para verificar para onde ir
+          // ou ir para o fluxo padrão
+          if (this.props.location.state && this.props.location.state.returnTo) {
+            this.props.history.push(this.props.location.state.returnTo);
+          } else this.props.history.push('/entidades');
+        } catch (err) {
+          if (err && err.response && err.response.data) parseErrors(err);
+          console.log('Erro interno ao atualizar uma entidade ', err);
+        }
+      }
+    });
+  };
 
   render() {
     const { getFieldDecorator } = this.props.form;
-    
+    const formItemLayout = {
+      labelCol: { span: 3 },
+      wrapperCol: { span: 12 },
+    };
+
     return (
       <div>
-        <Tabs defaultActiveKey="1">
-          <TabPane tab="Informações Básicas" key="1">
-            <Form onChange={this.props.handleFormState}>
-              <Form.Item label="Nome da entidade">
-                {getFieldDecorator('nome', {
-                  rules: [
-                    { required: true, message: 'Este campo é obrigatório!' },
-                  ],
-                  initialValue: this.props.formData.nome,
-                })(
-                  <Input disabled name="nome" ref={(input) => this.titleInput = input} />
-                )}
-              </Form.Item>
-              <Form.Item label="Descrição da entidade">
-                <Input.TextArea name="descricao" />
-              </Form.Item>
-            </Form>
-          </TabPane>
-          <TabPane tab="Dicionário de Dados" key="2">Content of Tab Pane 2</TabPane>
-        </Tabs>
-      </div >
-    )
+        <BreadcrumbStyled>
+          <Breadcrumb.Item>
+            <Button
+              href={
+                this.props.location.state && this.props.location.state.returnTo
+                  ? this.props.location.state.returnTo.pathname
+                  : '/entidades'
+              }
+            >
+              <Icon type="arrow-left" />
+              Voltar para tela anterior
+            </Button>
+          </Breadcrumb.Item>
+        </BreadcrumbStyled>
+        <Affix offsetTop={65}>
+          <PainelHeader title={[this.state.editMode ? 'Editando' : 'Nova', ' Entidade']}>
+            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+              Salvar entidade
+            </Button>
+          </PainelHeader>
+        </Affix>
+        <Form onChange={this.handleFormState}>
+          <Form.Item label="Nome" {...formItemLayout}>
+            {getFieldDecorator('nome', {
+              rules: [{ required: true, message: 'Este campo é obrigatório!' }],
+              initialValue: this.state.formData.nome,
+            })(<Input name="nome" ref={input => (this.titleInput = input)} />)}
+          </Form.Item>
+
+          <Form.Item label="Filial" {...formItemLayout}>
+            {getFieldDecorator('multiFilial', {
+              rules: [{ required: true, message: 'Este campo é obrigatório!' }],
+              initialValue: this.state.formData.multiFilial ? 'Sim' : 'Nao',
+            })(
+              <Select
+                name="multiFilial"
+                showAction={['focus', 'click']}
+                showSearch
+                style={{ width: 200 }}
+                placeholder="Selecione uma opção..."
+                onChange={e => this.handleFormState({
+                  target: { name: 'multiFilial', value: e },
+                })
+                }
+              >
+                <Option value="false">
+Não
+                </Option>
+                <Option value="true">
+Sim
+                </Option>
+              </Select>,
+            )}
+          </Form.Item>
+        </Form>
+      </div>
+    );
   }
 }
 
+const WrappepEntityForm = Form.create()(EntityForm);
 
-const WrappedRegistrationForm = Form.create()(EntidadeForm);
-
-
-export default WrappedRegistrationForm;
+export default WrappepEntityForm;
