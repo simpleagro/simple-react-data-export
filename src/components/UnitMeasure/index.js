@@ -22,7 +22,7 @@ class UnitMeasures extends Component {
     };
   }
 
-  async initializeList(aqp = {mostraUnidadeBase: true}) {
+  async initializeList(aqp = { mostraUnidadeBase: true }) {
     this.setState(previousState => {
       return { ...previousState, loadingData: true };
     });
@@ -121,13 +121,18 @@ class UnitMeasures extends Component {
     {
       title: "Ações",
       dataIndex: "action",
-      render: (text, record) => { 
+      render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/unidades-medidas/${record._id}/edit`}>
+            <Button
+              size="small"
+              onClick={() =>
+                this.props.history.push(`/unidades-medidas/${record._id}/edit`)
+              }
+            >
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
-            
+
             <Divider
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
@@ -169,7 +174,11 @@ class UnitMeasures extends Component {
     return (
       <div>
         <PainelHeader title="Unidades de Medidas">
-          <Button type="primary" icon="plus" href="/unidades-medidas/new">
+          <Button
+            type="primary"
+            icon="plus"
+            onClick={() => this.props.history.push("/unidades-medidas/new")}
+          >
             Adicionar
           </Button>
         </PainelHeader>

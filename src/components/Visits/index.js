@@ -139,7 +139,7 @@ class Seasons extends Component {
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      },
+      }
     },
     {
       title: "Data de Conclusão",
@@ -163,7 +163,7 @@ class Seasons extends Component {
         {
           text: "Gerente SimpleAgro",
           value: "Gerente SimpleAgro"
-        },
+        }
       ],
       onFilter: (value, record) => record.consultor.nome === value
     },
@@ -191,13 +191,18 @@ class Seasons extends Component {
     //   }
     // },
     {
-      title: "",
+      title: "Ações",
       dataIndex: "action",
       render: (text, record) => {
         return (
           <span>
             {
-              <Button size="small" href={`/visitas/${record._id}`}>
+              <Button
+                size="small"
+                onClick={() =>
+                  this.props.history.push(`/visitas/${record._id}`)
+                }
+              >
                 <Icon type="eye" style={{ fontSize: "16px" }} />
               </Button>
               /*
@@ -242,7 +247,11 @@ class Seasons extends Component {
     return (
       <div>
         <PainelHeader title="Visitas">
-          {/* <Button type="primary" icon="plus" href="/visitas/new">
+          {/* <Button type="primary" icon="plus" onClick={() =>
+                this.props.history.push(
+               "/visitas/new"
+                )
+              }>
             Adicionar
           </Button> */}
         </PainelHeader>

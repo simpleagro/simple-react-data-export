@@ -99,10 +99,13 @@ class VisitForm extends Component {
         <BreadcrumbStyled>
           <Breadcrumb.Item>
             <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : "/visitas"
+              onClick={() =>
+                this.props.history.push(
+                  this.props.location.state &&
+                  this.props.location.state.returnTo
+                    ? this.props.location.state.returnTo.pathname
+                    : "/visitas"
+                )
               }
             >
               <Icon type="arrow-left" />

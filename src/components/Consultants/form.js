@@ -142,22 +142,22 @@ class ConsultantForm extends Component {
     this.setState(prevState => ({
       formData: {
         ...prevState.formData,
-        login: userLogin,
+        login: userLogin
       }
     }));
   };
 
-  removeGerent = (cargo) => {
-    if(cargo === "GERENTE"){
-      this.setState((prevState) => ({
+  removeGerent = cargo => {
+    if (cargo === "GERENTE") {
+      this.setState(prevState => ({
         formData: {
           ...prevState.formData,
-          gerente_id: null,
+          gerente_id: null
         }
       }));
-      this.props.form.setFields({gerente_id : ""});
+      this.props.form.setFields({ gerente_id: "" });
     }
-  }
+  };
 
   render() {
     const { getFieldDecorator } = this.props.form;
@@ -171,10 +171,13 @@ class ConsultantForm extends Component {
         <BreadcrumbStyled>
           <Breadcrumb.Item>
             <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : "/consultores"
+              onClick={() =>
+                this.props.history.push(
+                  this.props.location.state &&
+                  this.props.location.state.returnTo
+                    ? this.props.location.state.returnTo.pathname
+                    : "/consultores"
+                )
               }
             >
               <Icon type="arrow-left" />

@@ -1,13 +1,5 @@
 import React, { Component } from "react";
-import {
-  Breadcrumb,
-  Button,
-  Icon,
-  Input,
-  Form,
-  Select,
-  Affix
-} from "antd";
+import { Breadcrumb, Button, Icon, Input, Form, Select, Affix } from "antd";
 import styled from "styled-components";
 
 import { flashWithSuccess } from "../../common/FlashMessages";
@@ -60,7 +52,6 @@ class CompanyForm extends Component {
   };
 
   saveForm = async e => {
-
     await this.getDatabase();
     await this.setStatus();
 
@@ -84,9 +75,7 @@ class CompanyForm extends Component {
             // if (this.props.location.state && this.props.location.state.returnTo)
             //   this.props.history.push(this.props.location.state.returnTo);
             // else this.props.history.push("/empresas");
-            this.props.history.push(
-              "/empresas/" + created._id + "/filiais"
-            );
+            this.props.history.push("/empresas/" + created._id + "/filiais");
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar uma empresa", err);
@@ -111,28 +100,28 @@ class CompanyForm extends Component {
   };
 
   getDatabase = () => {
-    const link = window.location.href
-    const suffixRegex = /(([http]*[s]*[:][/][/])+)/g
-    const linkRegex = /((.simpleagro.com.br)+(:[0-9]*)([/a-z0-9]*)*)/g
-    
-    let newLink = link.replace(suffixRegex, "").replace(linkRegex, "")
-    
-    this.setState((prevState) => ({
+    const link = window.location.href;
+    const suffixRegex = /(([http]*[s]*[:][/][/])+)/g;
+    const linkRegex = /((.simpleagro.com.br)+(:[0-9]*)([/a-z0-9]*)*)/g;
+
+    let newLink = link.replace(suffixRegex, "").replace(linkRegex, "");
+
+    this.setState(prevState => ({
       formData: {
         ...prevState.formData,
         database: newLink
       }
-    }))
-  }
+    }));
+  };
 
   setStatus = () => {
-    this.setState((prevState) => ({
+    this.setState(prevState => ({
       formData: {
         ...prevState.formData,
         status: true
       }
-    }))
-  }
+    }));
+  };
 
   render() {
     const { getFieldDecorator } = this.props.form;
@@ -146,10 +135,13 @@ class CompanyForm extends Component {
         <BreadcrumbStyled>
           <Breadcrumb.Item>
             <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : "/empresas"
+              onClick={() =>
+                this.props.history.push(
+                  this.props.location.state &&
+                  this.props.location.state.returnTo
+                    ? this.props.location.state.returnTo.pathname
+                    : "/empresas"
+                )
               }
             >
               <Icon type="arrow-left" />
@@ -159,9 +151,7 @@ class CompanyForm extends Component {
         </BreadcrumbStyled>
         <Affix offsetTop={65}>
           <PainelHeader
-            title={
-              this.state.editMode ? "Editando Empresa" : "Nova Empresa"
-            }
+            title={this.state.editMode ? "Editando Empresa" : "Nova Empresa"}
           >
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
               Salvar Empresa
@@ -170,12 +160,16 @@ class CompanyForm extends Component {
         </Affix>
 
         <Form onChange={this.handleFormState}>
-
           <Form.Item label="Razão Social" {...formItemLayout}>
             {getFieldDecorator("razao_social", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.razao_social
-            })(<Input name="razao_social" ref={input => (this.titleInput = input)} />)}
+            })(
+              <Input
+                name="razao_social"
+                ref={input => (this.titleInput = input)}
+              />
+            )}
           </Form.Item>
 
           <Form.Item label="Nome Fantasia" {...formItemLayout}>
@@ -191,7 +185,6 @@ class CompanyForm extends Component {
               initialValue: this.state.formData.cpf_cnpj
             })(<Input name="cpf_cnpj" />)}
           </Form.Item>
-
         </Form>
       </div>
     );

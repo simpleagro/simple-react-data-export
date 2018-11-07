@@ -188,9 +188,11 @@ class Plantings extends Component {
           <span>
             <Button
               size="small"
-              href={`/clientes/${this.state.client_id}/plantio/${
-                record._id
-              }/edit`}
+              onClick={() =>
+                this.props.history.push(
+                  `/clientes/${this.state.client_id}/plantio/${record._id}/edit`
+                )
+              }
             >
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>

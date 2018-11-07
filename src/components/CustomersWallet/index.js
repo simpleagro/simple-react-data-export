@@ -233,7 +233,6 @@ class CustomersWallet extends Component {
           <span>
             <Button
               size="small"
-              // href={`/carteiras-de-clientes/${record._id}/edit`}
               onClick={() => {
                 this.props.history.push(
                   `/carteiras-de-clientes/${record._id}/edit`

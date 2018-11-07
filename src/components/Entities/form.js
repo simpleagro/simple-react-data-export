@@ -1,19 +1,11 @@
-import React, { Component } from 'react';
-import {
-  Breadcrumb,
-  Button,
-  Icon,
-  Input,
-  Form,
-  Select,
-  Affix
-} from 'antd';
-import styled from 'styled-components';
+import React, { Component } from "react";
+import { Breadcrumb, Button, Icon, Input, Form, Select, Affix } from "antd";
+import styled from "styled-components";
 
-import { flashWithSuccess } from '../common/FlashMessages';
-import parseErrors from '../../lib/parseErrors';
-import { PainelHeader } from '../common/PainelHeader';
-import * as EntityService from '../../services/entities';
+import { flashWithSuccess } from "../common/FlashMessages";
+import parseErrors from "../../lib/parseErrors";
+import { PainelHeader } from "../common/PainelHeader";
+import * as EntityService from "../../services/entities";
 
 const Option = Select.Option;
 
@@ -29,7 +21,7 @@ class EntityForm extends Component {
     super(props);
     this.state = {
       editMode: false,
-      formData: {},
+      formData: {}
     };
   }
 
@@ -39,7 +31,7 @@ class EntityForm extends Component {
 
     this.setState(prev => ({
       ...prev,
-      listCargo: dataEntity,
+      listCargo: dataEntity
     }));
 
     if (id) {
@@ -50,7 +42,6 @@ class EntityForm extends Component {
           ...prev,
           formData,
           editMode: !!id,
-          listCargo: dataEntity,
         }));
       }
     }
@@ -60,27 +51,27 @@ class EntityForm extends Component {
     }, 0);
   }
 
-  handleFormState = (event) => {
+  handleFormState = event => {
     const form = Object.assign({}, this.state.formData, {
-      [event.target.name]: event.target.value,
+      [event.target.name]: event.target.value
     });
     this.setState(prev => ({ ...prev, formData: form }));
   };
 
-  saveForm = async (e) => {
-    this.props.form.validateFields(async (err) => {
+  saveForm = async e => {
+    this.props.form.validateFields(async err => {
       if (err) return;
 
       if (!this.state.editMode) {
         if (Object.keys(this.state.formData).length === 0) {
-          flashWithSuccess('Sem alterações para salvar', ' ');
+          flashWithSuccess("Sem alterações para salvar", " ");
         }
 
         try {
           const created = await EntityService.create(this.state.formData);
           this.setState({
             openForm: false,
-            editMode: false,
+            editMode: false
           });
           flashWithSuccess();
           // a chamada do formulário pode vir por fluxos diferentes
@@ -89,10 +80,10 @@ class EntityForm extends Component {
           // if (this.props.location.state && this.props.location.state.returnTo)
           //   this.props.history.push(this.props.location.state.returnTo);
           // else this.props.history.push("/entidades");
-          this.props.history.push('/entidades/');
+          this.props.history.push("/entidades/");
         } catch (err) {
           if (err && err.response && err.response.data) parseErrors(err);
-          console.log('Erro interno ao adicionar uma entidade', err);
+          console.log("Erro interno ao adicionar uma entidade", err);
         }
       } else {
         try {
@@ -103,10 +94,10 @@ class EntityForm extends Component {
           // ou ir para o fluxo padrão
           if (this.props.location.state && this.props.location.state.returnTo) {
             this.props.history.push(this.props.location.state.returnTo);
-          } else this.props.history.push('/entidades');
+          } else this.props.history.push("/entidades");
         } catch (err) {
           if (err && err.response && err.response.data) parseErrors(err);
-          console.log('Erro interno ao atualizar uma entidade ', err);
+          console.log("Erro interno ao atualizar uma entidade ", err);
         }
       }
     });
@@ -116,7 +107,7 @@ class EntityForm extends Component {
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
       labelCol: { span: 3 },
-      wrapperCol: { span: 12 },
+      wrapperCol: { span: 12 }
     };
 
     return (
@@ -124,10 +115,13 @@ class EntityForm extends Component {
         <BreadcrumbStyled>
           <Breadcrumb.Item>
             <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : '/entidades'
+              onClick={() =>
+                this.props.history.push(
+                  this.props.location.state &&
+                  this.props.location.state.returnTo
+                    ? this.props.location.state.returnTo.pathname
+                    : "/entidades"
+                )
               }
             >
               <Icon type="arrow-left" />
@@ -136,7 +130,9 @@ class EntityForm extends Component {
           </Breadcrumb.Item>
         </BreadcrumbStyled>
         <Affix offsetTop={65}>
-          <PainelHeader title={[this.state.editMode ? 'Editando' : 'Nova', ' Entidade']}>
+          <PainelHeader
+            title={[this.state.editMode ? "Editando" : "Nova", " Entidade"]}
+          >
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
               Salvar entidade
             </Button>
@@ -144,35 +140,32 @@ class EntityForm extends Component {
         </Affix>
         <Form onChange={this.handleFormState}>
           <Form.Item label="Nome" {...formItemLayout}>
-            {getFieldDecorator('nome', {
-              rules: [{ required: true, message: 'Este campo é obrigatório!' }],
-              initialValue: this.state.formData.nome,
+            {getFieldDecorator("nome", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.nome
             })(<Input name="nome" ref={input => (this.titleInput = input)} />)}
           </Form.Item>
 
           <Form.Item label="Filial" {...formItemLayout}>
-            {getFieldDecorator('multiFilial', {
-              rules: [{ required: true, message: 'Este campo é obrigatório!' }],
-              initialValue: this.state.formData.multiFilial ? 'Sim' : 'Nao',
+            {getFieldDecorator("multiFilial", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.multiFilial ? "Sim" : "Nao"
             })(
               <Select
                 name="multiFilial"
-                showAction={['focus', 'click']}
+                showAction={["focus", "click"]}
                 showSearch
                 style={{ width: 200 }}
                 placeholder="Selecione uma opção..."
-                onChange={e => this.handleFormState({
-                  target: { name: 'multiFilial', value: e },
-                })
+                onChange={e =>
+                  this.handleFormState({
+                    target: { name: "multiFilial", value: e }
+                  })
                 }
               >
-                <Option value="false">
-Não
-                </Option>
-                <Option value="true">
-Sim
-                </Option>
-              </Select>,
+                <Option value="false">Não</Option>
+                <Option value="true">Sim</Option>
+              </Select>
             )}
           </Form.Item>
         </Form>

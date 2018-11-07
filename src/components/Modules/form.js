@@ -43,7 +43,7 @@ class ModuleForm extends Component {
     this.setState(prev => ({
       ...prev,
       listModule: dataModule,
-      listEntity: dataEntity
+      listEntity: dataEntity.docs
     }));
 
     if (id) {
@@ -53,9 +53,7 @@ class ModuleForm extends Component {
         this.setState(prev => ({
           ...prev,
           formData,
-          editMode: id ? true : false,
-          listModule: dataModule,
-          listEntity: dataEntity
+          editMode: id ? true : false
         }));
     }
 
@@ -80,9 +78,7 @@ class ModuleForm extends Component {
             flashWithSuccess("Sem alterações para salvar", " ");
 
           try {
-            const created = await ModuleService.create(
-              this.state.formData
-            );
+            const created = await ModuleService.create(this.state.formData);
             this.setState({
               openForm: false,
               editMode: false
@@ -101,9 +97,7 @@ class ModuleForm extends Component {
           }
         } else {
           try {
-            const updated = await ModuleService.update(
-              this.state.formData
-            );
+            const updated = await ModuleService.update(this.state.formData);
             flashWithSuccess();
             // a chamada do formulário pode vir por fluxos diferentes
             // então usamos o returnTo para verificar para onde ir
@@ -132,10 +126,13 @@ class ModuleForm extends Component {
         <BreadcrumbStyled>
           <Breadcrumb.Item>
             <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : "/modulos"
+              onClick={() =>
+                this.props.history.push(
+                  this.props.location.state &&
+                  this.props.location.state.returnTo
+                    ? this.props.location.state.returnTo.pathname
+                    : "/modulos"
+                )
               }
             >
               <Icon type="arrow-left" />
@@ -145,7 +142,7 @@ class ModuleForm extends Component {
         </BreadcrumbStyled>
         <Affix offsetTop={65}>
           <PainelHeader
-            title={[ this.state.editMode ? "Editando" : "Novo", " Módulo" ]}
+            title={[this.state.editMode ? "Editando" : "Novo", " Módulo"]}
           >
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
               Salvar módulo
@@ -153,7 +150,6 @@ class ModuleForm extends Component {
           </PainelHeader>
         </Affix>
         <Form onChange={this.handleFormState}>
-
           <Form.Item label="Nome" {...formItemLayout}>
             {getFieldDecorator("nome", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
@@ -165,7 +161,6 @@ class ModuleForm extends Component {
             {getFieldDecorator("entidades", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.entidades
-
             })(
               <Select
                 name="entidades"
@@ -176,21 +171,20 @@ class ModuleForm extends Component {
                 placeholder="Selecione uma entidade..."
                 onChange={e =>
                   this.handleFormState({
-                    target: { name: "entidades", value: e}
+                    target: { name: "entidades", value: e }
                   })
                 }
               >
-                { this.state.listEntity &&
-                    this.state.listEntity.map(
-                      (ent, index) => (
-                        <Option key={index} value={ent._id}> {ent.nome} </Option>
-                      )
-                    )
-                }
+                {this.state.listEntity &&
+                  this.state.listEntity.map((ent, index) => (
+                    <Option key={index} value={ent._id}>
+                      {" "}
+                      {ent.nome}{" "}
+                    </Option>
+                  ))}
               </Select>
             )}
           </Form.Item>
-
         </Form>
       </div>
     );

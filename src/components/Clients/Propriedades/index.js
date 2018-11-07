@@ -167,7 +167,13 @@ class Properties extends Component {
           <span>
             <Button
               size="small"
-              href={`/clientes/${this.state.client_id}/propriedades/${record._id}/edit`}
+              onClick={() =>
+                this.props.history.push(
+                  `/clientes/${this.state.client_id}/propriedades/${
+                    record._id
+                  }/edit`
+                )
+              }
             >
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
@@ -192,8 +198,13 @@ class Properties extends Component {
             <Tooltip title="Veja os talhões da propriedade">
               <Button
                 size="small"
-                href={`/clientes/${this.state.client_id}/propriedades/${
-                  record._id}/talhoes`}
+                onClick={() =>
+                  this.props.history.push(
+                    `/clientes/${this.state.client_id}/propriedades/${
+                      record._id
+                    }/talhoes`
+                  )
+                }
               >
                 <FontAwesomeIcon icon="map-marked-alt" size="lg" />
               </Button>
@@ -247,7 +258,11 @@ class Properties extends Component {
                 <Button
                   type="primary"
                   icon="plus"
-                  href={`/clientes/${this.state.client_id}/propriedades/new`}
+                  onClick={() =>
+                    this.props.history.push(
+                      `/clientes/${this.state.client_id}/propriedades/new`
+                    )
+                  }
                 >
                   Adicionar
                 </Button>

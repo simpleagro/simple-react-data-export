@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
 
@@ -31,7 +31,7 @@ class Entities extends Component {
 
     this.setState(prev => ({
       ...prev,
-      list: data,
+      list: data.docs,
       loadingData: false,
       pagination: {
         total: data.total
@@ -129,10 +129,15 @@ class Entities extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/entidades/${record._id}/edit`}>
+            <Button
+              size="small"
+              onClick={() =>
+                this.props.history.push(`/entidades/${record._id}/edit`)
+              }
+            >
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
-            
+
             <Divider
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
@@ -174,7 +179,11 @@ class Entities extends Component {
     return (
       <div>
         <PainelHeader title="Entidades">
-          <Button type="primary" icon="plus" href="/entidades/new">
+          <Button
+            type="primary"
+            icon="plus"
+            onClick={() => this.props.history.push("/entidades/new")}
+          >
             Adicionar
           </Button>
         </PainelHeader>

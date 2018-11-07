@@ -143,7 +143,6 @@ class ClientPropertySpotForm extends Component {
   };
 
   adicionarPontosAoMapa() {
-
     let draw = false;
     let edit = false;
 
@@ -151,7 +150,8 @@ class ClientPropertySpotForm extends Component {
       case true:
         if (
           (this.state.formData.coordenadas &&
-          this.state.formData.coordenadas.length === 0) || this.state.formData.coordenadas === undefined
+            this.state.formData.coordenadas.length === 0) ||
+          this.state.formData.coordenadas === undefined
         )
           draw = true;
         else edit = true;
@@ -202,9 +202,13 @@ class ClientPropertySpotForm extends Component {
         <BreadcrumbStyled>
           <Breadcrumb.Item>
             <Button
-              href={`/clientes/${
-                this.props.match.params.client_id
-              }/propriedades/${this.props.match.params.property_id}/talhoes`}
+              onClick={() =>
+                this.props.history.push(
+                  `/clientes/${
+                    this.props.match.params.client_id
+                  }/propriedades/${this.props.match.params.property_id}/talhoes`
+                )
+              }
             >
               <Icon type="arrow-left" />
               Voltar para a tela anterior
