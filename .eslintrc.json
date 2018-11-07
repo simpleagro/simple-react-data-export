@@ -10,6 +10,8 @@
   "plugins": ["react", "jsx-a11y", "import"],
   "rules": {
     "react/forbid-prop-types": "off",
-    "react/require-default-props": "off"
+    "react/require-default-props": "off",
+    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+    "react/jsx-one-expression-per-line": [1, { "allow": "literal" }]
   }
 }
