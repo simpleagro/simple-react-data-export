@@ -107,11 +107,11 @@ class ClientPropertySpotForm extends Component {
             const created = await ClientSpotService.create(
               this.state.client_id
             )(this.state.property_id)(this.state.formData);
-            this.setState({
+            this.setState(prev => ({...prev,
               openForm: false,
               formData: {},
               editMode: false
-            });
+            }));
             flashWithSuccess();
             this.props.history.push(
               `/clientes/${this.props.match.params.client_id}/propriedades/${

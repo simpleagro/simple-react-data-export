@@ -32,7 +32,11 @@ class Properties extends Component {
     this.state = {
       list: [],
       loadingData: true,
-      pagination: false,
+      pagination: {
+        showSizeChanger: true,
+        defaultPageSize: 10,
+        pageSizeOptions: ["10", "25", "50", "100"]
+      },
       client_id: this.props.match.params.client_id,
       client_data: {}
     };
@@ -48,8 +52,11 @@ class Properties extends Component {
 
     this.setState(prev => ({
       ...prev,
-      list: data,
+      list: data.docs,
       loadingData: false,
+      pagination: {
+        total: data.total
+      },
       client_data: clientData
     }));
   }
@@ -148,8 +155,7 @@ class Properties extends Component {
             title={`Tem certeza em ${statusTxt} o propriedade?`}
             onConfirm={e => this.changeStatus(record._id, !record.status)}
             okText="Sim"
-            cancelText="Não"
-          >
+            cancelText="Não">
             <Tooltip title={`${statusTxt.toUpperCase()} a propriedade`}>
               <Button size="small">
                 <FontAwesomeIcon icon={statusBtn} size="lg" />
@@ -173,8 +179,7 @@ class Properties extends Component {
                     record._id
                   }/edit`
                 )
-              }
-            >
+              }>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
             <Divider
@@ -185,8 +190,7 @@ class Properties extends Component {
               title={`Tem certeza em excluir a propriedade?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
-              cancelText="Não"
-            >
+              cancelText="Não">
               <Button size="small">
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
@@ -204,8 +208,7 @@ class Properties extends Component {
                       record._id
                     }/talhoes`
                   )
-                }
-              >
+                }>
                 <FontAwesomeIcon icon="map-marked-alt" size="lg" />
               </Button>
             </Tooltip>
@@ -233,8 +236,7 @@ class Properties extends Component {
               style={{
                 boxShadow: "0px 8px 0px 0px #009d55 inset",
                 color: "#009d55"
-              }}
-            >
+              }}>
               <p>{`Cliente: ${this.state.client_data.nome}`}</p>
               <p>{`CPF/CNPJ: ${this.state.client_data.cpf_cnpj}`}</p>
               <Button
@@ -244,8 +246,7 @@ class Properties extends Component {
                     `/clientes/${this.state.client_id}/edit`,
                     { returnTo: this.props.history.location }
                   );
-                }}
-              >
+                }}>
                 <Icon type="edit" /> Editar
               </Button>
             </Card>
@@ -262,12 +263,10 @@ class Properties extends Component {
                     this.props.history.push(
                       `/clientes/${this.state.client_id}/propriedades/new`
                     )
-                  }
-                >
+                  }>
                   Adicionar
                 </Button>
-              }
-            >
+              }>
               <SimpleTable
                 pagination={this.state.pagination}
                 spinning={this.state.loadingData}

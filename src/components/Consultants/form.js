@@ -54,8 +54,6 @@ class ConsultantForm extends Component {
           ...prev,
           formData,
           editMode: id ? true : false,
-          listCargo: dataConsultants.docs,
-          listUser: dataUsers.docs
         }));
     }
 

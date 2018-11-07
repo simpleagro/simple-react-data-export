@@ -34,7 +34,11 @@ class Plots extends Component {
     this.state = {
       list: [],
       loadingData: true,
-      pagination: false,
+      pagination: {
+        showSizeChanger: true,
+        defaultPageSize: 10,
+        pageSizeOptions: ["10", "25", "50", "100"]
+      },
       property_id: this.props.match.params.property_id,
       client_id: this.props.match.params.client_id,
       property_data: {}
@@ -56,7 +60,7 @@ class Plots extends Component {
       )(this.props.match.params.property_id);
       this.setState(prev => ({
         ...prev,
-        list: data,
+        list: data.docs,
         loadingData: false,
         property_data: propertyData
       }));
@@ -136,7 +140,7 @@ class Plots extends Component {
         else return 1;
       },
       render: (text, record) => {
-        return record.coordenadas.length < 3 ? (
+        return !record.coordenadas || record.coordenadas.length < 3 ? (
           <Tooltip title="Este talhão ainda não possui pontos de mapeamento">
             <FontAwesomeIcon
               icon="exclamation-triangle"
