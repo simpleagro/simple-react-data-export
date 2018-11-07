@@ -173,9 +173,11 @@ class ClientPropertyForm extends Component {
         <BreadcrumbStyled>
           <Breadcrumb.Item>
             <Button
-              href={`/clientes/${
-                this.props.match.params.client_id
-              }/propriedades`}
+              onClick={() =>
+                this.props.history.push(
+                  `/clientes/${this.props.match.params.client_id}/propriedades`
+                )
+              }
             >
               <Icon type="arrow-left" />
               Voltar para a tela anterior
@@ -417,33 +419,33 @@ class ClientPropertyForm extends Component {
                   Digite o nome da região ou cidade no campo abaixo e utilize o
                   marcador em vermelho para pegar a latitude e longitude:
                 </p>
-                <div style={{position: 'relative'}}>
-                <SimpleMap
-                  polygonData={
-                    this.state.formData.coordenadas
-                      ? this.state.formData.coordenadas.map(
-                          c => new google.maps.LatLng(c.latitude, c.longitude)
-                        )
-                      : []
-                  }
-                  adicionarPontosAoMapa={() => this.adicionarPontosAoMapa()}
-                  salvarMapa={coordenadas => this.salvarMapa(coordenadas)}
-                  drawingMap={this.state.drawingMap}
-                  editingMap={this.state.editingMap}
-                  latitude={this.state.formData.latitude}
-                  longitude={this.state.formData.longitude}
-                  containerElement={<div style={{ height: `400px` }} />}
-                  mapElement={<div style={{ height: `100%` }} />}
-                  setGPS={(latitude, longitude) =>
-                    this.setGPS(latitude, longitude)
-                  }
-                  limparMapa={() =>
-                    this.setState(prev => ({
-                      ...prev,
-                      formData: { ...prev.formData, coordenadas: [] }
-                    }))
-                  }
-                />
+                <div style={{ position: "relative" }}>
+                  <SimpleMap
+                    polygonData={
+                      this.state.formData.coordenadas
+                        ? this.state.formData.coordenadas.map(
+                            c => new google.maps.LatLng(c.latitude, c.longitude)
+                          )
+                        : []
+                    }
+                    adicionarPontosAoMapa={() => this.adicionarPontosAoMapa()}
+                    salvarMapa={coordenadas => this.salvarMapa(coordenadas)}
+                    drawingMap={this.state.drawingMap}
+                    editingMap={this.state.editingMap}
+                    latitude={this.state.formData.latitude}
+                    longitude={this.state.formData.longitude}
+                    containerElement={<div style={{ height: `400px` }} />}
+                    mapElement={<div style={{ height: `100%` }} />}
+                    setGPS={(latitude, longitude) =>
+                      this.setGPS(latitude, longitude)
+                    }
+                    limparMapa={() =>
+                      this.setState(prev => ({
+                        ...prev,
+                        formData: { ...prev.formData, coordenadas: [] }
+                      }))
+                    }
+                  />
                 </div>
               </Col>
             </Row>

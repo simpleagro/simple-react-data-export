@@ -132,10 +132,13 @@ class UserForm extends Component {
         <BreadcrumbStyled>
           <Breadcrumb.Item>
             <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : "/usuarios"
+              onClick={() =>
+                this.props.history.push(
+                  this.props.location.state &&
+                  this.props.location.state.returnTo
+                    ? this.props.location.state.returnTo.pathname
+                    : "/usuarios"
+                )
               }
             >
               <Icon type="arrow-left" />

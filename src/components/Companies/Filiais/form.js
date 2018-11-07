@@ -1,12 +1,5 @@
 import React, { Component } from "react";
-import {
-  Breadcrumb,
-  Button,
-  Icon,
-  Input,
-  Form,
-  Affix
-} from "antd";
+import { Breadcrumb, Button, Icon, Input, Form, Affix } from "antd";
 import styled from "styled-components";
 
 import { flashWithSuccess } from "../../common/FlashMessages";
@@ -48,7 +41,7 @@ class CompanyBranchForm extends Component {
     setTimeout(() => {
       this.titleInput.focus();
     }, 0);
-  }  
+  }
 
   handleFormState = async event => {
     console.log(event);
@@ -108,15 +101,17 @@ class CompanyBranchForm extends Component {
       labelCol: { span: 3 },
       wrapperCol: { span: 12 }
     };
-    
+
     return (
       <div>
         <BreadcrumbStyled>
           <Breadcrumb.Item>
             <Button
-              href={`/empresas/${
-                this.props.match.params.company_id
-              }/filiais`}
+              onClick={() =>
+                this.props.history.push(
+                  `/empresas/${this.props.match.params.company_id}/filiais`
+                )
+              }
             >
               <Icon type="arrow-left" />
               Voltar para a tela anterior
@@ -125,23 +120,25 @@ class CompanyBranchForm extends Component {
         </BreadcrumbStyled>
         <Affix offsetTop={65}>
           <PainelHeader
-            title={
-              this.state.editMode ? "Editando Filial" : "Nova Filial"
-            }
+            title={this.state.editMode ? "Editando Filial" : "Nova Filial"}
           >
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
               Salvar Filial
             </Button>
           </PainelHeader>
         </Affix>
-        
-        <Form onChange={this.handleFormState}>
 
+        <Form onChange={this.handleFormState}>
           <Form.Item label="Razão Social" {...formItemLayout}>
             {getFieldDecorator("razao_social", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.razao_social
-            })(<Input name="razao_social" ref={input => (this.titleInput = input)} />)}
+            })(
+              <Input
+                name="razao_social"
+                ref={input => (this.titleInput = input)}
+              />
+            )}
           </Form.Item>
 
           <Form.Item label="Nome Fantasia" {...formItemLayout}>
@@ -157,7 +154,6 @@ class CompanyBranchForm extends Component {
               initialValue: this.state.formData.cpf_cnpj
             })(<Input name="cpf_cnpj" />)}
           </Form.Item>
-
         </Form>
       </div>
     );

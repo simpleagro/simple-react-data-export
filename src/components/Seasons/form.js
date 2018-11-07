@@ -111,10 +111,13 @@ class SeasonForm extends Component {
         <BreadcrumbStyled>
           <Breadcrumb.Item>
             <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : "/safras"
+              onClick={() =>
+                this.props.history.push(
+                  this.props.location.state &&
+                  this.props.location.state.returnTo
+                    ? this.props.location.state.returnTo.pathname
+                    : "/safras"
+                )
               }
             >
               <Icon type="arrow-left" />

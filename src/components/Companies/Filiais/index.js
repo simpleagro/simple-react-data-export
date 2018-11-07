@@ -161,7 +161,13 @@ class Companies extends Component {
           <span>
             <Button
               size="small"
-              href={`/empresas/${this.state.company_id}/filiais/${record._id}/edit`}
+              onClick={() =>
+                this.props.history.push(
+                  `/empresas/${this.state.company_id}/filiais/${
+                    record._id
+                  }/edit`
+                )
+              }
             >
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
@@ -232,7 +238,11 @@ class Companies extends Component {
                 <Button
                   type="primary"
                   icon="plus"
-                  href={`/empresas/${this.state.company_id}/filiais/new`}
+                  onClick={() =>
+                    this.props.history.push(
+                      `/empresas/${this.state.company_id}/filiais/new`
+                    )
+                  }
                 >
                   Adicionar
                 </Button>
@@ -248,7 +258,6 @@ class Companies extends Component {
             </Card>
           </Col>
         </Row>
-      
       </div>
     );
   }

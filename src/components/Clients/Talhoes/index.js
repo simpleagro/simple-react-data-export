@@ -138,7 +138,12 @@ class Plots extends Component {
       render: (text, record) => {
         return record.coordenadas.length < 3 ? (
           <Tooltip title="Este talhão ainda não possui pontos de mapeamento">
-            <FontAwesomeIcon icon="exclamation-triangle" size="1x" color="red" style={{marginRight: 8}}/>
+            <FontAwesomeIcon
+              icon="exclamation-triangle"
+              size="1x"
+              color="red"
+              style={{ marginRight: 8 }}
+            />
             {text}
           </Tooltip>
         ) : (
@@ -177,9 +182,13 @@ class Plots extends Component {
           <span>
             <Button
               size="small"
-              href={`/clientes/${this.state.client_id}/propriedades/${
-                this.state.property_id
-              }/talhoes/${record._id}/edit`}
+              onClick={() =>
+                this.props.history.push(
+                  `/clientes/${this.state.client_id}/propriedades/${
+                    this.state.property_id
+                  }/talhoes/${record._id}/edit`
+                )
+              }
             >
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
@@ -250,7 +259,9 @@ class Plots extends Component {
                 style={{ width: "100%" }}
                 onClick={() => {
                   this.props.history.push(
-                    `/clientes/${this.state.client_id}/propriedades/${this.state.property_id}/edit`,
+                    `/clientes/${this.state.client_id}/propriedades/${
+                      this.state.property_id
+                    }/edit`,
                     { returnTo: this.props.history.location }
                   );
                 }}
@@ -267,9 +278,14 @@ class Plots extends Component {
                 <Button
                   type="primary"
                   icon="plus"
-                  href={`/clientes/${this.state.client_id}/propriedades/${
-                    this.state.property_id
-                  }/talhoes/new`}
+                  onClick={() =>
+                    this.props.history.push(
+                      `/clientes/${this.state.client_id}/propriedades/${
+                        this.state.property_id
+                      }/talhoes/new`
+                    )
+                  }
+
                 >
                   Adicionar
                 </Button>

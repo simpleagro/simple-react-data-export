@@ -121,10 +121,13 @@ class UnitMeasureForm extends Component {
         <BreadcrumbStyled>
           <Breadcrumb.Item>
             <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : "/unidades-medidas"
+              onClick={() =>
+                this.props.history.push(
+                  this.props.location.state &&
+                  this.props.location.state.returnTo
+                    ? this.props.location.state.returnTo.pathname
+                    : "/unidades-medidas"
+                )
               }
             >
               <Icon type="arrow-left" />

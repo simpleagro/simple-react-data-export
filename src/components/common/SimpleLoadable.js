@@ -9,7 +9,10 @@ function Loading(props) {
     return (
       <div>
         Oopsss, não era para acontecer isso!{" "}
-        <Button type="default" href={`${window.location.href}`}>
+        <Button
+          type="default"
+          onClick={() => this.props.history.push(`${window.location.href}`)}
+        >
           Vamos carregar novamente...
         </Button>
       </div>
@@ -18,7 +21,10 @@ function Loading(props) {
     return (
       <div>
         Está meio lento né?{" "}
-        <Button type="default" href={`${window.location.href}`}>
+        <Button
+          type="default"
+          onClick={() => this.props.history.push(`${window.location.href}`)}
+        >
           Quer tentar novamente?
         </Button>
       </div>
