@@ -31,7 +31,7 @@ class Clients extends Component {
     });
 
     try {
-      const data = await ClientService.list();
+      const data = await ClientService.list(aqp);
       this.setState(prev => ({
         ...prev,
         list: data.docs,
@@ -226,6 +226,7 @@ class Clients extends Component {
   ];
 
   handleTableChange = (pagination, filter, sorter) => {
+
     const pager = { ...this.state.pagination };
     pager.current = pagination.current;
     this.setState({
