@@ -3,21 +3,13 @@ import locale from "antd/lib/date-picker/locale/pt_BR";
 import moment from "moment";
 import "moment/locale/pt-br";
 
-import { Breadcrumb, Button, Icon, Input, Form, Affix, DatePicker } from "antd";
-import styled from "styled-components";
+import { Button, Input, Form, Affix, DatePicker } from "antd";
 
 import { flashWithSuccess } from "../common/FlashMessages";
 import parseErrors from "../../lib/parseErrors";
 import { PainelHeader } from "../common/PainelHeader";
 import * as SeasonService from "../../services/seasons";
-const { MonthPicker, RangePicker, WeekPicker } = DatePicker;
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
+import { SimpleBreadCrumb } from "../common/SimpleBreadCrumb";
 
 class SeasonForm extends Component {
   constructor(props) {
@@ -63,7 +55,7 @@ class SeasonForm extends Component {
             flashWithSuccess("Sem alterações para salvar", " ");
 
           try {
-            const created = await SeasonService.create(this.state.formData);
+            await SeasonService.create(this.state.formData);
             this.setState({
               openForm: false,
               editMode: false
@@ -82,7 +74,7 @@ class SeasonForm extends Component {
           }
         } else {
           try {
-            const updated = await SeasonService.update(this.state.formData);
+            await SeasonService.update(this.state.formData);
             flashWithSuccess();
             // a chamada do formulário pode vir por fluxos diferentes
             // então usamos o returnTo para verificar para onde ir
@@ -108,24 +100,18 @@ class SeasonForm extends Component {
 
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : "/safras"
-              }
-            >
-              <Icon type="arrow-left" />
-              Voltar para tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={
+            this.props.location.state && this.props.location.state.returnTo
+              ? this.props.location.state.returnTo.pathname
+              : "/safras"
+          }
+          history={this.props.history}
+        />
+
         <Affix offsetTop={65}>
           <PainelHeader
-            title={this.state.editMode ? "Editando Safra" : "Nova Safra"}
-          >
+            title={this.state.editMode ? "Editando Safra" : "Nova Safra"}>
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
               Salvar Safra
             </Button>

@@ -1,5 +1,8 @@
 {
-  "eslint.enable": false,
+  "eslint.enable": true,
+  "prettier.eslintIntegration": true,
+  "prettier.bracketSpacing": true,
+  "prettier.jsxBracketSameLine": true,
   "files.exclude": {
     "**/.git": true,
     "**/.svn": true,
@@ -22,5 +25,5 @@
   "editor.fontFamily": "Fira Code",
   "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
   "javascript.format.insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces": true,
-  "javascript.format.insertSpaceAfterConstructor": true,
+  "javascript.format.insertSpaceAfterConstructor": true
 }

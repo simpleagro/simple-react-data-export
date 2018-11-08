@@ -1,20 +1,13 @@
 import React, { Component } from "react";
-import { Breadcrumb, Button, Icon, Input, Form, Select, Affix } from "antd";
-import styled from "styled-components";
+import { Button, Input, Form, Select, Affix } from "antd";
 
 import { flashWithSuccess } from "../common/FlashMessages";
 import parseErrors from "../../lib/parseErrors";
 import { PainelHeader } from "../common/PainelHeader";
 import * as UnitMeasuresService from "../../services/units-measures";
+import { SimpleBreadCrumb } from "../common/SimpleBreadCrumb";
 
 const Option = Select.Option;
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 class UnitMeasureForm extends Component {
   constructor(props) {
@@ -69,9 +62,7 @@ class UnitMeasureForm extends Component {
             flashWithSuccess("Sem alterações para salvar", " ");
 
           try {
-            const created = await UnitMeasuresService.create(
-              this.state.formData
-            );
+            await UnitMeasuresService.create(this.state.formData);
             this.setState({
               openForm: false,
               editMode: false
@@ -90,9 +81,7 @@ class UnitMeasureForm extends Component {
           }
         } else {
           try {
-            const updated = await UnitMeasuresService.update(
-              this.state.formData
-            );
+            await UnitMeasuresService.update(this.state.formData);
             flashWithSuccess();
             // a chamada do formulário pode vir por fluxos diferentes
             // então usamos o returnTo para verificar para onde ir
@@ -118,24 +107,18 @@ class UnitMeasureForm extends Component {
 
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : "/unidades-medidas"
-              }
-            >
-              <Icon type="arrow-left" />
-              Voltar para tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={
+            this.props.location.state && this.props.location.state.returnTo
+              ? this.props.location.state.returnTo.pathname
+              : "/unidades-medidas"
+          }
+          history={this.props.history}
+        />
+
         <Affix offsetTop={65}>
           <PainelHeader
-            title={this.state.editMode ? "Editando Unidade" : "Nova Unidade"}
-          >
+            title={this.state.editMode ? "Editando Unidade" : "Nova Unidade"}>
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
               Salvar unidade
             </Button>
@@ -174,8 +157,7 @@ class UnitMeasureForm extends Component {
                   this.handleFormState({
                     target: { name: "unidade_basica_id", value: e }
                   })
-                }
-              >
+                }>
                 {this.state.listUnidade &&
                   this.state.listUnidade.map((unidade, index) => (
                     <Option key={index} value={unidade._id}>

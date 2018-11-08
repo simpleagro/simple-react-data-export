@@ -1,29 +1,19 @@
 import React, { Component } from "react";
 import {
-  Breadcrumb,
   Button,
-  Icon,
   Input,
   Form,
   Select,
   Affix,
   Checkbox
 } from "antd";
-import styled from "styled-components";
 
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
 import * as ClientService from "../../../services/clients";
-
+import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 const Option = Select.Option;
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 class ClientForm extends Component {
   constructor(props) {
@@ -91,7 +81,7 @@ class ClientForm extends Component {
           }
         } else {
           try {
-            const updated = await ClientService.update(this.state.formData);
+            await ClientService.update(this.state.formData);
             flashWithSuccess();
             // a chamada do formulário pode vir por fluxos diferentes
             // então usamos o returnTo para verificar para onde ir
@@ -117,31 +107,23 @@ class ClientForm extends Component {
 
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : "/clientes"
-              }
-            >
-              <Icon type="arrow-left" />
-              Voltar para tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={
+            this.props.location.state && this.props.location.state.returnTo
+              ? this.props.location.state.returnTo.pathname
+              : "/clientes"
+          }
+          history={this.props.history}
+        />
         <Affix offsetTop={65}>
           <PainelHeader
-            title={this.state.editMode ? "Editando Cliente" : "Novo Cliente"}
-          >
+            title={this.state.editMode ? "Editando Cliente" : "Novo Cliente"}>
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
               Salvar Cliente
             </Button>
           </PainelHeader>
         </Affix>
         <Form onChange={this.handleFormState}>
-
           <Form.Item label="Nome" {...formItemLayout}>
             {getFieldDecorator("nome", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
@@ -164,8 +146,7 @@ class ClientForm extends Component {
                   this.handleFormState({
                     target: { name: "tipo", value: e }
                   })
-                }
-              >
+                }>
                 <Option value="PRODUTOR">Produtor</Option>
                 <Option value="COOPERADO">Cooperado</Option>
                 <Option value="DISTRIBUIDOR">Distribuidor</Option>
@@ -215,8 +196,7 @@ class ClientForm extends Component {
           <Form.Item
             label="Gerenciar Cateira por Propriedade?"
             labelCol={{ span: 4 }}
-            wrapperCol={{ span: 12 }}
-          >
+            wrapperCol={{ span: 12 }}>
             {getFieldDecorator("gerenciarCarteiraPorPropriedade", {
               // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.gerenciarCarteiraPorPropriedade
@@ -230,8 +210,7 @@ class ClientForm extends Component {
                       value: e.target.checked
                     }
                   })
-                }
-              >
+                }>
                 Sim
               </Checkbox>
             )}
@@ -250,7 +229,7 @@ class ClientForm extends Component {
         .replace(/[a-zA-Z|$|\s]+/, "")
         .replace(/[.]/g, "")
         .replace(/[,]/g, ".")
-        .replace(/(\d)(?=(\d{3})+\,)/g, "$1.");
+        .replace(/(\d)(?=(\d{3})+,)/g, "$1.");
 
     this.props.form.setFieldsValue({
       credito: formatedVal

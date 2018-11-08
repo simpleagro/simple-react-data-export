@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
+import { Divider, Button, Icon, Popconfirm, Tooltip } from "antd";
 
 import * as UserService from "../../services/users";
 import SimpleTable from "../common/SimpleTable";
@@ -102,8 +102,8 @@ class Users extends Component {
     },
     {
       title: "Grupo",
-      dataIndex: "grupo",
-      key: "grupo",
+      dataIndex: "grupo_id.nome",
+      key: "grupo_id.nome",
       render: text => text
     },
     {
@@ -135,10 +135,15 @@ class Users extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/usuarios/${record._id}/edit`}>
+            <Button
+              size="small"
+              onClick={() =>
+                this.props.history.push(`/usuarios/${record._id}/edit`)
+              }
+            >
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
-            
+
             <Divider
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
@@ -180,7 +185,11 @@ class Users extends Component {
     return (
       <div>
         <PainelHeader title="Usuários">
-          <Button type="primary" icon="plus" href="/usuarios/new">
+          <Button
+            type="primary"
+            icon="plus"
+            onClick={() => this.props.history.push("/usuarios/new")}
+          >
             Adicionar
           </Button>
         </PainelHeader>

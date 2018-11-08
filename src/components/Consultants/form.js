@@ -1,30 +1,14 @@
 import React, { Component } from "react";
-import {
-  Breadcrumb,
-  Button,
-  Icon,
-  Input,
-  Form,
-  Select,
-  Affix,
-  Steps
-} from "antd";
-import styled from "styled-components";
+import { Button, Input, Form, Select, Affix } from "antd";
 
 import { flashWithSuccess } from "../common/FlashMessages";
 import parseErrors from "../../lib/parseErrors";
 import { PainelHeader } from "../common/PainelHeader";
 import * as ConsultantsService from "../../services/consultants";
 import * as UsersService from "../../services/users";
+import { SimpleBreadCrumb } from "../common/SimpleBreadCrumb";
 
 const Option = Select.Option;
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 class ConsultantForm extends Component {
   constructor(props) {
@@ -53,9 +37,7 @@ class ConsultantForm extends Component {
         this.setState(prev => ({
           ...prev,
           formData,
-          editMode: id ? true : false,
-          listCargo: dataConsultants.docs,
-          listUser: dataUsers.docs
+          editMode: id ? true : false
         }));
     }
 
@@ -80,9 +62,7 @@ class ConsultantForm extends Component {
             flashWithSuccess("Sem alterações para salvar", " ");
 
           try {
-            const created = await ConsultantsService.create(
-              this.state.formData
-            );
+            await ConsultantsService.create(this.state.formData);
             this.setState({
               openForm: false,
               editMode: false
@@ -101,9 +81,7 @@ class ConsultantForm extends Component {
           }
         } else {
           try {
-            const updated = await ConsultantsService.update(
-              this.state.formData
-            );
+            await ConsultantsService.update(this.state.formData);
             flashWithSuccess();
             // a chamada do formulário pode vir por fluxos diferentes
             // então usamos o returnTo para verificar para onde ir
@@ -142,22 +120,22 @@ class ConsultantForm extends Component {
     this.setState(prevState => ({
       formData: {
         ...prevState.formData,
-        login: userLogin,
+        login: userLogin
       }
     }));
   };
 
-  removeGerent = (cargo) => {
-    if(cargo === "GERENTE"){
-      this.setState((prevState) => ({
+  removeGerent = cargo => {
+    if (cargo === "GERENTE") {
+      this.setState(prevState => ({
         formData: {
           ...prevState.formData,
-          gerente_id: null,
+          gerente_id: null
         }
       }));
-      this.props.form.setFields({gerente_id : ""});
+      this.props.form.setFields({ gerente_id: "" });
     }
-  }
+  };
 
   render() {
     const { getFieldDecorator } = this.props.form;
@@ -168,26 +146,19 @@ class ConsultantForm extends Component {
 
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : "/consultores"
-              }
-            >
-              <Icon type="arrow-left" />
-              Voltar para tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={
+            this.props.location.state && this.props.location.state.returnTo
+              ? this.props.location.state.returnTo.pathname
+              : "/consultores"
+          }
+          history={this.props.history}
+        />
         <Affix offsetTop={65}>
           <PainelHeader
             title={
               this.state.editMode ? "Editando Consultor" : "Novo Consultor"
-            }
-          >
+            }>
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
               Salvar consultor
             </Button>
@@ -208,13 +179,12 @@ class ConsultantForm extends Component {
                 showSearch
                 style={{ width: 200 }}
                 placeholder="Selecione um usuário..."
-                onChange={e => (
+                onChange={e => {
                   this.handleFormState({
                     target: { name: "usuario_id", value: e }
-                  }),
-                  this.setUser(e)
-                )}
-              >
+                  });
+                  this.setUser(e);
+                }}>
                 {this.state.listUser &&
                   this.state.listUser.map((user, index) => (
                     <Option key={index} value={user.nome}>
@@ -274,8 +244,7 @@ class ConsultantForm extends Component {
                     this.handleFormState({
                       target: { name: "tipoLogin", value: e }
                     })
-                  }
-                >
+                  }>
                   <Option value="API">API</Option>
                   <Option value="AD">AD</Option>
                 </Select>
@@ -313,13 +282,12 @@ class ConsultantForm extends Component {
                 style={{ width: 330 }}
                 placeholder="Selecione um cargo..."
                 //mode="multiple"
-                onChange={e => (
+                onChange={e => {
                   this.handleFormState({
                     target: { name: "cargo", value: e }
-                  }),
-                  this.removeGerent(e)
-                )}
-              >
+                  });
+                  this.removeGerent(e);
+                }}>
                 <Option value="CONSULTOR">Consultor</Option>
                 <Option value="GERENTE">Gerente</Option>
                 <Option value="AP">AP</Option>
@@ -361,8 +329,7 @@ class ConsultantForm extends Component {
                   this.handleFormState({
                     target: { name: "gerente_id", value: e }
                   })
-                }
-              >
+                }>
                 {this.state.listCargo &&
                   this.state.listCargo.map(
                     (cargo, index) =>
@@ -392,8 +359,7 @@ class ConsultantForm extends Component {
                   this.handleFormState({
                     target: { name: "tipo", value: e }
                   })
-                }
-              >
+                }>
                 <Option value="PRODUCAO">Produção</Option>
                 <Option value="COMERCIAL">Comercial</Option>
               </Select>

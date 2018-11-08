@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
+import { Divider, Button, Icon, Popconfirm, Tooltip } from "antd";
 
 import * as CompanyService from "../../../services/companies";
 import SimpleTable from "../../common/SimpleTable";
@@ -141,9 +141,14 @@ class Companies extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/empresas/${record._id}/edit`}>
+            <Button
+              size="small"
+              onClick={() =>
+                this.props.history.push(`/empresas/${record._id}/edit`)
+              }
+            >
               <Icon type="edit" style={{ fontSize: "16px" }} />
-            </Button>            
+            </Button>
             <Divider
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
@@ -167,7 +172,9 @@ class Companies extends Component {
             <Tooltip title="Veja as filiais da empresa">
               <Button
                 size="small"
-                href={`/empresas/${record._id}/filiais`}
+                onClick={() =>
+                  this.props.history.push(`/empresas/${record._id}/filiais`)
+                }
               >
                 <FontAwesomeIcon icon="book" size="lg" />
               </Button>
@@ -175,8 +182,7 @@ class Companies extends Component {
             <Divider
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
-            >
-            </Divider>
+            />
           </span>
         );
       }
@@ -199,7 +205,11 @@ class Companies extends Component {
     return (
       <div>
         <PainelHeader title="Empresas">
-          <Button type="primary" icon="plus" href="/empresas/new">
+          <Button
+            type="primary"
+            icon="plus"
+            onClick={() => this.props.history.push("/empresas/new")}
+          >
             Adicionar
           </Button>
         </PainelHeader>

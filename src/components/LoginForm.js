@@ -62,6 +62,7 @@ class LoginForm extends Component {
           notification.success({
             message: `Seja bem vindo, ${response.data.user.nome}`
           });
+          this.setState({ isLoading: false });
           this.props.history.push(this.state.from.pathname);
         } catch (error) {
           if (
@@ -72,7 +73,6 @@ class LoginForm extends Component {
           )
             notification.error({ message: error.response.data.error });
           else notification.error({ message: error.toString() });
-        } finally {
           this.setState({ isLoading: false });
         }
       }

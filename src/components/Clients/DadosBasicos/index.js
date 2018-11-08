@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
+import { Divider, Button, Icon, Popconfirm, Tooltip } from "antd";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 
@@ -31,7 +31,7 @@ class Clients extends Component {
     });
 
     try {
-      const data = await ClientService.list();
+      const data = await ClientService.list(aqp);
       this.setState(prev => ({
         ...prev,
         list: data.docs,
@@ -166,7 +166,12 @@ class Clients extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/clientes/${record._id}/edit`}>
+            <Button
+              size="small"
+              onClick={() =>
+                this.props.history.push(`/clientes/${record._id}/edit`)
+              }
+            >
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
             <Divider
@@ -190,7 +195,11 @@ class Clients extends Component {
             <Tooltip title="Veja as propriedades do cliente">
               <Button
                 size="small"
-                href={`/clientes/${record._id}/propriedades`}
+                onClick={() =>
+                  this.props.history.push(
+                    `/clientes/${record._id}/propriedades`
+                  )
+                }
               >
                 <FontAwesomeIcon icon="list" size="lg" />
               </Button>
@@ -217,6 +226,7 @@ class Clients extends Component {
   ];
 
   handleTableChange = (pagination, filter, sorter) => {
+
     const pager = { ...this.state.pagination };
     pager.current = pagination.current;
     this.setState({
@@ -232,7 +242,11 @@ class Clients extends Component {
     return (
       <div>
         <PainelHeader title="Clientes">
-          <Button type="primary" icon="plus" href="/clientes/new">
+          <Button
+            type="primary"
+            icon="plus"
+            onClick={() => this.props.history.push("/clientes/new")}
+          >
             Adicionar
           </Button>
         </PainelHeader>

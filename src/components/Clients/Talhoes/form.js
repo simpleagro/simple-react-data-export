@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import {
-  Breadcrumb,
   Button,
   Icon,
   Input,
@@ -19,15 +18,9 @@ import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
 import * as ClientSpotService from "../../../services/clients.plots";
 import { SimpleMap } from "../../SimpleMap";
+import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 
 const google = window.google; // é necessário para inicializar corretamente
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 const CardStyled = styled(Card)`
   background: #ececec;
@@ -107,11 +100,12 @@ class ClientPropertySpotForm extends Component {
             const created = await ClientSpotService.create(
               this.state.client_id
             )(this.state.property_id)(this.state.formData);
-            this.setState({
+            this.setState(prev => ({
+              ...prev,
               openForm: false,
               formData: {},
               editMode: false
-            });
+            }));
             flashWithSuccess();
             this.props.history.push(
               `/clientes/${this.props.match.params.client_id}/propriedades/${
@@ -143,7 +137,6 @@ class ClientPropertySpotForm extends Component {
   };
 
   adicionarPontosAoMapa() {
-
     let draw = false;
     let edit = false;
 
@@ -151,7 +144,8 @@ class ClientPropertySpotForm extends Component {
       case true:
         if (
           (this.state.formData.coordenadas &&
-          this.state.formData.coordenadas.length === 0) || this.state.formData.coordenadas === undefined
+            this.state.formData.coordenadas.length === 0) ||
+          this.state.formData.coordenadas === undefined
         )
           draw = true;
         else edit = true;
@@ -199,22 +193,15 @@ class ClientPropertySpotForm extends Component {
 
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              href={`/clientes/${
-                this.props.match.params.client_id
-              }/propriedades/${this.props.match.params.property_id}/talhoes`}
-            >
-              <Icon type="arrow-left" />
-              Voltar para a tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={`/clientes/${this.props.match.params.client_id}/propriedades/${
+            this.props.match.params.property_id
+          }/talhoes`}
+          history={this.props.history}
+        />
         <Affix offsetTop={65}>
           <PainelHeader
-            title={this.state.editMode ? "Editando Talhão" : "Novo Talhão"}
-          >
+            title={this.state.editMode ? "Editando Talhão" : "Novo Talhão"}>
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
               Salvar Talhão
             </Button>
@@ -230,8 +217,7 @@ class ClientPropertySpotForm extends Component {
           <Form.Item
             label="Área"
             labelCol={{ span: 3 }}
-            wrapperCol={{ span: 3 }}
-          >
+            wrapperCol={{ span: 3 }}>
             {getFieldDecorator("area", {
               initialValue: this.state.formData.area
             })(<Input type="number" name="area" addonAfter="ha" />)}

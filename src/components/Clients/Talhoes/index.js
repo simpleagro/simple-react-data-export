@@ -1,32 +1,25 @@
 import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  Breadcrumb,
   Card,
   Divider,
   Button,
   Icon,
   Popconfirm,
-  Breadcrumb,
   Tooltip,
   Row,
   Col
 } from "antd";
-import styled from "styled-components";
 
 import * as ClientsPropertyService from "../../../services/clients.properties";
 import * as ClientsPlotsService from "../../../services/clients.plots";
-// import * as TalhoesService from "../../../services/clients.talhoes";
+
 import SimpleTable from "../../common/SimpleTable";
-// import Form from "./form";
+
 import { flashWithSuccess, flashWithError } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
+import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 
 class Plots extends Component {
   constructor(props) {
@@ -34,7 +27,11 @@ class Plots extends Component {
     this.state = {
       list: [],
       loadingData: true,
-      pagination: false,
+      pagination: {
+        showSizeChanger: true,
+        defaultPageSize: 10,
+        pageSizeOptions: ["10", "25", "50", "100"]
+      },
       property_id: this.props.match.params.property_id,
       client_id: this.props.match.params.client_id,
       property_data: {}
@@ -56,7 +53,7 @@ class Plots extends Component {
       )(this.props.match.params.property_id);
       this.setState(prev => ({
         ...prev,
-        list: data,
+        list: data.docs,
         loadingData: false,
         property_data: propertyData
       }));
@@ -136,9 +133,14 @@ class Plots extends Component {
         else return 1;
       },
       render: (text, record) => {
-        return record.coordenadas.length < 3 ? (
+        return !record.coordenadas || record.coordenadas.length < 3 ? (
           <Tooltip title="Este talhão ainda não possui pontos de mapeamento">
-            <FontAwesomeIcon icon="exclamation-triangle" size="1x" color="red" style={{marginRight: 8}}/>
+            <FontAwesomeIcon
+              icon="exclamation-triangle"
+              size="1x"
+              color="red"
+              style={{ marginRight: 8 }}
+            />
             {text}
           </Tooltip>
         ) : (
@@ -158,8 +160,7 @@ class Plots extends Component {
             title={`Tem certeza em ${statusTxt} o talhão?`}
             onConfirm={e => this.changeStatus(record._id, !record.status)}
             okText="Sim"
-            cancelText="Não"
-          >
+            cancelText="Não">
             <Tooltip title={`${statusTxt.toUpperCase()} o talhão`}>
               <Button size="small">
                 <FontAwesomeIcon icon={statusBtn} size="lg" />
@@ -177,10 +178,13 @@ class Plots extends Component {
           <span>
             <Button
               size="small"
-              href={`/clientes/${this.state.client_id}/propriedades/${
-                this.state.property_id
-              }/talhoes/${record._id}/edit`}
-            >
+              onClick={() =>
+                this.props.history.push(
+                  `/clientes/${this.state.client_id}/propriedades/${
+                    this.state.property_id
+                  }/talhoes/${record._id}/edit`
+                )
+              }>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
             <Divider
@@ -191,8 +195,7 @@ class Plots extends Component {
               title={`Tem certeza em excluir o talhão?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
-              cancelText="Não"
-            >
+              cancelText="Não">
               <Button size="small">
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
@@ -210,7 +213,7 @@ class Plots extends Component {
   render() {
     return (
       <div>
-        <BreadcrumbStyled>
+        <SimpleBreadCrumb>
           <Breadcrumb.Item>
             <Button onClick={() => this.props.history.push("/clientes")}>
               Clientes
@@ -222,13 +225,12 @@ class Plots extends Component {
                 this.props.history.push(
                   `/clientes/${this.state.client_id}/propriedades`
                 )
-              }
-            >
+              }>
               Propriedades
             </Button>
           </Breadcrumb.Item>
           <Breadcrumb.Item>Talhões</Breadcrumb.Item>
-        </BreadcrumbStyled>
+        </SimpleBreadCrumb>
         <Row gutter={24}>
           <Col span={5}>
             <Card
@@ -236,8 +238,7 @@ class Plots extends Component {
               style={{
                 boxShadow: "0px 8px 0px 0px #009d55 inset",
                 color: "#009d55"
-              }}
-            >
+              }}>
               <p>{`Propriedade: ${this.state.property_data.nome}`}</p>
               <p>{`I.E: ${this.state.property_data.ie}`}</p>
               <p>
@@ -250,11 +251,12 @@ class Plots extends Component {
                 style={{ width: "100%" }}
                 onClick={() => {
                   this.props.history.push(
-                    `/clientes/${this.state.client_id}/propriedades/${this.state.property_id}/edit`,
+                    `/clientes/${this.state.client_id}/propriedades/${
+                      this.state.property_id
+                    }/edit`,
                     { returnTo: this.props.history.location }
                   );
-                }}
-              >
+                }}>
                 <Icon type="edit" /> Editar
               </Button>
             </Card>
@@ -267,14 +269,16 @@ class Plots extends Component {
                 <Button
                   type="primary"
                   icon="plus"
-                  href={`/clientes/${this.state.client_id}/propriedades/${
-                    this.state.property_id
-                  }/talhoes/new`}
-                >
+                  onClick={() =>
+                    this.props.history.push(
+                      `/clientes/${this.state.client_id}/propriedades/${
+                        this.state.property_id
+                      }/talhoes/new`
+                    )
+                  }>
                   Adicionar
                 </Button>
-              }
-            >
+              }>
               <SimpleTable
                 pagination={this.state.pagination}
                 spinning={this.state.loadingData}

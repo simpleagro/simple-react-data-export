@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
+import { Divider, Button, Icon, Popconfirm, Tooltip } from "antd";
 
 import * as ConsultantService from "../../services/consultants";
 import SimpleTable from "../common/SimpleTable";
@@ -151,10 +151,15 @@ class Consultants extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/consultores/${record._id}/edit`}>
+            <Button
+              size="small"
+              onClick={() =>
+                this.props.history.push(`/consultores/${record._id}/edit`)
+              }
+            >
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
-            
+
             <Divider
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
@@ -196,7 +201,11 @@ class Consultants extends Component {
     return (
       <div>
         <PainelHeader title="Consultores">
-          <Button type="primary" icon="plus" href="/consultores/new">
+          <Button
+            type="primary"
+            icon="plus"
+            onClick={() => this.props.history.push("/consultores/new")}
+          >
             Adicionar
           </Button>
         </PainelHeader>
