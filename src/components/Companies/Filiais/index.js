@@ -6,25 +6,17 @@ import {
   Button,
   Icon,
   Popconfirm,
-  Breadcrumb,
   Tooltip,
   Row,
   Col
 } from "antd";
-import styled from "styled-components";
 
 import * as CompaniesBranchService from "../../../services/companies.branchs";
 import * as CompaniesService from "../../../services/companies";
 import SimpleTable from "../../common/SimpleTable";
+import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 class Companies extends Component {
   constructor(props) {
@@ -142,8 +134,7 @@ class Companies extends Component {
             title={`Tem certeza em ${statusTxt} a filial?`}
             onConfirm={e => this.changeStatus(record._id, !record.status)}
             okText="Sim"
-            cancelText="Não"
-          >
+            cancelText="Não">
             <Tooltip title={`${statusTxt.toUpperCase()} a filial`}>
               <Button size="small">
                 <FontAwesomeIcon icon={statusBtn} size="lg" />
@@ -167,8 +158,7 @@ class Companies extends Component {
                     record._id
                   }/edit`
                 )
-              }
-            >
+              }>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
             <Divider
@@ -179,8 +169,7 @@ class Companies extends Component {
               title={`Tem certeza em excluir a filial?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
-              cancelText="Não"
-            >
+              cancelText="Não">
               <Button size="small">
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
@@ -198,14 +187,7 @@ class Companies extends Component {
   render() {
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button onClick={() => this.props.history.push("/empresas")}>
-              <Icon type="arrow-left" />
-              Voltar para a tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb to={"/empresas"} history={this.props.history} />
         <Row gutter={24}>
           <Col span={5}>
             <Card
@@ -213,8 +195,7 @@ class Companies extends Component {
               style={{
                 boxShadow: "0px 8px 0px 0px #009d55 inset",
                 color: "#009d55"
-              }}
-            >
+              }}>
               <p>{`Empresa: ${this.state.company_data.razao_social}`}</p>
               <p>{`CPF/CNPJ: ${this.state.company_data.cpf_cnpj}`}</p>
               <Button
@@ -224,8 +205,7 @@ class Companies extends Component {
                     `/empresas/${this.state.company_id}/edit`,
                     { returnTo: this.props.history.location }
                   );
-                }}
-              >
+                }}>
                 <Icon type="edit" /> Editar
               </Button>
             </Card>
@@ -242,12 +222,10 @@ class Companies extends Component {
                     this.props.history.push(
                       `/empresas/${this.state.company_id}/filiais/new`
                     )
-                  }
-                >
+                  }>
                   Adicionar
                 </Button>
-              }
-            >
+              }>
               <SimpleTable
                 pagination={this.state.pagination}
                 spinning={this.state.loadingData}

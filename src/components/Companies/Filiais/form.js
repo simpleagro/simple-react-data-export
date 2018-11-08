@@ -1,18 +1,11 @@
 import React, { Component } from "react";
-import { Breadcrumb, Button, Icon, Input, Form, Affix } from "antd";
-import styled from "styled-components";
+import { Button, Input, Form, Affix } from "antd";
 
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
+import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 import * as CompanyBranchService from "../../../services/companies.branchs";
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 class CompanyBranchForm extends Component {
   constructor(props) {
@@ -61,7 +54,7 @@ class CompanyBranchForm extends Component {
             flashWithSuccess("Sem alterações para salvar", " ");
 
           try {
-            const created = await CompanyBranchService.create(
+            await CompanyBranchService.create(
               this.state.company_id
             )(this.state.formData);
             this.setState({
@@ -79,7 +72,7 @@ class CompanyBranchForm extends Component {
           }
         } else {
           try {
-            const updated = await CompanyBranchService.update(
+            await CompanyBranchService.update(
               this.state.company_id
             )(this.state.formData);
             flashWithSuccess();
@@ -104,24 +97,14 @@ class CompanyBranchForm extends Component {
 
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              onClick={() =>
-                this.props.history.push(
-                  `/empresas/${this.props.match.params.company_id}/filiais`
-                )
-              }
-            >
-              <Icon type="arrow-left" />
-              Voltar para a tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={`/empresas/${this.props.match.params.company_id}/filiais`}
+          history={this.props.history}
+        />
+
         <Affix offsetTop={65}>
           <PainelHeader
-            title={this.state.editMode ? "Editando Filial" : "Nova Filial"}
-          >
+            title={this.state.editMode ? "Editando Filial" : "Nova Filial"}>
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
               Salvar Filial
             </Button>

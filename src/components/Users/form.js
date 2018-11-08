@@ -1,29 +1,12 @@
 import React, { Component } from "react";
-import {
-  Breadcrumb,
-  Button,
-  Icon,
-  Input,
-  Form,
-  Select,
-  Affix,
-  Steps
-} from "antd";
-import styled from "styled-components";
+import { Button, Input, Form, Select, Affix } from "antd";
 
 import { flashWithSuccess } from "../common/FlashMessages";
 import parseErrors from "../../lib/parseErrors";
 import { PainelHeader } from "../common/PainelHeader";
 import * as UsersService from "../../services/users";
-
+import { SimpleBreadCrumb } from "../common/SimpleBreadCrumb";
 const Option = Select.Option;
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 class UserForm extends Component {
   constructor(props) {
@@ -71,7 +54,7 @@ class UserForm extends Component {
             flashWithSuccess("Sem alterações para salvar", " ");
 
           try {
-            const created = await UsersService.create(this.state.formData);
+            await UsersService.create(this.state.formData);
             this.setState({
               openForm: false,
               editMode: false
@@ -90,7 +73,7 @@ class UserForm extends Component {
           }
         } else {
           try {
-            const updated = await UsersService.update(this.state.formData);
+            await UsersService.update(this.state.formData);
             flashWithSuccess();
             // a chamada do formulário pode vir por fluxos diferentes
             // então usamos o returnTo para verificar para onde ir
@@ -129,27 +112,18 @@ class UserForm extends Component {
 
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              onClick={() =>
-                this.props.history.push(
-                  this.props.location.state &&
-                  this.props.location.state.returnTo
-                    ? this.props.location.state.returnTo.pathname
-                    : "/usuarios"
-                )
-              }
-            >
-              <Icon type="arrow-left" />
-              Voltar para tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={
+            this.props.location.state && this.props.location.state.returnTo
+              ? this.props.location.state.returnTo.pathname
+              : "/usuarios"
+          }
+          history={this.props.history}
+        />
+
         <Affix offsetTop={65}>
           <PainelHeader
-            title={this.state.editMode ? "Editando Usuário" : "Novo Usuário"}
-          >
+            title={this.state.editMode ? "Editando Usuário" : "Novo Usuário"}>
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
               Salvar Usuário
             </Button>
@@ -193,8 +167,7 @@ class UserForm extends Component {
                   this.handleFormState({
                     target: { name: "filiais", value: e }
                   })
-                }
-              >
+                }>
                 <Option value="F1">Filial 1</Option>
                 <Option value="F2">Filial 2</Option>
               </Select>
@@ -216,8 +189,7 @@ class UserForm extends Component {
                   this.handleFormState({
                     target: { name: "tipoLogin", value: e }
                   })
-                }
-              >
+                }>
                 <Option value="API">API</Option>
                 <Option value="AD">AD</Option>
               </Select>
@@ -231,8 +203,7 @@ class UserForm extends Component {
               this.state.editMode
                 ? "Caso seja necessário trocar a senha, informe uma nova aqui."
                 : ""
-            }
-          >
+            }>
             {getFieldDecorator("senha", {
               rules: [
                 { required: false, message: "Este campo é obrigatório!" }

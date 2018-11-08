@@ -1,20 +1,13 @@
 import React, { Component } from "react";
-import { Breadcrumb, Button, Icon, Input, Form, Select, Affix } from "antd";
-import styled from "styled-components";
+import { Button, Icon, Input, Form, Select, Affix } from "antd";
 
 import { flashWithSuccess } from "../common/FlashMessages";
 import parseErrors from "../../lib/parseErrors";
 import { PainelHeader } from "../common/PainelHeader";
 import * as EntityService from "../../services/entities";
+import { SimpleBreadCrumb } from "../common/SimpleBreadCrumb";
 
 const Option = Select.Option;
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 class EntityForm extends Component {
   constructor(props) {
@@ -41,7 +34,7 @@ class EntityForm extends Component {
         this.setState(prev => ({
           ...prev,
           formData,
-          editMode: !!id,
+          editMode: !!id
         }));
       }
     }
@@ -112,27 +105,18 @@ class EntityForm extends Component {
 
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              onClick={() =>
-                this.props.history.push(
-                  this.props.location.state &&
-                  this.props.location.state.returnTo
-                    ? this.props.location.state.returnTo.pathname
-                    : "/entidades"
-                )
-              }
-            >
-              <Icon type="arrow-left" />
-              Voltar para tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={
+            this.props.location.state && this.props.location.state.returnTo
+              ? this.props.location.state.returnTo.pathname
+              : "/entidades"
+          }
+          history={this.props.history}
+        />
+
         <Affix offsetTop={65}>
           <PainelHeader
-            title={[this.state.editMode ? "Editando" : "Nova", " Entidade"]}
-          >
+            title={[this.state.editMode ? "Editando" : "Nova", " Entidade"]}>
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
               Salvar entidade
             </Button>
@@ -161,8 +145,7 @@ class EntityForm extends Component {
                   this.handleFormState({
                     target: { name: "multiFilial", value: e }
                   })
-                }
-              >
+                }>
                 <Option value="false">Não</Option>
                 <Option value="true">Sim</Option>
               </Select>

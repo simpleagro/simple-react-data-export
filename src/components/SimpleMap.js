@@ -5,11 +5,10 @@ import { compose, withProps, lifecycle } from "recompose";
 import { withGoogleMap, GoogleMap, Marker } from "react-google-maps";
 import { SearchBox } from "react-google-maps/lib/components/places/SearchBox";
 import { DrawingManager } from "react-google-maps/lib/components/drawing/DrawingManager";
-import { Tooltip, Modal, Button } from "antd";
+import { Tooltip, Modal } from "antd";
 
 const google = window.google;
 const confirm = Modal.confirm;
-const alert = Modal.alert;
 
 export const SimpleMap = compose(
   withProps({

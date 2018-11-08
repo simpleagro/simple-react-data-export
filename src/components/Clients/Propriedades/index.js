@@ -6,25 +6,17 @@ import {
   Button,
   Icon,
   Popconfirm,
-  Breadcrumb,
   Tooltip,
   Row,
   Col
 } from "antd";
-import styled from "styled-components";
 
 import * as ClientsPropertyService from "../../../services/clients.properties";
 import * as ClientsService from "../../../services/clients";
 import SimpleTable from "../../common/SimpleTable";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
+import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 
 class Properties extends Component {
   constructor(props) {
@@ -221,14 +213,7 @@ class Properties extends Component {
   render() {
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button onClick={() => this.props.history.push("/clientes")}>
-              <Icon type="arrow-left" />
-              Voltar para a tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb to={"/clientes"} history={this.props.history} />
         <Row gutter={24}>
           <Col span={5}>
             <Card

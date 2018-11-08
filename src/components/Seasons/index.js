@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import moment from "moment";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
+import { Divider, Button, Icon, Popconfirm, Tooltip } from "antd";
 
 import * as SeasonService from "../../services/seasons";
 import SimpleTable from "../common/SimpleTable";

@@ -4,7 +4,6 @@ import { cloneDeep as _cloneDeep } from "lodash";
 import debounce from "lodash/debounce";
 
 import {
-  Breadcrumb,
   Button,
   Icon,
   Input,
@@ -20,7 +19,6 @@ import {
   Tooltip,
   Spin
 } from "antd";
-import styled from "styled-components";
 
 import {
   flashWithSuccess,
@@ -38,17 +36,6 @@ const Option = Select.Option;
 const TreeNode = Tree.TreeNode;
 
 const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
-
-// const LoadComponentView = loadedComponent => {
-//   const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
-
-//   return this.state.loadingForm ? (
-//     <Spin tip="Carregando..." size="large" indicator={antIcon} />
-//   ) : (
-//     <loadedComponent props={this.props} />
-//   );
-// };
-
 
 class CustomerWalletForm extends Component {
   constructor(props) {
@@ -487,14 +474,12 @@ class CustomerWalletForm extends Component {
               this.state.editMode
                 ? "Editando Carteira de Cliente"
                 : "Nova Carteira de Cliente"
-            }
-          >
+            }>
             <Button
               disabled={this.state.errorOnWalletTree.length > 0}
               type="primary"
               icon="save"
-              onClick={() => this.saveForm()}
-            >
+              onClick={() => this.saveForm()}>
               Salvar Carteira de Cliente
             </Button>
           </PainelHeader>
@@ -527,8 +512,7 @@ class CustomerWalletForm extends Component {
                   this.handleFormState({
                     target: { name: "consultor_id", value: e }
                   })
-                }
-              >
+                }>
                 {this.state.consultants.map(c => (
                   <Option key={c._id} value={c._id}>
                     {c.nome}
@@ -558,8 +542,7 @@ class CustomerWalletForm extends Component {
                   this.handleFormState({
                     target: { name: "gerente_id", value: e }
                   })
-                }
-              >
+                }>
                 {this.state.consultants.map(c => (
                   <Option key={c._id} value={c._id}>
                     {c.nome}
@@ -609,8 +592,7 @@ class CustomerWalletForm extends Component {
                       showSearch
                       style={{ width: 200 }}
                       placeholder="Selecione..."
-                      onChange={e => this.selectedClient(e)}
-                    >
+                      onChange={e => this.selectedClient(e)}>
                       {this.state.clients.map(c => (
                         <Option key={c._id} value={c._id}>
                           {c.nome}
@@ -621,21 +603,18 @@ class CustomerWalletForm extends Component {
                     <Button
                       type="primary"
                       icon="plus"
-                      onClick={() => this.addClient()}
-                    >
+                      onClick={() => this.addClient()}>
                       Adicionar Cliente
                     </Button>
                   </span>
-                }
-              >
+                }>
                 {this.state.walletTree.length ? (
                   <Tree
                     checkable
                     defaultCheckedKeys={this.state.clientesChecados}
                     onCheck={(checkedNodes, e) => {
                       this.checkTreeNodes(checkedNodes, e);
-                    }}
-                  >
+                    }}>
                     {this.state.walletTree.map(
                       cliente => (
                         console.log(cliente),
@@ -667,47 +646,43 @@ class CustomerWalletForm extends Component {
                                     this.removeClient(
                                       cliente.cliente_id || cliente._id
                                     )
-                                  }
-                                >
+                                  }>
                                   <Icon type="minus-circle" />
                                 </Button>
                               </div>
-                            }
-                          >
+                            }>
                             {cliente.propriedades &&
                               cliente.propriedades.map(prop => (
                                 <TreeNode
-                                    disableCheckbox={
-                                      prop.propriedadeJaExisteEmOutraCarteira &&
-                                      prop.propriedadeJaExisteEmOutraCarteira !==
-                                        ""
-                                        ? true
-                                        : false
-                                    }
-                                    clienteID={
-                                      cliente.cliente_id || cliente._id
-                                    }
-                                    clienteNome={cliente.nome}
-                                    gerenciarCarteiraPorPropriedade={
-                                      cliente.gerenciarCarteiraPorPropriedade
-                                    }
-                                    dataRef={prop}
-                                    title={
-                                      <Tooltip
-                                        title={
-                                          prop.propriedadeJaExisteEmOutraCarteira
-                                            ? `Pertence a carteira.: ${
-                                                prop.propriedadeJaExisteEmOutraCarteira
-                                              }`
-                                            : ""
-                                        }
-                                      >
-                                        {prop.nome}
-                                      </Tooltip>
-                                    }
-                                    key={`${cliente.cliente_id ||
-                                      cliente._id}-${prop._id}`}
-                                  />
+                                  disableCheckbox={
+                                    prop.propriedadeJaExisteEmOutraCarteira &&
+                                    prop.propriedadeJaExisteEmOutraCarteira !==
+                                      ""
+                                      ? true
+                                      : false
+                                  }
+                                  clienteID={cliente.cliente_id || cliente._id}
+                                  clienteNome={cliente.nome}
+                                  gerenciarCarteiraPorPropriedade={
+                                    cliente.gerenciarCarteiraPorPropriedade
+                                  }
+                                  dataRef={prop}
+                                  title={
+                                    <Tooltip
+                                      title={
+                                        prop.propriedadeJaExisteEmOutraCarteira
+                                          ? `Pertence a carteira.: ${
+                                              prop.propriedadeJaExisteEmOutraCarteira
+                                            }`
+                                          : ""
+                                      }>
+                                      {prop.nome}
+                                    </Tooltip>
+                                  }
+                                  key={`${cliente.cliente_id || cliente._id}-${
+                                    prop._id
+                                  }`}
+                                />
                               ))}
                           </TreeNode>
                         )

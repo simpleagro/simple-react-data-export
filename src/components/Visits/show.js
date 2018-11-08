@@ -1,44 +1,19 @@
 import React, { Component } from "react";
-import { cloneDeep as _cloneDeep } from "lodash";
 import moment from "moment";
 import "moment/locale/pt-br";
-import {
-  Breadcrumb,
-  Button,
-  Icon,
-  Input,
-  Form,
-  Affix,
-  Card,
-  Radio,
-  Tabs
-} from "antd";
+import { Input, Form, Affix, Card, Radio, Tabs } from "antd";
 
 import styled from "styled-components";
 
 import { SimpleMap } from "../SimpleMap";
-import {
-  flashWithSuccess,
-  flashWithError,
-  flashModalWithError
-} from "../common/FlashMessages";
-import parseErrors from "../../lib/parseErrors";
+
 import { PainelHeader } from "../common/PainelHeader";
-import * as CustomerWalletService from "../../services/customerswallet";
-import { list as ConsultantsServiceList } from "../../services/consultants";
-import { list as ClientsServiceList } from "../../services/clients";
 import * as VisitsService from "../../services/visits";
 import { moneyFormat } from "../../lib/formatters";
+import { SimpleBreadCrumb } from "../common/SimpleBreadCrumb";
 
 const TabPane = Tabs.TabPane;
 const TextArea = Input.TextArea;
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 const CardStyled = styled(Card)`
   background: #ececec;
@@ -96,23 +71,15 @@ class VisitForm extends Component {
 
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              onClick={() =>
-                this.props.history.push(
-                  this.props.location.state &&
-                  this.props.location.state.returnTo
-                    ? this.props.location.state.returnTo.pathname
-                    : "/visitas"
-                )
-              }
-            >
-              <Icon type="arrow-left" />
-              Voltar para tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={
+            this.props.location.state && this.props.location.state.returnTo
+              ? this.props.location.state.returnTo.pathname
+              : "/visitas"
+          }
+          history={this.props.history}
+        />
+
         <Affix offsetTop={65}>
           <PainelHeader title="Detalhes da Visita" />
         </Affix>

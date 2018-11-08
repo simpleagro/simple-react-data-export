@@ -1,30 +1,14 @@
 import React, { Component } from "react";
-import {
-  Breadcrumb,
-  Button,
-  Icon,
-  Input,
-  Form,
-  Select,
-  Affix,
-  Steps
-} from "antd";
-import styled from "styled-components";
+import { Button, Icon, Input, Form, Select, Affix } from "antd";
 
 import { flashWithSuccess } from "../common/FlashMessages";
 import parseErrors from "../../lib/parseErrors";
 import { PainelHeader } from "../common/PainelHeader";
 import * as ModuleService from "../../services/modules";
 import * as EntityService from "../../services/entities";
+import { SimpleBreadCrumb } from "../common/SimpleBreadCrumb";
 
 const Option = Select.Option;
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 class ModuleForm extends Component {
   constructor(props) {
@@ -123,27 +107,18 @@ class ModuleForm extends Component {
 
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              onClick={() =>
-                this.props.history.push(
-                  this.props.location.state &&
-                  this.props.location.state.returnTo
-                    ? this.props.location.state.returnTo.pathname
-                    : "/modulos"
-                )
-              }
-            >
-              <Icon type="arrow-left" />
-              Voltar para tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={
+            this.props.location.state && this.props.location.state.returnTo
+              ? this.props.location.state.returnTo.pathname
+              : "/modulos"
+          }
+          history={this.props.history}
+        />
+
         <Affix offsetTop={65}>
           <PainelHeader
-            title={[this.state.editMode ? "Editando" : "Novo", " Módulo"]}
-          >
+            title={[this.state.editMode ? "Editando" : "Novo", " Módulo"]}>
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
               Salvar módulo
             </Button>
@@ -173,8 +148,7 @@ class ModuleForm extends Component {
                   this.handleFormState({
                     target: { name: "entidades", value: e }
                   })
-                }
-              >
+                }>
                 {this.state.listEntity &&
                   this.state.listEntity.map((ent, index) => (
                     <Option key={index} value={ent._id}>
