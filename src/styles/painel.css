@@ -123,11 +123,31 @@ select,
   border: 1px solid #999;
   font-family: sans-serif;
   font-size: 12px;
-  box-shadow: 1px 3px 3px rgba(0, 0, 0, .3);
+  box-shadow: 1px 3px 3px rgba(0, 0, 0, 0.3);
   margin-top: -10px;
   margin-left: 10px;
   cursor: pointer;
 }
 .delete-menu:hover {
   background: #eee;
+}
+
+.custom-filter-dropdown {
+  padding: 8px;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+}
+
+.custom-filter-dropdown input {
+  width: 130px;
+  margin-right: 8px;
+}
+
+.custom-filter-dropdown button {
+  margin-right: 8px;
+}
+
+.highlight {
+  color: #f50;
 }
