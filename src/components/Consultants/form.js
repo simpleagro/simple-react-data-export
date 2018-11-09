@@ -15,7 +15,8 @@ class ConsultantForm extends Component {
     super(props);
     this.state = {
       editMode: false,
-      formData: {}
+      formData: {},
+      userHasSelected: false
     };
   }
 
@@ -98,19 +99,43 @@ class ConsultantForm extends Component {
     });
   };
 
-  setUser = nome => {
-    this.state.listUser.map(
-      fDNome =>
-        fDNome.nome === nome && !this.state.editMode
-          ? this.setState({
-              formData: {
-                nome: fDNome.nome,
-                email: fDNome.email,
-                usuario_id: fDNome.nome
-              }
-            })
-          : null
-    );
+  setUser = usuario_id => {
+    let idx = -1;
+    let user = null;
+    this.state.listUser.some((u, index) => {
+      user = u;
+      return u._id === usuario_id;
+    });
+
+    if (user && !this.state.editMode)
+      this.setState(prev => ({
+        ...prev,
+        formData: {
+          ...prev.formData,
+          nome: user.nome,
+          email: user.email,
+          login: user.login,
+          tipoLogin: user.tipoLogin
+        },
+        userHasSelected: true
+      }));
+
+    // this.state.listUser.map(
+    //   user =>
+    //     user._id === usuario_id && !this.state.editMode
+    //       ? this.setState(prev => ({
+    //           ...prev,
+    //           formData: {
+    //             ...prev.formData,
+    //             nome: user.nome,
+    //             email: user.email,
+    //             login: user.login,
+    //             tipoLogin: user.tipoLogin
+    //           },
+    //           userHasSelected: true
+    //         }))
+    //       : null
+    // );
   };
 
   setLogin = email => {
@@ -170,7 +195,7 @@ class ConsultantForm extends Component {
               rules: [
                 { required: false, message: "Este campo é obrigatório!" }
               ],
-              initialValue: this.state.formData.nome
+              initialValue: this.state.formData.usuario_id
             })(
               <Select
                 name="usuario_id"
@@ -187,7 +212,7 @@ class ConsultantForm extends Component {
                 }}>
                 {this.state.listUser &&
                   this.state.listUser.map((user, index) => (
-                    <Option key={index} value={user.nome}>
+                    <Option key={user._id} value={user._id}>
                       {" "}
                       {user.nome}{" "}
                     </Option>
@@ -219,6 +244,7 @@ class ConsultantForm extends Component {
                 initialValue: this.state.formData.login
               })(
                 <Input
+                  disabled={this.state.userHasSelected}
                   name="login"
                   onFocus={() => this.setLogin(this.state.formData.email)}
                 />
@@ -227,14 +253,20 @@ class ConsultantForm extends Component {
           )}
 
           {!this.state.editMode && (
-            <Form.Item label="Tipo de Login" {...formItemLayout}>
+            <Form.Item
+              label="Tipo de Login"
+              {...formItemLayout}
+              style={{
+                display: this.state.userHasSelected ? "none" : "block"
+              }}>
               {getFieldDecorator("tipoLogin", {
                 rules: [
                   { required: true, message: "Este campo é obrigatório!" }
                 ],
-                initialValue: "API"
+                initialValue: this.state.formData.tipoLogin || "API"
               })(
                 <Select
+                  disabled={this.state.userHasSelected}
                   name="tipoLogin"
                   showAction={["focus", "click"]}
                   showSearch
@@ -252,7 +284,15 @@ class ConsultantForm extends Component {
             </Form.Item>
           )}
 
-          <Form.Item label="Senha" {...formItemLayout}>
+          <Form.Item
+            label="Senha"
+            {...formItemLayout}
+            style={{
+              display:
+                this.state.userHasSelected || this.state.editMode
+                  ? "none"
+                  : "block"
+            }}>
             {getFieldDecorator("senha", {
               rules: [
                 { required: false, message: "Este campo é obrigatório!" }

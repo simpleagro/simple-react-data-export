@@ -29,6 +29,7 @@ import parseErrors from "../../lib/parseErrors";
 import { PainelHeader } from "../common/PainelHeader";
 import * as CustomerWalletService from "../../services/customerswallet";
 import { list as ConsultantsServiceList } from "../../services/consultants";
+import { list as UserServiceList } from "../../services/users";
 import { list as ClientsServiceList } from "../../services/clients";
 import { SimpleBreadCrumb } from "../common/SimpleBreadCrumb";
 
@@ -47,6 +48,7 @@ class CustomerWalletForm extends Component {
       editMode: false,
       formData: {},
       consultants: [],
+      users: [],
       clients: [],
       fetchingClients: false,
       selectedClient: {},
@@ -59,7 +61,16 @@ class CustomerWalletForm extends Component {
   async componentDidMount() {
     const { id } = this.props.match.params;
 
-    const consultants = await ConsultantsServiceList();
+    const consultants = await ConsultantsServiceList({
+      limit: -1,
+      fields: "nome,usuario_id,cargo",
+      status: true
+    });
+    const users = await UserServiceList({
+      limit: -1,
+      status: true,
+      fields: "nome"
+    });
 
     if (id) {
       const formData = await CustomerWalletService.get(id);
@@ -106,6 +117,11 @@ class CustomerWalletForm extends Component {
       ...prev,
       consultants: consultants.docs,
       clients: clients.docs,
+      users: users.docs.filter(u =>
+        consultants.docs.some(
+          c => (c.usuario_id && c.usuario_id === u._id) && !c.cargo.includes("CONSULTOR")
+        )
+      ),
       loadingForm: true,
       loadingForm: false
     }));
@@ -543,7 +559,7 @@ class CustomerWalletForm extends Component {
                     target: { name: "gerente_id", value: e }
                   })
                 }>
-                {this.state.consultants.map(c => (
+                {this.state.users.map(c => (
                   <Option key={c._id} value={c._id}>
                     {c.nome}
                   </Option>

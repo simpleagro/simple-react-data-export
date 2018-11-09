@@ -168,8 +168,8 @@ class UserForm extends Component {
                     target: { name: "filiais", value: e }
                   })
                 }>
-                <Option value="F1">Filial 1</Option>
-                <Option value="F2">Filial 2</Option>
+                <Option value="1">Filial 1</Option>
+                <Option value="2">Filial 2</Option>
               </Select>
             )}
           </Form.Item>
@@ -177,7 +177,7 @@ class UserForm extends Component {
           <Form.Item label="Tipo de Login" {...formItemLayout}>
             {getFieldDecorator("tipoLogin", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: "API"
+              initialValue: this.state.formData.tipoLogin || "API"
             })(
               <Select
                 name="tipoLogin"
@@ -212,7 +212,6 @@ class UserForm extends Component {
             })(<Input name="senha" />)}
           </Form.Item>
         </Form>
-        {console.log(this.state.formData)}
       </div>
     );
   }
