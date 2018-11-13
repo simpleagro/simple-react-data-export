@@ -1,6 +1,6 @@
 import { baseApi as api } from "../config/api";
 
-const baseURL = "/entities";
+const baseURL = "/rules";
 
 export const list = aqp => {
   return api

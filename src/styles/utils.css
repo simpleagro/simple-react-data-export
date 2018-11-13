@@ -7,7 +7,7 @@
 
 .Aligner {
   display: flex;
-  height: 65vh;
+  height: 78vh;
   align-items: center;
   flex-direction: row;
 }

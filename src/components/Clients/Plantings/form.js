@@ -12,7 +12,7 @@ import {
   Spin,
   DatePicker
 } from "antd";
-import styled from "styled-components";
+
 import { connect } from "react-redux";
 import moment from "moment";
 
@@ -20,7 +20,6 @@ import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
 import * as ClientService from "../../../services/clients";
-// import * as ProductGroupService from "../../../services/product-group";
 import * as SeasonService from "../../../services/seasons";
 import * as IBGEService from "../../../services/ibge";
 import * as ClientPlantingService from "../../../services/clients.plantings";
@@ -29,13 +28,6 @@ import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 //#endregion
 
 const Option = Select.Option;
-
-const CardStyled = styled(Card)`
-  background: #ececec;
-  padding: 5px;
-  margin-bottom: 20px;
-  border: 1px solid #e3cccc;
-`;
 
 class ClientPlantingForm extends Component {
   constructor(props) {
@@ -184,23 +176,6 @@ class ClientPlantingForm extends Component {
     });
   };
 
-  async onChangeSelectCidade(cidade) {
-    console.log(cidade);
-    await this.setState(prev => ({
-      ...prev,
-      fetchingCidade: false
-    }));
-    // await this.handleFormState({
-    //   target: { name: "cidade_codigo", value: e.key }
-    // });
-    // await this.handleFormState({
-    //   target: { name: "cidade", value: e.label }
-    // });
-    await this.handleFormState({
-      target: { name: "cidade", value: cidade }
-    });
-  }
-
   async onChangeCliente(e) {
     const { _id: id, nome, propriedades } = JSON.parse(e);
     this.props.form.setFields({
@@ -314,8 +289,7 @@ class ClientPlantingForm extends Component {
                   (this.state.formData.cliente
                     ? this.state.formData.cliente.nome
                     : "")
-            }
-          >
+            }>
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
               Salvar Planejamento
             </Button>
@@ -342,8 +316,7 @@ class ClientPlantingForm extends Component {
                   this.handleFormState({
                     target: { name: "safra", value: e }
                   })
-                }
-              >
+                }>
                 {this.state.safras.map(s => (
                   <Option key={s._id} value={s.descricao}>
                     {s.descricao}
@@ -362,8 +335,7 @@ class ClientPlantingForm extends Component {
                   ? "Este cliente não possui propriedades"
                   : ""
             }
-            validateStatus={!this.state.formData.cliente ? "warning" : ""}
-          >
+            validateStatus={!this.state.formData.cliente ? "warning" : ""}>
             {getFieldDecorator("propriedade", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.propriedade
@@ -385,8 +357,7 @@ class ClientPlantingForm extends Component {
                     .toLowerCase()
                     .indexOf(input.toLowerCase()) >= 0
                 }
-                onSelect={e => this.selectPropriedade(e)}
-              >
+                onSelect={e => this.selectPropriedade(e)}>
                 {this.state.propriedades.length > 0 &&
                   this.state.propriedades.map(p => (
                     <Option key={p._id} value={JSON.stringify(p)}>
@@ -406,8 +377,7 @@ class ClientPlantingForm extends Component {
             }
             validateStatus={
               this.state.formData.propriedade === undefined ? "warning" : ""
-            }
-          >
+            }>
             {getFieldDecorator("talhao", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue:
@@ -434,8 +404,7 @@ class ClientPlantingForm extends Component {
                       value: { id: e._id, nome: e.nome }
                     }
                   });
-                }}
-              >
+                }}>
                 {this.state.talhoes && this.state.talhoes.length > 0
                   ? this.state.talhoes.map(t => (
                       <Option key={t._id} value={JSON.stringify(t)}>
@@ -449,8 +418,7 @@ class ClientPlantingForm extends Component {
           <Form.Item
             label="Cidade"
             {...formItemLayout}
-            help="cidade da propriedade escolhida"
-          >
+            help="cidade da propriedade escolhida">
             {getFieldDecorator("cidade", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.cidade
@@ -459,8 +427,7 @@ class ClientPlantingForm extends Component {
           <Form.Item
             label="Estado"
             {...formItemLayout}
-            help="estado da propriedade escolhida"
-          >
+            help="estado da propriedade escolhida">
             {getFieldDecorator("estado", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.estado
@@ -485,8 +452,7 @@ class ClientPlantingForm extends Component {
                     .toLowerCase()
                     .indexOf(input.toLowerCase()) >= 0
                 }
-                onSelect={e => this.onSelectGrupoProduto(e)}
-              >
+                onSelect={e => this.onSelectGrupoProduto(e)}>
                 {this.state.gruposDeProdutos.length > 0
                   ? this.state.gruposDeProdutos.map(t => (
                       <Option key={t._id} value={JSON.stringify(t)}>
@@ -507,8 +473,7 @@ class ClientPlantingForm extends Component {
               this.state.formData.grupo_produto === undefined
                 ? "Selecione primeiro um grupo de produto!"
                 : ""
-            }
-          >
+            }>
             {getFieldDecorator("produto", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.produto
@@ -528,8 +493,7 @@ class ClientPlantingForm extends Component {
                     .toLowerCase()
                     .indexOf(input.toLowerCase()) >= 0
                 }
-                onSelect={e => this.onSelectProduto(e)}
-              >
+                onSelect={e => this.onSelectProduto(e)}>
                 {this.state.produtos.length > 0
                   ? this.state.produtos.map(t => (
                       <Option key={t._id} value={JSON.stringify(t)}>
@@ -627,8 +591,7 @@ class ClientPlantingForm extends Component {
                       this.state.formData.plantas_metro
                     )
                   }));
-                }}
-              >
+                }}>
                 {this.state.espacamentos.length > 0
                   ? this.state.espacamentos.map(opt => (
                       <Option key={opt} value={opt}>
@@ -687,8 +650,7 @@ class ClientPlantingForm extends Component {
                   : "none"
             }}
             label="População Final"
-            {...formItemLayout}
-          >
+            {...formItemLayout}>
             <Input
               readOnly
               value={

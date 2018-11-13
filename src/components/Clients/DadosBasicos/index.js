@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
+import { Divider, Button, Icon, Popconfirm, Tooltip, Input } from "antd";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 
@@ -17,6 +17,9 @@ class Clients extends Component {
     this.state = {
       list: [],
       loadingData: true,
+      tableSearch: {
+        nome: ""
+      },
       pagination: {
         showSizeChanger: true,
         defaultPageSize: 10,
@@ -30,8 +33,8 @@ class Clients extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    try {
-      const data = await ClientService.list();
+
+      const data = await ClientService.list(aqp);
       this.setState(prev => ({
         ...prev,
         list: data.docs,
@@ -40,9 +43,7 @@ class Clients extends Component {
           total: data.total
         }
       }));
-    } catch (err) {
-      if (err && err.response && err.response.data) parseErrors(err);
-    }
+
   }
 
   async componentDidMount() {
@@ -105,7 +106,70 @@ class Clients extends Component {
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
+      },
+      filterIcon: filtered => (
+        <FontAwesomeIcon
+          icon="search"
+          style={{ color: filtered ? "#108ee9" : "#aaa" }}
+          size="lg"
+        />
+      ),
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters
+      }) => {
+        console.log("selectedKeys", selectedKeys);
+        return (
+          <div className="custom-filter-dropdown">
+            <Input
+              ref={ele => (this.searchInput = ele)}
+              style={{ width: 200 }}
+              value={selectedKeys}
+              onChange={e =>
+                setSelectedKeys(e.target.value ? [e.target.value] : [""])
+              }
+              onPressEnter={() => {
+                confirm();
+                this.setState(prev => ({
+                  ...prev,
+                  tableSearch: { ...prev.tableSearch, nome: selectedKeys }
+                }));
+              }}
+            />
+            <Button
+              type="primary"
+              onClick={() => {
+                confirm();
+                this.setState(prev => ({
+                  ...prev,
+                  tableSearch: { ...prev.tableSearch, nome: selectedKeys }
+                }));
+              }}>
+              Ok
+            </Button>
+            <Button
+              onClick={() => {
+                clearFilters();
+                this.setState(prev => ({
+                  ...prev,
+                  tableSearch: { ...prev.tableSearch, nome: selectedKeys }
+                }));
+              }}>
+              Limpar
+            </Button>
+          </div>
+        );
+      },
+      onFilterDropdownVisibleChange: visible => {
+        if (visible) {
+          setTimeout(() => {
+            this.searchInput.focus();
+          });
+        }
+      },
+      render: text => text
     },
     {
       title: "CPF / CNPJ",
@@ -149,8 +213,7 @@ class Clients extends Component {
             title={`Tem certeza em ${statusTxt} o cliente?`}
             onConfirm={e => this.changeStatus(record._id, !record.status)}
             okText="Sim"
-            cancelText="Não"
-          >
+            cancelText="Não">
             <Tooltip title={`${statusTxt.toUpperCase()} o cliente`}>
               <Button size="small">
                 <FontAwesomeIcon icon={statusBtn} size="lg" />
@@ -166,7 +229,11 @@ class Clients extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/clientes/${record._id}/edit`}>
+            <Button
+              size="small"
+              onClick={() =>
+                this.props.history.push(`/clientes/${record._id}/edit`)
+              }>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
             <Divider
@@ -177,8 +244,7 @@ class Clients extends Component {
               title={`Tem certeza em excluir o cliente?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
-              cancelText="Não"
-            >
+              cancelText="Não">
               <Button size="small">
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
@@ -190,8 +256,11 @@ class Clients extends Component {
             <Tooltip title="Veja as propriedades do cliente">
               <Button
                 size="small"
-                href={`/clientes/${record._id}/propriedades`}
-              >
+                onClick={() =>
+                  this.props.history.push(
+                    `/clientes/${record._id}/propriedades`
+                  )
+                }>
                 <FontAwesomeIcon icon="list" size="lg" />
               </Button>
             </Tooltip>
@@ -205,8 +274,7 @@ class Clients extends Component {
                 onClick={() => {
                   this.props.novoPlantio(record);
                   this.props.history.push(`/clientes/${record._id}/plantio`);
-                }}
-              >
+                }}>
                 <FontAwesomeIcon icon="seedling" size="lg" />
               </Button>
             </Tooltip>
@@ -216,7 +284,7 @@ class Clients extends Component {
     }
   ];
 
-  handleTableChange = (pagination, filter, sorter) => {
+  handleTableChange = (pagination, filters, sorter) => {
     const pager = { ...this.state.pagination };
     pager.current = pagination.current;
     this.setState({
@@ -224,7 +292,8 @@ class Clients extends Component {
     });
     this.initializeList({
       page: pagination.current,
-      limit: pagination.pageSize
+      limit: pagination.pageSize,
+      ...filters
     });
   };
 
@@ -232,7 +301,10 @@ class Clients extends Component {
     return (
       <div>
         <PainelHeader title="Clientes">
-          <Button type="primary" icon="plus" href="/clientes/new">
+          <Button
+            type="primary"
+            icon="plus"
+            onClick={() => this.props.history.push("/clientes/new")}>
             Adicionar
           </Button>
         </PainelHeader>

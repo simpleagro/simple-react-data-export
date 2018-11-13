@@ -24,6 +24,7 @@ class LoginForm extends Component {
     super(props);
     const { cookies, location } = this.props;
     this.state = {
+      isLoading: false,
       token: cookies.get("token") || "",
       ...(location.state || { from: { pathname: "/" } })
     };
@@ -39,6 +40,7 @@ class LoginForm extends Component {
 
   handleSubmit = e => {
     e.preventDefault();
+    this.setState({ isLoading: true });
     const { form } = this.props;
     form.validateFields(async (err, values) => {
       // console.log(values);
@@ -51,13 +53,16 @@ class LoginForm extends Component {
 
           if (!response) throw new Error("Houve um erro ao logar");
 
-          await this.props.cookies.set("token", response.data.token, { path: "/" });
+          await this.props.cookies.set("token", response.data.token, {
+            path: "/"
+          });
           await this.setState({ token: response.data.token });
           // console.log(this.state.from.pathname);
           await this.props.userLoggedIn(response.data);
           notification.success({
             message: `Seja bem vindo, ${response.data.user.nome}`
           });
+          this.setState({ isLoading: false });
           this.props.history.push(this.state.from.pathname);
         } catch (error) {
           if (
@@ -68,6 +73,7 @@ class LoginForm extends Component {
           )
             notification.error({ message: error.response.data.error });
           else notification.error({ message: error.toString() });
+          this.setState({ isLoading: false });
         }
       }
     });
@@ -139,6 +145,7 @@ class LoginForm extends Component {
                 disabled={hasErrors(getFieldsError())}
                 type="primary"
                 style={{ width: "100%" }}
+                loading={this.state.isLoading}
               >
                 Entrar
               </Button>

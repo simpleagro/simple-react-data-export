@@ -60,7 +60,12 @@ class PrivateRoute extends Component {
 
 const mapStateToProps = ({ painelState }) => {
   return {
-    userType: painelState.userData.user.usertype
+    userType:
+      (painelState &&
+        painelState.userData &&
+        painelState.userData.user &&
+        painelState.userData.user.usertype) ||
+      ""
   };
 };
 

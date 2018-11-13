@@ -16,16 +16,16 @@ export const SimpleBreadCrumb = ({
   children,
   history
 }) => {
-  return (
-    !children && (
-      <BreadcrumbStyled className={className}>
-        <Breadcrumb.Item>
-          <Button onClick={() => history.push(to)}>
-            <Icon type="arrow-left" />
-            Voltar para a tela anterior
-          </Button>
-        </Breadcrumb.Item>
-      </BreadcrumbStyled>
-    )
+  return !children ? (
+    <BreadcrumbStyled className={className}>
+      <Breadcrumb.Item>
+        <Button onClick={() => history.push(to)}>
+          <Icon type="arrow-left" />
+          Voltar para a tela anterior
+        </Button>
+      </Breadcrumb.Item>
+    </BreadcrumbStyled>
+  ) : (
+    <BreadcrumbStyled className={className}>{children}</BreadcrumbStyled>
   );
 };

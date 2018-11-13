@@ -6,7 +6,7 @@ export const moneyFormat = (currency, locale = "BR") => {
         .replace(/[a-zA-Z|$|\s]+/, "")
         .replace(".", "")
         .replace(",", ".")
-        .replace(/(\d)(?=(\d{3})+\,)/g, "$1.")
+        .replace(/(\d)(?=(\d{3})+,)/g, "$1.")
     ).toFixed(2)}`;
 
   return "should be implemented new locale, default BR";

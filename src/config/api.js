@@ -1,5 +1,6 @@
 import axios from "axios";
 import Cookies from "universal-cookie";
+import parseErrors from "../lib/parseErrors";
 
 let API_URL;
 
@@ -13,11 +14,9 @@ if (process.env.REACT_APP_API_SECURE === "true") {
   }/api`;
 }
 
-export { API_URL };
-
 const cookies = new Cookies();
 
-export const baseApi = axios.create({
+const baseApi = axios.create({
   baseURL: `${API_URL}`,
   headers: {
     Authorization: {
@@ -27,3 +26,20 @@ export const baseApi = axios.create({
     }
   }
 });
+
+baseApi.interceptors.response.use(
+  function(response) {
+    // Do something with response data
+    return response;
+  },
+  function(error) {
+    // Do something with response error
+
+    if (error && error.response && error.response.data) parseErrors(error);
+    return {
+      data: {}
+    };
+  }
+);
+
+export { baseApi, API_URL };

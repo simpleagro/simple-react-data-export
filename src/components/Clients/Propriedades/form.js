@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import {
-  Breadcrumb,
   Button,
   Icon,
   Input,
@@ -22,17 +21,11 @@ import { PainelHeader } from "../../common/PainelHeader";
 import * as ClientPropertyService from "../../../services/clients.properties";
 import * as IBGEService from "../../../services/ibge";
 import { SimpleMap } from "../../SimpleMap";
+import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 
 const google = window.google; // é necessário para inicializar corretamente
 
 const Option = Select.Option;
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 const CardStyled = styled(Card)`
   background: #ececec;
@@ -170,24 +163,15 @@ class ClientPropertyForm extends Component {
 
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              href={`/clientes/${
-                this.props.match.params.client_id
-              }/propriedades`}
-            >
-              <Icon type="arrow-left" />
-              Voltar para a tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={`/clientes/${this.props.match.params.client_id}/propriedades`}
+          history={this.props.history}
+        />
         <Affix offsetTop={65}>
           <PainelHeader
             title={
               this.state.editMode ? "Editando Propriedade" : "Nova propriedade"
-            }
-          >
+            }>
             <Button type="primary" icon="save" onClick={() => this.saveForm()}>
               Salvar Propriedade
             </Button>
@@ -224,8 +208,7 @@ class ClientPropertyForm extends Component {
             })(
               <Tooltip
                 title="Aqui você pode incluir várias matrículas. Basta digitar o valor e quando finalizar utilize o ENTER para salvar a matrícula"
-                trigger="focus"
-              >
+                trigger="focus">
                 <Select
                   name="matriculas"
                   value={this.state.formData.matriculas}
@@ -245,8 +228,7 @@ class ClientPropertyForm extends Component {
           <Form.Item
             label="Área"
             labelCol={{ span: 3 }}
-            wrapperCol={{ span: 3 }}
-          >
+            wrapperCol={{ span: 3 }}>
             {getFieldDecorator("area", {
               initialValue: this.state.formData.area
             })(<Input type="number" name="area" addonAfter="ha" />)}
@@ -282,8 +264,7 @@ class ClientPropertyForm extends Component {
                       .toLowerCase()
                       .indexOf(input.toLowerCase()) >= 0
                   }
-                  onSelect={e => this.listaCidadesPorEstado(e)}
-                >
+                  onSelect={e => this.listaCidadesPorEstado(e)}>
                   {this.state.estados.map(uf => (
                     <Option key={uf.codigo} value={(uf.nome, uf.codigo)}>
                       {uf.nome}
@@ -298,8 +279,7 @@ class ClientPropertyForm extends Component {
               help={this.generateHelper()}
               validateStatus={
                 this.state.formData.estado === undefined ? "warning" : ""
-              }
-            >
+              }>
               {getFieldDecorator("cidade", {
                 rules: [
                   { required: true, message: "Este campo é obrigatório!" }
@@ -320,8 +300,7 @@ class ClientPropertyForm extends Component {
                   }
                   onSelect={e => {
                     this.onChangeSelectCidade(e);
-                  }}
-                >
+                  }}>
                   {this.state.cidades.map(c => (
                     <Option key={c.codigo} value={c.nome}>
                       {c.nome}
@@ -417,33 +396,33 @@ class ClientPropertyForm extends Component {
                   Digite o nome da região ou cidade no campo abaixo e utilize o
                   marcador em vermelho para pegar a latitude e longitude:
                 </p>
-                <div style={{position: 'relative'}}>
-                <SimpleMap
-                  polygonData={
-                    this.state.formData.coordenadas
-                      ? this.state.formData.coordenadas.map(
-                          c => new google.maps.LatLng(c.latitude, c.longitude)
-                        )
-                      : []
-                  }
-                  adicionarPontosAoMapa={() => this.adicionarPontosAoMapa()}
-                  salvarMapa={coordenadas => this.salvarMapa(coordenadas)}
-                  drawingMap={this.state.drawingMap}
-                  editingMap={this.state.editingMap}
-                  latitude={this.state.formData.latitude}
-                  longitude={this.state.formData.longitude}
-                  containerElement={<div style={{ height: `400px` }} />}
-                  mapElement={<div style={{ height: `100%` }} />}
-                  setGPS={(latitude, longitude) =>
-                    this.setGPS(latitude, longitude)
-                  }
-                  limparMapa={() =>
-                    this.setState(prev => ({
-                      ...prev,
-                      formData: { ...prev.formData, coordenadas: [] }
-                    }))
-                  }
-                />
+                <div style={{ position: "relative" }}>
+                  <SimpleMap
+                    polygonData={
+                      this.state.formData.coordenadas
+                        ? this.state.formData.coordenadas.map(
+                            c => new google.maps.LatLng(c.latitude, c.longitude)
+                          )
+                        : []
+                    }
+                    adicionarPontosAoMapa={() => this.adicionarPontosAoMapa()}
+                    salvarMapa={coordenadas => this.salvarMapa(coordenadas)}
+                    drawingMap={this.state.drawingMap}
+                    editingMap={this.state.editingMap}
+                    latitude={this.state.formData.latitude}
+                    longitude={this.state.formData.longitude}
+                    containerElement={<div style={{ height: `400px` }} />}
+                    mapElement={<div style={{ height: `100%` }} />}
+                    setGPS={(latitude, longitude) =>
+                      this.setGPS(latitude, longitude)
+                    }
+                    limparMapa={() =>
+                      this.setState(prev => ({
+                        ...prev,
+                        formData: { ...prev.formData, coordenadas: [] }
+                      }))
+                    }
+                  />
                 </div>
               </Col>
             </Row>

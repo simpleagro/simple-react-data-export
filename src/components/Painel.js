@@ -199,8 +199,18 @@ class Painel extends Component {
 
 const mapStateToProps = ({ painelState }) => {
   return {
-    username: painelState.userData.user.nome,
-    userType: painelState.userData.user.usertype
+    userType:
+      (painelState &&
+        painelState.userData &&
+        painelState.userData.user &&
+        painelState.userData.user.usertype) ||
+      "",
+    username:
+      (painelState &&
+        painelState.userData &&
+        painelState.userData.user &&
+        painelState.userData.user.nome) ||
+      ""
   };
 };
 

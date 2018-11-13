@@ -6,25 +6,17 @@ import {
   Button,
   Icon,
   Popconfirm,
-  Breadcrumb,
   Tooltip,
   Row,
   Col
 } from "antd";
-import styled from "styled-components";
 
 import * as ClientsPropertyService from "../../../services/clients.properties";
 import * as ClientsService from "../../../services/clients";
 import SimpleTable from "../../common/SimpleTable";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
+import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 
 class Properties extends Component {
   constructor(props) {
@@ -32,7 +24,11 @@ class Properties extends Component {
     this.state = {
       list: [],
       loadingData: true,
-      pagination: false,
+      pagination: {
+        showSizeChanger: true,
+        defaultPageSize: 10,
+        pageSizeOptions: ["10", "25", "50", "100"]
+      },
       client_id: this.props.match.params.client_id,
       client_data: {}
     };
@@ -48,8 +44,11 @@ class Properties extends Component {
 
     this.setState(prev => ({
       ...prev,
-      list: data,
+      list: data.docs,
       loadingData: false,
+      pagination: {
+        total: data.total
+      },
       client_data: clientData
     }));
   }
@@ -148,8 +147,7 @@ class Properties extends Component {
             title={`Tem certeza em ${statusTxt} o propriedade?`}
             onConfirm={e => this.changeStatus(record._id, !record.status)}
             okText="Sim"
-            cancelText="Não"
-          >
+            cancelText="Não">
             <Tooltip title={`${statusTxt.toUpperCase()} a propriedade`}>
               <Button size="small">
                 <FontAwesomeIcon icon={statusBtn} size="lg" />
@@ -167,8 +165,13 @@ class Properties extends Component {
           <span>
             <Button
               size="small"
-              href={`/clientes/${this.state.client_id}/propriedades/${record._id}/edit`}
-            >
+              onClick={() =>
+                this.props.history.push(
+                  `/clientes/${this.state.client_id}/propriedades/${
+                    record._id
+                  }/edit`
+                )
+              }>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
             <Divider
@@ -179,8 +182,7 @@ class Properties extends Component {
               title={`Tem certeza em excluir a propriedade?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
-              cancelText="Não"
-            >
+              cancelText="Não">
               <Button size="small">
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
@@ -192,9 +194,13 @@ class Properties extends Component {
             <Tooltip title="Veja os talhões da propriedade">
               <Button
                 size="small"
-                href={`/clientes/${this.state.client_id}/propriedades/${
-                  record._id}/talhoes`}
-              >
+                onClick={() =>
+                  this.props.history.push(
+                    `/clientes/${this.state.client_id}/propriedades/${
+                      record._id
+                    }/talhoes`
+                  )
+                }>
                 <FontAwesomeIcon icon="map-marked-alt" size="lg" />
               </Button>
             </Tooltip>
@@ -207,14 +213,7 @@ class Properties extends Component {
   render() {
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button onClick={() => this.props.history.push("/clientes")}>
-              <Icon type="arrow-left" />
-              Voltar para a tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb to={"/clientes"} history={this.props.history} />
         <Row gutter={24}>
           <Col span={5}>
             <Card
@@ -222,8 +221,7 @@ class Properties extends Component {
               style={{
                 boxShadow: "0px 8px 0px 0px #009d55 inset",
                 color: "#009d55"
-              }}
-            >
+              }}>
               <p>{`Cliente: ${this.state.client_data.nome}`}</p>
               <p>{`CPF/CNPJ: ${this.state.client_data.cpf_cnpj}`}</p>
               <Button
@@ -233,8 +231,7 @@ class Properties extends Component {
                     `/clientes/${this.state.client_id}/edit`,
                     { returnTo: this.props.history.location }
                   );
-                }}
-              >
+                }}>
                 <Icon type="edit" /> Editar
               </Button>
             </Card>
@@ -247,12 +244,14 @@ class Properties extends Component {
                 <Button
                   type="primary"
                   icon="plus"
-                  href={`/clientes/${this.state.client_id}/propriedades/new`}
-                >
+                  onClick={() =>
+                    this.props.history.push(
+                      `/clientes/${this.state.client_id}/propriedades/new`
+                    )
+                  }>
                   Adicionar
                 </Button>
-              }
-            >
+              }>
               <SimpleTable
                 pagination={this.state.pagination}
                 spinning={this.state.loadingData}
