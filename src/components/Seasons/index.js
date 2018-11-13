@@ -109,7 +109,7 @@ class Seasons extends Component {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      render: text => moment(text).format("DD/MM/YYYY")
+      render: text => text ? moment(text).format("DD/MM/YYYY") : ""
     },
     {
       title: "Data de fim",
@@ -119,7 +119,7 @@ class Seasons extends Component {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      render: text => moment(text).format("DD/MM/YYYY")
+      render: text => text ? moment(text).format("DD/MM/YYYY") : ""
     },
     {
       title: "Status",

@@ -33,7 +33,7 @@ class Clients extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    try {
+
       const data = await ClientService.list(aqp);
       this.setState(prev => ({
         ...prev,
@@ -43,9 +43,7 @@ class Clients extends Component {
           total: data.total
         }
       }));
-    } catch (err) {
-      if (err && err.response && err.response.data) parseErrors(err);
-    }
+
   }
 
   async componentDidMount() {

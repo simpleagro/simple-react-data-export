@@ -131,8 +131,7 @@ class SeasonForm extends Component {
           </Form.Item>
           <Form.Item label="Data de início" {...formItemLayout}>
             {getFieldDecorator("inicio", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: moment(this.state.formData.inicio)
+              initialValue: this.state.formData.inicio ? moment(this.state.formData.inicio) : ""
             })(
               <DatePicker
                 format="DD/MM/YYYY"
@@ -148,8 +147,7 @@ class SeasonForm extends Component {
           </Form.Item>
           <Form.Item label="Data de fim" {...formItemLayout}>
             {getFieldDecorator("fim", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: moment(this.state.formData.fim)
+              initialValue: this.state.formData.fim ? moment(this.state.formData.fim) : ""
             })(
               <DatePicker
                 format="DD/MM/YYYY"
