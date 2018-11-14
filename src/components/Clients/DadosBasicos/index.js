@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Divider, Button, Icon, Popconfirm, Tooltip } from "antd";
+import { Divider, Button, Icon, Popconfirm, Tooltip, Input } from "antd";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 
@@ -8,6 +8,7 @@ import * as ClientService from "../../../services/clients";
 import SimpleTable from "../../common/SimpleTable";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
+import { simpleTableSearch } from "../../../lib/simpleTableSearch";
 import { PainelHeader } from "../../common/PainelHeader";
 import { novoPlantio } from "../../../actions/plantioActions";
 
@@ -23,6 +24,7 @@ class Clients extends Component {
         pageSizeOptions: ["10", "25", "50", "100"]
       }
     };
+
   }
 
   async initializeList(aqp) {
@@ -40,8 +42,10 @@ class Clients extends Component {
           total: data.total
         }
       }));
-    } catch (err) {
-      if (err && err.response && err.response.data) parseErrors(err);
+    } catch (error) {
+      if (error && error.response && error.response.data) parseErrors(error);
+    } finally {
+      this.setState({ loadingData: false });
     }
   }
 
@@ -105,12 +109,15 @@ class Clients extends Component {
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
+      },
+      ...simpleTableSearch(this)("nome"),
+      render: text => text
     },
     {
       title: "CPF / CNPJ",
       dataIndex: "cpf_cnpj",
       key: "cpf_cnpj",
+      ...simpleTableSearch(this)("cpf_cnpj"),
       render: text => text
     },
     {
@@ -146,11 +153,11 @@ class Clients extends Component {
         const statusBtn = record.status ? "unlock" : "lock";
         return (
           <Popconfirm
+          placement="rightTop"
             title={`Tem certeza em ${statusTxt} o cliente?`}
             onConfirm={e => this.changeStatus(record._id, !record.status)}
             okText="Sim"
-            cancelText="Não"
-          >
+            cancelText="Não">
             <Tooltip title={`${statusTxt.toUpperCase()} o cliente`}>
               <Button size="small">
                 <FontAwesomeIcon icon={statusBtn} size="lg" />
@@ -170,8 +177,7 @@ class Clients extends Component {
               size="small"
               onClick={() =>
                 this.props.history.push(`/clientes/${record._id}/edit`)
-              }
-            >
+              }>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
             <Divider
@@ -182,8 +188,7 @@ class Clients extends Component {
               title={`Tem certeza em excluir o cliente?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
-              cancelText="Não"
-            >
+              cancelText="Não">
               <Button size="small">
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
@@ -199,8 +204,7 @@ class Clients extends Component {
                   this.props.history.push(
                     `/clientes/${record._id}/propriedades`
                   )
-                }
-              >
+                }>
                 <FontAwesomeIcon icon="list" size="lg" />
               </Button>
             </Tooltip>
@@ -214,8 +218,7 @@ class Clients extends Component {
                 onClick={() => {
                   this.props.novoPlantio(record);
                   this.props.history.push(`/clientes/${record._id}/plantio`);
-                }}
-              >
+                }}>
                 <FontAwesomeIcon icon="seedling" size="lg" />
               </Button>
             </Tooltip>
@@ -225,8 +228,7 @@ class Clients extends Component {
     }
   ];
 
-  handleTableChange = (pagination, filter, sorter) => {
-
+  handleTableChange = (pagination, filters, sorter) => {
     const pager = { ...this.state.pagination };
     pager.current = pagination.current;
     this.setState({
@@ -234,7 +236,8 @@ class Clients extends Component {
     });
     this.initializeList({
       page: pagination.current,
-      limit: pagination.pageSize
+      limit: pagination.pageSize,
+      ...filters
     });
   };
 
@@ -245,8 +248,7 @@ class Clients extends Component {
           <Button
             type="primary"
             icon="plus"
-            onClick={() => this.props.history.push("/clientes/new")}
-          >
+            onClick={() => this.props.history.push("/clientes/new")}>
             Adicionar
           </Button>
         </PainelHeader>

@@ -1,6 +1,6 @@
 {
     "name": "simpleagro_paineladm",
-    "version": "0.1.0",
+    "version": "0.0.9",
     "private": true,
     "dependencies": {
         "@fortawesome/fontawesome-svg-core": "^1.2.4",
@@ -35,7 +35,7 @@
         "universal-cookie": "^2.2.0"
     },
     "scripts": {
-        "start": "react-app-rewired start",
+        "start": "env-cmd .env.development react-app-rewired start",
         "build": "react-app-rewired build",
         "build:production": "env-cmd .env.production npm run build",
         "build:stagging": "env-cmd .env.staging npm run build",

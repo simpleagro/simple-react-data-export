@@ -1,9 +1,10 @@
 const initialState = {
   userData: {
     user: {
-      usertype: '',
-      nome: ''
-    }
+      usertype: "",
+      nome: ""
+    },
+    empresa: ""
   }
 };
 

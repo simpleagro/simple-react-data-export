@@ -15,6 +15,7 @@ import etapasCultura from "./Menus/etapas-cultura";
 import unidadesMedida from "./Menus/unidades-medidas";
 import plantio from "./Menus/plantio";
 import gestaoDeProjetosAgricolas from "./Menus/gestao-projetos-agricolas";
+import filiais from "./Menus/filiais"
 
 const loadable = loader =>
   Loadable({
@@ -26,6 +27,7 @@ const loadable = loader =>
 const menus = {
   ...dashboard,
   ...empresas,
+  ...filiais,
   ...modulos,
   ...entidades,
   ...usuarios,
