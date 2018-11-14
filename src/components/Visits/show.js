@@ -132,15 +132,8 @@ class VisitForm extends Component {
                 {getFieldDecorator("data_agenda", {
                   initialValue: this.state.formData.data_agenda
                     ? moment(this.state.formData.data_agenda).format(
-                        "DD/MM/YYYY"
+                        "DD/MM/YYYY HH:mm:ss"
                       )
-                    : ""
-                })(<Input readOnly />)}
-              </Form.Item>
-              <Form.Item label="Hora Agendamento" {...formItemLayout}>
-                {getFieldDecorator("hora_agenda", {
-                  initialValue: this.state.formData.hora_agenda
-                    ? this.state.formData.hora_agenda
                     : ""
                 })(<Input readOnly />)}
               </Form.Item>
@@ -158,7 +151,7 @@ class VisitForm extends Component {
                 {getFieldDecorator("visitou_em", {
                   initialValue: this.state.formData.visitou_em
                     ? moment(this.state.formData.visitou_em).format(
-                        "DD/MM/YYYY"
+                        "DD/MM/YYYY HH:mm:ss"
                       )
                     : ""
                 })(<Input readOnly />)}

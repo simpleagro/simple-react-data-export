@@ -28,16 +28,22 @@ class Seasons extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await SeasonService.list(aqp);
+    try {
+      const data = await SeasonService.list(aqp);
 
-    this.setState(prev => ({
-      ...prev,
-      list: data.docs,
-      loadingData: false,
-      pagination: {
-        total: data.total
-      }
-    }));
+      this.setState(prev => ({
+        ...prev,
+        list: data.docs,
+        loadingData: false,
+        pagination: {
+          total: data.total
+        }
+      }));
+    } catch (error) {
+      if (error && error.response && error.response.data) parseErrors(error);
+    } finally {
+      this.setState({ loadingData: false });
+    }
   }
 
   async componentDidMount() {
@@ -109,7 +115,7 @@ class Seasons extends Component {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      render: text => text ? moment(text).format("DD/MM/YYYY") : ""
+      render: text => (text ? moment(text).format("DD/MM/YYYY") : "")
     },
     {
       title: "Data de fim",
@@ -119,7 +125,7 @@ class Seasons extends Component {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      render: text => text ? moment(text).format("DD/MM/YYYY") : ""
+      render: text => (text ? moment(text).format("DD/MM/YYYY") : "")
     },
     {
       title: "Status",
@@ -133,8 +139,7 @@ class Seasons extends Component {
             title={`Tem certeza em ${statusTxt} a safra?`}
             onConfirm={e => this.changeStatus(record._id, !record.status)}
             okText="Sim"
-            cancelText="Não"
-          >
+            cancelText="Não">
             <Tooltip title={`${statusTxt.toUpperCase()} a safra`}>
               <Button size="small">
                 <FontAwesomeIcon icon={statusBtn} size="lg" />
@@ -154,8 +159,7 @@ class Seasons extends Component {
               size="small"
               onClick={() =>
                 this.props.history.push(`/safras/${record._id}/edit`)
-              }
-            >
+              }>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
             <Divider
@@ -166,8 +170,7 @@ class Seasons extends Component {
               title={`Tem certeza em excluir esta safra?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
-              cancelText="Não"
-            >
+              cancelText="Não">
               <Button size="small">
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
@@ -201,8 +204,7 @@ class Seasons extends Component {
           <Button
             type="primary"
             icon="plus"
-            onClick={() => this.props.history.push("/safras/new")}
-          >
+            onClick={() => this.props.history.push("/safras/new")}>
             Adicionar
           </Button>
         </PainelHeader>

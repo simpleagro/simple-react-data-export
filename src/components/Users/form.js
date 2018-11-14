@@ -16,6 +16,7 @@ class UserForm extends Component {
     this.state = {
       editMode: false,
       formData: {},
+      savingForm: false,
       filiais: [],
       rules: []
     };
@@ -65,11 +66,11 @@ class UserForm extends Component {
   };
 
   saveForm = async e => {
-    await this.validateLogin(this.state.formData.login);
-
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
+        this.setState({savingForm: true});
+        await this.validateLogin(this.state.formData.login);
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
@@ -92,6 +93,9 @@ class UserForm extends Component {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar um usuário", err);
           }
+          finally{
+            this.setState({savingForm: false});
+          }
         } else {
           try {
             await UsersService.update(this.state.formData);
@@ -105,6 +109,9 @@ class UserForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar um usuário ", err);
+          }
+          finally{
+            this.setState({savingForm: false});
           }
         }
       }
@@ -145,7 +152,11 @@ class UserForm extends Component {
         <Affix offsetTop={65}>
           <PainelHeader
             title={this.state.editMode ? "Editando Usuário" : "Novo Usuário"}>
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+            <Button
+              type="primary"
+              icon="save"
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
               Salvar Usuário
             </Button>
           </PainelHeader>
@@ -191,7 +202,9 @@ class UserForm extends Component {
                 }>
                 {this.state.filiais &&
                   this.state.filiais.map((f, idx) => (
-                    <Option value={f._id} key={f._id}>{f.nome_fantasia}</Option>
+                    <Option value={f._id} key={f._id}>
+                      {f.nome_fantasia}
+                    </Option>
                   ))}
               </Select>
             )}

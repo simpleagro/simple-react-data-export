@@ -27,19 +27,15 @@ const baseApi = axios.create({
   }
 });
 
-baseApi.interceptors.response.use(
-  function(response) {
-    // Do something with response data
-    return response;
-  },
-  function(error) {
-    // Do something with response error
-
-    if (error && error.response && error.response.data) parseErrors(error);
-    return {
-      data: {}
-    };
-  }
-);
+// baseApi.interceptors.response.use(
+//   function(response) {
+//     // Do something with response data
+//     return response;
+//   },
+//   function(error) {
+//     if (error && error.response && error.response.data) parseErrors(error);
+//     return error;
+//   }
+// );
 
 export { baseApi, API_URL };

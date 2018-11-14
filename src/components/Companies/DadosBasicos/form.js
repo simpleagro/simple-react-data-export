@@ -12,7 +12,8 @@ class CompanyForm extends Component {
     super(props);
     this.state = {
       editMode: false,
-      formData: {}
+      formData: {},
+      savingForm: false
     };
   }
 
@@ -43,12 +44,13 @@ class CompanyForm extends Component {
   };
 
   saveForm = async e => {
-    await this.getDatabase();
+    // await this.getDatabase();
     await this.setStatus();
 
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
+        this.setState({ savingForm: true });
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
@@ -70,6 +72,8 @@ class CompanyForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar uma empresa", err);
+          } finally {
+            this.setState({ savingForm: false });
           }
         } else {
           try {
@@ -84,6 +88,8 @@ class CompanyForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar uma empresa ", err);
+          } finally {
+            this.setState({ savingForm: false });
           }
         }
       }
@@ -134,7 +140,11 @@ class CompanyForm extends Component {
         <Affix offsetTop={65}>
           <PainelHeader
             title={this.state.editMode ? "Editando Empresa" : "Nova Empresa"}>
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+            <Button
+              type="primary"
+              icon="save"
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
               Salvar Empresa
             </Button>
           </PainelHeader>
@@ -165,6 +175,13 @@ class CompanyForm extends Component {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.cpf_cnpj
             })(<Input name="cpf_cnpj" />)}
+          </Form.Item>
+
+          <Form.Item label="database" {...formItemLayout}>
+            {getFieldDecorator("database", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.database
+            })(<Input name="database" />)}
           </Form.Item>
         </Form>
       </div>

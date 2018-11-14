@@ -16,7 +16,8 @@ class ConsultantForm extends Component {
     this.state = {
       editMode: false,
       formData: {},
-      userHasSelected: false
+      userHasSelected: false,
+      savingForm: false,
     };
   }
 
@@ -58,6 +59,7 @@ class ConsultantForm extends Component {
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
+        this.setState({savingForm: true});
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
@@ -79,6 +81,8 @@ class ConsultantForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar um consultor", err);
+          } finally{
+            this.setState({savingForm: false});
           }
         } else {
           try {
@@ -93,6 +97,8 @@ class ConsultantForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar um consultor ", err);
+          } finally{
+            this.setState({savingForm: false});
           }
         }
       }
@@ -184,8 +190,8 @@ class ConsultantForm extends Component {
             title={
               this.state.editMode ? "Editando Consultor" : "Novo Consultor"
             }>
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
-              Salvar consultor
+            <Button type="primary" icon="save" onClick={() => this.saveForm()} loading={this.state.savingForm}>
+              Salvar Consultor
             </Button>
           </PainelHeader>
         </Affix>

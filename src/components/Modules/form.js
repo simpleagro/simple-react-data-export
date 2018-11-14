@@ -15,7 +15,8 @@ class ModuleForm extends Component {
     super(props);
     this.state = {
       editMode: false,
-      formData: {}
+      formData: {},
+      savingForm: false
     };
   }
 
@@ -56,43 +57,47 @@ class ModuleForm extends Component {
   saveForm = async e => {
     this.props.form.validateFields(async err => {
       if (err) return;
-      else {
-        if (!this.state.editMode) {
-          if (Object.keys(this.state.formData).length === 0)
-            flashWithSuccess("Sem alterações para salvar", " ");
 
-          try {
-            const created = await ModuleService.create(this.state.formData);
-            this.setState({
-              openForm: false,
-              editMode: false
-            });
-            flashWithSuccess();
-            // a chamada do formulário pode vir por fluxos diferentes
-            // então usamos o returnTo para verificar para onde ir
-            // ou ir para o fluxo padrão
-            // if (this.props.location.state && this.props.location.state.returnTo)
-            //   this.props.history.push(this.props.location.state.returnTo);
-            // else this.props.history.push("/modulos");
-            this.props.history.push("/modulos/");
-          } catch (err) {
-            if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao adicionar um módulo", err);
-          }
-        } else {
-          try {
-            const updated = await ModuleService.update(this.state.formData);
-            flashWithSuccess();
-            // a chamada do formulário pode vir por fluxos diferentes
-            // então usamos o returnTo para verificar para onde ir
-            // ou ir para o fluxo padrão
-            if (this.props.location.state && this.props.location.state.returnTo)
-              this.props.history.push(this.props.location.state.returnTo);
-            else this.props.history.push("/modulos");
-          } catch (err) {
-            if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao atualizar um módulo ", err);
-          }
+      this.setState({ savingForm: true });
+      if (!this.state.editMode) {
+        if (Object.keys(this.state.formData).length === 0)
+          flashWithSuccess("Sem alterações para salvar", " ");
+
+        try {
+          const created = await ModuleService.create(this.state.formData);
+          this.setState({
+            openForm: false,
+            editMode: false
+          });
+          flashWithSuccess();
+          // a chamada do formulário pode vir por fluxos diferentes
+          // então usamos o returnTo para verificar para onde ir
+          // ou ir para o fluxo padrão
+          // if (this.props.location.state && this.props.location.state.returnTo)
+          //   this.props.history.push(this.props.location.state.returnTo);
+          // else this.props.history.push("/modulos");
+          this.props.history.push("/modulos/");
+        } catch (err) {
+          if (err && err.response && err.response.data) parseErrors(err);
+          console.log("Erro interno ao adicionar um módulo", err);
+        } finally {
+          this.setState({ savingForm: false });
+        }
+      } else {
+        try {
+          const updated = await ModuleService.update(this.state.formData);
+          flashWithSuccess();
+          // a chamada do formulário pode vir por fluxos diferentes
+          // então usamos o returnTo para verificar para onde ir
+          // ou ir para o fluxo padrão
+          if (this.props.location.state && this.props.location.state.returnTo)
+            this.props.history.push(this.props.location.state.returnTo);
+          else this.props.history.push("/modulos");
+        } catch (err) {
+          if (err && err.response && err.response.data) parseErrors(err);
+          console.log("Erro interno ao atualizar um módulo ", err);
+        } finally {
+          this.setState({ savingForm: false });
         }
       }
     });
@@ -119,8 +124,12 @@ class ModuleForm extends Component {
         <Affix offsetTop={65}>
           <PainelHeader
             title={[this.state.editMode ? "Editando" : "Novo", " Módulo"]}>
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
-              Salvar módulo
+            <Button
+              type="primary"
+              icon="save"
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
+              Salvar Módulo
             </Button>
           </PainelHeader>
         </Affix>

@@ -8,6 +8,7 @@ import * as ClientService from "../../../services/clients";
 import SimpleTable from "../../common/SimpleTable";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
+import { simpleTableSearch } from "../../../lib/simpleTableSearch";
 import { PainelHeader } from "../../common/PainelHeader";
 import { novoPlantio } from "../../../actions/plantioActions";
 
@@ -17,15 +18,13 @@ class Clients extends Component {
     this.state = {
       list: [],
       loadingData: true,
-      tableSearch: {
-        nome: ""
-      },
       pagination: {
         showSizeChanger: true,
         defaultPageSize: 10,
         pageSizeOptions: ["10", "25", "50", "100"]
       }
     };
+
   }
 
   async initializeList(aqp) {
@@ -33,7 +32,7 @@ class Clients extends Component {
       return { ...previousState, loadingData: true };
     });
 
-
+    try {
       const data = await ClientService.list(aqp);
       this.setState(prev => ({
         ...prev,
@@ -43,7 +42,11 @@ class Clients extends Component {
           total: data.total
         }
       }));
-
+    } catch (error) {
+      if (error && error.response && error.response.data) parseErrors(error);
+    } finally {
+      this.setState({ loadingData: false });
+    }
   }
 
   async componentDidMount() {
@@ -107,74 +110,14 @@ class Clients extends Component {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      filterIcon: filtered => (
-        <FontAwesomeIcon
-          icon="search"
-          style={{ color: filtered ? "#108ee9" : "#aaa" }}
-          size="lg"
-        />
-      ),
-      filterDropdown: ({
-        setSelectedKeys,
-        selectedKeys,
-        confirm,
-        clearFilters
-      }) => {
-        console.log("selectedKeys", selectedKeys);
-        return (
-          <div className="custom-filter-dropdown">
-            <Input
-              ref={ele => (this.searchInput = ele)}
-              style={{ width: 200 }}
-              value={selectedKeys}
-              onChange={e =>
-                setSelectedKeys(e.target.value ? [e.target.value] : [""])
-              }
-              onPressEnter={() => {
-                confirm();
-                this.setState(prev => ({
-                  ...prev,
-                  tableSearch: { ...prev.tableSearch, nome: selectedKeys }
-                }));
-              }}
-            />
-            <Button
-              type="primary"
-              onClick={() => {
-                confirm();
-                this.setState(prev => ({
-                  ...prev,
-                  tableSearch: { ...prev.tableSearch, nome: selectedKeys }
-                }));
-              }}>
-              Ok
-            </Button>
-            <Button
-              onClick={() => {
-                clearFilters();
-                this.setState(prev => ({
-                  ...prev,
-                  tableSearch: { ...prev.tableSearch, nome: selectedKeys }
-                }));
-              }}>
-              Limpar
-            </Button>
-          </div>
-        );
-      },
-      onFilterDropdownVisibleChange: visible => {
-        if (visible) {
-          setTimeout(() => {
-            this.searchInput.focus();
-          });
-        }
-      },
+      ...simpleTableSearch(this)("nome"),
       render: text => text
     },
     {
       title: "CPF / CNPJ",
       dataIndex: "cpf_cnpj",
       key: "cpf_cnpj",
+      ...simpleTableSearch(this)("cpf_cnpj"),
       render: text => text
     },
     {
@@ -210,6 +153,7 @@ class Clients extends Component {
         const statusBtn = record.status ? "unlock" : "lock";
         return (
           <Popconfirm
+          placement="rightTop"
             title={`Tem certeza em ${statusTxt} o cliente?`}
             onConfirm={e => this.changeStatus(record._id, !record.status)}
             okText="Sim"
