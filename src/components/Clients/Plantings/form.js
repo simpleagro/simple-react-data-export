@@ -86,7 +86,11 @@ class ClientPlantingForm extends Component {
           ...prev,
           formData,
           editMode: id ? true : false,
-          talhoes
+          talhoes,
+          populacaoFinal: this.calculaPopulacaoFinal(
+            formData.espacamento,
+            formData.plantas_metro
+          )
         }));
     }
 

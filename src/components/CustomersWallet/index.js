@@ -37,15 +37,13 @@ const DescriptionItem = ({ title, content }) => (
       lineHeight: "22px",
       marginBottom: 7,
       color: "rgba(0,0,0,0.65)"
-    }}
-  >
+    }}>
     <p
       style={{
         marginRight: 8,
         display: "inline-block",
         color: "#333"
-      }}
-    >
+      }}>
       {title}:
     </p>
     {content}
@@ -75,16 +73,22 @@ class CustomersWallet extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await CustomerWalletService.list(aqp);
+    try {
+      const data = await CustomerWalletService.list(aqp);
 
-    this.setState(prev => ({
-      ...prev,
-      list: data.docs,
-      loadingData: false,
-      pagination: {
-        total: data.total
-      }
-    }));
+      this.setState(prev => ({
+        ...prev,
+        list: data.docs,
+        loadingData: false,
+        pagination: {
+          total: data.total
+        }
+      }));
+    } catch (error) {
+      if (error && error.response && error.response.data) parseErrors(error);
+    } finally {
+      this.setState({ loadingData: false });
+    }
   }
 
   async componentDidMount() {
@@ -131,10 +135,7 @@ class CustomersWallet extends Component {
         list: _list
       });
 
-      flashWithSuccess(
-        "",
-        `A carteira, ${nome}, foi removida com sucesso!`
-      );
+      flashWithSuccess("", `A carteira, ${nome}, foi removida com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover uma carteira", err);
@@ -214,8 +215,7 @@ class CustomersWallet extends Component {
             title={`Tem certeza em ${statusTxt} esta carteira?`}
             onConfirm={e => this.changeStatus(record._id, !record.status)}
             okText="Sim"
-            cancelText="Não"
-          >
+            cancelText="Não">
             <Tooltip title={`${statusTxt.toUpperCase()} esta carteira`}>
               <Button size="small">
                 <FontAwesomeIcon icon={statusBtn} size="lg" />
@@ -237,8 +237,7 @@ class CustomersWallet extends Component {
                 this.props.history.push(
                   `/carteiras-de-clientes/${record._id}/edit`
                 );
-              }}
-            >
+              }}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
             <Divider
@@ -249,8 +248,7 @@ class CustomersWallet extends Component {
               title={`Tem certeza em excluir esta carteira?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
-              cancelText="Não"
-            >
+              cancelText="Não">
               <Button size="small">
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
@@ -262,8 +260,7 @@ class CustomersWallet extends Component {
             <Tooltip title="Informações estratégicas dos clientes da carteira">
               <Button
                 size="small"
-                onClick={() => this.showMoreInfo(record._id)}
-              >
+                onClick={() => this.showMoreInfo(record._id)}>
                 <FontAwesomeIcon icon="user" size="lg" />
               </Button>
             </Tooltip>
@@ -298,8 +295,7 @@ class CustomersWallet extends Component {
             icon="plus"
             onClick={() => {
               this.props.history.push(`/carteiras-de-clientes/new`);
-            }}
-          >
+            }}>
             Adicionar
           </Button>
         </PainelHeader>
@@ -318,19 +314,16 @@ class CustomersWallet extends Component {
           onClose={this.closeMoreInfo}
           visible={this.state.clientInfoIsVisible}
           style={{ padding: 0 }}
-          className="white-close"
-        >
+          className="white-close">
           <Layout style={{ background: "#fff" }}>
             <Layout.Header
               style={{
                 color: "#fff",
                 paddingLeft: 20
-              }}
-            >
+              }}>
               <Row type="flex" justify="space-around" align="middle">
                 <Col span={12}>
-                  Informações Extras Da Carteira -{" "}
-                  {this.state.info.nome}
+                  Informações Extras Da Carteira - {this.state.info.nome}
                 </Col>
                 <Col span={12}>
                   <Search
@@ -341,8 +334,7 @@ class CustomersWallet extends Component {
               </Row>
             </Layout.Header>
             <Layout.Content
-              style={{ padding: "0 20px", marginTop: 35, background: "#fff" }}
-            >
+              style={{ padding: "0 20px", marginTop: 35, background: "#fff" }}>
               <h2
                 style={{
                   textAlign: "center",
@@ -350,9 +342,9 @@ class CustomersWallet extends Component {
                   borderRadius: 10,
                   padding: 5,
                   marginBottom: 40
-                }}
-              >
-                Total em carteira: {`${this.state.info.totalAreaCarteira || 0} ha`}
+                }}>
+                Total em carteira:{" "}
+                {`${this.state.info.totalAreaCarteira || 0} ha`}
               </h2>
 
               {this.state.info &&
@@ -371,8 +363,7 @@ class CustomersWallet extends Component {
                             this.props.history.push(`/clientes/${c._id}/edit`, {
                               returnTo: this.props.history.location
                             })
-                          }
-                        >
+                          }>
                           Mais infos do cliente
                         </Button>
                       </Col>

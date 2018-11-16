@@ -28,16 +28,22 @@ class Seasons extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await SeasonService.list(aqp);
+    try {
+      const data = await SeasonService.list(aqp);
 
-    this.setState(prev => ({
-      ...prev,
-      list: data.docs,
-      loadingData: false,
-      pagination: {
-        total: data.total
-      }
-    }));
+      this.setState(prev => ({
+        ...prev,
+        list: data.docs,
+        loadingData: false,
+        pagination: {
+          total: data.total
+        }
+      }));
+    } catch (error) {
+      if (error && error.response && error.response.data) parseErrors(error);
+    } finally {
+      this.setState({ loadingData: false });
+    }
   }
 
   async componentDidMount() {
@@ -201,8 +207,7 @@ class Seasons extends Component {
                 size="small"
                 onClick={() =>
                   this.props.history.push(`/visitas/${record._id}`)
-                }
-              >
+                }>
                 <Icon type="eye" style={{ fontSize: "16px" }} />
               </Button>
               /*

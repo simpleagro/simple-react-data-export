@@ -17,6 +17,7 @@ import SimpleTable from "../../common/SimpleTable";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
+import { simpleTableSearch } from "../../../lib/simpleTableSearch";
 
 class Properties extends Component {
   constructor(props) {
@@ -35,22 +36,31 @@ class Properties extends Component {
   }
 
   async initializeList(aqp) {
+
+
     this.setState(previousState => {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await ClientsPropertyService.list(this.state.client_id)(aqp);
-    const clientData = await ClientsService.get(this.state.client_id);
+    try {
+      const data = await ClientsPropertyService.list(this.state.client_id)(aqp);
+      const clientData = await ClientsService.get(this.state.client_id);
 
-    this.setState(prev => ({
-      ...prev,
-      list: data.docs,
-      loadingData: false,
-      pagination: {
-        total: data.total
-      },
-      client_data: clientData
-    }));
+      this.setState(prev => ({
+        ...prev,
+        list: data.docs,
+        loadingData: false,
+        pagination: {
+          total: data.total
+        },
+        client_data: clientData
+      }));
+    } catch (error) {
+      if (error && error.response && error.response.data) parseErrors(error);
+      this.props.history.push(`/clientes/${this.state.client_id}`);
+    } finally {
+      this.setState({ loadingData: false });
+    }
   }
 
   async componentDidMount() {
@@ -111,29 +121,31 @@ class Properties extends Component {
     {
       title: "Nome",
       dataIndex: "nome",
-      key: "nome",
+      key: "propriedades.nome",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
+      },
+      ...simpleTableSearch(this)('propriedades.nome'),
+      render: text => text
     },
     {
       title: "Inscrição Estadual",
       dataIndex: "ie",
-      key: "ie",
-      render: text => text
+      key: "propriedades.ie",
+      ...simpleTableSearch(this)('propriedades.ie'),
     },
     {
       title: "Cidade",
       dataIndex: "cidade",
-      key: "cidade",
-      render: text => text
+      key: "propriedades.cidade",
+      ...simpleTableSearch(this)("propriedades.cidade"),
     },
     {
       title: "Estado",
       dataIndex: "estado",
-      key: "estado",
-      render: text => text
+      key: "propriedades.estado",
+      ...simpleTableSearch(this)("propriedades.estado"),
     },
     {
       title: "Status",
@@ -210,6 +222,22 @@ class Properties extends Component {
     }
   ];
 
+  handleTableChange = (pagination, filters) => {
+
+    let _this = this;
+    const pager = { ...this.state.pagination };
+    pager.current = pagination.current;
+    this.setState({
+      pagination: pager
+    });
+    this.initializeList({
+      page: pagination.current,
+      limit: pagination.pageSize,
+      ...filters,
+      // ..._this.state.tableSearch ? _this.state.tableSearch : null
+    });
+  };
+
   render() {
     return (
       <div>
@@ -258,6 +286,7 @@ class Properties extends Component {
                 rowKey="_id"
                 columns={this.tableConfig()}
                 dataSource={this.state.list}
+                onChange={this.handleTableChange}
               />
             </Card>
           </Col>

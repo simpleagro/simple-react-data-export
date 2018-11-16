@@ -42,7 +42,8 @@ class ClientPropertySpotForm extends Component {
       fetchingCidade: false,
       isMarkerShown: false,
       drawingMap: false,
-      editingMap: false
+      editingMap: false,
+      savingForm: false
     };
   }
 
@@ -92,6 +93,7 @@ class ClientPropertySpotForm extends Component {
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
+        this.setState({ savingForm: true });
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
@@ -115,6 +117,8 @@ class ClientPropertySpotForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar um cliente", err);
+          } finally{
+            this.setState({savingForm: false});
           }
         } else {
           try {
@@ -130,6 +134,8 @@ class ClientPropertySpotForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar um cliente ", err);
+          } finally{
+            this.setState({savingForm: false});
           }
         }
       }
@@ -202,7 +208,7 @@ class ClientPropertySpotForm extends Component {
         <Affix offsetTop={65}>
           <PainelHeader
             title={this.state.editMode ? "Editando Talhão" : "Novo Talhão"}>
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+            <Button type="primary" icon="save" onClick={() => this.saveForm()} loading={this.state.savingForm}>
               Salvar Talhão
             </Button>
           </PainelHeader>

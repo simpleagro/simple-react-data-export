@@ -27,16 +27,22 @@ class UnitMeasures extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await UnitMeasureService.list(aqp);
+    try {
+      const data = await UnitMeasureService.list(aqp);
 
-    this.setState(prev => ({
-      ...prev,
-      list: data.docs,
-      loadingData: false,
-      pagination: {
-        total: data.total
-      }
-    }));
+      this.setState(prev => ({
+        ...prev,
+        list: data.docs,
+        loadingData: false,
+        pagination: {
+          total: data.total
+        }
+      }));
+    } catch (error) {
+      if (error && error.response && error.response.data) parseErrors(error);
+    } finally {
+      this.setState({ loadingData: false });
+    }
   }
 
   async componentDidMount() {
@@ -128,8 +134,7 @@ class UnitMeasures extends Component {
               size="small"
               onClick={() =>
                 this.props.history.push(`/unidades-medidas/${record._id}/edit`)
-              }
-            >
+              }>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
 
@@ -142,8 +147,7 @@ class UnitMeasures extends Component {
               title={`Tem certeza em excluir a unidade?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
-              cancelText="Não"
-            >
+              cancelText="Não">
               <Button size="small">
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
@@ -177,8 +181,7 @@ class UnitMeasures extends Component {
           <Button
             type="primary"
             icon="plus"
-            onClick={() => this.props.history.push("/unidades-medidas/new")}
-          >
+            onClick={() => this.props.history.push("/unidades-medidas/new")}>
             Adicionar
           </Button>
         </PainelHeader>

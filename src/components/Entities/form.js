@@ -14,7 +14,8 @@ class EntityForm extends Component {
     super(props);
     this.state = {
       editMode: false,
-      formData: {}
+      formData: {},
+      savingForm: false
     };
   }
 
@@ -54,7 +55,7 @@ class EntityForm extends Component {
   saveForm = async e => {
     this.props.form.validateFields(async err => {
       if (err) return;
-
+      this.setState({ savingForm: true });
       if (!this.state.editMode) {
         if (Object.keys(this.state.formData).length === 0) {
           flashWithSuccess("Sem alterações para salvar", " ");
@@ -77,6 +78,8 @@ class EntityForm extends Component {
         } catch (err) {
           if (err && err.response && err.response.data) parseErrors(err);
           console.log("Erro interno ao adicionar uma entidade", err);
+        } finally {
+          this.setState({ savingForm: false });
         }
       } else {
         try {
@@ -91,6 +94,8 @@ class EntityForm extends Component {
         } catch (err) {
           if (err && err.response && err.response.data) parseErrors(err);
           console.log("Erro interno ao atualizar uma entidade ", err);
+        } finally {
+          this.setState({ savingForm: false });
         }
       }
     });
@@ -117,8 +122,12 @@ class EntityForm extends Component {
         <Affix offsetTop={65}>
           <PainelHeader
             title={[this.state.editMode ? "Editando" : "Nova", " Entidade"]}>
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
-              Salvar entidade
+            <Button
+              type="primary"
+              icon="save"
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
+              Salvar Entidade
             </Button>
           </PainelHeader>
         </Affix>

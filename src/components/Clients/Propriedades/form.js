@@ -45,7 +45,8 @@ class ClientPropertyForm extends Component {
       client_id: this.props.match.params.client_id,
       fetchingCidade: false,
       drawingMap: false,
-      editingMap: false
+      editingMap: false,
+      savingForm: false
     };
   }
 
@@ -102,6 +103,7 @@ class ClientPropertyForm extends Component {
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
+        this.setState({savingForm: true});
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
@@ -124,6 +126,8 @@ class ClientPropertyForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             // console.log("Erro interno ao adicionar um cliente", err);
+          } finally{
+            this.setState({savingForm: false});
           }
         } else {
           try {
@@ -139,6 +143,8 @@ class ClientPropertyForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar um cliente ", err);
+          } finally{
+            this.setState({savingForm: false});
           }
         }
       }
@@ -172,7 +178,7 @@ class ClientPropertyForm extends Component {
             title={
               this.state.editMode ? "Editando Propriedade" : "Nova propriedade"
             }>
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+            <Button type="primary" icon="save" onClick={() => this.saveForm()} loading={this.state.savingForm}>
               Salvar Propriedade
             </Button>
           </PainelHeader>
@@ -203,7 +209,6 @@ class ClientPropertyForm extends Component {
           </Form.Item>
           <Form.Item label="Matrículas" {...formItemLayout}>
             {getFieldDecorator("matriculas", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.matriculas
             })(
               <Tooltip
@@ -211,7 +216,6 @@ class ClientPropertyForm extends Component {
                 trigger="focus">
                 <Select
                   name="matriculas"
-                  value={this.state.formData.matriculas}
                   mode="tags"
                   showSearch
                   allowClear

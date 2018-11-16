@@ -1,12 +1,5 @@
 import React, { Component } from "react";
-import {
-  Button,
-  Input,
-  Form,
-  Select,
-  Affix,
-  Checkbox
-} from "antd";
+import { Button, Input, Form, Select, Affix, Checkbox } from "antd";
 
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
@@ -20,7 +13,8 @@ class ClientForm extends Component {
     super(props);
     this.state = {
       editMode: false,
-      formData: {}
+      formData: {},
+      savingForm: false
     };
   }
 
@@ -55,6 +49,7 @@ class ClientForm extends Component {
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
+        this.setState({ savingForm: true });
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
@@ -78,6 +73,8 @@ class ClientForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar um cliente", err);
+          } finally {
+            this.setState({ savingForm: false });
           }
         } else {
           try {
@@ -92,6 +89,8 @@ class ClientForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar um cliente ", err);
+          } finally {
+            this.setState({ savingForm: false });
           }
         }
       }
@@ -118,7 +117,7 @@ class ClientForm extends Component {
         <Affix offsetTop={65}>
           <PainelHeader
             title={this.state.editMode ? "Editando Cliente" : "Novo Cliente"}>
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+            <Button type="primary" icon="save" onClick={() => this.saveForm()} loading={this.state.savingForm}>
               Salvar Cliente
             </Button>
           </PainelHeader>

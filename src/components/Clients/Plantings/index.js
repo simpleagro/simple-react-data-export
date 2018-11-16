@@ -45,17 +45,31 @@ class Plantings extends Component {
       };
     });
 
-    const data = await PlantingService.list(this.state.client_id)(aqp);
-    const clientData = await ClientsService.get(this.state.client_id);
+    try {
+      const clientData = await ClientsService.get(this.state.client_id);
+      this.setState(prev => ({
+        ...prev,
+        client_data: clientData
+      }));
+    } catch (error) {
+      if (error && error.response && error.response.data) parseErrors(error);
+    }
 
-    this.setState(prev => ({
-      ...prev,
-      list: data.docs,
-      filtro_safras: data.safrasFiltro,
-      safra_selecionada: data.safraSelecionada,
-      loadingData: false,
-      client_data: clientData
-    }));
+    try {
+      const data = await PlantingService.list(this.state.client_id)(aqp);
+
+      this.setState(prev => ({
+        ...prev,
+        list: data.docs,
+        filtro_safras: data.safrasFiltro,
+        safra_selecionada: data.safraSelecionada,
+        loadingData: false,
+      }));
+    } catch (error) {
+      if (error && error.response && error.response.data) parseErrors(error);
+    } finally {
+      this.setState({ loadingData: false });
+    }
   }
 
   async componentDidMount() {
@@ -167,11 +181,9 @@ class Plantings extends Component {
             title={`Tem certeza em ${statusTxt} este planejamento de plantio?`}
             onConfirm={e => this.changeStatus(record._id, !record.status)}
             okText="Sim"
-            cancelText="Não"
-          >
+            cancelText="Não">
             <Tooltip
-              title={`${statusTxt.toUpperCase()} planejamento de plantio`}
-            >
+              title={`${statusTxt.toUpperCase()} planejamento de plantio`}>
               <Button size="small">
                 <FontAwesomeIcon icon={statusBtn} size="lg" />
               </Button>
@@ -192,8 +204,7 @@ class Plantings extends Component {
                 this.props.history.push(
                   `/clientes/${this.state.client_id}/plantio/${record._id}/edit`
                 )
-              }
-            >
+              }>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
             <Divider
@@ -204,8 +215,7 @@ class Plantings extends Component {
               title={`Tem certeza em excluir este planejamento de plantio?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
-              cancelText="Não"
-            >
+              cancelText="Não">
               <Button size="small">
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
@@ -236,8 +246,7 @@ class Plantings extends Component {
               style={{
                 boxShadow: "0px 8px 0px 0px #009d55 inset",
                 color: "#009d55"
-              }}
-            >
+              }}>
               <p>{`Cliente: ${this.state.client_data.nome}`}</p>
               <p>{`CPF/CNPJ: ${this.state.client_data.cpf_cnpj}`}</p>
               <Button
@@ -247,8 +256,7 @@ class Plantings extends Component {
                     `/clientes/${this.state.client_id}/edit`,
                     { returnTo: this.props.history.location }
                   );
-                }}
-              >
+                }}>
                 <Icon type="edit" /> Editar
               </Button>
             </Card>
@@ -269,8 +277,7 @@ class Plantings extends Component {
                       option.props.children
                         .toLowerCase()
                         .indexOf(input.toLowerCase()) >= 0
-                    }
-                  >
+                    }>
                     {this.state.filtro_safras &&
                       this.state.filtro_safras.map(s => (
                         <Option key={s} value={s}>
@@ -289,12 +296,10 @@ class Plantings extends Component {
                     this.props.history.push(
                       `/clientes/${this.state.client_id}/plantio/new`
                     )
-                  }
-                >
+                  }>
                   Adicionar
                 </Button>
-              }
-            >
+              }>
               <SimpleTable
                 pagination={this.state.pagination}
                 spinning={this.state.loadingData}
