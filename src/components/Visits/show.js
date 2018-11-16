@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import moment from "moment";
 import "moment/locale/pt-br";
-import { Input, Form, Affix, Card, Radio, Tabs } from "antd";
+import { Select, Input, Form, Affix, Card, Radio, Tabs } from "antd";
 
 import styled from "styled-components";
 
@@ -14,6 +14,7 @@ import { SimpleBreadCrumb } from "../common/SimpleBreadCrumb";
 
 const TabPane = Tabs.TabPane;
 const TextArea = Input.TextArea;
+const Option = Select.Option;
 
 const CardStyled = styled(Card)`
   background: #ececec;
@@ -172,12 +173,26 @@ class VisitForm extends Component {
                     : ""
                 })(<Input readOnly />)}
               </Form.Item>
-              <Form.Item label="Talhão" {...formItemLayout}>
-                {getFieldDecorator("talhao.nome", {
+              {/* <Form.Item label="Talhões" {...formItemLayout}>
+                {getFieldDecorator("talhoes", {
                   initialValue: this.state.formData.talhao
                     ? this.state.formData.talhao.nome
                     : ""
                 })(<Input readOnly />)}
+              </Form.Item> */}
+              <Form.Item label="Talhões" {...formItemLayout}>
+                {getFieldDecorator("talhoes", {
+                  initialValue: this.state.formData.talhoes && this.state.formData.talhoes.map(t => t.nome)
+                })(
+                  <Select name="talhoes" mode="tags" readOnly={true}>
+                    {this.state.formData.talhoes &&
+                      this.state.formData.talhoes.map(t => (
+                        <Option value={t.id} key={t.id}>
+                          {t.nome}
+                        </Option>
+                      ))}
+                  </Select>
+                )}
               </Form.Item>
               <CardStyled type="inner" title="Geolocalização" bordered>
                 {this.state.formData.geolocalizacao && (
