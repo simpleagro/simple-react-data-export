@@ -120,8 +120,8 @@ class Consultants extends Component {
     },
     {
       title: "Gerente",
-      dataIndex: "gerente_id",
-      key: "gerente_id",
+      dataIndex: "gerente_id.nome",
+      key: "gerente_id.nome",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;

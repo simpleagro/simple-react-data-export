@@ -308,7 +308,7 @@ class CustomersWallet extends Component {
           onChange={this.handleTableChange}
         />
         <Drawer
-          width="30vw"
+          width="54vw"
           placement="right"
           closable={true}
           onClose={this.closeMoreInfo}
@@ -352,20 +352,25 @@ class CustomersWallet extends Component {
                 this.state.info.clientes.length > 0 &&
                 this.state.info.clientes.map(c => (
                   <div key={c._id}>
-                    <Row>
-                      <Col span={12}>
+                    <Row gutter={10}>
+                      <Col span={20}>
                         <DescriptionItem title="Nome" content={c.nome} />{" "}
                       </Col>
-                      <Col span={12}>
-                        <Button
-                          block
-                          onClick={() =>
-                            this.props.history.push(`/clientes/${c._id}/edit`, {
-                              returnTo: this.props.history.location
-                            })
-                          }>
-                          Mais infos do cliente
-                        </Button>
+                      <Col span={4} style={{textAlign: "right"}}>
+                        <Tooltip title="Veja mais informações do cliente" placement="topLeft">
+                          <Icon
+                            style={{ fontSize: "1.5em" }}
+                            type="info-circle"
+                            onClick={() =>
+                              this.props.history.push(
+                                `/clientes/${c._id}/edit`,
+                                {
+                                  returnTo: this.props.history.location
+                                }
+                              )
+                            }
+                          />
+                        </Tooltip>
                       </Col>
                     </Row>
                     <Row>

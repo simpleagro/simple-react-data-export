@@ -170,7 +170,7 @@ class Properties extends Component {
       }
     },
     {
-      title: "",
+      title: "Ações",
       dataIndex: "action",
       render: (text, record) => {
         return (
@@ -233,7 +233,7 @@ class Properties extends Component {
     this.initializeList({
       page: pagination.current,
       limit: pagination.pageSize,
-      ...filters,
+      ...this.state.tableSearch
       // ..._this.state.tableSearch ? _this.state.tableSearch : null
     });
   };
