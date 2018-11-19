@@ -75,7 +75,7 @@ export const simpleTableSearch = self => field => {
                 ...prev,
                 tableSearch: {
                   ...prev.tableSearch,
-                  [field]: `/${val}/`
+                  [field]: `/${val}/i`
                 }
               }));
             }}
