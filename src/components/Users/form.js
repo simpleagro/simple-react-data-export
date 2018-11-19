@@ -49,7 +49,7 @@ class UserForm extends Component {
 
     this.setState(prev => ({
       ...prev,
-      rules,
+      rules: rules.docs,
       filiais: filiais.docs
     }));
 
@@ -69,7 +69,7 @@ class UserForm extends Component {
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
-        this.setState({savingForm: true});
+        this.setState({ savingForm: true });
         await this.validateLogin(this.state.formData.login);
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
@@ -92,9 +92,8 @@ class UserForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar um usuário", err);
-          }
-          finally{
-            this.setState({savingForm: false});
+          } finally {
+            this.setState({ savingForm: false });
           }
         } else {
           try {
@@ -109,9 +108,8 @@ class UserForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar um usuário ", err);
-          }
-          finally{
-            this.setState({savingForm: false});
+          } finally {
+            this.setState({ savingForm: false });
           }
         }
       }
@@ -194,6 +192,7 @@ class UserForm extends Component {
                 showSearch
                 style={{ width: 200 }}
                 mode="multiple"
+                optionFilterProp="data-filter"
                 placeholder="Selecione uma filial..."
                 onChange={e =>
                   this.handleFormState({
@@ -202,7 +201,10 @@ class UserForm extends Component {
                 }>
                 {this.state.filiais &&
                   this.state.filiais.map((f, idx) => (
-                    <Option value={f._id} key={f._id}>
+                    <Option
+                      data-filter={f.nome_fantasia}
+                      value={f._id}
+                      key={f._id}>
                       {f.nome_fantasia}
                     </Option>
                   ))}
@@ -213,7 +215,8 @@ class UserForm extends Component {
           <Form.Item label="Tipo de Login" {...formItemLayout}>
             {getFieldDecorator("tipoLogin", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.tipoLogin || "API"
+              initialValue: this.state.formData.tipoLogin,
+              defaultValue: "API"
             })(
               <Select
                 name="tipoLogin"
@@ -241,6 +244,7 @@ class UserForm extends Component {
                 name="grupo_id"
                 showAction={["focus", "click"]}
                 showSearch
+                optionFilterProp="data-filter"
                 style={{ width: 200 }}
                 placeholder="Selecione um grupo de permissão..."
                 onChange={e =>
@@ -250,7 +254,7 @@ class UserForm extends Component {
                 }>
                 {this.state.rules &&
                   this.state.rules.map(r => (
-                    <Option key={r._id} value={r._id}>
+                    <Option data-filter={r.nome} key={r._id} value={r._id}>
                       {r.nome}
                     </Option>
                   ))}
@@ -265,10 +269,22 @@ class UserForm extends Component {
               this.state.editMode
                 ? "Caso seja necessário trocar a senha, informe uma nova aqui."
                 : ""
-            }>
+            }
+            style={{
+              display:
+                this.state.userHasSelected ||
+                this.state.editMode ||
+                this.state.formData.tipoLogin !== "API"
+                  ? "none"
+                  : "block"
+            }}>
             {getFieldDecorator("senha", {
               rules: [
-                { required: false, message: "Este campo é obrigatório!" }
+                {
+                  required:
+                    this.state.formData.tipoLogin === "API" ? true : false,
+                  message: "Este campo é obrigatório!"
+                }
               ],
               initialValue: this.state.formData.senha
             })(<Input name="senha" />)}

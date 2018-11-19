@@ -130,7 +130,7 @@ class Plots extends Component {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      ...simpleTableSearch(this)('propriedades.talhoes.nome'),
+      ...simpleTableSearch(this)("propriedades.talhoes.nome"),
       render: (text, record) => {
         return !record.coordenadas || record.coordenadas.length < 3 ? (
           <Tooltip title="Este talhão ainda não possui pontos de mapeamento">
@@ -170,7 +170,7 @@ class Plots extends Component {
       }
     },
     {
-      title: "",
+      title: "Ações",
       dataIndex: "action",
       render: (text, record) => {
         return (
@@ -203,6 +203,17 @@ class Plots extends Component {
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
+            <Tooltip title="Veja os planejamentos de plantio para este talhão">
+              <Button
+                size="small"
+                onClick={() => {
+                  this.props.history.push(
+                    `/clientes/${this.state.client_id}/plantio?talhao=${record._id}`
+                  );
+                }}>
+                <FontAwesomeIcon icon="seedling" size="lg" />
+              </Button>
+            </Tooltip>
           </span>
         );
       }
@@ -210,7 +221,6 @@ class Plots extends Component {
   ];
 
   handleTableChange = (pagination, filters) => {
-
     let _this = this;
     const pager = { ...this.state.pagination };
     pager.current = pagination.current;
@@ -220,7 +230,7 @@ class Plots extends Component {
     this.initializeList({
       page: pagination.current,
       limit: pagination.pageSize,
-      ...filters,
+      ...this.state.tableSearch
       // ..._this.state.tableSearch ? _this.state.tableSearch : null
     });
   };

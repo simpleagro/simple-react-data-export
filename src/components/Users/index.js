@@ -7,6 +7,7 @@ import SimpleTable from "../common/SimpleTable";
 import { flashWithSuccess } from "../common/FlashMessages";
 import parseErrors from "../../lib/parseErrors";
 import { PainelHeader } from "../common/PainelHeader";
+import { simpleTableSearch } from "../../lib/simpleTableSearch";
 
 class Users extends Component {
   constructor(props) {
@@ -100,10 +101,10 @@ class Users extends Component {
       title: "Nome",
       dataIndex: "nome",
       key: "nome",
-      sorter: (a, b, sorter) => {
-        if (sorter === "ascendent") return -1;
-        else return 1;
-      }
+      defaultSortOrder: "ascend",
+      sortOrder: "ascend",
+      sorter: true,
+      ...simpleTableSearch(this)('nome')
     },
     {
       title: "Grupo",
@@ -179,7 +180,9 @@ class Users extends Component {
     });
     this.initializeList({
       page: pagination.current,
-      limit: pagination.pageSize
+      limit: pagination.pageSize,
+      sort: `${sorter.order === "descend" ? "-" : ""}${sorter.field}`,
+      ...this.state.tableSearch
     });
   };
 

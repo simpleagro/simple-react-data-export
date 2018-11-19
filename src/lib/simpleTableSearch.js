@@ -71,15 +71,16 @@ export const simpleTableSearch = self => field => {
             onChange={e => {
               const val = e.target.value;
               setSelectedKeys(val ? val : "");
-              // self.setState(prev => ({
-              //   ...prev,
-              //   tableSearch: {
-              //     ...prev.tableSearch,
-              //     [field]: `${val}`
-              //   }
-              // }));
+              self.setState(prev => ({
+                ...prev,
+                tableSearch: {
+                  ...prev.tableSearch,
+                  [field]: `/${val}/`
+                }
+              }));
             }}
             onPressEnter={() => {
+
               confirm();
               // self.setState(prev => ({
               //   ...prev,
@@ -107,10 +108,10 @@ export const simpleTableSearch = self => field => {
           <Button
             onClick={() => {
               clearFilters();
-              // self.setState(prev => ({
-              //   ...prev,
-              //   tableSearch: { ...prev.tableSearch, [field]: "" }
-              // }));
+              self.setState(prev => ({
+                ...prev,
+                tableSearch: { ...prev.tableSearch, [field]: "" }
+              }));
             }}>
             Limpar
           </Button>
