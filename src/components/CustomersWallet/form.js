@@ -177,7 +177,6 @@ class CustomerWalletForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar a carteira de cliente", err);
-          } finally {
             this.setState({ savingForm: false });
           }
         } else {
@@ -198,7 +197,6 @@ class CustomerWalletForm extends Component {
               "Erro interno ao atualizar a carteira de cliente ",
               err
             );
-          } finally {
             this.setState({ savingForm: false });
           }
         }

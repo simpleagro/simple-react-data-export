@@ -80,7 +80,6 @@ class UnitMeasureForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar uma unidade", err);
-          } finally {
             this.setState({ savingForm: false });
           }
         } else {
@@ -96,7 +95,6 @@ class UnitMeasureForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar uma unidade ", err);
-          } finally {
             this.setState({ savingForm: false });
           }
         }

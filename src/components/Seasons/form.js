@@ -73,7 +73,6 @@ class SeasonForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar a safra", err);
-          } finally {
             this.setState({ savingForm: false });
           }
         } else {
@@ -89,7 +88,6 @@ class SeasonForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar a safra ", err);
-          } finally {
             this.setState({ savingForm: false });
           }
         }
@@ -118,7 +116,11 @@ class SeasonForm extends Component {
         <Affix offsetTop={65}>
           <PainelHeader
             title={this.state.editMode ? "Editando Safra" : "Nova Safra"}>
-            <Button type="primary" icon="save" onClick={() => this.saveForm()} loading={this.state.savingForm}>
+            <Button
+              type="primary"
+              icon="save"
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
               Salvar Safra
             </Button>
           </PainelHeader>

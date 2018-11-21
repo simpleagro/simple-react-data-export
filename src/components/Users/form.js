@@ -92,7 +92,6 @@ class UserForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar um usuário", err);
-          } finally {
             this.setState({ savingForm: false });
           }
         } else {
@@ -108,7 +107,6 @@ class UserForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar um usuário ", err);
-          } finally {
             this.setState({ savingForm: false });
           }
         }
@@ -268,21 +266,15 @@ class UserForm extends Component {
             help={
               this.state.editMode
                 ? "Caso seja necessário trocar a senha, informe uma nova aqui."
-                : ""
+                : undefined
             }
             style={{
-              display:
-                this.state.userHasSelected ||
-                this.state.editMode ||
-                this.state.formData.tipoLogin !== "API"
-                  ? "none"
-                  : "block"
+              display: this.state.formData.tipoLogin === "AD" ? "none" : "block"
             }}>
             {getFieldDecorator("senha", {
               rules: [
                 {
-                  required:
-                    this.state.formData.tipoLogin === "API" ? true : false,
+                  required: !this.state.editMode ? true : false,
                   message: "Este campo é obrigatório!"
                 }
               ],

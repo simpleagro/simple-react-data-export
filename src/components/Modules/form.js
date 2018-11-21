@@ -80,7 +80,6 @@ class ModuleForm extends Component {
         } catch (err) {
           if (err && err.response && err.response.data) parseErrors(err);
           console.log("Erro interno ao adicionar um módulo", err);
-        } finally {
           this.setState({ savingForm: false });
         }
       } else {
@@ -96,7 +95,6 @@ class ModuleForm extends Component {
         } catch (err) {
           if (err && err.response && err.response.data) parseErrors(err);
           console.log("Erro interno ao atualizar um módulo ", err);
-        } finally {
           this.setState({ savingForm: false });
         }
       }

@@ -78,7 +78,6 @@ class EntityForm extends Component {
         } catch (err) {
           if (err && err.response && err.response.data) parseErrors(err);
           console.log("Erro interno ao adicionar uma entidade", err);
-        } finally {
           this.setState({ savingForm: false });
         }
       } else {
@@ -94,7 +93,6 @@ class EntityForm extends Component {
         } catch (err) {
           if (err && err.response && err.response.data) parseErrors(err);
           console.log("Erro interno ao atualizar uma entidade ", err);
-        } finally {
           this.setState({ savingForm: false });
         }
       }
