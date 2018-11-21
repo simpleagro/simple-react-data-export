@@ -117,7 +117,6 @@ class ClientPropertySpotForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar um cliente", err);
-          } finally{
             this.setState({savingForm: false});
           }
         } else {
@@ -134,7 +133,6 @@ class ClientPropertySpotForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar um cliente ", err);
-          } finally{
             this.setState({savingForm: false});
           }
         }
@@ -270,6 +268,7 @@ class ClientPropertySpotForm extends Component {
             <Row>
               <Col span={24}>
                 <SimpleMap
+
                   polygonData={
                     this.state.formData.coordenadas &&
                     this.state.formData.coordenadas.length > 0

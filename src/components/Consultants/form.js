@@ -97,7 +97,6 @@ class ConsultantForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar um consultor", err);
-          } finally {
             this.setState({ savingForm: false });
           }
         } else {
@@ -113,7 +112,6 @@ class ConsultantForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar um consultor ", err);
-          } finally {
             this.setState({ savingForm: false });
           }
         }

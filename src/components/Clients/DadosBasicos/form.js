@@ -73,7 +73,6 @@ class ClientForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar um cliente", err);
-          } finally {
             this.setState({ savingForm: false });
           }
         } else {
@@ -89,7 +88,6 @@ class ClientForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar um cliente ", err);
-          } finally {
             this.setState({ savingForm: false });
           }
         }
@@ -117,7 +115,11 @@ class ClientForm extends Component {
         <Affix offsetTop={65}>
           <PainelHeader
             title={this.state.editMode ? "Editando Cliente" : "Novo Cliente"}>
-            <Button type="primary" icon="save" onClick={() => this.saveForm()} loading={this.state.savingForm}>
+            <Button
+              type="primary"
+              icon="save"
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
               Salvar Cliente
             </Button>
           </PainelHeader>

@@ -126,7 +126,6 @@ class ClientPropertyForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             // console.log("Erro interno ao adicionar um cliente", err);
-          } finally{
             this.setState({savingForm: false});
           }
         } else {
@@ -136,14 +135,11 @@ class ClientPropertyForm extends Component {
             )(this.state.formData);
             flashWithSuccess();
             this.props.history.push(
-              `/clientes/${this.props.match.params.client_id}/propriedades/${
-                updated._id
-              }/talhoes`
+              `/clientes/${this.props.match.params.client_id}/propriedades`
             );
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar um cliente ", err);
-          } finally{
             this.setState({savingForm: false});
           }
         }
