@@ -7,6 +7,8 @@ import { PainelHeader } from "../common/PainelHeader";
 import * as ConsultantsService from "../../services/consultants";
 import * as UsersService from "../../services/users";
 import { SimpleBreadCrumb } from "../common/SimpleBreadCrumb";
+import { list as RulesListService } from "../../services/rules";
+import { list as BranchsListService } from "../../services/companies.branchs";
 
 const Option = Select.Option;
 
@@ -18,6 +20,8 @@ class ConsultantForm extends Component {
       formData: {},
       userHasSelected: false,
       savingForm: false,
+      filiais: [],
+      rules: []
     };
   }
 
@@ -25,11 +29,23 @@ class ConsultantForm extends Component {
     const { id } = this.props.match.params;
     const dataConsultants = await ConsultantsService.list();
     const dataUsers = await UsersService.list({ limit: 999999999 });
+    const rules = await RulesListService({ limit: -1, fields: "nome" });
+
+    const { empresa } = JSON.parse(
+      localStorage.getItem("simpleagro_painel")
+    ).painelState.userData;
+
+    const filiais = await BranchsListService(empresa)({
+      limit: -1,
+      fields: "filiais.nome_fantasia, filiais._id"
+    });
 
     this.setState(prev => ({
       ...prev,
       listCargo: dataConsultants.docs,
-      listUser: dataUsers.docs
+      listUser: dataUsers.docs,
+      rules: rules.docs,
+      filiais: filiais.docs
     }));
 
     if (id) {
@@ -59,7 +75,7 @@ class ConsultantForm extends Component {
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
-        this.setState({savingForm: true});
+        this.setState({ savingForm: true });
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
@@ -81,8 +97,7 @@ class ConsultantForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar um consultor", err);
-          } finally{
-            this.setState({savingForm: false});
+            this.setState({ savingForm: false });
           }
         } else {
           try {
@@ -97,8 +112,7 @@ class ConsultantForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar um consultor ", err);
-          } finally{
-            this.setState({savingForm: false});
+            this.setState({ savingForm: false });
           }
         }
       }
@@ -109,39 +123,43 @@ class ConsultantForm extends Component {
     let idx = -1;
     let user = null;
     this.state.listUser.some((u, index) => {
-      user = u;
-      return u._id === usuario_id;
+      if (u._id === usuario_id) {
+        user = u;
+        return true;
+      }
     });
 
-    if (user && !this.state.editMode)
-      this.setState(prev => ({
-        ...prev,
-        formData: {
-          ...prev.formData,
-          nome: user.nome,
-          email: user.email,
-          login: user.login,
-          tipoLogin: user.tipoLogin
-        },
-        userHasSelected: true
-      }));
+    if (!this.state.editMode) {
+      user &&
+        this.setState(prev => ({
+          ...prev,
+          formData: {
+            ...prev.formData,
+            nome: user.nome,
+            email: user.email,
+            login: user.login,
+            tipoLogin: user.tipoLogin,
+            grupo_id: user.grupo_id,
+            filiais: user.filiais
+          },
+          userHasSelected: true
+        }));
 
-    // this.state.listUser.map(
-    //   user =>
-    //     user._id === usuario_id && !this.state.editMode
-    //       ? this.setState(prev => ({
-    //           ...prev,
-    //           formData: {
-    //             ...prev.formData,
-    //             nome: user.nome,
-    //             email: user.email,
-    //             login: user.login,
-    //             tipoLogin: user.tipoLogin
-    //           },
-    //           userHasSelected: true
-    //         }))
-    //       : null
-    // );
+      !user &&
+        this.setState(prev => ({
+          ...prev,
+          formData: {
+            ...prev.formData,
+            nome: "",
+            email: "",
+            login: "",
+            tipoLogin: "",
+            grupo_id: null,
+            filiais: []
+          },
+          userHasSelected: false
+        }));
+    }
   };
 
   setLogin = email => {
@@ -190,7 +208,11 @@ class ConsultantForm extends Component {
             title={
               this.state.editMode ? "Editando Consultor" : "Novo Consultor"
             }>
-            <Button type="primary" icon="save" onClick={() => this.saveForm()} loading={this.state.savingForm}>
+            <Button
+              type="primary"
+              icon="save"
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
               Salvar Consultor
             </Button>
           </PainelHeader>
@@ -269,7 +291,8 @@ class ConsultantForm extends Component {
                 rules: [
                   { required: true, message: "Este campo é obrigatório!" }
                 ],
-                initialValue: this.state.formData.tipoLogin || "API"
+                initialValue: this.state.formData.tipoLogin,
+                defaultValue: "API"
               })(
                 <Select
                   disabled={this.state.userHasSelected}
@@ -295,17 +318,96 @@ class ConsultantForm extends Component {
             {...formItemLayout}
             style={{
               display:
-                this.state.userHasSelected || this.state.editMode
+                this.state.userHasSelected ||
+                this.state.editMode ||
+                this.state.formData.tipoLogin !== "API"
                   ? "none"
                   : "block"
             }}>
             {getFieldDecorator("senha", {
               rules: [
-                { required: false, message: "Este campo é obrigatório!" }
+                {
+                  required:
+                    this.state.formData.tipoLogin === "API" ? true : false,
+                  message: "Este campo é obrigatório!"
+                }
               ],
               initialValue: this.state.formData.senha
             })(<Input name="senha" />)}
           </Form.Item>
+
+          {!this.state.editMode && (
+            <Form.Item
+              label="Filial"
+              {...formItemLayout}
+              style={{
+                display: this.state.userHasSelected ? "none" : "block"
+              }}>
+              {getFieldDecorator("filiais", {
+                rules: [
+                  { required: true, message: "Este campo é obrigatório!" }
+                ],
+                initialValue: this.state.formData.filiais
+              })(
+                <Select
+                  disabled={this.state.userHasSelected}
+                  name="filiais"
+                  showAction={["focus", "click"]}
+                  showSearch
+                  style={{ width: 200 }}
+                  mode="multiple"
+                  placeholder="Selecione uma filial..."
+                  onChange={e =>
+                    this.handleFormState({
+                      target: { name: "filiais", value: e }
+                    })
+                  }>
+                  {this.state.filiais &&
+                    this.state.filiais.map((f, idx) => (
+                      <Option value={f._id} key={f._id}>
+                        {f.nome_fantasia}
+                      </Option>
+                    ))}
+                </Select>
+              )}
+            </Form.Item>
+          )}
+
+          {!this.state.editMode && (
+            <Form.Item
+              label="Grupo de Permissão"
+              {...formItemLayout}
+              style={{
+                display: this.state.userHasSelected ? "none" : "block"
+              }}>
+              {getFieldDecorator("grupo_id", {
+                rules: [
+                  { required: true, message: "Este campo é obrigatório!" }
+                ],
+                initialValue: this.state.formData.grupo_id
+              })(
+                <Select
+                  disabled={this.state.userHasSelected}
+                  name="grupo_id"
+                  showAction={["focus", "click"]}
+                  showSearch
+                  style={{ width: 200 }}
+                  placeholder="Selecione um grupo de permissão..."
+                  onChange={e =>
+                    this.handleFormState({
+                      target: { name: "grupo_id", value: e }
+                    })
+                  }>
+                  {this.state.rules &&
+                    this.state.rules.map(r => (
+                      <Option key={r._id} value={r._id}>
+                        {r.nome}
+                      </Option>
+                    ))}
+                </Select>
+              )}
+            </Form.Item>
+          )}
 
           <Form.Item label="Contato" {...formItemLayout}>
             {getFieldDecorator("contato", {
@@ -381,7 +483,7 @@ class ConsultantForm extends Component {
                     (cargo, index) =>
                       cargo.cargo &&
                       cargo.cargo.includes("GERENTE") && (
-                        <Option key={index} value={cargo.nome}>
+                        <Option key={index} value={cargo._id}>
                           {cargo.nome}
                         </Option>
                       )

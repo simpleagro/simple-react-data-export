@@ -77,7 +77,6 @@ class CompanyBranchForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar uma filial", err);
-          } finally {
             this.setState({ savingForm: false });
           }
         } else {
@@ -94,7 +93,6 @@ class CompanyBranchForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar uma filial ", err);
-          } finally {
             this.setState({ savingForm: false });
           }
         }

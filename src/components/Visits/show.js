@@ -97,7 +97,7 @@ class VisitForm extends Component {
               <Form.Item label="Safra" {...formItemLayout}>
                 {getFieldDecorator("safra", {
                   initialValue: this.state.formData.safra
-                    ? this.state.formData.safra
+                    ? this.state.formData.safra.descricao
                     : ""
                 })(<Input readOnly />)}
               </Form.Item>
