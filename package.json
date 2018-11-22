@@ -1,6 +1,6 @@
 {
     "name": "simpleagro_paineladm",
-    "version": "0.0.10",
+    "version": "0.0.11",
     "private": true,
     "dependencies": {
         "@fortawesome/fontawesome-svg-core": "^1.2.4",
@@ -32,6 +32,7 @@
         "redux": "^4.0.0",
         "redux-saga": "^0.16.0",
         "styled-components": "^3.3.3",
+        "turf": "^3.0.14",
         "universal-cookie": "^2.2.0"
     },
     "scripts": {

@@ -22,6 +22,7 @@ import * as ClientPropertyService from "../../../services/clients.properties";
 import * as IBGEService from "../../../services/ibge";
 import { SimpleMap } from "../../SimpleMap";
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
+import { calculateArea, calculateCenter } from "../../../lib/mapUtils";
 
 const google = window.google; // é necessário para inicializar corretamente
 
@@ -56,13 +57,15 @@ class ClientPropertyForm extends Component {
     if (id) {
       const formData = await ClientPropertyService.get(client_id)(id);
 
-      if (formData)
+      if (formData) {
         this.setState(prev => ({
           ...prev,
           formData,
           editMode: id ? true : false,
           editingMap: id ? true : false
         }));
+        this.atualizarMapa(this.state.formData.coordenadas);
+      }
       // console.log(formData);
     }
 
@@ -103,7 +106,7 @@ class ClientPropertyForm extends Component {
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
-        this.setState({savingForm: true});
+        this.setState({ savingForm: true });
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
@@ -126,7 +129,7 @@ class ClientPropertyForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             // console.log("Erro interno ao adicionar um cliente", err);
-            this.setState({savingForm: false});
+            this.setState({ savingForm: false });
           }
         } else {
           try {
@@ -140,7 +143,7 @@ class ClientPropertyForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar um cliente ", err);
-            this.setState({savingForm: false});
+            this.setState({ savingForm: false });
           }
         }
       }
@@ -174,7 +177,11 @@ class ClientPropertyForm extends Component {
             title={
               this.state.editMode ? "Editando Propriedade" : "Nova propriedade"
             }>
-            <Button type="primary" icon="save" onClick={() => this.saveForm()} loading={this.state.savingForm}>
+            <Button
+              type="primary"
+              icon="save"
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
               Salvar Propriedade
             </Button>
           </PainelHeader>
@@ -390,6 +397,14 @@ class ClientPropertyForm extends Component {
                     />
                   )}
                 </Form.Item>
+                <Form.Item label="Área Calculada">
+                  <Input
+                    addonAfter="Ha"
+                    style={{ width: 250 }}
+                    value={this.state.areaDoPoligono}
+                    readOnly
+                  />
+                </Form.Item>
               </Col>
               <Col span={19}>
                 <p>
@@ -405,6 +420,7 @@ class ClientPropertyForm extends Component {
                           )
                         : []
                     }
+                    markers={this.state.markerCentroTalhao}
                     adicionarPontosAoMapa={() => this.adicionarPontosAoMapa()}
                     salvarMapa={coordenadas => this.salvarMapa(coordenadas)}
                     drawingMap={this.state.drawingMap}
@@ -457,6 +473,25 @@ class ClientPropertyForm extends Component {
     }));
   }
 
+  atualizarMapa(coordenadas) {
+    const novoCentroMapa = calculateCenter(coordenadas);
+    this.setGPS(novoCentroMapa.latitude, novoCentroMapa.longitude);
+    this.setState(prev => ({
+      ...prev,
+      areaDoPoligono: coordenadas ? calculateArea(coordenadas) : 0,
+      markerCentroTalhao: novoCentroMapa
+        ? [
+            {
+              position: {
+                lat: novoCentroMapa.latitude,
+                lng: novoCentroMapa.longitude
+              }
+            }
+          ]
+        : []
+    }));
+  }
+
   salvarMapa(coordenadas) {
     this.setState(prev => ({
       ...prev,
@@ -467,6 +502,7 @@ class ClientPropertyForm extends Component {
       }
     }));
     // console.log("SAlvar mapa ", this.state);
+    this.atualizarMapa(coordenadas);
   }
 
   generateHelper() {

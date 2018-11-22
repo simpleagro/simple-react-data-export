@@ -12,11 +12,19 @@ const confirm = Modal.confirm;
 
 export const SimpleMap = compose(
   defaultProps({
-    showControl: true
+    showControl: true,
+    markers: [
+      {
+        position: {
+          lat: -17.79272, // padrão rio verde
+          lng: -50.91965849999997 // padrão rio verde
+        }
+      }
+    ]
   }),
   withProps({
     containerElement: <div style={{ height: `400px` }} />,
-    mapElement: <div style={{ height: `100%` }} />,
+    mapElement: <div style={{ height: `100%` }} />
   }),
   lifecycle({
     componentWillMount() {
@@ -26,15 +34,6 @@ export const SimpleMap = compose(
       }
       this.setState({
         bounds: null,
-        markers: [
-          {
-            position: {
-              lat: -17.79272, // padrão rio verde
-              lng: -50.91965849999997 // padrão rio verde
-            }
-          }
-        ],
-
         onMapMounted: ref => {
           refs.map = ref;
         },
@@ -175,15 +174,17 @@ export const SimpleMap = compose(
           />
         </SearchBox>
       )}
-
-      {props.markers.map((marker, index) => (
-        <Marker
-          draggable
-          key={index}
-          position={marker.position}
-          onDragEnd={e => props.setGPS(e.latLng.lat(), e.latLng.lng())}
-        />
-      ))}
+      {console.log(props.markers)}
+      {props.markers &&
+        props.markers.length &&
+        props.markers.map((marker, index) => (
+          <Marker
+            draggable
+            key={index}
+            position={marker.position}
+            onDragEnd={e => props.setGPS(e.latLng.lat(), e.latLng.lng())}
+          />
+        ))}
       {props.showControl && (
         <div>
           <BtnEditar
