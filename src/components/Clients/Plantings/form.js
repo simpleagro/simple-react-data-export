@@ -247,6 +247,16 @@ class ClientPlantingForm extends Component {
     await this.setState(prev => ({ ...prev, produtos: e.produtos }));
   }
 
+  async onSelectSafra(e) {
+    e = JSON.parse(e);
+    await this.handleFormState({
+      target: {
+        name: "safra",
+        value: { id: e._id, descricao: e.descricao }
+      }
+    });
+  }
+
   async onSelectProduto(e) {
     e = JSON.parse(e);
     await this.handleFormState({
@@ -316,13 +326,9 @@ class ClientPlantingForm extends Component {
                     .toLowerCase()
                     .indexOf(input.toLowerCase()) >= 0
                 }
-                onChange={e =>
-                  this.handleFormState({
-                    target: { name: "safra", value: e }
-                  })
-                }>
+                onSelect={e => this.onSelectSafra(e)}>
                 {this.state.safras.map(s => (
-                  <Option key={s._id} value={s.descricao}>
+                  <Option key={s._id} value={JSON.stringify(s)}>
                     {s.descricao}
                   </Option>
                 ))}

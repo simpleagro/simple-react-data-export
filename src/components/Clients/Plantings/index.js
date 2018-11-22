@@ -60,7 +60,7 @@ class Plantings extends Component {
       const params = new URLSearchParams(window.location.search);
       aqp = {
         ...aqp,
-        'talhao.id': params.get("talhao") ? params.get("talhao") : null
+        "talhao.id": params.get("talhao") ? params.get("talhao") : null
       };
       const data = await PlantingService.list(this.state.client_id)(aqp);
 
@@ -280,7 +280,7 @@ class Plantings extends Component {
                     showSearch
                     style={{ width: 150, marginLeft: 10 }}
                     value={this.state.safra_selecionada}
-                    onChange={e => this.initializeList({ safra: e })}
+                    onChange={e => this.initializeList({ "safra.id": e })}
                     placeholder="Selecione a safra..."
                     filterOption={(input, option) =>
                       option.props.children
@@ -289,8 +289,8 @@ class Plantings extends Component {
                     }>
                     {this.state.filtro_safras &&
                       this.state.filtro_safras.map(s => (
-                        <Option key={s} value={s}>
-                          {s}
+                        <Option key={s._id} value={s._id}>
+                          {s.descricao}
                         </Option>
                       ))}
                   </Select>
