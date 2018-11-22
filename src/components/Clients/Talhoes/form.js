@@ -19,6 +19,7 @@ import { PainelHeader } from "../../common/PainelHeader";
 import * as ClientSpotService from "../../../services/clients.plots";
 import { SimpleMap } from "../../SimpleMap";
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
+import { calculateArea, calculateCenter } from "../../../lib/mapUtils";
 
 const google = window.google; // é necessário para inicializar corretamente
 
@@ -55,14 +56,16 @@ class ClientPropertySpotForm extends Component {
     if (id) {
       const formData = await ClientSpotService.get(client_id)(property_id)(id);
 
-      if (formData)
+      if (formData) {
         this.setState(prev => ({
           ...prev,
           formData,
           editMode: id ? true : false,
           editingMap: id ? true : false
         }));
-      // console.log(formData);
+        // console.log(formData);
+        this.atualizarMapa(this.state.formData.coordenadas);
+      }
     }
 
     setTimeout(() => {
@@ -117,7 +120,7 @@ class ClientPropertySpotForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar um cliente", err);
-            this.setState({savingForm: false});
+            this.setState({ savingForm: false });
           }
         } else {
           try {
@@ -133,7 +136,7 @@ class ClientPropertySpotForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar um cliente ", err);
-            this.setState({savingForm: false});
+            this.setState({ savingForm: false });
           }
         }
       }
@@ -177,7 +180,26 @@ class ClientPropertySpotForm extends Component {
         coordenadas
       }
     }));
-    // console.log("SAlvar mapa ", this.state);
+    this.atualizarMapa(coordenadas);
+  }
+
+  atualizarMapa(coordenadas) {
+    const novoCentroMapa = calculateCenter(coordenadas);
+    this.setGPS(novoCentroMapa.latitude, novoCentroMapa.longitude);
+    this.setState(prev => ({
+      ...prev,
+      areaDoPoligono: coordenadas ? calculateArea(coordenadas) : 0,
+      markerCentroTalhao: novoCentroMapa
+        ? [
+            {
+              position: {
+                lat: novoCentroMapa.latitude,
+                lng: novoCentroMapa.longitude
+              }
+            }
+          ]
+        : []
+    }));
   }
 
   setGPS(latitude, longitude) {
@@ -206,7 +228,11 @@ class ClientPropertySpotForm extends Component {
         <Affix offsetTop={65}>
           <PainelHeader
             title={this.state.editMode ? "Editando Talhão" : "Novo Talhão"}>
-            <Button type="primary" icon="save" onClick={() => this.saveForm()} loading={this.state.savingForm}>
+            <Button
+              type="primary"
+              icon="save"
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
               Salvar Talhão
             </Button>
           </PainelHeader>
@@ -263,12 +289,19 @@ class ClientPropertySpotForm extends Component {
                 />
               )}
             </Form.Item>
+            <Form.Item label="Área Calculada" {...formItemLayout}>
+              <Input
+                addonAfter="Ha"
+                style={{ width: 250 }}
+                value={this.state.areaDoPoligono}
+                readOnly
+              />
+            </Form.Item>
           </CardStyled>
           <CardStyled type="inner" title="Mapa do Talhão" bordered>
             <Row>
               <Col span={24}>
                 <SimpleMap
-
                   polygonData={
                     this.state.formData.coordenadas &&
                     this.state.formData.coordenadas.length > 0
@@ -277,6 +310,7 @@ class ClientPropertySpotForm extends Component {
                         )
                       : []
                   }
+                  markers={this.state.markerCentroTalhao}
                   adicionarPontosAoMapa={() => this.adicionarPontosAoMapa()}
                   salvarMapa={coordenadas => this.salvarMapa(coordenadas)}
                   drawingMap={this.state.drawingMap}
