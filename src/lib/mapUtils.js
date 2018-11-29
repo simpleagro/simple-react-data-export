@@ -1,7 +1,7 @@
 import { area, point, polygon, center, featureCollection } from "turf";
 
 export const calculateArea = (poligono = []) => {
-  if (!poligono.length) return 0;
+  if (!poligono.length || poligono.length <= 2) return 0;
   let array_poligono = [];
   poligono.forEach(ponto =>
     array_poligono.push([ponto.longitude, ponto.latitude])
