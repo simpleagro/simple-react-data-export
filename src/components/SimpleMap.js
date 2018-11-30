@@ -187,13 +187,17 @@ export const SimpleMap = compose(
               google.maps.event.addListener(poly.getPath(), "set_at", function(
                 e
               ) {
-                props.salvarMapa(getBoundsFromPolygon(poly));
+                setTimeout(() => {
+                  props.salvarMapa(getBoundsFromPolygon(poly));
+                }, 1000);
               });
               google.maps.event.addListener(
                 poly.getPath(),
                 "insert_at",
                 function(e) {
-                  props.salvarMapa(getBoundsFromPolygon(poly));
+                  setTimeout(() => {
+                    props.salvarMapa(getBoundsFromPolygon(poly));
+                  }, 1000);
                 }
               );
             }
@@ -207,7 +211,6 @@ export const SimpleMap = compose(
             zIndex: 1
           }}
           onRightClick={bounds => {
-            debugger;
             document.oncontextmenu = function() {
               return false;
             };
