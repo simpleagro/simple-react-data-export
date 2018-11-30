@@ -374,7 +374,7 @@ class ClientPropertyForm extends Component {
                           target: { name: "latitude", value: e }
                         })
                       }
-                      style={{ width: 250 }}
+                      style={{ width: '90%' }}
                       name="latitude"
                     />
                   )}
@@ -392,7 +392,7 @@ class ClientPropertyForm extends Component {
                           target: { name: "longitude", value: e }
                         })
                       }
-                      style={{ width: 250 }}
+                      style={{ width: '90%' }}
                       name="longitude"
                     />
                   )}
@@ -400,7 +400,7 @@ class ClientPropertyForm extends Component {
                 <Form.Item label="Área Calculada">
                   <Input
                     addonAfter="Ha"
-                    style={{ width: 250 }}
+                    style={{ width: '90%' }}
                     value={this.state.areaDoPoligono}
                     readOnly
                   />
@@ -475,6 +475,7 @@ class ClientPropertyForm extends Component {
 
   atualizarMapa(coordenadas) {
     const novoCentroMapa = calculateCenter(coordenadas);
+    if(!novoCentroMapa) return;
     this.setGPS(novoCentroMapa.latitude, novoCentroMapa.longitude);
     this.setState(prev => ({
       ...prev,

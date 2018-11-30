@@ -185,6 +185,7 @@ class ClientPropertySpotForm extends Component {
 
   atualizarMapa(coordenadas) {
     const novoCentroMapa = calculateCenter(coordenadas);
+    if(!novoCentroMapa) return;
     this.setGPS(novoCentroMapa.latitude, novoCentroMapa.longitude);
     this.setState(prev => ({
       ...prev,
