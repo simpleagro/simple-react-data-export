@@ -47,7 +47,7 @@ class ClientPropertyForm extends Component {
       fetchingCidade: false,
       drawingMap: false,
       editingMap: false,
-      savingForm: false
+      savingForm: false,
     };
   }
 
@@ -374,7 +374,7 @@ class ClientPropertyForm extends Component {
                           target: { name: "latitude", value: e }
                         })
                       }
-                      style={{ width: 250 }}
+                      style={{ width: "90%" }}
                       name="latitude"
                     />
                   )}
@@ -392,7 +392,7 @@ class ClientPropertyForm extends Component {
                           target: { name: "longitude", value: e }
                         })
                       }
-                      style={{ width: 250 }}
+                      style={{ width: "90%" }}
                       name="longitude"
                     />
                   )}
@@ -400,7 +400,7 @@ class ClientPropertyForm extends Component {
                 <Form.Item label="Área Calculada">
                   <Input
                     addonAfter="Ha"
-                    style={{ width: 250 }}
+                    style={{ width: "90%" }}
                     value={this.state.areaDoPoligono}
                     readOnly
                   />
@@ -427,7 +427,7 @@ class ClientPropertyForm extends Component {
                     editingMap={this.state.editingMap}
                     latitude={this.state.formData.latitude}
                     longitude={this.state.formData.longitude}
-                    containerElement={<div style={{ height: `400px` }} />}
+                    containerElement={<div style={{ height: `100%` }} />}
                     mapElement={<div style={{ height: `100%` }} />}
                     setGPS={(latitude, longitude) =>
                       this.setGPS(latitude, longitude)
@@ -475,7 +475,7 @@ class ClientPropertyForm extends Component {
 
   atualizarMapa(coordenadas) {
     const novoCentroMapa = calculateCenter(coordenadas);
-    if(!novoCentroMapa) return;
+    if (!novoCentroMapa) return;
     this.setGPS(novoCentroMapa.latitude, novoCentroMapa.longitude);
     this.setState(prev => ({
       ...prev,
