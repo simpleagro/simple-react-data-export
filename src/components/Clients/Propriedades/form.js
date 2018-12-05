@@ -47,7 +47,7 @@ class ClientPropertyForm extends Component {
       fetchingCidade: false,
       drawingMap: false,
       editingMap: false,
-      savingForm: false,
+      savingForm: false
     };
   }
 
@@ -80,7 +80,7 @@ class ClientPropertyForm extends Component {
   async listaCidadesPorEstado(estado) {
     await this.setState({ fetchingCidade: true, cidades: [], cidade: "" });
     await this.handleFormState({
-      target: { name: "estado", value: estado.label }
+      target: { name: "estado", value: estado }
     });
     // await this.handleFormState({
     //   target: { name: "estado", value: estado.label}
@@ -88,7 +88,7 @@ class ClientPropertyForm extends Component {
     // await this.handleFormState({
     //   target: { name: "estado_codigo", value: estado.key }
     // });
-    const cidades = await IBGEService.listaCidadesPorEstado(estado.key);
+    const cidades = await IBGEService.listaCidadesPorEstado(estado);
     this.setState(prev => ({ ...prev, cidades, fetchingCidade: false }));
   }
 
@@ -254,16 +254,12 @@ class ClientPropertyForm extends Component {
                 rules: [
                   { required: true, message: "Este campo é obrigatório!" }
                 ],
-                initialValue: {
-                  key: this.state.formData.estado_codigo || 0,
-                  label: this.state.formData.estado || ""
-                }
+                initialValue: this.state.formData.estado
               })(
                 <Select
                   name="estado"
                   showAction={["focus", "click"]}
                   showSearch
-                  labelInValue={true}
                   style={{ width: 200 }}
                   placeholder="Selecione um estado..."
                   filterOption={(input, option) =>
@@ -273,8 +269,8 @@ class ClientPropertyForm extends Component {
                   }
                   onSelect={e => this.listaCidadesPorEstado(e)}>
                   {this.state.estados.map(uf => (
-                    <Option key={uf.codigo} value={(uf.nome, uf.codigo)}>
-                      {uf.nome}
+                    <Option key={uf} value={uf}>
+                      {uf}
                     </Option>
                   ))}
                 </Select>
@@ -299,7 +295,6 @@ class ClientPropertyForm extends Component {
                   showAction={["focus", "click"]}
                   showSearch
                   style={{ width: 200 }}
-                  // labelInValue={true}
                   filterOption={(input, option) =>
                     option.props.children
                       .toLowerCase()
@@ -309,7 +304,7 @@ class ClientPropertyForm extends Component {
                     this.onChangeSelectCidade(e);
                   }}>
                   {this.state.cidades.map(c => (
-                    <Option key={c.codigo} value={c.nome}>
+                    <Option key={c.id} value={c.nome}>
                       {c.nome}
                     </Option>
                   ))}

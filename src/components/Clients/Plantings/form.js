@@ -8,7 +8,6 @@ import {
   Form,
   Select,
   Affix,
-  Card,
   Spin,
   DatePicker
 } from "antd";
@@ -43,9 +42,6 @@ class ClientPlantingForm extends Component {
       propriedades: [],
       talhoes: [],
       safras: [],
-      fetchingCidade: false,
-      estados: [],
-      cidades: [],
       gruposDeProdutos: [],
       produtos: [],
       espacamentos: [45, 50]
@@ -97,7 +93,7 @@ class ClientPlantingForm extends Component {
     const gruposDeProdutos = await ProductGroupService.list({
       fields: "nome,produtos"
     });
-    const estados = await IBGEService.listaEstados();
+
     const safras = await SeasonService.list({
       limit: 999999999999,
       fields: "descricao"
@@ -106,20 +102,9 @@ class ClientPlantingForm extends Component {
     this.setState(prev => ({
       ...prev,
       safras,
-      estados,
       gruposDeProdutos,
-      fetchingCidade: false,
       loadingForm: false
     }));
-  }
-
-  async listaCidadesPorEstado(estado) {
-    await this.setState({ fetchingCidade: true, cidades: [], cidade: "" });
-    await this.handleFormState({
-      target: { name: "estado", value: estado.label }
-    });
-    const cidades = await IBGEService.listaCidadesPorEstado(estado.key);
-    this.setState(prev => ({ ...prev, cidades, fetchingCidade: false }));
   }
 
   handleFormState = async event => {
@@ -688,23 +673,6 @@ class ClientPlantingForm extends Component {
         </Form>
       </div>
     );
-  }
-
-  async onChangeSelectCidade(cidade) {
-    console.log(cidade);
-    await this.setState(prev => ({
-      ...prev,
-      fetchingCidade: false
-    }));
-    // await this.handleFormState({
-    //   target: { name: "cidade_codigo", value: e.key }
-    // });
-    // await this.handleFormState({
-    //   target: { name: "cidade", value: e.label }
-    // });
-    await this.handleFormState({
-      target: { name: "cidade", value: cidade }
-    });
   }
 }
 
