@@ -51,7 +51,7 @@ class Clients extends Component {
 
   async componentDidMount() {
     this.props.novoPlantio({});
-    await this.initializeList();
+    await this.initializeList({'carteira' : this.props.carteira});
   }
 
   changeStatus = async (id, newStatus) => {
@@ -265,6 +265,16 @@ class Clients extends Component {
   }
 }
 
+const mapStateToProps = ({ painelState }) => {
+  return {
+    carteira:
+      (painelState &&
+        painelState.userData &&
+        painelState.userData.carteira) ||
+      ""
+  };
+};
+
 const mapDispatchToProps = dispatch =>
   bindActionCreators(
     {
@@ -274,6 +284,6 @@ const mapDispatchToProps = dispatch =>
   );
 
 export default connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps
 )(Clients);
