@@ -5,6 +5,9 @@ import { withCookies, Cookies } from "react-cookie";
 import { instanceOf } from "prop-types";
 import { connect } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { version } from "../../package.json";
+import moment from "moment";
+import "moment/locale/pt-br";
 
 import "../styles/painel.css";
 import { menus } from "../config/menus";
@@ -28,8 +31,7 @@ const MenuHeader = () => (
         onClick={e => {
           e.preventDefault();
           logout();
-        }}
-      >
+        }}>
         {" "}
         <Icon type="logout" /> Sair{" "}
       </Link>
@@ -86,8 +88,7 @@ class Painel extends Component {
             position: "fixed",
             left: 0
           }}
-          className="ant-menu-image"
-        >
+          className="ant-menu-image">
           <div
             className="logo"
             style={{ backgroundImage: "url(logo-branca.png)" }}
@@ -97,8 +98,7 @@ class Painel extends Component {
             theme="dark"
             mode="inline"
             defaultSelectedKeys={["/"]}
-            selectedKeys={[location]}
-          >
+            selectedKeys={[location]}>
             {Object.keys(menus).map(mKey => {
               const {
                 path: mPath,
@@ -125,8 +125,7 @@ class Painel extends Component {
                         <FontAwesomeIcon icon={subIcon} size="lg" />
                         <span className="nav-text">{subTitle}</span>
                       </span>
-                    }
-                  >
+                    }>
                     {subs.map(sub => (
                       <Menu.Item key={sub.key}>
                         <Link to={sub.path}>
@@ -157,8 +156,7 @@ class Painel extends Component {
         <Layout style={{ marginLeft: this.state.marginContent }}>
           <Header
             className="painel-header"
-            style={{ marginLeft: this.state.headerContent }}
-          >
+            style={{ marginLeft: this.state.headerContent }}>
             <div style={{ float: "left" }}>
               <Icon
                 className="trigger"
@@ -184,13 +182,14 @@ class Painel extends Component {
               margin: "85px 16px 0",
               padding: 24,
               background: "#fff"
-            }}
-          >
+            }}>
             {/* <Router> */}
             {this.props.children}
             {/* </Router> */}
           </Content>
-          <Footer style={{ textAlign: "center" }}>SimpleAgro ©2018</Footer>
+          <Footer style={{ textAlign: "center" }}>
+            SimpleAgro ©{moment().format("YYYY")} - v.{version}
+          </Footer>
         </Layout>
       </Layout>
     );

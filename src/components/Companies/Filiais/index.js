@@ -10,6 +10,8 @@ import {
   Row,
   Col
 } from "antd";
+import { connect } from "react-redux";
+import { withRouter } from "react-router-dom";
 
 import * as CompaniesBranchService from "../../../services/companies.branchs";
 import * as CompaniesService from "../../../services/companies";
@@ -17,15 +19,16 @@ import SimpleTable from "../../common/SimpleTable";
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
+import { PainelHeader } from "../../common/PainelHeader";
 
-class Companies extends Component {
+class Filiais extends Component {
   constructor(props) {
     super(props);
     this.state = {
       list: [],
       loadingData: true,
       pagination: false,
-      company_id: this.props.match.params.company_id,
+      company_id: this.props.empresa || this.props.match.params.company_id || 0,
       company_data: {}
     };
   }
@@ -153,11 +156,7 @@ class Companies extends Component {
             <Button
               size="small"
               onClick={() =>
-                this.props.history.push(
-                  `/empresas/${this.state.company_id}/filiais/${
-                    record._id
-                  }/edit`
-                )
+                this.editarFilial(record)
               }>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
@@ -184,61 +183,96 @@ class Companies extends Component {
     }
   ];
 
+  editarFilial (record) {
+    return this.props.match.params.company_id
+      ? this.props.history.push(`/empresas/${this.state.company_id}/filiais/${record._id}/edit`)
+      : this.props.history.push(`/filiais/${record._id}/edit`);
+  }
+
   render() {
     return (
       <div>
-        <SimpleBreadCrumb to={"/empresas"} history={this.props.history} />
-        <Row gutter={24}>
-          <Col span={5}>
-            <Card
-              bordered
-              style={{
-                boxShadow: "0px 8px 0px 0px #009d55 inset",
-                color: "#009d55"
-              }}>
-              <p>{`Empresa: ${this.state.company_data.razao_social}`}</p>
-              <p>{`CPF/CNPJ: ${this.state.company_data.cpf_cnpj}`}</p>
-              <Button
-                style={{ width: "100%" }}
-                onClick={() => {
-                  this.props.history.push(
-                    `/empresas/${this.state.company_id}/edit`,
-                    { returnTo: this.props.history.location }
-                  );
-                }}>
-                <Icon type="edit" /> Editar
-              </Button>
-            </Card>
-          </Col>
-          <Col span={19}>
-            <Card
-              title="Filiais"
-              bordered={false}
-              extra={
-                <Button
-                  type="primary"
-                  icon="plus"
-                  onClick={() =>
-                    this.props.history.push(
-                      `/empresas/${this.state.company_id}/filiais/new`
-                    )
+        {this.props.match.params.company_id ? (
+          <div>
+            <SimpleBreadCrumb to={"/empresas"} history={this.props.history} />
+            <Row gutter={24}>
+              <Col span={5}>
+                <Card
+                  bordered
+                  style={{
+                    boxShadow: "0px 8px 0px 0px #009d55 inset",
+                    color: "#009d55"
+                  }}>
+                  <p>{`Empresa: ${this.state.company_data.razao_social}`}</p>
+                  <p>{`CPF/CNPJ: ${this.state.company_data.cpf_cnpj}`}</p>
+                  <Button
+                    style={{ width: "100%" }}
+                    onClick={() => {
+                      this.props.history.push(
+                        `/empresas/${this.state.company_id}/edit`,
+                        { returnTo: this.props.history.location }
+                      );
+                    }}>
+                    <Icon type="edit" /> Editar
+                  </Button>
+                </Card>
+              </Col>
+              <Col span={19}>
+                <Card
+                  title="Filiais"
+                  bordered={false}
+                  extra={
+                    <Button
+                      type="primary"
+                      icon="plus"
+                      onClick={() =>
+                        this.props.history.push(
+                          `/empresas/${this.state.company_id}/filiais/new`
+                        )
+                      }>
+                      Adicionar
+                    </Button>
                   }>
-                  Adicionar
-                </Button>
-              }>
-              <SimpleTable
-                pagination={this.state.pagination}
-                spinning={this.state.loadingData}
-                rowKey="_id"
-                columns={this.tableConfig()}
-                dataSource={this.state.list}
-              />
-            </Card>
-          </Col>
-        </Row>
+                  <SimpleTable
+                    pagination={this.state.pagination}
+                    spinning={this.state.loadingData}
+                    rowKey="_id"
+                    columns={this.tableConfig()}
+                    dataSource={this.state.list}
+                  />
+                </Card>
+              </Col>
+            </Row>
+          </div>
+        ) : (
+          <div>
+            <PainelHeader title="Filiais">
+              <Button
+                type="primary"
+                icon="plus"
+                onClick={() => this.props.history.push("/filiais/new")}>
+                Adicionar
+              </Button>
+            </PainelHeader>
+            <SimpleTable
+              pagination={this.state.pagination}
+              spinning={this.state.loadingData}
+              rowKey="_id"
+              columns={this.tableConfig()}
+              dataSource={this.state.list}
+              onChange={this.handleTableChange}
+            />
+          </div>
+        )}
       </div>
     );
   }
 }
 
-export default Companies;
+const mapStateToProps = ({ painelState }) => {
+  return {
+    empresa: painelState.userData.empresa
+  };
+};
+
+export default withRouter(connect(mapStateToProps)(Filiais));

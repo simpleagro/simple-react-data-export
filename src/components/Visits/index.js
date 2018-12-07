@@ -28,16 +28,22 @@ class Seasons extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await SeasonService.list(aqp);
+    try {
+      const data = await SeasonService.list(aqp);
 
-    this.setState(prev => ({
-      ...prev,
-      list: data.docs,
-      loadingData: false,
-      pagination: {
-        total: data.total
-      }
-    }));
+      this.setState(prev => ({
+        ...prev,
+        list: data.docs,
+        loadingData: false,
+        pagination: {
+          total: data.total
+        }
+      }));
+    } catch (error) {
+      if (error && error.response && error.response.data) parseErrors(error);
+    } finally {
+      this.setState({ loadingData: false });
+    }
   }
 
   async componentDidMount() {
@@ -114,23 +120,12 @@ class Seasons extends Component {
     },
     {
       title: "Safra",
-      dataIndex: "safra",
+      dataIndex: "safra.descricao",
       key: "safra",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      filters: [
-        {
-          text: "2018",
-          value: "2018"
-        },
-        {
-          text: "2017",
-          value: "2017"
-        }
-      ],
-      onFilter: (value, record) => record.safra === value
     },
     {
       title: "Cliente",
@@ -201,8 +196,7 @@ class Seasons extends Component {
                 size="small"
                 onClick={() =>
                   this.props.history.push(`/visitas/${record._id}`)
-                }
-              >
+                }>
                 <Icon type="eye" style={{ fontSize: "16px" }} />
               </Button>
               /*

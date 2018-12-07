@@ -16,6 +16,7 @@ class UserForm extends Component {
     this.state = {
       editMode: false,
       formData: {},
+      savingForm: false,
       filiais: [],
       rules2: []
     };
@@ -48,7 +49,7 @@ class UserForm extends Component {
 
     this.setState(prev => ({
       ...prev,
-      rules,
+      rules: rules.docs,
       filiais: filiais.docs
     }));
 
@@ -65,11 +66,11 @@ class UserForm extends Component {
   };
 
   saveForm = async e => {
-    await this.validateLogin(this.state.formData.login);
-
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
+        this.setState({ savingForm: true });
+        await this.validateLogin(this.state.formData.login);
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
@@ -91,6 +92,7 @@ class UserForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar um usuário", err);
+            this.setState({ savingForm: false });
           }
         } else {
           try {
@@ -105,6 +107,7 @@ class UserForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar um usuário ", err);
+            this.setState({ savingForm: false });
           }
         }
       }
@@ -145,7 +148,11 @@ class UserForm extends Component {
         <Affix offsetTop={65}>
           <PainelHeader
             title={this.state.editMode ? "Editando Usuário" : "Novo Usuário"}>
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+            <Button
+              type="primary"
+              icon="save"
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
               Salvar Usuário
             </Button>
           </PainelHeader>
@@ -183,6 +190,7 @@ class UserForm extends Component {
                 showSearch
                 style={{ width: 200 }}
                 mode="multiple"
+                optionFilterProp="data-filter"
                 placeholder="Selecione uma filial..."
                 onChange={e =>
                   this.handleFormState({
@@ -191,7 +199,12 @@ class UserForm extends Component {
                 }>
                 {this.state.filiais &&
                   this.state.filiais.map((f, idx) => (
-                    <Option value={f._id} key={f._id}>{f.nome_fantasia}</Option>
+                    <Option
+                      data-filter={f.nome_fantasia}
+                      value={f._id}
+                      key={f._id}>
+                      {f.nome_fantasia}
+                    </Option>
                   ))}
               </Select>
             )}
@@ -200,7 +213,8 @@ class UserForm extends Component {
           <Form.Item label="Tipo de Login" {...formItemLayout}>
             {getFieldDecorator("tipoLogin", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.tipoLogin || "API"
+              initialValue: this.state.formData.tipoLogin,
+              defaultValue: "API"
             })(
               <Select
                 name="tipoLogin"
@@ -228,6 +242,7 @@ class UserForm extends Component {
                 name="grupo_id"
                 showAction={["focus", "click"]}
                 showSearch
+                optionFilterProp="data-filter"
                 style={{ width: 200 }}
                 placeholder="Selecione um grupo de permissão..."
                 onChange={e =>
@@ -235,9 +250,9 @@ class UserForm extends Component {
                     target: { name: "grupo_id", value: e }
                   })
                 }>
-                {this.state.rules2 &&
-                  this.state.rules2.map(r => (
-                    <Option key={r._id} value={r._id}>
+                {this.state.rules &&
+                  this.state.rules.map(r => (
+                    <Option data-filter={r.nome} key={r._id} value={r._id}>
                       {r.nome}
                     </Option>
                   ))}
@@ -249,11 +264,19 @@ class UserForm extends Component {
             label="Senha"
             {...formItemLayout}
             help={
-              this.state.editMode && "Caso seja necessário trocar a senha, informe uma nova aqui."
-            }>
+              this.state.editMode
+                ? "Caso seja necessário trocar a senha, informe uma nova aqui."
+                : undefined
+            }
+            style={{
+              display: this.state.formData.tipoLogin === "AD" ? "none" : "block"
+            }}>
             {getFieldDecorator("senha", {
               rules: [
-                { required: false, message: "Este campo é obrigatório!" }
+                {
+                  required: !this.state.editMode ? true : false,
+                  message: "Este campo é obrigatório!"
+                }
               ],
               initialValue: this.state.formData.senha
             })(<Input name="senha" />)}

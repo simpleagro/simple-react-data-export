@@ -27,16 +27,22 @@ class Consultants extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await ConsultantService.list(aqp);
+    try {
+      const data = await ConsultantService.list(aqp);
 
-    this.setState(prev => ({
-      ...prev,
-      list: data.docs,
-      loadingData: false,
-      pagination: {
-        total: data.total
-      }
-    }));
+      this.setState(prev => ({
+        ...prev,
+        list: data.docs,
+        loadingData: false,
+        pagination: {
+          total: data.total
+        }
+      }));
+    } catch (error) {
+      if (error && error.response && error.response.data) parseErrors(error);
+    } finally {
+      this.setState({ loadingData: false });
+    }
   }
 
   async componentDidMount() {
@@ -114,8 +120,8 @@ class Consultants extends Component {
     },
     {
       title: "Gerente",
-      dataIndex: "gerente_id",
-      key: "gerente_id",
+      dataIndex: "gerente_id.nome",
+      key: "gerente_id.nome",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
@@ -134,8 +140,7 @@ class Consultants extends Component {
             title={`Tem certeza em ${statusTxt} o consultor?`}
             onConfirm={e => this.changeStatus(record._id, !record.status)}
             okText="Sim"
-            cancelText="Não"
-          >
+            cancelText="Não">
             <Tooltip title={`${statusTxt.toUpperCase()} o consultor`}>
               <Button size="small">
                 <FontAwesomeIcon icon={statusBtn} size="lg" />
@@ -155,8 +160,7 @@ class Consultants extends Component {
               size="small"
               onClick={() =>
                 this.props.history.push(`/consultores/${record._id}/edit`)
-              }
-            >
+              }>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
 
@@ -169,8 +173,7 @@ class Consultants extends Component {
               title={`Tem certeza em excluir o consultor?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
-              cancelText="Não"
-            >
+              cancelText="Não">
               <Button size="small">
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
@@ -204,8 +207,7 @@ class Consultants extends Component {
           <Button
             type="primary"
             icon="plus"
-            onClick={() => this.props.history.push("/consultores/new")}
-          >
+            onClick={() => this.props.history.push("/consultores/new")}>
             Adicionar
           </Button>
         </PainelHeader>

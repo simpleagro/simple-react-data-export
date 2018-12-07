@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import moment from "moment";
 import "moment/locale/pt-br";
-import { Input, Form, Affix, Card, Radio, Tabs } from "antd";
+import { Select, Input, Form, Affix, Card, Radio, Tabs } from "antd";
 
 import styled from "styled-components";
 
@@ -14,6 +14,7 @@ import { SimpleBreadCrumb } from "../common/SimpleBreadCrumb";
 
 const TabPane = Tabs.TabPane;
 const TextArea = Input.TextArea;
+const Option = Select.Option;
 
 const CardStyled = styled(Card)`
   background: #ececec;
@@ -96,7 +97,7 @@ class VisitForm extends Component {
               <Form.Item label="Safra" {...formItemLayout}>
                 {getFieldDecorator("safra", {
                   initialValue: this.state.formData.safra
-                    ? this.state.formData.safra
+                    ? this.state.formData.safra.descricao
                     : ""
                 })(<Input readOnly />)}
               </Form.Item>
@@ -132,15 +133,8 @@ class VisitForm extends Component {
                 {getFieldDecorator("data_agenda", {
                   initialValue: this.state.formData.data_agenda
                     ? moment(this.state.formData.data_agenda).format(
-                        "DD/MM/YYYY"
+                        "DD/MM/YYYY HH:mm:ss"
                       )
-                    : ""
-                })(<Input readOnly />)}
-              </Form.Item>
-              <Form.Item label="Hora Agendamento" {...formItemLayout}>
-                {getFieldDecorator("hora_agenda", {
-                  initialValue: this.state.formData.hora_agenda
-                    ? this.state.formData.hora_agenda
                     : ""
                 })(<Input readOnly />)}
               </Form.Item>
@@ -158,7 +152,7 @@ class VisitForm extends Component {
                 {getFieldDecorator("visitou_em", {
                   initialValue: this.state.formData.visitou_em
                     ? moment(this.state.formData.visitou_em).format(
-                        "DD/MM/YYYY"
+                        "DD/MM/YYYY HH:mm:ss"
                       )
                     : ""
                 })(<Input readOnly />)}
@@ -179,12 +173,26 @@ class VisitForm extends Component {
                     : ""
                 })(<Input readOnly />)}
               </Form.Item>
-              <Form.Item label="Talhão" {...formItemLayout}>
-                {getFieldDecorator("talhao.nome", {
+              {/* <Form.Item label="Talhões" {...formItemLayout}>
+                {getFieldDecorator("talhoes", {
                   initialValue: this.state.formData.talhao
                     ? this.state.formData.talhao.nome
                     : ""
                 })(<Input readOnly />)}
+              </Form.Item> */}
+              <Form.Item label="Talhões" {...formItemLayout}>
+                {getFieldDecorator("talhoes", {
+                  initialValue: this.state.formData.talhoes && this.state.formData.talhoes.map(t => t.nome)
+                })(
+                  <Select name="talhoes" mode="tags" readOnly={true}>
+                    {this.state.formData.talhoes &&
+                      this.state.formData.talhoes.map(t => (
+                        <Option value={t.id} key={t.id}>
+                          {t.nome}
+                        </Option>
+                      ))}
+                  </Select>
+                )}
               </Form.Item>
               <CardStyled type="inner" title="Geolocalização" bordered>
                 {this.state.formData.geolocalizacao && (

@@ -22,6 +22,7 @@ import * as ClientPropertyService from "../../../services/clients.properties";
 import * as IBGEService from "../../../services/ibge";
 import { SimpleMap } from "../../SimpleMap";
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
+import { calculateArea, calculateCenter } from "../../../lib/mapUtils";
 
 const google = window.google; // é necessário para inicializar corretamente
 
@@ -45,7 +46,8 @@ class ClientPropertyForm extends Component {
       client_id: this.props.match.params.client_id,
       fetchingCidade: false,
       drawingMap: false,
-      editingMap: false
+      editingMap: false,
+      savingForm: false
     };
   }
 
@@ -55,13 +57,15 @@ class ClientPropertyForm extends Component {
     if (id) {
       const formData = await ClientPropertyService.get(client_id)(id);
 
-      if (formData)
+      if (formData) {
         this.setState(prev => ({
           ...prev,
           formData,
           editMode: id ? true : false,
           editingMap: id ? true : false
         }));
+        this.atualizarMapa(this.state.formData.coordenadas);
+      }
       // console.log(formData);
     }
 
@@ -76,7 +80,7 @@ class ClientPropertyForm extends Component {
   async listaCidadesPorEstado(estado) {
     await this.setState({ fetchingCidade: true, cidades: [], cidade: "" });
     await this.handleFormState({
-      target: { name: "estado", value: estado.label }
+      target: { name: "estado", value: estado }
     });
     // await this.handleFormState({
     //   target: { name: "estado", value: estado.label}
@@ -84,7 +88,7 @@ class ClientPropertyForm extends Component {
     // await this.handleFormState({
     //   target: { name: "estado_codigo", value: estado.key }
     // });
-    const cidades = await IBGEService.listaCidadesPorEstado(estado.key);
+    const cidades = await IBGEService.listaCidadesPorEstado(estado);
     this.setState(prev => ({ ...prev, cidades, fetchingCidade: false }));
   }
 
@@ -102,6 +106,7 @@ class ClientPropertyForm extends Component {
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
+        this.setState({ savingForm: true });
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
@@ -124,6 +129,7 @@ class ClientPropertyForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             // console.log("Erro interno ao adicionar um cliente", err);
+            this.setState({ savingForm: false });
           }
         } else {
           try {
@@ -132,13 +138,12 @@ class ClientPropertyForm extends Component {
             )(this.state.formData);
             flashWithSuccess();
             this.props.history.push(
-              `/clientes/${this.props.match.params.client_id}/propriedades/${
-                updated._id
-              }/talhoes`
+              `/clientes/${this.props.match.params.client_id}/propriedades`
             );
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar um cliente ", err);
+            this.setState({ savingForm: false });
           }
         }
       }
@@ -172,7 +177,11 @@ class ClientPropertyForm extends Component {
             title={
               this.state.editMode ? "Editando Propriedade" : "Nova propriedade"
             }>
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+            <Button
+              type="primary"
+              icon="save"
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
               Salvar Propriedade
             </Button>
           </PainelHeader>
@@ -203,7 +212,6 @@ class ClientPropertyForm extends Component {
           </Form.Item>
           <Form.Item label="Matrículas" {...formItemLayout}>
             {getFieldDecorator("matriculas", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.matriculas
             })(
               <Tooltip
@@ -211,7 +219,6 @@ class ClientPropertyForm extends Component {
                 trigger="focus">
                 <Select
                   name="matriculas"
-                  value={this.state.formData.matriculas}
                   mode="tags"
                   showSearch
                   allowClear
@@ -247,16 +254,12 @@ class ClientPropertyForm extends Component {
                 rules: [
                   { required: true, message: "Este campo é obrigatório!" }
                 ],
-                initialValue: {
-                  key: this.state.formData.estado_codigo || 0,
-                  label: this.state.formData.estado || ""
-                }
+                initialValue: this.state.formData.estado
               })(
                 <Select
                   name="estado"
                   showAction={["focus", "click"]}
                   showSearch
-                  labelInValue={true}
                   style={{ width: 200 }}
                   placeholder="Selecione um estado..."
                   filterOption={(input, option) =>
@@ -266,8 +269,8 @@ class ClientPropertyForm extends Component {
                   }
                   onSelect={e => this.listaCidadesPorEstado(e)}>
                   {this.state.estados.map(uf => (
-                    <Option key={uf.codigo} value={(uf.nome, uf.codigo)}>
-                      {uf.nome}
+                    <Option key={uf} value={uf}>
+                      {uf}
                     </Option>
                   ))}
                 </Select>
@@ -292,7 +295,6 @@ class ClientPropertyForm extends Component {
                   showAction={["focus", "click"]}
                   showSearch
                   style={{ width: 200 }}
-                  // labelInValue={true}
                   filterOption={(input, option) =>
                     option.props.children
                       .toLowerCase()
@@ -302,7 +304,7 @@ class ClientPropertyForm extends Component {
                     this.onChangeSelectCidade(e);
                   }}>
                   {this.state.cidades.map(c => (
-                    <Option key={c.codigo} value={c.nome}>
+                    <Option key={c.id} value={c.nome}>
                       {c.nome}
                     </Option>
                   ))}
@@ -367,7 +369,7 @@ class ClientPropertyForm extends Component {
                           target: { name: "latitude", value: e }
                         })
                       }
-                      style={{ width: 250 }}
+                      style={{ width: "90%" }}
                       name="latitude"
                     />
                   )}
@@ -385,10 +387,18 @@ class ClientPropertyForm extends Component {
                           target: { name: "longitude", value: e }
                         })
                       }
-                      style={{ width: 250 }}
+                      style={{ width: "90%" }}
                       name="longitude"
                     />
                   )}
+                </Form.Item>
+                <Form.Item label="Área Calculada">
+                  <Input
+                    addonAfter="Ha"
+                    style={{ width: "90%" }}
+                    value={this.state.areaDoPoligono}
+                    readOnly
+                  />
                 </Form.Item>
               </Col>
               <Col span={19}>
@@ -405,13 +415,14 @@ class ClientPropertyForm extends Component {
                           )
                         : []
                     }
+                    markers={this.state.markerCentroTalhao}
                     adicionarPontosAoMapa={() => this.adicionarPontosAoMapa()}
                     salvarMapa={coordenadas => this.salvarMapa(coordenadas)}
                     drawingMap={this.state.drawingMap}
                     editingMap={this.state.editingMap}
                     latitude={this.state.formData.latitude}
                     longitude={this.state.formData.longitude}
-                    containerElement={<div style={{ height: `400px` }} />}
+                    containerElement={<div style={{ height: `100%` }} />}
                     mapElement={<div style={{ height: `100%` }} />}
                     setGPS={(latitude, longitude) =>
                       this.setGPS(latitude, longitude)
@@ -457,6 +468,26 @@ class ClientPropertyForm extends Component {
     }));
   }
 
+  atualizarMapa(coordenadas) {
+    const novoCentroMapa = calculateCenter(coordenadas);
+    if (!novoCentroMapa) return;
+    this.setGPS(novoCentroMapa.latitude, novoCentroMapa.longitude);
+    this.setState(prev => ({
+      ...prev,
+      areaDoPoligono: coordenadas ? calculateArea(coordenadas) : 0,
+      markerCentroTalhao: novoCentroMapa
+        ? [
+            {
+              position: {
+                lat: novoCentroMapa.latitude,
+                lng: novoCentroMapa.longitude
+              }
+            }
+          ]
+        : []
+    }));
+  }
+
   salvarMapa(coordenadas) {
     this.setState(prev => ({
       ...prev,
@@ -467,6 +498,7 @@ class ClientPropertyForm extends Component {
       }
     }));
     // console.log("SAlvar mapa ", this.state);
+    this.atualizarMapa(coordenadas);
   }
 
   generateHelper() {

@@ -34,6 +34,7 @@ const loadable = loader =>
 const menus = {
   ...dashboard,
   ...empresas,
+  ...filiais,
   ...modulos,
   ...entidades,
   ...usuarios,

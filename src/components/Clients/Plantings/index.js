@@ -19,6 +19,7 @@ import SimpleTable from "../../common/SimpleTable";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
+import { simpleTableSearch } from "../../../lib/simpleTableSearch";
 
 const Option = Select.Option;
 
@@ -45,17 +46,36 @@ class Plantings extends Component {
       };
     });
 
-    const data = await PlantingService.list(this.state.client_id)(aqp);
-    const clientData = await ClientsService.get(this.state.client_id);
+    try {
+      const clientData = await ClientsService.get(this.state.client_id);
+      this.setState(prev => ({
+        ...prev,
+        client_data: clientData
+      }));
+    } catch (error) {
+      if (error && error.response && error.response.data) parseErrors(error);
+    }
 
-    this.setState(prev => ({
-      ...prev,
-      list: data.docs,
-      filtro_safras: data.safrasFiltro,
-      safra_selecionada: data.safraSelecionada,
-      loadingData: false,
-      client_data: clientData
-    }));
+    try {
+      const params = new URLSearchParams(window.location.search);
+      aqp = {
+        ...aqp,
+        "talhao.id": params.get("talhao") ? params.get("talhao") : null
+      };
+      const data = await PlantingService.list(this.state.client_id)(aqp);
+
+      this.setState(prev => ({
+        ...prev,
+        list: data.docs,
+        filtro_safras: data.safrasFiltro,
+        safra_selecionada: data.safraSelecionada,
+        loadingData: false
+      }));
+    } catch (error) {
+      if (error && error.response && error.response.data) parseErrors(error);
+    } finally {
+      this.setState({ loadingData: false });
+    }
   }
 
   async componentDidMount() {
@@ -123,37 +143,25 @@ class Plantings extends Component {
       title: "Propriedade",
       dataIndex: "propriedade.nome",
       key: "propriedade.nome",
-      sorter: (a, b, sorter) => {
-        if (sorter === "ascendent") return -1;
-        else return 1;
-      }
+      ...simpleTableSearch(this)("propriedades.nome")
     },
     {
       title: "Inscrição Estadual",
       dataIndex: "propriedade.ie",
       key: "propriedade.ie",
-      sorter: (a, b, sorter) => {
-        if (sorter === "ascendent") return -1;
-        else return 1;
-      }
+      ...simpleTableSearch(this)("propriedades.ie")
     },
     {
       title: "Talhão",
       dataIndex: "talhao.nome",
       key: "talhao.nome",
-      sorter: (a, b, sorter) => {
-        if (sorter === "ascendent") return -1;
-        else return 1;
-      }
+      ...simpleTableSearch(this)("propriedades.talhao.nome")
     },
     {
       title: "Produto",
       dataIndex: "produto.nome",
       key: "produto.nome",
-      sorter: (a, b, sorter) => {
-        if (sorter === "ascendent") return -1;
-        else return 1;
-      }
+      ...simpleTableSearch(this)("produto.nome")
     },
     {
       title: "Status",
@@ -167,11 +175,9 @@ class Plantings extends Component {
             title={`Tem certeza em ${statusTxt} este planejamento de plantio?`}
             onConfirm={e => this.changeStatus(record._id, !record.status)}
             okText="Sim"
-            cancelText="Não"
-          >
+            cancelText="Não">
             <Tooltip
-              title={`${statusTxt.toUpperCase()} planejamento de plantio`}
-            >
+              title={`${statusTxt.toUpperCase()} planejamento de plantio`}>
               <Button size="small">
                 <FontAwesomeIcon icon={statusBtn} size="lg" />
               </Button>
@@ -192,8 +198,7 @@ class Plantings extends Component {
                 this.props.history.push(
                   `/clientes/${this.state.client_id}/plantio/${record._id}/edit`
                 )
-              }
-            >
+              }>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
             <Divider
@@ -204,8 +209,7 @@ class Plantings extends Component {
               title={`Tem certeza em excluir este planejamento de plantio?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
-              cancelText="Não"
-            >
+              cancelText="Não">
               <Button size="small">
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
@@ -219,6 +223,21 @@ class Plantings extends Component {
       }
     }
   ];
+
+  handleTableChange = (pagination, filters) => {
+    let _this = this;
+    const pager = { ...this.state.pagination };
+    pager.current = pagination.current;
+    this.setState({
+      pagination: pager
+    });
+    this.initializeList({
+      page: pagination.current,
+      limit: pagination.pageSize,
+      ...this.state.tableSearch
+      // ..._this.state.tableSearch ? _this.state.tableSearch : null
+    });
+  };
 
   render() {
     return (
@@ -236,8 +255,7 @@ class Plantings extends Component {
               style={{
                 boxShadow: "0px 8px 0px 0px #009d55 inset",
                 color: "#009d55"
-              }}
-            >
+              }}>
               <p>{`Cliente: ${this.state.client_data.nome}`}</p>
               <p>{`CPF/CNPJ: ${this.state.client_data.cpf_cnpj}`}</p>
               <Button
@@ -247,8 +265,7 @@ class Plantings extends Component {
                     `/clientes/${this.state.client_id}/edit`,
                     { returnTo: this.props.history.location }
                   );
-                }}
-              >
+                }}>
                 <Icon type="edit" /> Editar
               </Button>
             </Card>
@@ -263,18 +280,17 @@ class Plantings extends Component {
                     showSearch
                     style={{ width: 150, marginLeft: 10 }}
                     value={this.state.safra_selecionada}
-                    onChange={e => this.initializeList({ safra: e })}
+                    onChange={e => this.initializeList({ "safra.id": e })}
                     placeholder="Selecione a safra..."
                     filterOption={(input, option) =>
                       option.props.children
                         .toLowerCase()
                         .indexOf(input.toLowerCase()) >= 0
-                    }
-                  >
+                    }>
                     {this.state.filtro_safras &&
                       this.state.filtro_safras.map(s => (
-                        <Option key={s} value={s}>
-                          {s}
+                        <Option key={s._id} value={s._id}>
+                          {s.descricao}
                         </Option>
                       ))}
                   </Select>
@@ -289,18 +305,17 @@ class Plantings extends Component {
                     this.props.history.push(
                       `/clientes/${this.state.client_id}/plantio/new`
                     )
-                  }
-                >
+                  }>
                   Adicionar
                 </Button>
-              }
-            >
+              }>
               <SimpleTable
                 pagination={this.state.pagination}
                 spinning={this.state.loadingData}
                 rowKey="_id"
                 columns={this.tableConfig()}
                 dataSource={this.state.list}
+                onChange={this.handleTableChange}
               />
             </Card>
           </Col>

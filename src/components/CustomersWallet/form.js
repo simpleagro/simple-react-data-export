@@ -54,7 +54,8 @@ class CustomerWalletForm extends Component {
       selectedClient: {},
       walletTree: [],
       walletTreeCheckeds: [],
-      errorOnWalletTree: []
+      errorOnWalletTree: [],
+      savingForm: false
     };
   }
 
@@ -119,7 +120,10 @@ class CustomerWalletForm extends Component {
       clients: clients.docs,
       users: users.docs.filter(u =>
         consultants.docs.some(
-          c => (c.usuario_id && c.usuario_id === u._id) && !c.cargo.includes("CONSULTOR")
+          c =>
+            c.usuario_id &&
+            c.usuario_id === u._id &&
+            !c.cargo.includes("CONSULTOR")
         )
       ),
       loadingForm: true,
@@ -149,6 +153,7 @@ class CustomerWalletForm extends Component {
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
+        this.setState({ savingForm: true });
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
@@ -172,6 +177,7 @@ class CustomerWalletForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar a carteira de cliente", err);
+            this.setState({ savingForm: false });
           }
         } else {
           try {
@@ -191,6 +197,7 @@ class CustomerWalletForm extends Component {
               "Erro interno ao atualizar a carteira de cliente ",
               err
             );
+            this.setState({ savingForm: false });
           }
         }
       }
@@ -495,7 +502,8 @@ class CustomerWalletForm extends Component {
               disabled={this.state.errorOnWalletTree.length > 0}
               type="primary"
               icon="save"
-              onClick={() => this.saveForm()}>
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
               Salvar Carteira de Cliente
             </Button>
           </PainelHeader>

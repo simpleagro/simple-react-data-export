@@ -20,6 +20,7 @@ import SimpleTable from "../../common/SimpleTable";
 import { flashWithSuccess, flashWithError } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
+import { simpleTableSearch } from "../../../lib/simpleTableSearch";
 
 class Plots extends Component {
   constructor(props) {
@@ -57,14 +58,11 @@ class Plots extends Component {
         loadingData: false,
         property_data: propertyData
       }));
-    } catch (err) {
-      const {
-        error = "Houve um erro ao visualizar os dados"
-      } = err.response.data;
-
-      flashWithError(error);
-
+    } catch (error) {
+      if (error && error.response && error.response.data) parseErrors(error);
       this.props.history.push(`/clientes/${this.state.client_id}/propriedades`);
+    } finally {
+      this.setState({ loadingData: false });
     }
   }
 
@@ -127,11 +125,12 @@ class Plots extends Component {
     {
       title: "Nome",
       dataIndex: "nome",
-      key: "nome",
+      key: "propriedades.talhoes.nome",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
+      ...simpleTableSearch(this)("propriedades.talhoes.nome"),
       render: (text, record) => {
         return !record.coordenadas || record.coordenadas.length < 3 ? (
           <Tooltip title="Este talhão ainda não possui pontos de mapeamento">
@@ -171,7 +170,7 @@ class Plots extends Component {
       }
     },
     {
-      title: "",
+      title: "Ações",
       dataIndex: "action",
       render: (text, record) => {
         return (
@@ -204,11 +203,37 @@ class Plots extends Component {
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
+            <Tooltip title="Veja os planejamentos de plantio para este talhão">
+              <Button
+                size="small"
+                onClick={() => {
+                  this.props.history.push(
+                    `/clientes/${this.state.client_id}/plantio?talhao=${record._id}`
+                  );
+                }}>
+                <FontAwesomeIcon icon="seedling" size="lg" />
+              </Button>
+            </Tooltip>
           </span>
         );
       }
     }
   ];
+
+  handleTableChange = (pagination, filters) => {
+    let _this = this;
+    const pager = { ...this.state.pagination };
+    pager.current = pagination.current;
+    this.setState({
+      pagination: pager
+    });
+    this.initializeList({
+      page: pagination.current,
+      limit: pagination.pageSize,
+      ...this.state.tableSearch
+      // ..._this.state.tableSearch ? _this.state.tableSearch : null
+    });
+  };
 
   render() {
     return (
@@ -285,6 +310,7 @@ class Plots extends Component {
                 rowKey="_id"
                 columns={this.tableConfig()}
                 dataSource={this.state.list}
+                onChange={this.handleTableChange}
               />
             </Card>
           </Col>

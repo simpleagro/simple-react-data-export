@@ -14,7 +14,8 @@ class UnitMeasureForm extends Component {
     super(props);
     this.state = {
       editMode: false,
-      formData: {}
+      formData: {},
+      savingForm: false
     };
   }
 
@@ -57,6 +58,7 @@ class UnitMeasureForm extends Component {
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
+        this.setState({ savingForm: true });
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
@@ -78,6 +80,7 @@ class UnitMeasureForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar uma unidade", err);
+            this.setState({ savingForm: false });
           }
         } else {
           try {
@@ -92,6 +95,7 @@ class UnitMeasureForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar uma unidade ", err);
+            this.setState({ savingForm: false });
           }
         }
       }
@@ -119,8 +123,12 @@ class UnitMeasureForm extends Component {
         <Affix offsetTop={65}>
           <PainelHeader
             title={this.state.editMode ? "Editando Unidade" : "Nova Unidade"}>
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
-              Salvar unidade
+            <Button
+              type="primary"
+              icon="save"
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
+              Salvar Unidade
             </Button>
           </PainelHeader>
         </Affix>

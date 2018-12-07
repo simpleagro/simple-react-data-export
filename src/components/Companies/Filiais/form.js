@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import { Button, Input, Form, Affix } from "antd";
+import { connect } from "react-redux";
+import { withRouter } from "react-router-dom";
 
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
@@ -13,15 +15,18 @@ class CompanyBranchForm extends Component {
     this.state = {
       editMode: false,
       formData: {},
-      company_id: this.props.match.params.company_id
+      company_id: this.props.match.params.company_id || this.props.empresa,
+      savingForm: false
     };
   }
 
   async componentDidMount() {
-    const { company_id, id } = this.props.match.params;
+    const { id } = this.props.match.params;
 
     if (id) {
-      const formData = await CompanyBranchService.get(company_id)(id);
+      const formData = await CompanyBranchService.get(this.state.company_id)(
+        id
+      );
 
       if (formData)
         this.setState(prev => ({
@@ -49,14 +54,15 @@ class CompanyBranchForm extends Component {
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
+        this.setState({ savingForm: true });
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
 
           try {
-            await CompanyBranchService.create(
-              this.state.company_id
-            )(this.state.formData);
+            await CompanyBranchService.create(this.state.company_id)(
+              this.state.formData
+            );
             this.setState({
               openForm: false,
               formData: {},
@@ -64,24 +70,30 @@ class CompanyBranchForm extends Component {
             });
             flashWithSuccess();
             this.props.history.push(
-              `/empresas/${this.props.match.params.company_id}/filiais/`
+              this.props.match.params.company_id
+                ? `/empresas/${this.props.match.params.company_id}/filiais/`
+                : "/filiais"
             );
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar uma filial", err);
+            this.setState({ savingForm: false });
           }
         } else {
           try {
-            await CompanyBranchService.update(
-              this.state.company_id
-            )(this.state.formData);
+            await CompanyBranchService.update(this.state.company_id)(
+              this.state.formData
+            );
             flashWithSuccess();
             this.props.history.push(
-              `/empresas/${this.props.match.params.company_id}/filiais/`
+              this.props.match.params.company_id
+                ? `/empresas/${this.props.match.params.company_id}/filiais/`
+                : "/filiais"
             );
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar uma filial ", err);
+            this.setState({ savingForm: false });
           }
         }
       }
@@ -98,14 +110,22 @@ class CompanyBranchForm extends Component {
     return (
       <div>
         <SimpleBreadCrumb
-          to={`/empresas/${this.props.match.params.company_id}/filiais`}
+          to={
+            this.props.match.params.company_id
+              ? `/empresas/${this.props.match.params.company_id}/filiais`
+              : "/filiais"
+          }
           history={this.props.history}
         />
 
         <Affix offsetTop={65}>
           <PainelHeader
             title={this.state.editMode ? "Editando Filial" : "Nova Filial"}>
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+            <Button
+              type="primary"
+              icon="save"
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
               Salvar Filial
             </Button>
           </PainelHeader>
@@ -143,6 +163,12 @@ class CompanyBranchForm extends Component {
   }
 }
 
+const mapStateToProps = ({ painelState }) => {
+  return {
+    empresa: painelState.userData.empresa
+  };
+};
+
 const WrappepCompanyBranchForm = Form.create()(CompanyBranchForm);
 
-export default WrappepCompanyBranchForm;
+export default withRouter(connect(mapStateToProps)(WrappepCompanyBranchForm));

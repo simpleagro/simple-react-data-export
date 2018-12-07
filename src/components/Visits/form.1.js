@@ -337,7 +337,6 @@ class CustomerWalletForm extends Component {
 
       //   console.log(this.state.formData);
     } else {
-      debugger;
       if (nodeProps.ehCliente) {
         clientes = clientes.filter(
           c =>

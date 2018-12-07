@@ -16,7 +16,8 @@ class SeasonForm extends Component {
     super(props);
     this.state = {
       editMode: false,
-      formData: {}
+      formData: {},
+      savingForm: false
     };
   }
 
@@ -50,6 +51,7 @@ class SeasonForm extends Component {
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
+        this.setState({ savingForm: true });
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
@@ -71,6 +73,7 @@ class SeasonForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar a safra", err);
+            this.setState({ savingForm: false });
           }
         } else {
           try {
@@ -85,6 +88,7 @@ class SeasonForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar a safra ", err);
+            this.setState({ savingForm: false });
           }
         }
       }
@@ -112,7 +116,11 @@ class SeasonForm extends Component {
         <Affix offsetTop={65}>
           <PainelHeader
             title={this.state.editMode ? "Editando Safra" : "Nova Safra"}>
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+            <Button
+              type="primary"
+              icon="save"
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
               Salvar Safra
             </Button>
           </PainelHeader>
@@ -131,7 +139,9 @@ class SeasonForm extends Component {
           </Form.Item>
           <Form.Item label="Data de início" {...formItemLayout}>
             {getFieldDecorator("inicio", {
-              initialValue: this.state.formData.inicio ? moment(this.state.formData.inicio) : ""
+              initialValue: this.state.formData.inicio
+                ? moment(this.state.formData.inicio)
+                : ""
             })(
               <DatePicker
                 format="DD/MM/YYYY"
@@ -147,7 +157,9 @@ class SeasonForm extends Component {
           </Form.Item>
           <Form.Item label="Data de fim" {...formItemLayout}>
             {getFieldDecorator("fim", {
-              initialValue: this.state.formData.fim ? moment(this.state.formData.fim) : ""
+              initialValue: this.state.formData.fim
+                ? moment(this.state.formData.fim)
+                : ""
             })(
               <DatePicker
                 format="DD/MM/YYYY"

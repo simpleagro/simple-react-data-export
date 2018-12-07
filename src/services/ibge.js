@@ -1,20 +1,17 @@
-import axios from "axios";
+import { baseApi as api } from "../config/api";
 
-const ESTADOS_ENDPOINT =
-  "https://servicodados.ibge.gov.br/api/v1/localidades/estados";
-const CIDADES_ENDPOINT =
-  "https://servicodados.ibge.gov.br/api/v1/localidades/estados/:estado_id/municipios";
+const baseURL = "/regions";
 
 export const listaEstados = async () => {
-  return await axios
-    .get(ESTADOS_ENDPOINT)
+  return await api
+    .get(baseURL)
     .then(response => response.data)
-    .then(estados => estados.map(c => ({ codigo: c.id, nome: c.nome })));
+    .then(estados => estados.map(c => c.uf));
 };
 
-export const listaCidadesPorEstado = async estado_id => {
-  return await axios
-    .get(CIDADES_ENDPOINT.replace(":estado_id", estado_id))
+export const listaCidadesPorEstado = async uf => {
+  return await api
+    .get(`${baseURL}/${uf}`)
     .then(response => response.data)
-    .then(cidades => cidades.map(c => ({ codigo: c.id, nome: c.nome })));
+    .then(municipios => municipios[0].municipios);
 };

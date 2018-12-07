@@ -7,6 +7,7 @@ import SimpleTable from "../common/SimpleTable";
 import { flashWithSuccess } from "../common/FlashMessages";
 import parseErrors from "../../lib/parseErrors";
 import { PainelHeader } from "../common/PainelHeader";
+import { simpleTableSearch } from "../../lib/simpleTableSearch";
 
 class Users extends Component {
   constructor(props) {
@@ -27,16 +28,21 @@ class Users extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await UserService.list(aqp);
-
-    this.setState(prev => ({
-      ...prev,
-      list: data.docs,
-      loadingData: false,
-      pagination: {
-        total: data.total
-      }
-    }));
+    try {
+      const data = await UserService.list(aqp);
+      this.setState(prev => ({
+        ...prev,
+        list: data.docs,
+        loadingData: false,
+        pagination: {
+          total: data.total
+        }
+      }));
+    } catch (error) {
+      if (error && error.response && error.response.data) parseErrors(error);
+    } finally {
+      this.setState({ loadingData: false });
+    }
   }
 
   async componentDidMount() {
@@ -95,10 +101,10 @@ class Users extends Component {
       title: "Nome",
       dataIndex: "nome",
       key: "nome",
-      sorter: (a, b, sorter) => {
-        if (sorter === "ascendent") return -1;
-        else return 1;
-      }
+      defaultSortOrder: "ascend",
+      sortOrder: "ascend",
+      sorter: true,
+      ...simpleTableSearch(this)('nome')
     },
     {
       title: "Grupo",
@@ -118,8 +124,7 @@ class Users extends Component {
             title={`Tem certeza em ${statusTxt} o usuário?`}
             onConfirm={e => this.changeStatus(record._id, !record.status)}
             okText="Sim"
-            cancelText="Não"
-          >
+            cancelText="Não">
             <Tooltip title={`${statusTxt.toUpperCase()} o usuário`}>
               <Button size="small">
                 <FontAwesomeIcon icon={statusBtn} size="lg" />
@@ -139,8 +144,7 @@ class Users extends Component {
               size="small"
               onClick={() =>
                 this.props.history.push(`/usuarios/${record._id}/edit`)
-              }
-            >
+              }>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
 
@@ -153,8 +157,7 @@ class Users extends Component {
               title={`Tem certeza em excluir o usuário?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
-              cancelText="Não"
-            >
+              cancelText="Não">
               <Button size="small">
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
@@ -177,7 +180,9 @@ class Users extends Component {
     });
     this.initializeList({
       page: pagination.current,
-      limit: pagination.pageSize
+      limit: pagination.pageSize,
+      sort: `${sorter.order === "descend" ? "-" : ""}${sorter.field}`,
+      ...this.state.tableSearch
     });
   };
 
@@ -188,8 +193,7 @@ class Users extends Component {
           <Button
             type="primary"
             icon="plus"
-            onClick={() => this.props.history.push("/usuarios/new")}
-          >
+            onClick={() => this.props.history.push("/usuarios/new")}>
             Adicionar
           </Button>
         </PainelHeader>
