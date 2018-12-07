@@ -17,7 +17,7 @@ class UserForm extends Component {
       editMode: false,
       formData: {},
       filiais: [],
-      rules: []
+      rules2: []
     };
   }
 
@@ -235,8 +235,8 @@ class UserForm extends Component {
                     target: { name: "grupo_id", value: e }
                   })
                 }>
-                {this.state.rules &&
-                  this.state.rules.map(r => (
+                {this.state.rules2 &&
+                  this.state.rules2.map(r => (
                     <Option key={r._id} value={r._id}>
                       {r.nome}
                     </Option>
@@ -249,9 +249,7 @@ class UserForm extends Component {
             label="Senha"
             {...formItemLayout}
             help={
-              this.state.editMode
-                ? "Caso seja necessário trocar a senha, informe uma nova aqui."
-                : ""
+              this.state.editMode && "Caso seja necessário trocar a senha, informe uma nova aqui."
             }>
             {getFieldDecorator("senha", {
               rules: [

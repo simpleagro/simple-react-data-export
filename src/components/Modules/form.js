@@ -22,7 +22,7 @@ class ModuleForm extends Component {
   async componentDidMount() {
     const { id } = this.props.match.params;
     const dataModule = await ModuleService.list();
-    const dataEntity = await EntityService.list();
+    const dataEntity = await EntityService.list({limit: 99999999});
 
     this.setState(prev => ({
       ...prev,
@@ -139,10 +139,12 @@ class ModuleForm extends Component {
             })(
               <Select
                 name="entidades"
+                optionFilterProp="data-filter"
                 showAction={["focus", "click"]}
                 showSearch
+                allowClear
                 mode="multiple"
-                style={{ width: 200 }}
+                style={{ width: 600 }}
                 placeholder="Selecione uma entidade..."
                 onChange={e =>
                   this.handleFormState({
@@ -151,9 +153,8 @@ class ModuleForm extends Component {
                 }>
                 {this.state.listEntity &&
                   this.state.listEntity.map((ent, index) => (
-                    <Option key={index} value={ent._id}>
-                      {" "}
-                      {ent.nome}{" "}
+                    <Option data-filter={ent.nome} key={index} value={ent._id}>
+                      {ent.nome}
                     </Option>
                   ))}
               </Select>

@@ -1,11 +1,12 @@
 import React, { Component } from "react";
-import { Button, Input, Form, Select, Affix } from "antd";
+import { Button, Input, Form, Select, Affix, Checkbox } from "antd";
 
 import { flashWithSuccess } from "../common/FlashMessages";
 import parseErrors from "../../lib/parseErrors";
 import { PainelHeader } from "../common/PainelHeader";
 import * as ConsultantsService from "../../services/consultants";
 import * as UsersService from "../../services/users";
+import * as SalesmanService from "../../services/salesman-types";
 import { SimpleBreadCrumb } from "../common/SimpleBreadCrumb";
 
 const Option = Select.Option;
@@ -14,6 +15,7 @@ class ConsultantForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      checked: false,
       editMode: false,
       formData: {},
       userHasSelected: false
@@ -23,12 +25,14 @@ class ConsultantForm extends Component {
   async componentDidMount() {
     const { id } = this.props.match.params;
     const dataConsultants = await ConsultantsService.list();
-    const dataUsers = await UsersService.list({ limit: 999999999 });
+    const dataUsers = await UsersService.list({ limit: 999999 });
+    const dataSalesman = await SalesmanService.list();
 
     this.setState(prev => ({
       ...prev,
       listCargo: dataConsultants.docs,
-      listUser: dataUsers.docs
+      listUser: dataUsers.docs,
+      listSalesman: dataSalesman.docs
     }));
 
     if (id) {
@@ -138,6 +142,10 @@ class ConsultantForm extends Component {
     // );
   };
 
+  toggleChecked = () => {
+    this.setState({ checked: !this.state.checked });
+  }
+
   setLogin = email => {
     const emailRegex = /[@][a-z0-9-_]+[.com]+[.br]*/g;
     let userLogin = email.split(emailRegex).join("");
@@ -213,8 +221,7 @@ class ConsultantForm extends Component {
                 {this.state.listUser &&
                   this.state.listUser.map((user, index) => (
                     <Option key={user._id} value={user._id}>
-                      {" "}
-                      {user.nome}{" "}
+                      {user.nome}
                     </Option>
                   ))}
               </Select>
@@ -405,7 +412,53 @@ class ConsultantForm extends Component {
               </Select>
             )}
           </Form.Item>
+
+          <Form.Item label="Vendedor" {...formItemLayout}>
+            {getFieldDecorator("vendedor", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.checked
+            })(<Checkbox
+                  name="vendedor"
+                  onClick={this.toggleChecked}
+                  onChange={e => {
+                    this.handleFormState({
+                      target: { name: "vendedor", value: e }
+                    });
+                  }
+                }
+               />)
+            }
+          </Form.Item>
+
+          { this.state.checked &&
+            (<Form.Item label="Tipo de Vendedor" {...formItemLayout}>
+            {getFieldDecorator("tipo_vendedor_id", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.tipo_vendedor_id
+            })(<Select
+                 name="tipo_vendedor_id"
+                 allowClear
+                 showAction={["focus", "click"]}
+                 showSearch
+                 style={{ width: 200 }}
+                 placeholder="Selecione um tipo de vendedor..."
+                 onChange={e => {
+                   this.handleFormState({
+                     target: { name: "tipo_vendedor_id", value: e }
+                   });
+                 }}>
+                    {this.state.listSalesman &&
+                      this.state.listSalesman.map((salesman, index) => (
+                        <Option key={salesman._id} value={salesman._id}>
+                          {salesman.descricao}
+                        </Option>
+                      ))
+                    }
+              </Select>)}
+            </Form.Item>)
+          }
         </Form>
+        {console.log(this.state)}
       </div>
     );
   }
