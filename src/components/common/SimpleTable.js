@@ -1,9 +1,16 @@
 import React from "react";
-import { Table, Spin, Pagination } from "antd";
+import { Table, Spin, Pagination, Button } from "antd";
 
 const SimpleTable = ({ spinning, ...props }) => (
   <Spin spinning={spinning} tip="Carregando..." size="large">
-    <Table  {...props} />
+    {/* <Button
+      ghost
+      type="primary"
+      icon="reload"
+      onClick={() => window.location.reload()}>
+      Atualizar
+    </Button> */}
+    <Table {...props} />
     {/* scroll={{ y: 240 }} */}
   </Spin>
 );
