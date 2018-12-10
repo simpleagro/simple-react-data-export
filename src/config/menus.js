@@ -1,6 +1,7 @@
 import Loadable                   from "react-loadable";
 import dashboard                  from "./Menus/dashboard";
 import empresas                   from "./Menus/empresas";
+import filiais                    from "./Menus/filiais";
 import modulos                    from "./Menus/modulos";
 import entidades                  from "./Menus/entidades";
 import usuarios                   from "./Menus/usuarios";
