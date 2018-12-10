@@ -18,7 +18,6 @@ class UserForm extends Component {
       formData: {},
       savingForm: false,
       filiais: [],
-      rules2: []
     };
   }
 
