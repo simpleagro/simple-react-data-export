@@ -195,7 +195,7 @@ class ClientForm extends Component {
             )}
           </Form.Item>
           <Form.Item
-            label="Gerenciar Cateira por Propriedade?"
+            label="Gerenciar Carteira por Propriedade?"
             labelCol={{ span: 4 }}
             wrapperCol={{ span: 12 }}>
             {getFieldDecorator("gerenciarCarteiraPorPropriedade", {

@@ -10,6 +10,7 @@ import { logout } from "./services/auth";
 import { menus } from "./config/menus";
 
 import { EmptyStatePainel } from "./components/EmptyStatePainel";
+import ModuleSwitch from "./components/ModuleSwitch";
 
 // this is the default behavior
 const getConfirmation = (message, callback) => {
@@ -31,12 +32,17 @@ const Routes = () => (
               return null;
             }}
           />
+          <Route exact path="/selecionar-modulo" component={ModuleSwitch} />
           <PrivateRoute exact path="/" component={EmptyStatePainel} />
 
-          {Object.keys(menus).map(path => {
-            const { exact, ...props } = menus[path];
-            props.exact = exact === void 0 || exact || false; // set true as default
-            return <PrivateRoute key={path} path={path} {...props} />;
+          {Object.keys(menus).map(modulo => {
+            {
+              return Object.keys(menus[modulo]).map(path => {
+                const { exact, ...props } = menus[modulo][path];
+                props.exact = exact === void 0 || exact || false; // set true as default
+                return <PrivateRoute key={path} path={path} {...props} />;
+              });
+            }
           })}
 
           <Route component={PageNotFound} />

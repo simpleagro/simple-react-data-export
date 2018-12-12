@@ -1,6 +1,6 @@
 {
     "name": "simpleagro_paineladm",
-    "version": "0.0.13.1",
+    "version": "0.0.20",
     "private": true,
     "dependencies": {
         "@fortawesome/fontawesome-svg-core": "^1.2.4",
@@ -37,6 +37,8 @@
     },
     "scripts": {
         "start": "env-cmd .env.development react-app-rewired start",
+        "teste": "set DOCKER_API_IP=simpleagro.simpleagro.com.br && set DOCKER_API_PORT=3333 && env-cmd .env.production node teste.js",
+        "production": "env-cmd .env.production react-app-rewired start",
         "build": "react-app-rewired build",
         "build:production": "env-cmd .env.production npm run build",
         "build:stagging": "env-cmd .env.staging npm run build",
