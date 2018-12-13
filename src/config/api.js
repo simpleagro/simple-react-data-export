@@ -4,18 +4,12 @@ import parseErrors from "../lib/parseErrors";
 
 let API_URL;
 
-if (process.env.REACT_APP_API_SECURE === "true") {
-  API_URL = `${process.env.REACT_APP_API_IP.replace(/\s/g, '')}:${
-    process.env.REACT_APP_API_PORT.replace(/\s/g, '')
-  }/api`;
-} else {
-  API_URL = `${process.env.REACT_APP_API_IP.replace(/\s/g, '')}:${
-    process.env.REACT_APP_API_PORT.replace(/\s/g, '')
-  }/api`;
-}
+API_URL = `${process.env.REACT_APP_API_IP.replace(
+  /\s/g,
+  ""
+)}:${process.env.REACT_APP_API_PORT.replace(/\s/g, "")}/api`;
 
 const cookies = new Cookies();
-
 
 const baseApi = axios.create({
   baseURL: `${API_URL}`,
