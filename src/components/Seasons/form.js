@@ -141,7 +141,7 @@ class SeasonForm extends Component {
             {getFieldDecorator("inicio", {
               initialValue: this.state.formData.inicio
                 ? moment(this.state.formData.inicio)
-                : ""
+                : null
             })(
               <DatePicker
                 format="DD/MM/YYYY"
@@ -159,7 +159,7 @@ class SeasonForm extends Component {
             {getFieldDecorator("fim", {
               initialValue: this.state.formData.fim
                 ? moment(this.state.formData.fim)
-                : ""
+                : null
             })(
               <DatePicker
                 format="DD/MM/YYYY"
