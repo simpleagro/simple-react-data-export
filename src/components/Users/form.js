@@ -17,7 +17,7 @@ class UserForm extends Component {
       editMode: false,
       formData: {},
       savingForm: false,
-      filiais: [],
+      filiais: []
     };
   }
 
@@ -262,23 +262,35 @@ class UserForm extends Component {
           <Form.Item
             label="Senha"
             {...formItemLayout}
-            help={
-              this.state.editMode
-                ? "Caso seja necessário trocar a senha, informe uma nova aqui."
-                : undefined
-            }
             style={{
-              display: this.state.formData.tipoLogin === "AD" ? "none" : "block"
+              display:
+                this.state.formData.tipoLogin === "API" ? "block" : "none"
             }}>
             {getFieldDecorator("senha", {
               rules: [
                 {
-                  required: !this.state.editMode ? true : false,
+                  required:
+                    !this.state.editMode &&
+                    this.state.formData.tipoLogin === "API"
+                      ? true
+                      : false,
                   message: "Este campo é obrigatório!"
                 }
               ],
               initialValue: this.state.formData.senha
-            })(<Input name="senha" />)}
+            })(
+              <div>
+                <span
+                  style={{
+                    display: this.state.editMode ? "block" : "none"
+                  }}>
+                  Caso seja necessário trocar a senha, informe uma nova aqui.
+                  <br />{" "}
+                </span>
+
+                <Input name="senha" />
+              </div>
+            )}
           </Form.Item>
         </Form>
       </div>
