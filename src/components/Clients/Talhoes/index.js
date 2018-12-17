@@ -132,7 +132,7 @@ class Plots extends Component {
       },
       ...simpleTableSearch(this)("propriedades.talhoes.nome"),
       render: (text, record) => {
-        return !record.coordenadas || record.coordenadas.length < 3 ? (
+        return !record.poligonos || (record.poligonos && record.poligonos.length && record.poligonos[0].coordenadas.length < 3) ? (
           <Tooltip title="Este talhão ainda não possui pontos de mapeamento">
             <FontAwesomeIcon
               icon="exclamation-triangle"

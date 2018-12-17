@@ -64,7 +64,11 @@ class ClientPropertySpotForm extends Component {
           editingMap: id ? true : false
         }));
         // console.log(formData);
-        this.atualizarMapa(this.state.formData.poligonos[0].coordenadas);
+        this.atualizarMapa(
+          this.state.formData.poligonos.length
+            ? this.state.formData.poligonos[0].coordenadas
+            : []
+        );
       }
     }
 
