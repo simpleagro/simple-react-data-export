@@ -62,7 +62,15 @@ class ClientPropertyForm extends Component {
           ...prev,
           formData,
           editMode: id ? true : false,
-          editingMap: id ? true : false
+          editingMap: id ? true : false,
+          markerCentroTalhao: [
+            {
+              position: {
+                lat: parseFloat(formData.latitude),
+                lng: parseFloat(formData.longitude)
+              }
+            }
+          ]
         }));
         this.atualizarMapa(this.state.formData.coordenadas);
       }
