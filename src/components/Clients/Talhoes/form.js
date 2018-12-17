@@ -53,6 +53,24 @@ class ClientPropertySpotForm extends Component {
 
     const { client_id, property_id, id } = this.props.match.params;
 
+    if (this.props.location.state.propriedade) {
+      this.setState({
+        markerCentroTalhao: [
+          {
+            position: {
+              lat: parseFloat(this.props.location.state.propriedade.latitude),
+              lng: parseFloat(this.props.location.state.propriedade.longitude)
+            }
+          }
+        ]
+      });
+
+      this.setGPS(
+        this.props.location.state.propriedade.latitude,
+        this.props.location.state.propriedade.longitude
+      );
+    }
+
     if (id) {
       const formData = await ClientSpotService.get(client_id)(property_id)(id);
 
