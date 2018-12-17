@@ -53,7 +53,7 @@ class ClientPropertySpotForm extends Component {
 
     const { client_id, property_id, id } = this.props.match.params;
 
-    if (this.props.location.state.propriedade) {
+    if (this.props.location.state && this.props.location.state.propriedade) {
       this.setState({
         markerCentroTalhao: [
           {
