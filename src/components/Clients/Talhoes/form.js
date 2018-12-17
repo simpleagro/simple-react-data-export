@@ -64,7 +64,7 @@ class ClientPropertySpotForm extends Component {
           editingMap: id ? true : false
         }));
         // console.log(formData);
-        this.atualizarMapa(this.state.formData.coordenadas);
+        this.atualizarMapa(this.state.formData.poligonos[0].coordenadas);
       }
     }
 
@@ -150,9 +150,9 @@ class ClientPropertySpotForm extends Component {
     switch (this.state.editMode) {
       case true:
         if (
-          (this.state.formData.coordenadas &&
-            this.state.formData.coordenadas.length === 0) ||
-          this.state.formData.coordenadas === undefined
+          (this.state.formData.poligonos &&
+            this.state.formData.poligonos.length === 0) ||
+          this.state.formData.poligonos === undefined
         )
           draw = true;
         else edit = true;
@@ -171,25 +171,27 @@ class ClientPropertySpotForm extends Component {
     // console.log("ADDDDDD",this.state);
   }
 
-  salvarMapa(coordenadas) {
+  salvarMapa(poligonos) {
     this.setState(prev => ({
       ...prev,
       drawingMap: false,
       formData: {
         ...prev.formData,
-        coordenadas
+        poligonos: {
+          coordenadas: poligonos
+        }
       }
     }));
-    this.atualizarMapa(coordenadas);
+    this.atualizarMapa(poligonos);
   }
 
-  atualizarMapa(coordenadas) {
-    const novoCentroMapa = calculateCenter(coordenadas);
-    if(!novoCentroMapa) return;
+  atualizarMapa(poligonos) {
+    const novoCentroMapa = calculateCenter(poligonos);
+    if (!novoCentroMapa) return;
     this.setGPS(novoCentroMapa.latitude, novoCentroMapa.longitude);
     this.setState(prev => ({
       ...prev,
-      areaDoPoligono: coordenadas ? calculateArea(coordenadas) : 0,
+      areaDoPoligono: poligonos ? calculateArea(poligonos) : 0,
       markerCentroTalhao: novoCentroMapa
         ? [
             {
@@ -304,16 +306,16 @@ class ClientPropertySpotForm extends Component {
               <Col span={24}>
                 <SimpleMap
                   polygonData={
-                    this.state.formData.coordenadas &&
-                    this.state.formData.coordenadas.length > 0
-                      ? this.state.formData.coordenadas.map(
+                    this.state.formData.poligonos &&
+                    this.state.formData.poligonos.length > 0
+                      ? this.state.formData.poligonos[0].coordenadas.map(
                           c => new google.maps.LatLng(c.latitude, c.longitude)
                         )
                       : []
                   }
                   markers={this.state.markerCentroTalhao}
                   adicionarPontosAoMapa={() => this.adicionarPontosAoMapa()}
-                  salvarMapa={coordenadas => this.salvarMapa(coordenadas)}
+                  salvarMapa={poligonos => this.salvarMapa(poligonos)}
                   drawingMap={this.state.drawingMap}
                   editingMap={this.state.editingMap}
                   latitude={this.state.formData.latitude}
@@ -326,7 +328,7 @@ class ClientPropertySpotForm extends Component {
                   limparMapa={() =>
                     this.setState(prev => ({
                       ...prev,
-                      formData: { ...prev.formData, coordenadas: [] }
+                      formData: { ...prev.formData, poligonos: [] }
                     }))
                   }
                 />
