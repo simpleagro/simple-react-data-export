@@ -547,7 +547,6 @@ class CustomerWalletForm extends Component {
           </Form.Item>
           <Form.Item label="Gerente" {...formItemLayout}>
             {getFieldDecorator("gerente_id", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.gerente_id
             })(
               <Select

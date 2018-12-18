@@ -7,7 +7,8 @@ const menus = {
     path: "/safras",
     label: "Safras",
     icon: "circle-notch",
-    showMenu: true
+    showMenu: true,
+    rule: 'Season'
   },
   "/safras/:id/edit": {
     component: SimpleLoadable(() => import("../../components/Seasons/form")),

@@ -7,7 +7,8 @@ const menus = {
     path: "/consultores",
     label: "Consultores",
     icon: "user-tie",
-    showMenu: true
+    showMenu: true,
+    rule: 'Consultant',
   },
   "/consultores/:id/edit": {
     component: SimpleLoadable(() => import("../../components/Consultants/form")),

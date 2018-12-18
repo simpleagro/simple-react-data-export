@@ -13,7 +13,7 @@ const menus = {
     showMenu: true,
     label: "Filiais",
     icon: "building",
-    onlyAccess: ["UserCompany"],
+    rule: 'Branch'
   },
   "/filiais/new": {
     component: SimpleLoadable(() =>

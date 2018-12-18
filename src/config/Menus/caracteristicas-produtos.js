@@ -7,7 +7,8 @@ const menus = {
     path: "/caracteristicas-produtos",
     label: "Caract. Produtos",
     icon: "list-alt",
-    showMenu: true
+    showMenu: true,
+    rule: 'ProductFeature',
   }
 };
 

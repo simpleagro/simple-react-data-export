@@ -7,7 +7,8 @@ const menus = {
     path: "/agente-de-vendas",
     label: "Agente de Vendas",
     icon: "database",
-    showMenu: true
+    showMenu: true,
+    rule: 'SaleAgent',
   },
   "/agente-de-vendas/:id/edit": {
     component: SimpleLoadable(() => import("../../components/Sales/SalesAgents/form")),

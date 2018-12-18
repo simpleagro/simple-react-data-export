@@ -66,11 +66,21 @@ class Painel extends Component {
     });
   };
 
-  showMenu = mOnlyAccess => {
-    if (mOnlyAccess && mOnlyAccess.length > 0)
-      return !!mOnlyAccess.find(access => access === this.props.userType);
+  showMenu = (mOnlyAccess, subject) => {
 
-    return true;
+    if (this.props.userType === "SuperUser") return true;
+
+    if (subject)
+      return this.props.permissoes.some(p => {
+        if (p.subject === "all") return true;
+        else if (
+          p.subject === subject &&
+          (p.actions.includes("read") || p.actions.includes("manage"))
+        )
+          return true;
+      });
+
+    return false;
   };
 
   render() {
@@ -120,7 +130,10 @@ class Painel extends Component {
 
                     if (
                       submenu &&
-                      !!this.showMenu(menus[modulo][mKey].onlyAccess) &&
+                      !!this.showMenu(
+                        menus[modulo][mKey].onlyAccess,
+                        menus[modulo][mKey].rule
+                      ) &&
                       showMenu === true
                     )
                       return (
@@ -145,7 +158,10 @@ class Painel extends Component {
 
                     if (
                       !submenu &&
-                      !!this.showMenu(menus[modulo][mKey].onlyAccess) &&
+                      !!this.showMenu(
+                        menus[modulo][mKey].onlyAccess,
+                        menus[modulo][mKey].rule
+                      ) &&
                       showMenu === true
                     )
                       return (
@@ -235,7 +251,8 @@ const mapStateToProps = ({ painelState }) => {
     permitirTrocarModulo:
       painelState.userData &&
       painelState.userData.modulosDaEmpresa &&
-      painelState.userData.modulosDaEmpresa.length <= 1
+      painelState.userData.modulosDaEmpresa.length <= 1,
+    permissoes: painelState.userData && painelState.userData.rules
   };
 };
 

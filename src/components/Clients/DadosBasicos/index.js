@@ -237,6 +237,7 @@ class Clients extends Component {
     this.initializeList({
       page: pagination.current,
       limit: pagination.pageSize,
+      ...filters,
       ...this.state.tableSearch
     });
   };

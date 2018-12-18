@@ -7,7 +7,8 @@ const menus = {
     path: "/tipo-de-garantia",
     label: "Tipo de Garantia",
     icon: "database",
-    showMenu: true
+    showMenu: true,
+    rule: 'TypeOfWarranty'
   },
   "/tipo-de-garantia/:id/edit": {
     component: SimpleLoadable(() => import("../../components/Sales/TypesOfWarranty/form")),
