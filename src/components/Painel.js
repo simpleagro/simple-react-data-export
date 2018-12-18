@@ -68,14 +68,16 @@ class Painel extends Component {
 
   showMenu = (mOnlyAccess, subject) => {
 
-    if (mOnlyAccess && mOnlyAccess.length > 0)
-      return !!mOnlyAccess.find(access => access === this.props.userType);
+    if (this.props.userType === "SuperUser") return true;
 
     if (subject)
       return this.props.permissoes.some(p => {
         if (p.subject === "all") return true;
-        else if(p.subject === subject &&
-          (p.actions.includes("read") || p.actions.includes("manage"))) return true
+        else if (
+          p.subject === subject &&
+          (p.actions.includes("read") || p.actions.includes("manage"))
+        )
+          return true;
       });
 
     return false;
