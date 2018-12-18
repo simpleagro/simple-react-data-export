@@ -7,7 +7,8 @@ const menus = {
     path: "/usuarios",
     label: "Usuários",
     icon: "user-friends",
-    showMenu: true
+    showMenu: true,
+    rule: 'UserCompany'
   },
   "/usuarios/:id/edit": {
     component: SimpleLoadable(() => import("../../components/Users/form")),

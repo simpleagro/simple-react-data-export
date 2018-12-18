@@ -7,7 +7,8 @@ const menus = {
     path: "/unidades-medidas",
     label: "Unidades de Medidas",
     icon: "exchange-alt",
-    showMenu: true
+    showMenu: true,
+    rule: 'UnitMeasure'
   },
   "/unidades-medidas/:id/edit": {
     component: SimpleLoadable(() => import("../../components/UnitMeasure/form")),

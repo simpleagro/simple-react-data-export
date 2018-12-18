@@ -8,7 +8,7 @@ const menus = {
     label: "Empresas",
     icon: "building",
     onlyAccess: ["SuperUser"],
-    showMenu: true
+    showMenu: true,
   },
   "/empresas/:id/edit": {
     component: SimpleLoadable(() =>

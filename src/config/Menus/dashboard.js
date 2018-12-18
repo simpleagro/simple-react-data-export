@@ -7,7 +7,8 @@ const menus = {
     path: "/dashboard",
     label: "Dashboard",
     icon: "home",
-    showMenu: true
+    showMenu: true,
+    rule: 'Dashboard',
   }
 };
 

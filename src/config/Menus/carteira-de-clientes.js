@@ -7,7 +7,8 @@ const menus = {
     path: "/carteiras-de-clientes",
     label: "Carteiras de Clientes",
     icon: "wallet",
-    showMenu: true
+    showMenu: true,
+    rule: 'CustomerWallet',
   },
   "/carteiras-de-clientes/:id/edit": {
     component: SimpleLoadable(() => import("../../components/CustomersWallet/form")),
