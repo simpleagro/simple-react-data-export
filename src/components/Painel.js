@@ -67,7 +67,6 @@ class Painel extends Component {
   };
 
   showMenu = (mOnlyAccess, subject) => {
-
     if (this.props.userType === "SuperUser") return true;
 
     if (subject)
@@ -234,6 +233,12 @@ class Painel extends Component {
 }
 
 const mapStateToProps = ({ painelState }) => {
+  if (
+    !painelState.userData.modulosDaEmpresa ||
+    !painelState.seletorModulo ||
+    !(painelState.userData && painelState.userData.rules)
+  )
+    window.location.href = "logout";
   return {
     userType:
       (painelState &&
