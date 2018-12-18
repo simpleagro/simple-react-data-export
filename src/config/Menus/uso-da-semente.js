@@ -7,7 +7,8 @@ const menus = {
     path: "/uso-da-semente",
     label: "Uso da Semente",
     icon: "database",
-    showMenu: true
+    showMenu: true,
+    rule: 'SeedUse'
   },
   "/uso-da-semente/:id/edit": {
     component: SimpleLoadable(() => import("../../components/Sales/SeedUse/form")),

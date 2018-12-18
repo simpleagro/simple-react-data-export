@@ -7,7 +7,8 @@ const menus = {
     path: "/forma-de-pagamento",
     label: "Forma de Pagamento",
     icon: "database",
-    showMenu: true
+    showMenu: true,
+    rule: 'FormOfPayment'
   },
   "/forma-de-pagamento/:id/edit": {
     component: SimpleLoadable(() => import("../../components/Sales/FormOfPayment/form")),

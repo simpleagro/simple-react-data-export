@@ -7,7 +7,8 @@ const menus = {
     path: "/etapas-cultura",
     label: "Etapas de Cultura",
     icon: "leaf",
-    showMenu: true
+    showMenu: true,
+    rule: 'StageOfCulture'
   }
 };
 

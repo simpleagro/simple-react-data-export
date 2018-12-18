@@ -7,7 +7,8 @@ const menus = {
     path: "/grupos-produtos",
     label: "Grupos de Produtos",
     icon: "object-group",
-    showMenu: true
+    showMenu: true,
+    rule: 'ProductGroup'
   }
 };
 
