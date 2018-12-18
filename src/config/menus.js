@@ -59,7 +59,9 @@ const menus = {
     ...formaPagamento,
     ...tipoPagamento
   },
-  sales: {}
+  sales: {
+    ...clientes,
+  }
 };
 
 export { menus };
