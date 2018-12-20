@@ -2,11 +2,11 @@ import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
 
-import * as PaymentFormService from "../../../services/form-of-payment";
-import SimpleTable from "../../common/SimpleTable";
-import { flashWithSuccess } from "../../common/FlashMessages";
-import parseErrors from "../../../lib/parseErrors";
-import { PainelHeader } from "../../common/PainelHeader";
+import * as FeaturePriceTableService from "../../../../services/feature-table-prices";
+import SimpleTable from "../../../common/SimpleTable";
+import { flashWithSuccess } from "../../../common/FlashMessages";
+import parseErrors from "../../../../lib/parseErrors";
+import { PainelHeader } from "../../../common/PainelHeader";
 
 class PaymentForm extends Component {
   constructor(props) {
@@ -27,7 +27,7 @@ class PaymentForm extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await PaymentFormService.list(aqp);
+    const data = await FeaturePriceTableService.list(aqp);
 
     this.setState(prev => ({
       ...prev,
@@ -45,7 +45,7 @@ class PaymentForm extends Component {
 
   changeStatus = async (id, newStatus) => {
     try {
-      await PaymentFormService.changeStatus(id, newStatus);
+      await FeaturePriceTableService.changeStatus(id, newStatus);
 
       let recordName = "";
 
@@ -64,37 +64,73 @@ class PaymentForm extends Component {
 
       flashWithSuccess(
         "",
-        `A forma de pagamento, ${recordName}, foi ${
+        `A tabela de preço de característica, ${recordName}, foi ${
           newStatus ? "ativado" : "bloqueado"
         } com sucesso!`
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao mudar status da forma de pagamento", err);
+      console.log("Erro interno ao mudar status da tabela de preço de característica", err);
     }
   };
 
-  removeRecord = async ({ _id, descricao }) => {
+  removeRecord = async ({ _id, nome }) => {
     try {
-      await PaymentFormService.remove(_id);
+      await FeaturePriceTableService.remove(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
 
       this.setState({
         list: _list
       });
 
-      flashWithSuccess("", `A forma de pagamento, ${descricao}, foi removido com sucesso!`);
+      flashWithSuccess("", `A tabela de preço de característica, ${nome}, foi removido com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover uma forma de pagamento", err);
+      console.log("Erro interno ao remover uma tabela de preço de característica", err);
     }
   };
 
   tableConfig = () => [
     {
       title: "Nome",
-      dataIndex: "descricao",
-      key: "descricao",
+      dataIndex: "nome",
+      key: "nome",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      }
+    },
+    {
+      title: "Moeda",
+      dataIndex: "moeda",
+      key: "moeda",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      }
+    },
+    {
+      title: "Safra",
+      dataIndex: "safra.descricao",
+      key: "safra.descricao",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      }
+    },
+    {
+      title: "Data de Validade",
+      dataIndex: "data_validade",
+      key: "data_validade",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      }
+    },
+    {
+      title: "Caracteristica",
+      dataIndex: "caracteristica.label",
+      key: "caracteristica.label",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
@@ -106,7 +142,7 @@ class PaymentForm extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/forma-de-pagamento/${record._id}/edit`}>
+            <Button size="small" href={`/tabela-preco-caracteristica/${record._id}/edit`}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
 
@@ -115,8 +151,19 @@ class PaymentForm extends Component {
               type="vertical"
             />
 
+            <Tooltip title="Veja as variações de preços">
+              <Button size="small" href={`/tabela-preco-caracteristica/${record._id}/variacao-de-preco`}>
+                <Icon type="form" style={{ fontSize: "16px"}} />
+              </Button>
+            </Tooltip>
+
+            <Divider
+              style={{ fontSize: "10px", padding: 0, margin: 2 }}
+              type="vertical"
+            />
+
             <Popconfirm
-              title={`Tem certeza em excluir a forma de pagamento?`}
+              title={`Tem certeza em excluir a tabela de preço de característica?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
               cancelText="Não"
@@ -125,6 +172,7 @@ class PaymentForm extends Component {
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
             </Popconfirm>
+
             <Divider
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
@@ -150,8 +198,8 @@ class PaymentForm extends Component {
   render() {
     return (
       <div>
-        <PainelHeader title="Forma de Pagamento">
-          <Button type="primary" icon="plus" href="/forma-de-pagamento/new">
+        <PainelHeader title="Tabela Preço Característica">
+          <Button type="primary" icon="plus" href="/tabela-preco-caracteristica/new">
             Adicionar
           </Button>
         </PainelHeader>

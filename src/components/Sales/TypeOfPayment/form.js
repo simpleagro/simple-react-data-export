@@ -149,8 +149,6 @@ class TypeOfPayment extends Component {
             })(<Input name="descricao" ref={input => (this.titleInput = input)} />)}
           </Form.Item>
 
-          {console.log(this.state)}
-
         </Form>
 
       </div>

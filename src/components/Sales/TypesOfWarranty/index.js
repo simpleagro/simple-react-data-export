@@ -74,7 +74,7 @@ class WarrantyType extends Component {
     }
   };
 
-  removeRecord = async ({ _id, nome }) => {
+  removeRecord = async ({ _id, descricao }) => {
     try {
       await WarrantyTypeService.remove(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
@@ -83,7 +83,7 @@ class WarrantyType extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `O tipo de garantia, ${nome}, foi removido com sucesso!`);
+      flashWithSuccess("", `O tipo de garantia, ${descricao}, foi removido com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover um tipo de garantia", err);

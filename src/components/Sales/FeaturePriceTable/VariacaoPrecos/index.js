@@ -2,18 +2,22 @@ import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
 
-import * as PaymentFormService from "../../../services/form-of-payment";
-import SimpleTable from "../../common/SimpleTable";
-import { flashWithSuccess } from "../../common/FlashMessages";
-import parseErrors from "../../../lib/parseErrors";
-import { PainelHeader } from "../../common/PainelHeader";
+import * as FeatureTablePricesService from "../../../../services/feature-table-prices";
+import * as PriceVariationsService from "../../../../services/feature-table-prices.price-variations";
+import SimpleTable from "../../../common/SimpleTable";
+import { flashWithSuccess } from "../../../common/FlashMessages";
+import parseErrors from "../../../../lib/parseErrors";
+import { PainelHeader } from "../../../common/PainelHeader";
+import { simpleTableSearch } from "../../../../lib/simpleTableSearch";
 
-class PaymentForm extends Component {
+class PriceVariation extends Component {
   constructor(props) {
     super(props);
     this.state = {
       list: [],
       loadingData: true,
+      tabela_id: this.props.match.params.tabela_id,
+      tabela_data: {},
       pagination: {
         showSizeChanger: true,
         defaultPageSize: 10,
@@ -27,11 +31,13 @@ class PaymentForm extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await PaymentFormService.list(aqp);
+    const data = await PriceVariationsService.list(this.state.tabela_id)(aqp);
+    const dataFTP = await FeatureTablePricesService.list();
 
     this.setState(prev => ({
       ...prev,
       list: data.docs,
+      listFTP: dataFTP.docs,
       loadingData: false,
       pagination: {
         total: data.total
@@ -45,7 +51,7 @@ class PaymentForm extends Component {
 
   changeStatus = async (id, newStatus) => {
     try {
-      await PaymentFormService.changeStatus(id, newStatus);
+      await PriceVariationsService.changeStatus(id, newStatus);
 
       let recordName = "";
 
@@ -64,41 +70,55 @@ class PaymentForm extends Component {
 
       flashWithSuccess(
         "",
-        `A forma de pagamento, ${recordName}, foi ${
+        `A variação de preço, ${recordName}, foi ${
           newStatus ? "ativado" : "bloqueado"
         } com sucesso!`
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao mudar status da forma de pagamento", err);
+      console.log("Erro interno ao mudar status da variação de preço", err);
     }
   };
 
-  removeRecord = async ({ _id, descricao }) => {
+  removeRecord = async ({ _id, nome }) => {
     try {
-      await PaymentFormService.remove(_id);
+      await PriceVariationsService.remove(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
 
       this.setState({
         list: _list
       });
 
-      flashWithSuccess("", `A forma de pagamento, ${descricao}, foi removido com sucesso!`);
+      flashWithSuccess("", `A variação de preço, ${nome}, foi removido com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover uma forma de pagamento", err);
+      console.log("Erro interno ao remover uma variação de preço", err);
     }
   };
 
   tableConfig = () => [
     {
-      title: "Nome",
-      dataIndex: "descricao",
-      key: "descricao",
+      title: "Opção",
+      dataIndex: "opcao_chave",
+      key: "precos.opcao_chave",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
+      },
+      ...simpleTableSearch(this)('precos.opcao_chave'),
+      render: text => text
+    },
+    {
+      title: "Valor",
+      dataIndex: "valor",
+      key: "precos.valor",
+      ...simpleTableSearch(this)('precos.valor')
+    },
+    {
+      title: "Unidade de Medida",
+      dataIndex: "u_m",
+      key: "precos.u_m",
+      ...simpleTableSearch(this)('precos.u_m')
     },
     {
       title: "Ações",
@@ -106,7 +126,7 @@ class PaymentForm extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/forma-de-pagamento/${record._id}/edit`}>
+            <Button size="small" href={`/tabela-preco-caracteristica/${this.state.tabela_id}/variacao-de-preco/${record._id}/edit`}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
 
@@ -116,7 +136,7 @@ class PaymentForm extends Component {
             />
 
             <Popconfirm
-              title={`Tem certeza em excluir a forma de pagamento?`}
+              title={`Tem certeza em excluir a variação de preço?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
               cancelText="Não"
@@ -150,8 +170,8 @@ class PaymentForm extends Component {
   render() {
     return (
       <div>
-        <PainelHeader title="Forma de Pagamento">
-          <Button type="primary" icon="plus" href="/forma-de-pagamento/new">
+        <PainelHeader title="Variação de Preço">
+          <Button type="primary" icon="plus" href={"/tabela-preco-caracteristica/"+ this.state.tabela_id +"/variacao-de-preco/new"}>
             Adicionar
           </Button>
         </PainelHeader>
@@ -163,9 +183,14 @@ class PaymentForm extends Component {
           dataSource={this.state.list}
           onChange={this.handleTableChange}
         />
+        {[
+          console.clear(),
+          console.log("state", this.state),
+          console.log("props", this.props.match)
+        ]}
       </div>
     );
   }
 }
 
-export default PaymentForm;
+export default PriceVariation;

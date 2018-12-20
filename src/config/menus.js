@@ -15,7 +15,6 @@ import etapasCultura              from "./Menus/etapas-cultura";
 import unidadesMedida             from "./Menus/unidades-medidas";
 import plantio                    from "./Menus/plantio";
 import gestaoDeProjetosAgricolas  from "./Menus/gestao-projetos-agricolas";
-
 import tipoVendedores             from "./Menus/tipo-de-vendedores";
 import agenteVendas               from "./Menus/agente-de-vendas";
 import tipoGarantia               from "./Menus/tipo-de-garantia";
@@ -23,6 +22,7 @@ import tipoVenda                  from "./Menus/tipo-de-vendas";
 import usoSemente                 from "./Menus/uso-da-semente";
 import formaPagamento             from "./Menus/forma-de-pagamento";
 import tipoPagamento              from "./Menus/tipo-de-pagamento";
+import tabelaPrecoCaracteristica  from "./Menus/tabela-preco-caracteristica"
 
 const loadable = loader =>
   Loadable({
@@ -32,9 +32,9 @@ const loadable = loader =>
   });
 
 const menus = {
+  ...tabelaPrecoCaracteristica,
   ...dashboard,
   ...empresas,
-  ...filiais,
   ...modulos,
   ...entidades,
   ...usuarios,
