@@ -29,7 +29,8 @@ class TypeForm extends Component {
     super(props);
     this.state = {
       editMode: false,
-      formData: {}
+      formData: {},
+      savingForm: false
     };
   }
 
@@ -70,14 +71,13 @@ class TypeForm extends Component {
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
+        this.setState({ savingForm: true });
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
 
           try {
-            const created = await TypeSalesService.create(
-              this.state.formData
-            );
+            await TypeSalesService.create(this.state.formData);
             this.setState({
               openForm: false,
               editMode: false
@@ -88,12 +88,11 @@ class TypeForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar um tipo de vendedor", err);
+            this.setState({ savingForm: false });
           }
         } else {
           try {
-            const updated = await TypeSalesService.update(
-              this.state.formData
-            );
+            await TypeSalesService.update(this.state.formData);
             flashWithSuccess();
 
             if (this.props.location.state && this.props.location.state.returnTo)
@@ -102,6 +101,7 @@ class TypeForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar um tipo de vendedor ", err);
+            this.setState({ savingForm: false });
           }
         }
       }

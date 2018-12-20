@@ -21,10 +21,13 @@ class SeletorModuloOpcoes extends Component {
   }
 }
 
-const mapStateToProps = ({ painelState }) => ({
-  modulosDaEmpresa:
-    (painelState.userData && painelState.userData.modulosDaEmpresa) || null
-});
+const mapStateToProps = ({ painelState }) => {
+  if (!painelState.userData.modulosDaEmpresa) window.location.href = "logout";
+  return {
+    modulosDaEmpresa:
+      (painelState.userData && painelState.userData.modulosDaEmpresa) || null
+  };
+};
 
 const mapDispatchToProps = dispatch =>
   bindActionCreators(

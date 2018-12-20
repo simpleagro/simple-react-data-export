@@ -48,9 +48,9 @@ class Painel extends Component {
 
     this.state = {
       collapsed: false,
-      siderWidth: 236,
-      marginContent: 236,
-      headerContent: 236
+      siderWidth: 256,
+      marginContent: 256,
+      headerContent: 256
     };
   }
 
@@ -67,7 +67,6 @@ class Painel extends Component {
   };
 
   showMenu = (mOnlyAccess, subject) => {
-
     if (this.props.userType === "SuperUser") return true;
 
     if (subject)
@@ -234,6 +233,12 @@ class Painel extends Component {
 }
 
 const mapStateToProps = ({ painelState }) => {
+  if (
+    !painelState.userData.modulosDaEmpresa ||
+    !painelState.seletorModulo ||
+    !(painelState.userData && painelState.userData.rules)
+  )
+    window.location.href = "logout";
   return {
     userType:
       (painelState &&

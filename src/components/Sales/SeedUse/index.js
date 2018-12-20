@@ -74,7 +74,7 @@ class UseSeed extends Component {
     }
   };
 
-  removeRecord = async ({ _id, nome }) => {
+  removeRecord = async ({ _id, descricao }) => {
     try {
       await UseSeedService.remove(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
@@ -83,7 +83,7 @@ class UseSeed extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `O uso da semente, ${nome}, foi removido com sucesso!`);
+      flashWithSuccess("", `O uso da semente, ${descricao}, foi removido com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover um uso da semente", err);
@@ -106,7 +106,9 @@ class UseSeed extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/uso-da-semente/${record._id}/edit`}>
+            <Button
+              size="small"
+              onClick={() => this.props.history.push(`/uso-da-semente/${record._id}/edit`)}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
 
@@ -151,7 +153,10 @@ class UseSeed extends Component {
     return (
       <div>
         <PainelHeader title="Uso da Semente">
-          <Button type="primary" icon="plus" href="/uso-da-semente/new">
+          <Button
+            type="primary"
+            icon="plus"
+            onClick={() => this.props.history.push("/uso-da-semente/new")}>
             Adicionar
           </Button>
         </PainelHeader>

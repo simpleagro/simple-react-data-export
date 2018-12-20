@@ -6,7 +6,8 @@ import {
   Input,
   Form,
   Select,
-  Affix
+  Affix,
+  Spin
 } from "antd";
 import styled from "styled-components";
 
@@ -31,7 +32,9 @@ class AgentSalesForm extends Component {
     this.state = {
       editMode: false,
       estados: [],
-      formData: {}
+      cidades: [],
+      formData: {},
+      savingForm: false
     };
   }
 
@@ -75,14 +78,13 @@ class AgentSalesForm extends Component {
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
+        this.setState({ savingForm: true });
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
 
           try {
-            const created = await AgentSalesService.create(
-              this.state.formData
-            );
+            await AgentSalesService.create(this.state.formData);
             this.setState({
               openForm: false,
               editMode: false
@@ -93,12 +95,11 @@ class AgentSalesForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar um agente de vendas", err);
+            this.setState({ savingForm: false });
           }
         } else {
           try {
-            const updated = await AgentSalesService.update(
-              this.state.formData
-            );
+            await AgentSalesService.update(this.state.formData);
             flashWithSuccess();
 
             if (this.props.location.state && this.props.location.state.returnTo)
@@ -106,23 +107,14 @@ class AgentSalesForm extends Component {
             else this.props.history.push("/agente-de-vendas");
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao atualizar um agente de vendas", err);
+            console.log("Erro interno ao atualizar um agente de vendas ", err);
+            this.setState({ savingForm: false });
           }
         }
       }
     });
-
   };
 
-  async setEstado(estado) {
-    await this.setState({ fetchingCidade: true, cidades: [], cidade: "" });
-    await this.handleFormState({
-      target: { name: "estado", value: estado.label }
-    });
-
-    const cidades = await IBGEService.listaCidadesPorEstado(estado.key);
-    this.setState(prev => ({ ...prev, cidades, fetchingCidade: false }));
-  }
 
   render() {
     const { getFieldDecorator } = this.props.form;
@@ -172,26 +164,17 @@ class AgentSalesForm extends Component {
             })(<Input name="cpf_cnpj" />)}
           </Form.Item>
 
-          <Form.Item label="Cidade" {...formItemLayout}>
-            {getFieldDecorator("cidade", {
-              rules: [{ required: true, message: "Este campo é obrigatório!"}],
-              initialValue: this.state.formData.cidade
-            })(<Input name="cidade" />)}
-          </Form.Item>
-
           <Form.Item label="Estado" {...formItemLayout}>
               {getFieldDecorator("estado", {
-                rules: [{ required: true, message: "Este campo é obrigatório!" }],
-                initialValue: {
-                  key: this.state.formData.estado_codigo || 0,
-                  label: this.state.formData.estado || ""
-                }
+                rules: [
+                  { required: true, message: "Este campo é obrigatório!" }
+                ],
+                initialValue: this.state.formData.estado
               })(
                 <Select
                   name="estado"
                   showAction={["focus", "click"]}
                   showSearch
-                  labelInValue={true}
                   style={{ width: 200 }}
                   placeholder="Selecione um estado..."
                   filterOption={(input, option) =>
@@ -199,17 +182,52 @@ class AgentSalesForm extends Component {
                       .toLowerCase()
                       .indexOf(input.toLowerCase()) >= 0
                   }
-                  onSelect={e => this.setEstado(e)}>
+                  onSelect={e => this.listaCidadesPorEstado(e)}>
                   {this.state.estados.map(uf => (
-                    <Option key={uf.codigo} value={(uf.nome, uf.codigo)}>
-                      {uf.nome}
+                    <Option key={uf} value={uf}>
+                      {uf}
                     </Option>
                   ))}
                 </Select>
               )}
             </Form.Item>
 
-          { /* Exibir somente empresas que nao possuem agente-pai */ }
+            <Form.Item
+              label="Cidade"
+              {...formItemLayout}
+              help={this.generateHelper()}
+              validateStatus={
+                this.state.formData.estado === undefined ? "warning" : ""
+              }>
+              {getFieldDecorator("cidade", {
+                rules: [
+                  { required: true, message: "Este campo é obrigatório!" }
+                ],
+                initialValue: this.state.formData.cidade
+              })(
+                <Select
+                  disabled={this.state.formData.estado === undefined}
+                  name="cidade"
+                  showAction={["focus", "click"]}
+                  showSearch
+                  style={{ width: 200 }}
+                  filterOption={(input, option) =>
+                    option.props.children
+                      .toLowerCase()
+                      .indexOf(input.toLowerCase()) >= 0
+                  }
+                  onSelect={e => {
+                    this.onChangeSelectCidade(e);
+                  }}>
+                  {this.state.cidades.map(c => (
+                    <Option key={c.id} value={c.nome}>
+                      {c.nome}
+                    </Option>
+                  ))}
+                </Select>
+              )}
+            </Form.Item>
+
           <Form.Item label="Agente Pai" {...formItemLayout}>
             {getFieldDecorator("agente_pai", {
               initialValue: this.state.formData.agente_pai && this.state.formData.agente_pai.nome
@@ -219,7 +237,7 @@ class AgentSalesForm extends Component {
                  showAction={["focus", "click"]}
                  showSearch
                  style={{ width: 200 }}
-                 placegolder="Selecione um Agente Pai"
+                 placeholder="Selecione um Agente Pai"
                  onChange={e => {
                   this.handleFormState({
                     target: { name: "agente_pai", value: JSON.parse(e) }
@@ -235,7 +253,6 @@ class AgentSalesForm extends Component {
                   ))}
                </Select>)}
           </Form.Item>
-          { /* Agente Pai */ }
 
           <Form.Item label="Logradouro" {...formItemLayout}>
             {getFieldDecorator("logradouro", {
@@ -276,6 +293,43 @@ class AgentSalesForm extends Component {
       </div>
     );
   }
+
+  async onChangeSelectCidade(cidade) {
+
+    await this.setState(prev => ({
+      ...prev,
+      fetchingCidade: false
+    }));
+
+    await this.handleFormState({
+      target: { name: "cidade", value: cidade }
+    });
+  }
+
+  async listaCidadesPorEstado(estado) {
+    await this.setState({ fetchingCidade: true, cidades: [], cidade: "" });
+    await this.handleFormState({
+      target: { name: "estado", value: estado }
+    });
+
+    const cidades = await IBGEService.listaCidadesPorEstado(estado);
+    this.setState(prev => ({ ...prev, cidades, fetchingCidade: false }));
+  }
+
+  generateHelper() {
+    if (this.state.formData.estado === undefined)
+      return "Selecione um estado primeiro";
+
+    if (this.state.fetchingCidade === true)
+      return (
+        <Spin
+          indicator={<Icon type="loading" style={{ fontSize: 24 }} spin />}
+        />
+      );
+
+    return null;
+  }
+
 }
 
 const WrappepAgentSalesForm = Form.create()(AgentSalesForm);

@@ -29,7 +29,8 @@ class TypeForm extends Component {
     super(props);
     this.state = {
       editMode: false,
-      formData: {}
+      formData: {},
+      savingForm: false
     };
   }
 
@@ -70,30 +71,28 @@ class TypeForm extends Component {
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
+        this.setState({ savingForm: true });
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
 
           try {
-            const created = await PaymentFormService.create(
-              this.state.formData
-            );
+            await PaymentFormService.create(this.state.formData);
             this.setState({
               openForm: false,
               editMode: false
             });
             flashWithSuccess();
 
-            this.props.history.push("/forma-de-pagamento");
+            this.props.history.push("/forma-de-pagamento/");
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar uma forma de pagamento", err);
+            this.setState({ savingForm: false });
           }
         } else {
           try {
-            const updated = await PaymentFormService.update(
-              this.state.formData
-            );
+            await PaymentFormService.update(this.state.formData);
             flashWithSuccess();
 
             if (this.props.location.state && this.props.location.state.returnTo)
@@ -101,7 +100,8 @@ class TypeForm extends Component {
             else this.props.history.push("/forma-de-pagamento");
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao atualizar uma forma de pagamento", err);
+            console.log("Erro interno ao atualizar uma forma de pagamento ", err);
+            this.setState({ savingForm: false });
           }
         }
       }

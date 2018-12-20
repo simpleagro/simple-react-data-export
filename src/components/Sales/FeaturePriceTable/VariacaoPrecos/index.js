@@ -2,18 +2,22 @@ import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
 
-import * as TypeSaleService from "../../../services/salesman-types";
-import SimpleTable from "../../common/SimpleTable";
-import { flashWithSuccess } from "../../common/FlashMessages";
-import parseErrors from "../../../lib/parseErrors";
-import { PainelHeader } from "../../common/PainelHeader";
+import * as FeatureTablePricesService from "../../../../services/feature-table-prices";
+import * as PriceVariationsService from "../../../../services/feature-table-prices.price-variations";
+import SimpleTable from "../../../common/SimpleTable";
+import { flashWithSuccess } from "../../../common/FlashMessages";
+import parseErrors from "../../../../lib/parseErrors";
+import { PainelHeader } from "../../../common/PainelHeader";
+import { simpleTableSearch } from "../../../../lib/simpleTableSearch";
 
-class TypeSales extends Component {
+class PriceVariation extends Component {
   constructor(props) {
     super(props);
     this.state = {
       list: [],
       loadingData: true,
+      tabela_id: this.props.match.params.tabela_id,
+      tabela_data: {},
       pagination: {
         showSizeChanger: true,
         defaultPageSize: 10,
@@ -27,11 +31,13 @@ class TypeSales extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await TypeSaleService.list(aqp);
+    const data = await PriceVariationsService.list(this.state.tabela_id)(aqp);
+    const dataFTP = await FeatureTablePricesService.list();
 
     this.setState(prev => ({
       ...prev,
       list: data.docs,
+      listFTP: dataFTP.docs,
       loadingData: false,
       pagination: {
         total: data.total
@@ -45,7 +51,7 @@ class TypeSales extends Component {
 
   changeStatus = async (id, newStatus) => {
     try {
-      await TypeSaleService.changeStatus(id, newStatus);
+      await PriceVariationsService.changeStatus(id, newStatus);
 
       let recordName = "";
 
@@ -64,41 +70,55 @@ class TypeSales extends Component {
 
       flashWithSuccess(
         "",
-        `O tipo de vendedor, ${recordName}, foi ${
+        `A variação de preço, ${recordName}, foi ${
           newStatus ? "ativado" : "bloqueado"
         } com sucesso!`
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao mudar status do tipo de vendedor", err);
+      console.log("Erro interno ao mudar status da variação de preço", err);
     }
   };
 
-  removeRecord = async ({ _id, descricao }) => {
+  removeRecord = async ({ _id, opcao_chave }) => {
     try {
-      await TypeSaleService.remove(_id);
+      await PriceVariationsService.remove(this.state.tabela_id)(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
 
       this.setState({
         list: _list
       });
 
-      flashWithSuccess("", `O tipo de vendedor, ${descricao}, foi removido com sucesso!`);
+      flashWithSuccess("", `A variação de preço, ${opcao_chave}, foi removido com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover um tipo de vendedor", err);
+      console.log("Erro interno ao remover uma variação de preço", err);
     }
   };
 
   tableConfig = () => [
     {
-      title: "Nome",
-      dataIndex: "descricao",
-      key: "descricao",
+      title: "Opção",
+      dataIndex: "opcao_chave",
+      key: "precos.opcao_chave",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
+      },
+      ...simpleTableSearch(this)('precos.opcao_chave'),
+      render: text => text
+    },
+    {
+      title: "Valor",
+      dataIndex: "valor",
+      key: "precos.valor",
+      ...simpleTableSearch(this)('precos.valor')
+    },
+    {
+      title: "Unidade de Medida",
+      dataIndex: "u_m",
+      key: "precos.u_m",
+      ...simpleTableSearch(this)('precos.u_m')
     },
     {
       title: "Ações",
@@ -108,7 +128,7 @@ class TypeSales extends Component {
           <span>
             <Button
               size="small"
-              onClick={() => this.props.history.push(`/tipo-de-vendedores/${record._id}/edit`)}>
+              onClick={() => this.props.history.push(`/tabela-preco-caracteristica/${this.state.tabela_id}/variacao-de-preco/${record._id}/edit`)}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
 
@@ -118,7 +138,7 @@ class TypeSales extends Component {
             />
 
             <Popconfirm
-              title={`Tem certeza em excluir o tipo de vendedor?`}
+              title={`Tem certeza em excluir a variação de preço?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
               cancelText="Não"
@@ -152,11 +172,11 @@ class TypeSales extends Component {
   render() {
     return (
       <div>
-        <PainelHeader title="Tipo de Vendedor">
+        <PainelHeader title="Variação de Preço">
           <Button
             type="primary"
             icon="plus"
-            onClick={() => this.props.history.push("/tipo-de-vendedores/new")}>
+            onClick={() => this.props.history.push("/tabela-preco-caracteristica/"+ this.state.tabela_id +"/variacao-de-preco/new")}>
             Adicionar
           </Button>
         </PainelHeader>
@@ -168,9 +188,10 @@ class TypeSales extends Component {
           dataSource={this.state.list}
           onChange={this.handleTableChange}
         />
+
       </div>
     );
   }
 }
 
-export default TypeSales;
+export default PriceVariation;
