@@ -142,7 +142,9 @@ class PaymentForm extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/tabela-preco-caracteristica/${record._id}/edit`}>
+            <Button
+              size="small"
+              onClick={() => this.props.history.push(`/tabela-preco-caracteristica/${record._id}/edit`)}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
 
@@ -152,7 +154,9 @@ class PaymentForm extends Component {
             />
 
             <Tooltip title="Veja as variações de preços">
-              <Button size="small" href={`/tabela-preco-caracteristica/${record._id}/variacao-de-preco`}>
+              <Button
+                size="small"
+                onClick={() => this.props.history.push(`/tabela-preco-caracteristica/${record._id}/variacao-de-preco`)}>
                 <Icon type="form" style={{ fontSize: "16px"}} />
               </Button>
             </Tooltip>
@@ -199,7 +203,10 @@ class PaymentForm extends Component {
     return (
       <div>
         <PainelHeader title="Tabela Preço Característica">
-          <Button type="primary" icon="plus" href="/tabela-preco-caracteristica/new">
+          <Button
+            type="primary"
+            icon="plus"
+            onClick={() => this.props.history.push("/tabela-preco-caracteristica/new")}>
             Adicionar
           </Button>
         </PainelHeader>

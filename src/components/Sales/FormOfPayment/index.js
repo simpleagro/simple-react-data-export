@@ -106,7 +106,9 @@ class PaymentForm extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/forma-de-pagamento/${record._id}/edit`}>
+            <Button
+              size="small"
+              onClick={() => this.props.history.push(`/forma-de-pagamento/${record._id}/edit`)}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
 
@@ -151,7 +153,10 @@ class PaymentForm extends Component {
     return (
       <div>
         <PainelHeader title="Forma de Pagamento">
-          <Button type="primary" icon="plus" href="/forma-de-pagamento/new">
+          <Button
+            type="primary"
+            icon="plus"
+            onClick={() => this.props.history.push("/forma-de-pagamento/new")}>
             Adicionar
           </Button>
         </PainelHeader>

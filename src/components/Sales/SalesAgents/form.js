@@ -33,7 +33,8 @@ class AgentSalesForm extends Component {
       editMode: false,
       estados: [],
       cidades: [],
-      formData: {}
+      formData: {},
+      savingForm: false
     };
   }
 
@@ -77,14 +78,13 @@ class AgentSalesForm extends Component {
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
+        this.setState({ savingForm: true });
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
 
           try {
-            const created = await AgentSalesService.create(
-              this.state.formData
-            );
+            await AgentSalesService.create(this.state.formData);
             this.setState({
               openForm: false,
               editMode: false
@@ -95,12 +95,11 @@ class AgentSalesForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar um agente de vendas", err);
+            this.setState({ savingForm: false });
           }
         } else {
           try {
-            const updated = await AgentSalesService.update(
-              this.state.formData
-            );
+            await AgentSalesService.update(this.state.formData);
             flashWithSuccess();
 
             if (this.props.location.state && this.props.location.state.returnTo)
@@ -108,12 +107,12 @@ class AgentSalesForm extends Component {
             else this.props.history.push("/agente-de-vendas");
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao atualizar um agente de vendas", err);
+            console.log("Erro interno ao atualizar um agente de vendas ", err);
+            this.setState({ savingForm: false });
           }
         }
       }
     });
-
   };
 
 

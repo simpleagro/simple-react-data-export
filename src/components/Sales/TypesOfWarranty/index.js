@@ -106,7 +106,9 @@ class WarrantyType extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/tipo-de-garantia/${record._id}/edit`}>
+            <Button
+              size="small"
+              onClick={() => this.props.history.push(`/tipo-de-garantia/${record._id}/edit`)}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
 
@@ -151,7 +153,10 @@ class WarrantyType extends Component {
     return (
       <div>
         <PainelHeader title="Tipo de Garantia">
-          <Button type="primary" icon="plus" href="/tipo-de-garantia/new">
+          <Button
+            type="primary"
+            icon="plus"
+            onClick={() => this.props.history.push("/tipo-de-garantia/new")}>
             Adicionar
           </Button>
         </PainelHeader>

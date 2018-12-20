@@ -32,7 +32,8 @@ class PriceVariations extends Component {
     super(props);
     this.state = {
       editMode: false,
-      formData: {}
+      formData: {},
+      savingForm: false
     };
   }
 
@@ -156,7 +157,7 @@ class PriceVariations extends Component {
           <PainelHeader
             title={[ this.state.editMode ? "Editando" : "Nova", " Variação de Preço" ]}
           >
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+            <Button type="primary" icon="save" onClick={() => this.saveForm()} loading={this.state.savingForm}>
               Salvar Variação de Preço
             </Button>
           </PainelHeader>

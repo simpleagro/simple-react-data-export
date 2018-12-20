@@ -106,7 +106,9 @@ class UseSeed extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/uso-da-semente/${record._id}/edit`}>
+            <Button
+              size="small"
+              onClick={() => this.props.history.push(`/uso-da-semente/${record._id}/edit`)}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
 
@@ -151,7 +153,10 @@ class UseSeed extends Component {
     return (
       <div>
         <PainelHeader title="Uso da Semente">
-          <Button type="primary" icon="plus" href="/uso-da-semente/new">
+          <Button
+            type="primary"
+            icon="plus"
+            onClick={() => this.props.history.push("/uso-da-semente/new")}>
             Adicionar
           </Button>
         </PainelHeader>

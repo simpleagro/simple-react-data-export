@@ -106,7 +106,9 @@ class SalesType extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/tipo-de-vendas/${record._id}/edit`}>
+            <Button
+              size="small"
+              onClick={() => this.props.history.push(`/tipo-de-vendas/${record._id}/edit`)}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
 
@@ -151,7 +153,10 @@ class SalesType extends Component {
     return (
       <div>
         <PainelHeader title="Tipo de Venda">
-          <Button type="primary" icon="plus" href="/tipo-de-vendas/new">
+          <Button
+            type="primary"
+            icon="plus"
+            onClick={() => this.props.history.push("/tipo-de-vendas/new")}>
             Adicionar
           </Button>
         </PainelHeader>

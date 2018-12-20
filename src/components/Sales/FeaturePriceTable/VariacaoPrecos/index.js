@@ -80,16 +80,16 @@ class PriceVariation extends Component {
     }
   };
 
-  removeRecord = async ({ _id, nome }) => {
+  removeRecord = async ({ _id, opcao_chave }) => {
     try {
-      await PriceVariationsService.remove(_id);
+      await PriceVariationsService.remove(this.state.tabela_id)(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
 
       this.setState({
         list: _list
       });
 
-      flashWithSuccess("", `A variação de preço, ${nome}, foi removido com sucesso!`);
+      flashWithSuccess("", `A variação de preço, ${opcao_chave}, foi removido com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover uma variação de preço", err);
@@ -126,7 +126,9 @@ class PriceVariation extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/tabela-preco-caracteristica/${this.state.tabela_id}/variacao-de-preco/${record._id}/edit`}>
+            <Button
+              size="small"
+              onClick={() => this.props.history.push(`/tabela-preco-caracteristica/${this.state.tabela_id}/variacao-de-preco/${record._id}/edit`)}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
 
@@ -171,7 +173,10 @@ class PriceVariation extends Component {
     return (
       <div>
         <PainelHeader title="Variação de Preço">
-          <Button type="primary" icon="plus" href={"/tabela-preco-caracteristica/"+ this.state.tabela_id +"/variacao-de-preco/new"}>
+          <Button
+            type="primary"
+            icon="plus"
+            onClick={() => this.props.history.push("/tabela-preco-caracteristica/"+ this.state.tabela_id +"/variacao-de-preco/new")}>
             Adicionar
           </Button>
         </PainelHeader>
@@ -183,11 +188,7 @@ class PriceVariation extends Component {
           dataSource={this.state.list}
           onChange={this.handleTableChange}
         />
-        {[
-          console.clear(),
-          console.log("state", this.state),
-          console.log("props", this.props.match)
-        ]}
+
       </div>
     );
   }
