@@ -161,6 +161,7 @@ class PriceVariations extends Component {
             </Button>
           </PainelHeader>
         </Affix>
+
         <Form onChange={this.handleFormState}>
 
           <Form.Item label="Opção" {...formItemLayout}>
@@ -213,12 +214,8 @@ class PriceVariations extends Component {
                  }
                </Select>)}
           </Form.Item>
-        </Form>
 
-        {[
-          console.log( "state: ", this.state ),
-          console.log( "props: ", this.props )
-        ]}
+        </Form>
 
       </div>
     );
