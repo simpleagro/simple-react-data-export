@@ -51,6 +51,9 @@ const menus = {
     ...safras,
     ...etapasCultura,
     ...unidadesMedida,
+  },
+  sales: {
+    ...clientes,
     ...agenteVendas,
     ...tipoVendedores,
     ...tipoGarantia,
@@ -59,9 +62,6 @@ const menus = {
     ...formaPagamento,
     ...tipoPagamento,
     ...tabelaPrecoCaracteristica
-  },
-  sales: {
-    ...clientes,
   }
 };
 
