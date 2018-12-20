@@ -132,7 +132,10 @@ class Plots extends Component {
       },
       ...simpleTableSearch(this)("propriedades.talhoes.nome"),
       render: (text, record) => {
-        return !record.coordenadas || record.coordenadas.length < 3 ? (
+        return !record.poligonos ||
+          (record.poligonos &&
+            record.poligonos.length &&
+            record.poligonos[0].coordenadas.length < 3) ? (
           <Tooltip title="Este talhão ainda não possui pontos de mapeamento">
             <FontAwesomeIcon
               icon="exclamation-triangle"
@@ -208,7 +211,9 @@ class Plots extends Component {
                 size="small"
                 onClick={() => {
                   this.props.history.push(
-                    `/clientes/${this.state.client_id}/plantio?talhao=${record._id}`
+                    `/clientes/${this.state.client_id}/plantio?talhao=${
+                      record._id
+                    }`
                   );
                 }}>
                 <FontAwesomeIcon icon="seedling" size="lg" />
@@ -298,7 +303,8 @@ class Plots extends Component {
                     this.props.history.push(
                       `/clientes/${this.state.client_id}/propriedades/${
                         this.state.property_id
-                      }/talhoes/new`
+                      }/talhoes/new`,
+                      { propriedade: this.state.property_data }
                     )
                   }>
                   Adicionar

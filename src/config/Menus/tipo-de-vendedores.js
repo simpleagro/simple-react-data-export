@@ -7,7 +7,8 @@ const menus = {
     path: "/tipo-de-vendedores",
     label: "Tipo de Vendedores",
     icon: "database",
-    showMenu: true
+    showMenu: true,
+    rule: 'SalemanType'
   },
   "/tipo-de-vendedores/:id/edit": {
     component: SimpleLoadable(() => import("../../components/Sales/SalesmanTypes/form")),

@@ -1,6 +1,7 @@
 import Loadable                   from "react-loadable";
 import dashboard                  from "./Menus/dashboard";
 import empresas                   from "./Menus/empresas";
+import filiais                    from "./Menus/filiais";
 import modulos                    from "./Menus/modulos";
 import entidades                  from "./Menus/entidades";
 import usuarios                   from "./Menus/usuarios";
@@ -32,30 +33,36 @@ const loadable = loader =>
   });
 
 const menus = {
-  ...tabelaPrecoCaracteristica,
-  ...dashboard,
-  ...empresas,
-  ...modulos,
-  ...entidades,
-  ...usuarios,
-  ...consultores,
-  ...clientes,
-  ...plantio,
-  ...carteiraDeClientes,
-  ...gestaoDeProjetosAgricolas,
-  ...caracteristicasProdutos,
-  ...gruposDeProdutos,
-  ...produtos,
-  ...safras,
-  ...etapasCultura,
-  ...unidadesMedida,
-  ...agenteVendas,
-  ...tipoVendedores,
-  ...tipoGarantia,
-  ...tipoVenda,
-  ...usoSemente,
-  ...formaPagamento,
-  ...tipoPagamento,
+  field: {
+    ...dashboard,
+    ...empresas,
+    ...filiais,
+    ...modulos,
+    ...entidades,
+    ...usuarios,
+    ...consultores,
+    ...clientes,
+    ...plantio,
+    ...carteiraDeClientes,
+    ...gestaoDeProjetosAgricolas,
+    ...caracteristicasProdutos,
+    ...gruposDeProdutos,
+    ...produtos,
+    ...safras,
+    ...etapasCultura,
+    ...unidadesMedida,
+    ...agenteVendas,
+    ...tipoVendedores,
+    ...tipoGarantia,
+    ...tipoVenda,
+    ...usoSemente,
+    ...formaPagamento,
+    ...tipoPagamento,
+    ...tabelaPrecoCaracteristica
+  },
+  sales: {
+    ...clientes,
+  }
 };
 
 export { menus };

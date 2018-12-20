@@ -38,15 +38,23 @@ class Filiais extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await CompaniesBranchService.list(this.state.company_id)(aqp);
-    const companyData = await CompaniesService.get(this.state.company_id);
+    try {
+      const data = await CompaniesBranchService.list(this.state.company_id)(
+        aqp
+      );
+      const companyData = await CompaniesService.get(this.state.company_id);
 
-    this.setState(prev => ({
-      ...prev,
-      list: data.docs,
-      loadingData: false,
-      company_data: companyData
-    }));
+      this.setState(prev => ({
+        ...prev,
+        list: data.docs,
+        loadingData: false,
+        company_data: companyData
+      }));
+    } catch (error) {
+      if (error && error.response && error.response.data) parseErrors(error);
+    } finally {
+      this.setState({ loadingData: false });
+    }
   }
 
   async componentDidMount() {
@@ -153,11 +161,7 @@ class Filiais extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button
-              size="small"
-              onClick={() =>
-                this.editarFilial(record)
-              }>
+            <Button size="small" onClick={() => this.editarFilial(record)}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
             <Divider
@@ -183,9 +187,11 @@ class Filiais extends Component {
     }
   ];
 
-  editarFilial (record) {
+  editarFilial(record) {
     return this.props.match.params.company_id
-      ? this.props.history.push(`/empresas/${this.state.company_id}/filiais/${record._id}/edit`)
+      ? this.props.history.push(
+          `/empresas/${this.state.company_id}/filiais/${record._id}/edit`
+        )
       : this.props.history.push(`/filiais/${record._id}/edit`);
   }
 

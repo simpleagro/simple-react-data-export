@@ -10,6 +10,7 @@ import {
   Row,
   Col
 } from "antd";
+import { connect } from "react-redux";
 
 import * as ClientsPropertyService from "../../../services/clients.properties";
 import * as ClientsService from "../../../services/clients";
@@ -36,8 +37,6 @@ class Properties extends Component {
   }
 
   async initializeList(aqp) {
-
-
     this.setState(previousState => {
       return { ...previousState, loadingData: true };
     });
@@ -126,26 +125,26 @@ class Properties extends Component {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      ...simpleTableSearch(this)('propriedades.nome'),
+      ...simpleTableSearch(this)("propriedades.nome"),
       render: text => text
     },
     {
       title: "Inscrição Estadual",
       dataIndex: "ie",
       key: "propriedades.ie",
-      ...simpleTableSearch(this)('propriedades.ie'),
+      ...simpleTableSearch(this)("propriedades.ie")
     },
     {
       title: "Cidade",
       dataIndex: "cidade",
       key: "propriedades.cidade",
-      ...simpleTableSearch(this)("propriedades.cidade"),
+      ...simpleTableSearch(this)("propriedades.cidade")
     },
     {
       title: "Estado",
       dataIndex: "estado",
       key: "propriedades.estado",
-      ...simpleTableSearch(this)("propriedades.estado"),
+      ...simpleTableSearch(this)("propriedades.estado")
     },
     {
       title: "Status",
@@ -203,19 +202,22 @@ class Properties extends Component {
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
-            <Tooltip title="Veja os talhões da propriedade">
-              <Button
-                size="small"
-                onClick={() =>
-                  this.props.history.push(
-                    `/clientes/${this.state.client_id}/propriedades/${
-                      record._id
-                    }/talhoes`
-                  )
-                }>
-                <FontAwesomeIcon icon="map-marked-alt" size="lg" />
-              </Button>
-            </Tooltip>
+            {this.props.seletorModulo &&
+              this.props.seletorModulo.slug !== "sales" && (
+                <Tooltip title="Veja os talhões da propriedade">
+                  <Button
+                    size="small"
+                    onClick={() =>
+                      this.props.history.push(
+                        `/clientes/${this.state.client_id}/propriedades/${
+                          record._id
+                        }/talhoes`
+                      )
+                    }>
+                    <FontAwesomeIcon icon="map-marked-alt" size="lg" />
+                  </Button>
+                </Tooltip>
+              )}
           </span>
         );
       }
@@ -223,7 +225,6 @@ class Properties extends Component {
   ];
 
   handleTableChange = (pagination, filters) => {
-
     let _this = this;
     const pager = { ...this.state.pagination };
     pager.current = pagination.current;
@@ -296,4 +297,13 @@ class Properties extends Component {
   }
 }
 
-export default Properties;
+const mapStateToProps = ({ painelState }) => {
+  return {
+    seletorModulo: painelState.seletorModulo || null
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  null
+)(Properties);

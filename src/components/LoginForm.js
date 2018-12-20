@@ -5,10 +5,11 @@ import axios from "axios";
 import { withCookies, Cookies } from "react-cookie";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
-import { userLoggedIn } from "../actions/painelActions";
+import { userLoggedIn, userSwitchedModule } from "../actions/painelActions";
 
 import { API_URL } from "../config/api";
 import "../styles/login.css";
+import { mapProps } from "recompose";
 
 const FormItem = Form.Item;
 
@@ -63,7 +64,16 @@ class LoginForm extends Component {
             message: `Seja bem vindo, ${response.data.user.nome}`
           });
           this.setState({ isLoading: false });
-          this.props.history.push(this.state.from.pathname);
+          if (
+            response.data.modulosDaEmpresa &&
+            response.data.modulosDaEmpresa.length === 1
+          ) {
+            this.props.userSwitchedModule({
+              nome: response.data.modulosDaEmpresa[0].nome,
+              slug: response.data.modulosDaEmpresa[0].slug
+            });
+            this.props.history.push("/");
+          } else this.props.history.push("/selecionar-modulo");
         } catch (error) {
           if (
             error &&
@@ -102,8 +112,7 @@ class LoginForm extends Component {
           <Form onSubmit={this.handleSubmit} className="login-form">
             <FormItem
               validateStatus={loginError ? "error" : ""}
-              help={loginError || ""}
-            >
+              help={loginError || ""}>
               {getFieldDecorator("login", {
                 rules: [
                   {
@@ -123,8 +132,7 @@ class LoginForm extends Component {
             </FormItem>
             <FormItem
               validateStatus={senhaError ? "error" : ""}
-              help={senhaError || ""}
-            >
+              help={senhaError || ""}>
               {getFieldDecorator("senha", {
                 rules: [
                   { required: true, message: "Por favor, informe sua senha." }
@@ -145,8 +153,7 @@ class LoginForm extends Component {
                 disabled={hasErrors(getFieldsError())}
                 type="primary"
                 style={{ width: "100%" }}
-                loading={this.state.isLoading}
-              >
+                loading={this.state.isLoading}>
                 Entrar
               </Button>
             </FormItem>
@@ -164,7 +171,8 @@ class LoginForm extends Component {
 const mapDispatchToProps = dispatch =>
   bindActionCreators(
     {
-      userLoggedIn
+      userLoggedIn,
+      userSwitchedModule
     },
     dispatch
   );

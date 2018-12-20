@@ -6,12 +6,13 @@ const menus = {
     path: "/visitas",
     label: "Visitas",
     icon: "clipboard-list",
-    showMenu: true
+    showMenu: true,
+    rule: "Visit"
   },
   "/visitas/:id": {
     component: SimpleLoadable(() => import("../../components/Visits/show")),
     showMenu: false
-  },
+  }
 };
 
 export default menus;

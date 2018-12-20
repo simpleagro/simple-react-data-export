@@ -7,7 +7,8 @@ const menus = {
     path: "/clientes",
     label: "Clientes",
     icon: "users",
-    showMenu: true
+    showMenu: true,
+    rule: 'Client',
   },
   "/clientes/:id/edit": {
     component: SimpleLoadable(() =>

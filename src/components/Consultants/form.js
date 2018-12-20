@@ -143,7 +143,7 @@ class ConsultantForm extends Component {
             email: user.email,
             login: user.login,
             tipoLogin: user.tipoLogin,
-            grupo_id: user.grupo_id,
+            grupo_id: user.grupo_id._id,
             filiais: user.filiais
           },
           userHasSelected: true

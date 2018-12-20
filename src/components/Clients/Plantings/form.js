@@ -298,7 +298,7 @@ class ClientPlantingForm extends Component {
           <Form.Item label="Safra" {...formItemLayout}>
             {getFieldDecorator("safra", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.safra
+              initialValue: this.state.formData.safra && this.state.formData.safra.descricao
             })(
               <Select
                 name="safra"

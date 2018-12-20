@@ -24,7 +24,6 @@ class Clients extends Component {
         pageSizeOptions: ["10", "25", "50", "100"]
       }
     };
-
   }
 
   async initializeList(aqp) {
@@ -51,7 +50,7 @@ class Clients extends Component {
 
   async componentDidMount() {
     this.props.novoPlantio({});
-    await this.initializeList({'carteira' : this.props.carteira});
+    await this.initializeList({ carteira: this.props.carteira });
   }
 
   changeStatus = async (id, newStatus) => {
@@ -153,7 +152,7 @@ class Clients extends Component {
         const statusBtn = record.status ? "unlock" : "lock";
         return (
           <Popconfirm
-          placement="rightTop"
+            placement="rightTop"
             title={`Tem certeza em ${statusTxt} o cliente?`}
             onConfirm={e => this.changeStatus(record._id, !record.status)}
             okText="Sim"
@@ -212,16 +211,21 @@ class Clients extends Component {
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
-            <Tooltip title="Veja os planejamentos de plantio do cliente">
-              <Button
-                size="small"
-                onClick={() => {
-                  this.props.novoPlantio(record);
-                  this.props.history.push(`/clientes/${record._id}/plantio`);
-                }}>
-                <FontAwesomeIcon icon="seedling" size="lg" />
-              </Button>
-            </Tooltip>
+            {this.props.seletorModulo &&
+              this.props.seletorModulo.slug !== "sales" && (
+                <Tooltip title="Veja os planejamentos de plantio do cliente">
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      this.props.novoPlantio(record);
+                      this.props.history.push(
+                        `/clientes/${record._id}/plantio`
+                      );
+                    }}>
+                    <FontAwesomeIcon icon="seedling" size="lg" />
+                  </Button>
+                </Tooltip>
+              )}
           </span>
         );
       }
@@ -237,6 +241,7 @@ class Clients extends Component {
     this.initializeList({
       page: pagination.current,
       limit: pagination.pageSize,
+      ...filters,
       ...this.state.tableSearch
     });
   };
@@ -268,10 +273,9 @@ class Clients extends Component {
 const mapStateToProps = ({ painelState }) => {
   return {
     carteira:
-      (painelState &&
-        painelState.userData &&
-        painelState.userData.carteira) ||
-      ""
+      (painelState && painelState.userData && painelState.userData.carteira) ||
+      "",
+    seletorModulo: painelState.seletorModulo || null
   };
 };
 

@@ -3,7 +3,8 @@ import SimpleLoadable from "../../components/common/SimpleLoadable";
 const menus = {
   "/clientes/:client_id/plantio": {
     component: SimpleLoadable(() => import("../../components/Clients/Plantings")),
-    showMenu: false
+    showMenu: false,
+    rule: 'Planting'
   },
   "/clientes/:client_id/plantio/:id/edit": {
     component: SimpleLoadable(() =>

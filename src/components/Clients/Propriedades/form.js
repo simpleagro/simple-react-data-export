@@ -14,6 +14,7 @@ import {
   Col
 } from "antd";
 import styled from "styled-components";
+import { connect } from "react-redux";
 
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
@@ -62,7 +63,15 @@ class ClientPropertyForm extends Component {
           ...prev,
           formData,
           editMode: id ? true : false,
-          editingMap: id ? true : false
+          editingMap: id ? true : false,
+          markerCentroTalhao: [
+            {
+              position: {
+                lat: parseFloat(formData.latitude),
+                lng: parseFloat(formData.longitude)
+              }
+            }
+          ]
         }));
         this.atualizarMapa(this.state.formData.coordenadas);
       }
@@ -353,91 +362,107 @@ class ClientPropertyForm extends Component {
               )}
             </Form.Item> */}
           </CardStyled>
-          <CardStyled type="inner" title="Geolocalização" bordered>
-            <Row>
-              <Col span={5}>
-                <Form.Item label="Latitude">
-                  {getFieldDecorator("latitude", {
-                    rules: [
-                      { required: true, message: "Este campo é obrigatório!" }
-                    ],
-                    initialValue: this.state.formData.latitude
-                  })(
-                    <InputNumber
-                      onChange={e =>
-                        this.handleFormState({
-                          target: { name: "latitude", value: e }
-                        })
-                      }
-                      style={{ width: "90%" }}
-                      name="latitude"
-                    />
-                  )}
-                </Form.Item>
-                <Form.Item label="Longitude">
-                  {getFieldDecorator("longitude", {
-                    rules: [
-                      { required: true, message: "Este campo é obrigatório!" }
-                    ],
-                    initialValue: this.state.formData.longitude
-                  })(
-                    <InputNumber
-                      onChange={e =>
-                        this.handleFormState({
-                          target: { name: "longitude", value: e }
-                        })
-                      }
-                      style={{ width: "90%" }}
-                      name="longitude"
-                    />
-                  )}
-                </Form.Item>
-                <Form.Item label="Área Calculada">
-                  <Input
-                    addonAfter="Ha"
-                    style={{ width: "90%" }}
-                    value={this.state.areaDoPoligono}
-                    readOnly
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={19}>
-                <p>
-                  Digite o nome da região ou cidade no campo abaixo e utilize o
-                  marcador em vermelho para pegar a latitude e longitude:
-                </p>
-                <div style={{ position: "relative" }}>
-                  <SimpleMap
-                    polygonData={
-                      this.state.formData.coordenadas
-                        ? this.state.formData.coordenadas.map(
-                            c => new google.maps.LatLng(c.latitude, c.longitude)
-                          )
-                        : []
-                    }
-                    markers={this.state.markerCentroTalhao}
-                    adicionarPontosAoMapa={() => this.adicionarPontosAoMapa()}
-                    salvarMapa={coordenadas => this.salvarMapa(coordenadas)}
-                    drawingMap={this.state.drawingMap}
-                    editingMap={this.state.editingMap}
-                    latitude={this.state.formData.latitude}
-                    longitude={this.state.formData.longitude}
-                    containerElement={<div style={{ height: `100%` }} />}
-                    mapElement={<div style={{ height: `100%` }} />}
-                    setGPS={(latitude, longitude) =>
-                      this.setGPS(latitude, longitude)
-                    }
-                    limparMapa={() =>
-                      this.setState(prev => ({
-                        ...prev,
-                        formData: { ...prev.formData, coordenadas: [] }
-                      }))
-                    }
-                  />
-                </div>
-              </Col>
-            </Row>
-          </CardStyled>
+          {this.props.seletorModulo &&
+            this.props.seletorModulo.slug !== "sales" && (
+              <CardStyled type="inner" title="Geolocalização" bordered>
+                <Row>
+                  <Col span={5}>
+                    <Form.Item label="Latitude">
+                      {getFieldDecorator("latitude", {
+                        rules: [
+                          {
+                            required: true,
+                            message: "Este campo é obrigatório!"
+                          }
+                        ],
+                        initialValue: this.state.formData.latitude
+                      })(
+                        <InputNumber
+                          onChange={e =>
+                            this.handleFormState({
+                              target: { name: "latitude", value: e }
+                            })
+                          }
+                          style={{ width: "90%" }}
+                          name="latitude"
+                        />
+                      )}
+                    </Form.Item>
+                    <Form.Item label="Longitude">
+                      {getFieldDecorator("longitude", {
+                        rules: [
+                          {
+                            required: true,
+                            message: "Este campo é obrigatório!"
+                          }
+                        ],
+                        initialValue: this.state.formData.longitude
+                      })(
+                        <InputNumber
+                          onChange={e =>
+                            this.handleFormState({
+                              target: { name: "longitude", value: e }
+                            })
+                          }
+                          style={{ width: "90%" }}
+                          name="longitude"
+                        />
+                      )}
+                    </Form.Item>
+                    <Form.Item label="Área Calculada">
+                      <Input
+                        addonAfter="Ha"
+                        style={{ width: "90%" }}
+                        value={this.state.areaDoPoligono}
+                        readOnly
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={19}>
+                    <p>
+                      Digite o nome da região ou cidade no campo abaixo e
+                      utilize o marcador em vermelho para pegar a latitude e
+                      longitude:
+                    </p>
+                    <div style={{ position: "relative" }}>
+                      <SimpleMap
+                        polygonData={
+                          this.state.formData.coordenadas
+                            ? this.state.formData.coordenadas.map(
+                                c =>
+                                  new google.maps.LatLng(
+                                    c.latitude,
+                                    c.longitude
+                                  )
+                              )
+                            : []
+                        }
+                        markers={this.state.markerCentroTalhao}
+                        adicionarPontosAoMapa={() =>
+                          this.adicionarPontosAoMapa()
+                        }
+                        salvarMapa={coordenadas => this.salvarMapa(coordenadas)}
+                        drawingMap={this.state.drawingMap}
+                        editingMap={this.state.editingMap}
+                        latitude={this.state.formData.latitude}
+                        longitude={this.state.formData.longitude}
+                        containerElement={<div style={{ height: `100%` }} />}
+                        mapElement={<div style={{ height: `100%` }} />}
+                        setGPS={(latitude, longitude) =>
+                          this.setGPS(latitude, longitude)
+                        }
+                        limparMapa={() =>
+                          this.setState(prev => ({
+                            ...prev,
+                            formData: { ...prev.formData, coordenadas: [] }
+                          }))
+                        }
+                      />
+                    </div>
+                  </Col>
+                </Row>
+              </CardStyled>
+            )}
         </Form>
       </div>
     );
@@ -533,6 +558,15 @@ class ClientPropertyForm extends Component {
   }
 }
 
+const mapStateToProps = ({ painelState }) => {
+  return {
+    seletorModulo: painelState.seletorModulo || null
+  };
+};
+
 const WrappepClientPropertyForm = Form.create()(ClientPropertyForm);
 
-export default WrappepClientPropertyForm;
+export default connect(
+  mapStateToProps,
+  null
+)(WrappepClientPropertyForm);
