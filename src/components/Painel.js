@@ -48,9 +48,9 @@ class Painel extends Component {
 
     this.state = {
       collapsed: false,
-      siderWidth: 236,
-      marginContent: 236,
-      headerContent: 236
+      siderWidth: 256,
+      marginContent: 256,
+      headerContent: 256
     };
   }
 
