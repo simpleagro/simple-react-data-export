@@ -84,43 +84,37 @@ class FeaturePriceTable extends Component {
       if (err) return;
       else {
         this.setState({ savingForm: true });
-        await this.validateLogin(this.state.formData.login);
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
 
           try {
-            await FeaturePriceTableService.create(this.state.formData);
+            const created = await FeaturePriceTableService.create(this.state.formData);
             this.setState({
               openForm: false,
               editMode: false
             });
             flashWithSuccess();
-            // a chamada do formulário pode vir por fluxos diferentes
-            // então usamos o returnTo para verificar para onde ir
-            // ou ir para o fluxo padrão
-            // if (this.props.location.state && this.props.location.state.returnTo)
-            //   this.props.history.push(this.props.location.state.returnTo);
-            // else this.props.history.push("/usuarios");
-            this.props.history.push("/tabela-preco-caracteristica/");
+
+            this.props.history.push(
+              "/tabela-preco-caracteristica/" + created._id + "/variacao-de-preco"
+            );
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao adicionar um usuário", err);
+            console.log("Erro interno ao adicionar uma tabela de preço de caracteristica", err);
             this.setState({ savingForm: false });
           }
         } else {
           try {
             await FeaturePriceTableService.update(this.state.formData);
             flashWithSuccess();
-            // a chamada do formulário pode vir por fluxos diferentes
-            // então usamos o returnTo para verificar para onde ir
-            // ou ir para o fluxo padrão
+
             if (this.props.location.state && this.props.location.state.returnTo)
               this.props.history.push(this.props.location.state.returnTo);
-            else this.props.history.push("/tabela-preco-caracteristica");
+            else this.props.history.push("/tabela-preco-caracteristica/");
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao atualizar um usuário ", err);
+            console.log("Erro interno ao atualizar uma tabela de preço de caracteristica ", err);
             this.setState({ savingForm: false });
           }
         }
