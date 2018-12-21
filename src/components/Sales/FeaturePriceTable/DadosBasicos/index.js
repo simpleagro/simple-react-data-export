@@ -157,7 +157,7 @@ class PaymentForm extends Component {
               <Button
                 size="small"
                 onClick={() => this.props.history.push(`/tabela-preco-caracteristica/${record._id}/variacao-de-preco`)}>
-                <Icon type="form" style={{ fontSize: "16px"}} />
+                <Icon type="dollar" style={{ fontSize: "16px"}} />
               </Button>
             </Tooltip>
 
