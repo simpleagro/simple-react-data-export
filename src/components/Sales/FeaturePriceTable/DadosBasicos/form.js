@@ -35,8 +35,7 @@ class FeaturePriceTable extends Component {
     this.state = {
       editMode: false,
       savingForm: false,
-      formData: {},
-      data_validade: moment(new Date(), "YYYY-MM-DD"),
+      formData: {}
     };
   }
 
