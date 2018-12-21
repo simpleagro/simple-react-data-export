@@ -122,7 +122,8 @@ class PriceVariations extends Component {
     this.state.listFeaturePriceTable &&
       this.state.listFeaturePriceTable.map(fpt => (fpt._id === this.props.match.params.tabela_id &&
         this.state.listProductGroup.map(pg => (pg._id === fpt.grupo_produto.id &&
-          pg.caracteristicas.map(caract => (caract.opcoes.map(opc =>
+          pg.caracteristicas.map(caract => caract._id === fpt.caracteristica.id &&
+            (caract.opcoes.map(opc =>
             arr.push( opc.label )
           )))
         ))
@@ -190,7 +191,12 @@ class PriceVariations extends Component {
             {getFieldDecorator("valor", {
               rules: [{ required: true, message: "Este campo é obragatório!" }],
               initialValue: this.state.formData.valor
-            })(<Input name="valor" ref={input => (this.titleInput = input)} style={{ width: 200 }} />)}
+            })(<Input
+                  name="valor"
+                  prefix="R$"
+                  ref={input => (this.titleInput = input)}
+                  style={{ width: 200 }}
+                />)}
           </Form.Item>
 
           <Form.Item label="Unidade de Medida" {...formItemLayout}>

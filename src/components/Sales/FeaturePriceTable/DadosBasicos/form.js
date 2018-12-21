@@ -7,9 +7,11 @@ import {
   Form,
   Select,
   Affix,
-  InputNumber
+  InputNumber,
+  DatePicker
 } from "antd";
 import styled from "styled-components";
+import moment from "moment";
 
 import { flashWithSuccess } from "../../../common/FlashMessages";
 import parseErrors from "../../../../lib/parseErrors";
@@ -33,7 +35,8 @@ class FeaturePriceTable extends Component {
     this.state = {
       editMode: false,
       savingForm: false,
-      formData: {}
+      formData: {},
+      data_validade: moment(new Date(), "YYYY-MM-DD"),
     };
   }
 
@@ -222,8 +225,28 @@ class FeaturePriceTable extends Component {
           <Form.Item label="Data de Validade" {...formItemLayout}>
             {getFieldDecorator("data_validade", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.data_validade
-            })(<Input name="data_validade" />)}
+              initialValue: moment(
+                this.state.formData.data_validade
+                  ? this.state.formData.data_validade
+                  : new Date(),
+                "YYYY-MM-DD"
+              )
+            })(<DatePicker
+              onChange={(data, dataString) =>
+                this.handleFormState({
+                  target: {
+                    name: "data_validade",
+                    value: moment(dataString, "DD/MM/YYYY").format(
+                      "YYYY-MM-DD"
+                    )
+                  }
+                })
+              }
+              allowClear
+              format={"DD/MM/YYYY"}
+              style={{ width: 200 }}
+              name="data_validade"
+            />)}
           </Form.Item>
 
           <Form.Item label="Grupo de Produtos" {...formItemLayout}>
