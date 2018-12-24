@@ -245,7 +245,7 @@ class Plantings extends Component {
         <SimpleBreadCrumb
           history={this.props.history}
           className="breadcrumbStyled"
-          to="/clientes"
+          to={`/clientes/${this.state.client_id}/propriedades/${this.props.location.state.propriedade_id}/talhoes`}
         />
 
         <Row gutter={24}>

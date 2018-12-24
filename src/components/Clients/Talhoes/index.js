@@ -16,7 +16,6 @@ import * as ClientsPropertyService from "../../../services/clients.properties";
 import * as ClientsPlotsService from "../../../services/clients.plots";
 
 import SimpleTable from "../../common/SimpleTable";
-
 import { flashWithSuccess, flashWithError } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
@@ -213,7 +212,7 @@ class Plots extends Component {
                   this.props.history.push(
                     `/clientes/${this.state.client_id}/plantio?talhao=${
                       record._id
-                    }`
+                    }`, { propriedade_id: this.state.property_id }
                   );
                 }}>
                 <FontAwesomeIcon icon="seedling" size="lg" />
