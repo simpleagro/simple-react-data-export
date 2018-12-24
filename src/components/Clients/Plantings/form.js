@@ -27,6 +27,7 @@ import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 //#endregion
 
 const Option = Select.Option;
+const { TextArea } = Input;
 
 class ClientPlantingForm extends Component {
   constructor(props) {
@@ -36,7 +37,7 @@ class ClientPlantingForm extends Component {
       editMode: false,
       formData: {
         data_inicio: moment(new Date(), "YYYY-MM-DD"),
-        data_fim: moment(new Date(), "YYYY-MM-DD")
+        data_fim: undefined
       },
       client_id: this.props.match.params.client_id,
       propriedades: [],
@@ -261,6 +262,17 @@ class ClientPlantingForm extends Component {
     return calculo.toFixed(3);
   }
 
+  getAreaTalhao(t){
+    this.setState(prev => ({
+      ...prev,
+      formData: {
+        ...prev.formData,
+        area: t.area
+      }
+    }));
+    console.log("getAreaTalhao: ", t.area);
+  }
+
   render() {
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
@@ -398,7 +410,7 @@ class ClientPlantingForm extends Component {
                       name: "talhao",
                       value: { id: e._id, nome: e.nome }
                     }
-                  });
+                  }); this.getAreaTalhao(e);
                 }}>
                 {this.state.talhoes && this.state.talhoes.length > 0
                   ? this.state.talhoes.map(t => (
@@ -410,6 +422,7 @@ class ClientPlantingForm extends Component {
               </Select>
             )}
           </Form.Item>
+          {/*
           <Form.Item
             label="Cidade"
             {...formItemLayout}
@@ -428,6 +441,7 @@ class ClientPlantingForm extends Component {
               initialValue: this.state.formData.estado
             })(<Input style={{ width: 200 }} disabled name="estado" />)}
           </Form.Item>
+          */}
           <Form.Item label="Grupo de Produto" {...formItemLayout}>
             {getFieldDecorator("grupo_produto", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
@@ -529,22 +543,22 @@ class ClientPlantingForm extends Component {
           </Form.Item>
           <Form.Item label="Data de Fim" {...formItemLayout}>
             {getFieldDecorator("data_fim", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: moment(
+              rules: [{ required: false, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.data_fim ? moment(
                 this.state.formData.data_fim
                   ? this.state.formData.data_fim
                   : new Date(),
                 "YYYY-MM-DD"
-              )
+              ) : undefined
             })(
               <DatePicker
                 onChange={(data, dataString) =>
                   this.handleFormState({
                     target: {
                       name: "data_fim",
-                      value: moment(dataString, "DD/MM/YYYY").format(
+                      value: dataString ? moment(dataString, "DD/MM/YYYY").format(
                         "YYYY-MM-DD"
-                      )
+                      ) : null
                     }
                   })
                 }
@@ -654,7 +668,7 @@ class ClientPlantingForm extends Component {
               style={{ width: 200 }}
             />
           </Form.Item>
-          <Form.Item label="Área" {...formItemLayout}>
+          <Form.Item label="Área" {...formItemLayout} validateStatus={ this.state.formData.talhao === undefined ? "warning" : "" }>
             {getFieldDecorator("area", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.area
@@ -669,6 +683,18 @@ class ClientPlantingForm extends Component {
                 name="area"
               />
             )}
+          </Form.Item>
+          <Form.Item label="Produtividade (SC)" {...formItemLayout}>
+            {getFieldDecorator("produtividade", {
+              rules: [{ required: false }],
+              initialValue: this.state.formData.produtividade
+            })(<InputNumber name="produtividade" style={{ width: 200 }} />)}
+          </Form.Item>
+          <Form.Item label="Observações" {...formItemLayout}>
+            {getFieldDecorator("observacoes", {
+              rules: [{ required: false }],
+              initialValue: this.state.formData.observacoes
+            })(<TextArea name="observacoes" autosize={{ minRows: 2, maxRows: 7 }} style={{ width: 400 }} />)}
           </Form.Item>
         </Form>
       </div>
