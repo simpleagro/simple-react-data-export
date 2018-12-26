@@ -7,7 +7,7 @@ import usuarios from "./Menus/usuarios";
 import consultores from "./Menus/consultores";
 import clientes from "./Menus/clientes";
 import carteiraDeClientes from "./Menus/carteira-de-clientes";
-import caracteristicasProdutos from "./Menus/caracteristicas-produtos";
+//import caracteristicasProdutos from "./Menus/caracteristicas-produtos";
 import gruposDeProdutos from "./Menus/grupos-produtos";
 import produtos from "./Menus/produtos";
 import safras from "./Menus/safras";
@@ -16,6 +16,11 @@ import unidadesMedida from "./Menus/unidades-medidas";
 import plantio from "./Menus/plantio";
 import gestaoDeProjetosAgricolas from "./Menus/gestao-projetos-agricolas";
 import filiais from "./Menus/filiais"
+import tabelaFrete from './Menus/tabela-frete'
+import tabelaPreco from './Menus/tabela-preco'
+import metas from './Menus/metas'
+import cotas from './Menus/cotas'
+import tabelaComissao from './Menus/tabela-comissao'
 
 const loadable = loader =>
   Loadable({
@@ -36,12 +41,17 @@ const menus = {
   ...plantio,
   ...carteiraDeClientes,
   ...gestaoDeProjetosAgricolas,
-  ...caracteristicasProdutos,
+  //...caracteristicasProdutos,
   ...gruposDeProdutos,
   ...produtos,
   ...safras,
   ...etapasCultura,
   ...unidadesMedida,
+  ...tabelaFrete,
+  ...tabelaPreco,
+  ...tabelaComissao,
+  ...metas,
+  ...cotas
 };
 
 export { menus };
