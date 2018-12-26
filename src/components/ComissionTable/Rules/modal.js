@@ -1,7 +1,7 @@
 import React from 'react'
 import { Modal, Form, Button, Select } from 'antd';
 import * as GroupsServices from "../../../services/productgroups";
-import * as SeedUsesServices from "../../../services/seeduse";
+import * as SeedUsesServices from "../../../services/seed-use";
 import * as TypesOfSalesServices from "../../../services/typesofsales";
 
 const ModalForm = Form.create()(
@@ -78,7 +78,7 @@ const ModalForm = Form.create()(
       render() {
         const { visible, onCancel, onCreate, form } = this.props;
         const { getFieldDecorator } = form;
-        
+
         return (
           <Modal
             visible={visible}
@@ -182,4 +182,3 @@ const ModalForm = Form.create()(
   );
 
   export default ModalForm;
- 
