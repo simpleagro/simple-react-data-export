@@ -1,13 +1,13 @@
 import { baseApi as api } from "../config/api";
 
-const baseURL = "/productgroups";
+const baseURL = "/quotas";
 
 export const list = aqp => {
   return api
     .get(baseURL, {
       params: aqp
     })
-    .then(response => response.data)
+    .then(response => response.data);
 };
 
 export const get = _id =>
