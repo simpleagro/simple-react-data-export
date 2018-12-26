@@ -17,6 +17,7 @@ select,
 }
 .ant-menu-dark {
   background-color: #606062;
+  padding-bottom: 50px;
 }
 .ant-menu-dark .ant-menu-sub {
   background: #606062;

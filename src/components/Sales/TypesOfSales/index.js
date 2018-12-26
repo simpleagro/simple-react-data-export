@@ -74,7 +74,7 @@ class SalesType extends Component {
     }
   };
 
-  removeRecord = async ({ _id, nome }) => {
+  removeRecord = async ({ _id, descricao }) => {
     try {
       await SalesTypeService.remove(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
@@ -83,7 +83,7 @@ class SalesType extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `O tipo de venda, ${nome}, foi removido com sucesso!`);
+      flashWithSuccess("", `O tipo de venda, ${descricao}, foi removido com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover um tipo de venda", err);
@@ -106,7 +106,9 @@ class SalesType extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/tipo-de-vendas/${record._id}/edit`}>
+            <Button
+              size="small"
+              onClick={() => this.props.history.push(`/tipo-de-vendas/${record._id}/edit`)}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
 
@@ -151,7 +153,10 @@ class SalesType extends Component {
     return (
       <div>
         <PainelHeader title="Tipo de Venda">
-          <Button type="primary" icon="plus" href="/tipo-de-vendas/new">
+          <Button
+            type="primary"
+            icon="plus"
+            onClick={() => this.props.history.push("/tipo-de-vendas/new")}>
             Adicionar
           </Button>
         </PainelHeader>

@@ -29,7 +29,8 @@ class TypeForm extends Component {
     super(props);
     this.state = {
       editMode: false,
-      formData: {}
+      formData: {},
+      savingForm: false
     };
   }
 
@@ -70,30 +71,28 @@ class TypeForm extends Component {
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
+        this.setState({ savingForm: true });
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
             flashWithSuccess("Sem alterações para salvar", " ");
 
           try {
-            const created = await WarrantyTypeService.create(
-              this.state.formData
-            );
+            await WarrantyTypeService.create(this.state.formData);
             this.setState({
               openForm: false,
               editMode: false
             });
             flashWithSuccess();
 
-            this.props.history.push("/tipo-de-garantia");
+            this.props.history.push("/tipo-de-garantia/");
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar um tipo de garantia", err);
+            this.setState({ savingForm: false });
           }
         } else {
           try {
-            const updated = await WarrantyTypeService.update(
-              this.state.formData
-            );
+            await WarrantyTypeService.update(this.state.formData);
             flashWithSuccess();
 
             if (this.props.location.state && this.props.location.state.returnTo)
@@ -102,6 +101,7 @@ class TypeForm extends Component {
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao atualizar um tipo de garantia ", err);
+            this.setState({ savingForm: false });
           }
         }
       }
@@ -123,7 +123,7 @@ class TypeForm extends Component {
               href={
                 this.props.location.state && this.props.location.state.returnTo
                   ? this.props.location.state.returnTo.pathname
-                  : "/tipo-garantia"
+                  : "/tipo-de-garantia"
               }
             >
               <Icon type="arrow-left" />

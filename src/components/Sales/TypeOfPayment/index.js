@@ -74,7 +74,7 @@ class TypeOfPayment extends Component {
     }
   };
 
-  removeRecord = async ({ _id, nome }) => {
+  removeRecord = async ({ _id, descricao }) => {
     try {
       await TypeOfPaymentService.remove(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
@@ -83,7 +83,7 @@ class TypeOfPayment extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `O tipo de pagamento, ${nome}, foi removido com sucesso!`);
+      flashWithSuccess("", `O tipo de pagamento, ${descricao}, foi removido com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover um tipo de pagamento", err);
@@ -106,7 +106,9 @@ class TypeOfPayment extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/tipo-de-pagamento/${record._id}/edit`}>
+            <Button
+              size="small"
+              onClick={() => this.props.history.push(`/tipo-de-pagamento/${record._id}/edit`)}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
 
@@ -117,7 +119,7 @@ class TypeOfPayment extends Component {
 
             <Popconfirm
               title={`Tem certeza em excluir o tipo de pagamento?`}
-              onConfirm={() => this.removeRecord(record)}
+              onConfirm={() => this.removeRecord(record, record.nome)}
               okText="Sim"
               cancelText="Não"
             >
@@ -151,7 +153,10 @@ class TypeOfPayment extends Component {
     return (
       <div>
         <PainelHeader title="Tipo de Pagamento">
-          <Button type="primary" icon="plus" href="/tipo-de-pagamento/new">
+          <Button
+            type="primary"
+            icon="plus"
+            onClick={() => this.props.history.push("/tipo-de-pagamento/new")}>
             Adicionar
           </Button>
         </PainelHeader>

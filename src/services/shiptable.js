@@ -1,6 +1,6 @@
 import { baseApi as api } from "../config/api";
 
-const baseURL = "/type-sales";
+const baseURL = "/ship-table";
 
 export const list = aqp => {
   return api

@@ -1,22 +1,19 @@
-import Loadable                   from "react-loadable";
-import dashboard                  from "./Menus/dashboard";
-import empresas                   from "./Menus/empresas";
-import filiais                    from "./Menus/filiais";
-import modulos                    from "./Menus/modulos";
-import entidades                  from "./Menus/entidades";
-import usuarios                   from "./Menus/usuarios";
-import consultores                from "./Menus/consultores";
-import clientes                   from "./Menus/clientes";
-import carteiraDeClientes         from "./Menus/carteira-de-clientes";
-import caracteristicasProdutos    from "./Menus/caracteristicas-produtos";
-import gruposDeProdutos           from "./Menus/grupos-produtos";
-import produtos                   from "./Menus/produtos";
-import safras                     from "./Menus/safras";
-import etapasCultura              from "./Menus/etapas-cultura";
-import unidadesMedida             from "./Menus/unidades-medidas";
-import plantio                    from "./Menus/plantio";
-import gestaoDeProjetosAgricolas  from "./Menus/gestao-projetos-agricolas";
-
+import Loadable from "react-loadable";
+import dashboard from "./Menus/dashboard";
+import empresas from "./Menus/empresas";
+import filiais from "./Menus/filiais";
+import modulos from "./Menus/modulos";
+import entidades from "./Menus/entidades";
+import usuarios from "./Menus/usuarios";
+import consultores from "./Menus/consultores";
+import clientes from "./Menus/clientes";
+import carteiraDeClientes from "./Menus/carteira-de-clientes";
+import gruposDeProdutos from "./Menus/grupos-produtos";
+import safras from "./Menus/safras";
+import etapasCultura from "./Menus/etapas-cultura";
+import unidadesMedida from "./Menus/unidades-medidas";
+import plantio from "./Menus/plantio";
+import gestaoDeProjetosAgricolas from "./Menus/gestao-projetos-agricolas";
 import tipoVendedores from "./Menus/tipo-de-vendedores";
 import agenteVendas from "./Menus/agente-de-vendas";
 import tipoGarantia from "./Menus/tipo-de-garantia";
@@ -24,6 +21,12 @@ import tipoVenda from "./Menus/tipo-de-vendas";
 import usoSemente from "./Menus/uso-da-semente";
 import formaPagamento from "./Menus/forma-de-pagamento";
 import tipoPagamento from "./Menus/tipo-de-pagamento";
+import tabelaPrecoCaracteristica from "./Menus/tabela-preco-caracteristica";
+import tabelaFrete from "./Menus/tabela-frete";
+import tabelaPreco from "./Menus/tabela-preco";
+import metas from "./Menus/metas";
+import cotas from "./Menus/cotas";
+import tabelaComissao from "./Menus/tabela-comissao";
 
 const loadable = loader =>
   Loadable({
@@ -45,21 +48,27 @@ const menus = {
     ...plantio,
     ...carteiraDeClientes,
     ...gestaoDeProjetosAgricolas,
-    ...caracteristicasProdutos,
     ...gruposDeProdutos,
-    ...produtos,
     ...safras,
     ...etapasCultura,
-    ...unidadesMedida,
+    ...unidadesMedida
+  },
+  sales: {
+    ...clientes,
     ...agenteVendas,
     ...tipoVendedores,
     ...tipoGarantia,
     ...tipoVenda,
     ...usoSemente,
     ...formaPagamento,
-    ...tipoPagamento
-  },
-  sales: {}
+    ...tipoPagamento,
+    ...tabelaPrecoCaracteristica,
+    ...tabelaFrete,
+    ...tabelaPreco,
+    ...tabelaComissao,
+    ...metas,
+    ...cotas
+  }
 };
 
 export { menus };

@@ -74,7 +74,7 @@ class PaymentForm extends Component {
     }
   };
 
-  removeRecord = async ({ _id, nome }) => {
+  removeRecord = async ({ _id, descricao }) => {
     try {
       await PaymentFormService.remove(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
@@ -83,7 +83,7 @@ class PaymentForm extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `A forma de pagamento, ${nome}, foi removido com sucesso!`);
+      flashWithSuccess("", `A forma de pagamento, ${descricao}, foi removido com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover uma forma de pagamento", err);
@@ -106,7 +106,9 @@ class PaymentForm extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/forma-de-pagamento/${record._id}/edit`}>
+            <Button
+              size="small"
+              onClick={() => this.props.history.push(`/forma-de-pagamento/${record._id}/edit`)}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
 
@@ -151,7 +153,10 @@ class PaymentForm extends Component {
     return (
       <div>
         <PainelHeader title="Forma de Pagamento">
-          <Button type="primary" icon="plus" href="/forma-de-pagamento/new">
+          <Button
+            type="primary"
+            icon="plus"
+            onClick={() => this.props.history.push("/forma-de-pagamento/new")}>
             Adicionar
           </Button>
         </PainelHeader>

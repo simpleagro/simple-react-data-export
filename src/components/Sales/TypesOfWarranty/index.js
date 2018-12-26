@@ -74,7 +74,7 @@ class WarrantyType extends Component {
     }
   };
 
-  removeRecord = async ({ _id, nome }) => {
+  removeRecord = async ({ _id, descricao }) => {
     try {
       await WarrantyTypeService.remove(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
@@ -83,7 +83,7 @@ class WarrantyType extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `O tipo de garantia, ${nome}, foi removido com sucesso!`);
+      flashWithSuccess("", `O tipo de garantia, ${descricao}, foi removido com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover um tipo de garantia", err);
@@ -106,7 +106,9 @@ class WarrantyType extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button size="small" href={`/tipo-de-garantia/${record._id}/edit`}>
+            <Button
+              size="small"
+              onClick={() => this.props.history.push(`/tipo-de-garantia/${record._id}/edit`)}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
 
@@ -151,7 +153,10 @@ class WarrantyType extends Component {
     return (
       <div>
         <PainelHeader title="Tipo de Garantia">
-          <Button type="primary" icon="plus" href="/tipo-de-garantia/new">
+          <Button
+            type="primary"
+            icon="plus"
+            onClick={() => this.props.history.push("/tipo-de-garantia/new")}>
             Adicionar
           </Button>
         </PainelHeader>

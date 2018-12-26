@@ -8,7 +8,6 @@ export const list = aqp => {
       params: aqp
     })
     .then(response => response.data)
-    .then(response => response.docs);
 };
 
 export const get = _id =>
