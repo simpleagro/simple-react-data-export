@@ -2,7 +2,7 @@ import React from 'react'
 import { Modal, Form, Button, Select } from 'antd';
 import * as GroupsServices from "../../../services/productgroups";
 import * as SeedUsesServices from "../../../services/seed-use";
-import * as TypesOfSalesServices from "../../../services/typesofsales";
+import * as TypesOfSalesServices from "../../../services/types-of-sale";
 
 const ModalForm = Form.create()(
     class extends React.Component {
