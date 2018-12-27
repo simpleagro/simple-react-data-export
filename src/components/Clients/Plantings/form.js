@@ -92,8 +92,9 @@ class ClientPlantingForm extends Component {
     }
 
     const gruposDeProdutos = await ProductGroupService.list({
-      fields: "nome,produtos"
-    });
+      fields: "nome,produtos",
+      limit: -1,
+    }).then(response => response.docs);
 
     const safras = await SeasonService.list({
       limit: 999999999999,
