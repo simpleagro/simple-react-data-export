@@ -46,6 +46,7 @@ class EntityForm extends Component {
   }
 
   handleFormState = event => {
+    if (!event.target.name) return;
     const form = Object.assign({}, this.state.formData, {
       [event.target.name]: event.target.value
     });

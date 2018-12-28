@@ -68,6 +68,7 @@ class AgentSalesForm extends Component {
   }
 
   handleFormState = event => {
+    if (!event.target.name) return;
     let form = Object.assign({}, this.state.formData, {
       [event.target.name]: event.target.value
     });
@@ -270,7 +271,6 @@ class AgentSalesForm extends Component {
 
           <Form.Item label="Complemento" {...formItemLayout}>
             {getFieldDecorator("complemento", {
-              rules: [{ required: true, message: "Este campo é obrigatório!"}],
               initialValue: this.state.formData.complemento
             })(<Input name="complemento" />)}
           </Form.Item>
