@@ -44,7 +44,10 @@ class AgentSalesForm extends Component {
 
     this.setState(prev => ({
       ...prev,
-      listAgentSales: dataAgentSales.docs
+      listAgentSales: [
+        { _id: null, nome: "Nenhuma opção" },
+        ...dataAgentSales.docs
+      ]
     }));
 
     if (id) {
@@ -54,6 +57,10 @@ class AgentSalesForm extends Component {
         this.setState(prev => ({
           ...prev,
           formData,
+          agentSaleId: id,
+          listAgentSales: this.state.listAgentSales.filter(
+            ag => ag._id !== id && (ag.agente_pai && ag.agente_pai.id !== id)
+          ),
           editMode: id ? true : false
         }));
     }
@@ -130,7 +137,7 @@ class AgentSalesForm extends Component {
               href={
                 this.props.location.state && this.props.location.state.returnTo
                   ? this.props.location.state.returnTo.pathname
-                  : "/agente-vendas"
+                  : "/agente-de-vendas"
               }>
               <Icon type="arrow-left" />
               Voltar para tela anterior
@@ -241,21 +248,20 @@ class AgentSalesForm extends Component {
                 style={{ width: 200 }}
                 placeholder="Selecione um Agente Pai"
                 onChange={e => {
+                  let obj = JSON.parse(e);
+                  if (!obj.id) obj = null;
                   this.handleFormState({
-                    target: { name: "agente_pai", value: JSON.parse(e) }
+                    target: { name: "agente_pai", value: obj }
                   });
                 }}>
                 {this.state.listAgentSales &&
-                  this.state.listAgentSales.map(
-                    ag =>
-                      !ag.agente_pai && (
-                        <Option
-                          key={ag._id}
-                          value={JSON.stringify({ id: ag._id, nome: ag.nome })}>
-                          {ag.nome}
-                        </Option>
-                      )
-                  )}
+                  this.state.listAgentSales.map(ag => (
+                    <Option
+                      key={ag._id}
+                      value={JSON.stringify({ id: ag._id, nome: ag.nome })}>
+                      {ag.nome}
+                    </Option>
+                  ))}
               </Select>
             )}
           </Form.Item>
