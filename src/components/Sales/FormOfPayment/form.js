@@ -1,13 +1,5 @@
 import React, { Component } from "react";
-import {
-  Breadcrumb,
-  Button,
-  Icon,
-  Input,
-  Form,
-  Select,
-  Affix
-} from "antd";
+import { Breadcrumb, Button, Icon, Input, Form, Select, Affix } from "antd";
 import styled from "styled-components";
 
 import { flashWithSuccess } from "../../common/FlashMessages";
@@ -40,7 +32,7 @@ class TypeForm extends Component {
 
     this.setState(prev => ({
       ...prev,
-      listType: dataType,
+      listType: dataType
     }));
 
     if (id) {
@@ -88,7 +80,10 @@ class TypeForm extends Component {
             this.props.history.push("/forma-de-pagamento/");
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao adicionar uma forma de pagamento", err);
+            console.log(
+              "Erro interno ao adicionar uma forma de pagamento",
+              err
+            );
             this.setState({ savingForm: false });
           }
         } else {
@@ -101,7 +96,10 @@ class TypeForm extends Component {
             else this.props.history.push("/forma-de-pagamento");
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao atualizar uma forma de pagamento ", err);
+            console.log(
+              "Erro interno ao atualizar uma forma de pagamento ",
+              err
+            );
             this.setState({ savingForm: false });
           }
         }
@@ -125,8 +123,7 @@ class TypeForm extends Component {
                 this.props.location.state && this.props.location.state.returnTo
                   ? this.props.location.state.returnTo.pathname
                   : "/forma-de-pagamento"
-              }
-            >
+              }>
               <Icon type="arrow-left" />
               Voltar para tela anterior
             </Button>
@@ -134,24 +131,32 @@ class TypeForm extends Component {
         </BreadcrumbStyled>
         <Affix offsetTop={65}>
           <PainelHeader
-            title={[ this.state.editMode ? "Editando" : "Novo", " Forma de Pagamento" ]}
-          >
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+            title={[
+              this.state.editMode ? "Editando" : "Novo",
+              " Forma de Pagamento"
+            ]}>
+            <Button
+              type="primary"
+              icon="save"
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
               Salvar Forma de Pagamento
             </Button>
           </PainelHeader>
         </Affix>
         <Form onChange={this.handleFormState}>
-
           <Form.Item label="Descrição" {...formItemLayout}>
             {getFieldDecorator("descricao", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.descricao
-            })(<Input name="descricao" ref={input => (this.titleInput = input)} />)}
+            })(
+              <Input
+                name="descricao"
+                ref={input => (this.titleInput = input)}
+              />
+            )}
           </Form.Item>
-
         </Form>
-
       </div>
     );
   }

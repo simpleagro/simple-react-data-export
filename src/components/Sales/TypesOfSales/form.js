@@ -136,7 +136,7 @@ class TypeForm extends Component {
           <PainelHeader
             title={[ this.state.editMode ? "Editando" : "Novo", " Tipo de Venda" ]}
           >
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+            <Button type="primary" icon="save" onClick={() => this.saveForm()} loading={this.state.savingForm}>
               Salvar Tipo de Venda
             </Button>
           </PainelHeader>
