@@ -61,6 +61,7 @@ class TypeForm extends Component {
   }
 
   handleFormState = event => {
+    if (!event.target.name) return;
     let form = Object.assign({}, this.state.formData, {
       [event.target.name]: event.target.value
     });
@@ -135,7 +136,7 @@ class TypeForm extends Component {
           <PainelHeader
             title={[ this.state.editMode ? "Editando" : "Novo", " Uso de Semente" ]}
           >
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+            <Button type="primary" icon="save" onClick={() => this.saveForm()} loading={this.state.savingForm}>
               Salvar Uso de Semente
             </Button>
           </PainelHeader>

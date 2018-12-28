@@ -74,7 +74,7 @@ class Companies extends Component {
     }
   };
 
-  removeRecord = async ({ _id, nome }) => {
+  removeRecord = async ({ _id, razao_social }) => {
     try {
       await CompanyService.remove(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
@@ -83,7 +83,7 @@ class Companies extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `A empresa, ${nome}, foi removido com sucesso!`);
+      flashWithSuccess("", `A empresa, ${razao_social}, foi removido com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover uma empresa", err);

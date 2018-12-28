@@ -1,13 +1,5 @@
 import React, { Component } from "react";
-import {
-  Breadcrumb,
-  Button,
-  Icon,
-  Input,
-  Form,
-  Select,
-  Affix
-} from "antd";
+import { Breadcrumb, Button, Icon, Input, Form, Select, Affix } from "antd";
 import styled from "styled-components";
 
 import { flashWithSuccess } from "../../../common/FlashMessages";
@@ -68,6 +60,7 @@ class PriceVariations extends Component {
   }
 
   handleFormState = event => {
+    if (!event.target.name) return;
     let form = Object.assign({}, this.state.formData, {
       [event.target.name]: event.target.value
     });
@@ -75,7 +68,6 @@ class PriceVariations extends Component {
   };
 
   saveForm = async e => {
-
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
@@ -95,7 +87,9 @@ class PriceVariations extends Component {
             });
             flashWithSuccess();
             this.props.history.push(
-              `/tabela-preco-caracteristica/${this.props.match.params.tabela_id}/variacao-de-preco`
+              `/tabela-preco-caracteristica/${
+                this.props.match.params.tabela_id
+              }/variacao-de-preco`
             );
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
@@ -104,12 +98,21 @@ class PriceVariations extends Component {
           }
         } else {
           try {
-            const updated = await PriceVariationsService.update(this.state.tabela_id)(this.state.formData);
+            const updated = await PriceVariationsService.update(
+              this.state.tabela_id
+            )(this.state.formData);
             flashWithSuccess();
-            this.props.history.push(`/tabela-preco-caracteristica/${this.props.match.params.tabela_id}/variacao-de-preco`);
+            this.props.history.push(
+              `/tabela-preco-caracteristica/${
+                this.props.match.params.tabela_id
+              }/variacao-de-preco`
+            );
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao atualizar uma variação de preço ", err);
+            console.log(
+              "Erro interno ao atualizar uma variação de preço ",
+              err
+            );
             this.setState({ savingForm: false });
           }
         }
@@ -117,17 +120,22 @@ class PriceVariations extends Component {
     });
   };
 
-  getProductGroupOption(){
+  getProductGroupOption() {
     let arr = [];
     this.state.listFeaturePriceTable &&
-      this.state.listFeaturePriceTable.map(fpt => (fpt._id === this.props.match.params.tabela_id &&
-        this.state.listProductGroup.map(pg => (pg._id === fpt.grupo_produto.id &&
-          pg.caracteristicas.map(caract => caract._id === fpt.caracteristica.id &&
-            (caract.opcoes.map(opc =>
-            arr.push( opc.label )
-          )))
-        ))
-      ))
+      this.state.listFeaturePriceTable.map(
+        fpt =>
+          fpt._id === this.props.match.params.tabela_id &&
+          this.state.listProductGroup.map(
+            pg =>
+              pg._id === fpt.grupo_produto.id &&
+              pg.caracteristicas.map(
+                caract =>
+                  caract._id === fpt.caracteristica.id &&
+                  caract.opcoes.map(opc => arr.push(opc.label))
+              )
+          )
+      );
     return arr;
   }
 
@@ -146,9 +154,10 @@ class PriceVariations extends Component {
               href={
                 this.props.location.state && this.props.location.state.returnTo
                   ? this.props.location.state.returnTo.pathname
-                  : `/tabela-preco-caracteristica/${this.state.tabela_id}/variacao-de-preco`
-              }
-            >
+                  : `/tabela-preco-caracteristica/${
+                      this.state.tabela_id
+                    }/variacao-de-preco`
+              }>
               <Icon type="arrow-left" />
               Voltar para tela anterior
             </Button>
@@ -156,74 +165,89 @@ class PriceVariations extends Component {
         </BreadcrumbStyled>
         <Affix offsetTop={65}>
           <PainelHeader
-            title={[ this.state.editMode ? "Editando" : "Nova", " Variação de Preço" ]}
-          >
-            <Button type="primary" icon="save" onClick={() => this.saveForm()} loading={this.state.savingForm}>
+            title={[
+              this.state.editMode ? "Editando" : "Nova",
+              " Variação de Preço"
+            ]}>
+            <Button
+              type="primary"
+              icon="save"
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
               Salvar Variação de Preço
             </Button>
           </PainelHeader>
         </Affix>
 
         <Form onChange={this.handleFormState}>
-
           <Form.Item label="Opção" {...formItemLayout}>
             {getFieldDecorator("opcao_chave", {
               rules: [{ required: true, message: "Este campo é obragatório!" }],
               initialValue: this.state.formData.opcao_chave
-            })(<Select
-                 name="opcao_chave"
-                 allowClear
-                 showAction={["focus", "click"]}
-                 showSearch
-                 style={{ width: 200 }}
-                 placeholder="Selecione uma opção..."
-                 onChange={e => {
-                   this.handleFormState({
-                     target: { name: "opcao_chave", value: e }
-                   });
-                 }}
-               >
-                  { this.getProductGroupOption().map(element => (<Option key={element} value={element}> {element} </Option>)) }
-               </Select>)}
+            })(
+              <Select
+                name="opcao_chave"
+                allowClear
+                showAction={["focus", "click"]}
+                showSearch
+                style={{ width: 200 }}
+                placeholder="Selecione uma opção..."
+                onChange={e => {
+                  this.handleFormState({
+                    target: { name: "opcao_chave", value: e }
+                  });
+                }}>
+                {this.getProductGroupOption().map(element => (
+                  <Option key={element} value={element}>
+                    {" "}
+                    {element}{" "}
+                  </Option>
+                ))}
+              </Select>
+            )}
           </Form.Item>
 
           <Form.Item label="Valor" {...formItemLayout}>
             {getFieldDecorator("valor", {
               rules: [{ required: true, message: "Este campo é obragatório!" }],
               initialValue: this.state.formData.valor
-            })(<Input
-                  name="valor"
-                  prefix="R$"
-                  ref={input => (this.titleInput = input)}
-                  style={{ width: 200 }}
-                />)}
+            })(
+              <Input
+                name="valor"
+                prefix="R$"
+                ref={input => (this.titleInput = input)}
+                style={{ width: 200 }}
+              />
+            )}
           </Form.Item>
 
           <Form.Item label="Unidade de Medida" {...formItemLayout}>
             {getFieldDecorator("u_m", {
               rules: [{ required: true, message: "Este campo é obragatório!" }],
               initialValue: this.state.formData.u_m
-            })(<Select
-                 name="u_m"
-                 allowClear
-                 showAction={["focus", "click"]}
-                 showSearch
-                 style={{ width: 200 }}
-                 placeholder="Selecione uma unidade de medida..."
-                 onChange={e => {
-                   this.handleFormState({
-                     target: { name: "u_m", value: e}
-                   })
-                 }}
-               >
-                 {
-                   this.state.listUnit && this.state.listUnit.map(unit => (<Option key={unit._id} value={unit.sigla}>{unit.nome}</Option>))
-                 }
-               </Select>)}
+            })(
+              <Select
+                name="u_m"
+                allowClear
+                showAction={["focus", "click"]}
+                showSearch
+                style={{ width: 200 }}
+                placeholder="Selecione uma unidade de medida..."
+                onChange={e => {
+                  this.handleFormState({
+                    target: { name: "u_m", value: e }
+                  });
+                }}>
+                {this.state.listUnit &&
+                  this.state.listUnit.map(unit => (
+                    <Option key={unit._id} value={unit.sigla}>
+                      {unit.nome}
+                    </Option>
+                  ))}
+              </Select>
+            )}
           </Form.Item>
-
         </Form>
-
       </div>
     );
   }

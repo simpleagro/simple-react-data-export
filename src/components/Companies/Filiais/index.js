@@ -95,7 +95,7 @@ class Filiais extends Component {
     }
   };
 
-  removeRecord = async ({ _id, nome }) => {
+  removeRecord = async ({ _id, razao_social }) => {
     try {
       await CompaniesBranchService.remove(this.state.company_id)(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
@@ -104,7 +104,7 @@ class Filiais extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `A filial, ${nome}, foi removida com sucesso!`);
+      flashWithSuccess("", `A filial, ${razao_social}, foi removida com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover uma filial", err);
