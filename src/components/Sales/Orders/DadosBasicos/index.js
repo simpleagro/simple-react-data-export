@@ -1,14 +1,15 @@
 import React, { Component } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Divider, Button, Icon, Popconfirm, Tooltip } from "antd";
+import moment from "moment";
 
-import * as CompanyService from "../../../services/companies";
-import SimpleTable from "../../common/SimpleTable";
-import { flashWithSuccess } from "../../common/FlashMessages";
-import parseErrors from "../../../lib/parseErrors";
-import { PainelHeader } from "../../common/PainelHeader";
+import { simpleTableSearch } from "../../../../lib/simpleTableSearch";
+import * as OrderService from "../../../../services/orders";
+import SimpleTable from "../../../common/SimpleTable";
+import { flashWithSuccess } from "../../../common/FlashMessages";
+import parseErrors from "../../../../lib/parseErrors";
+import { PainelHeader } from "../../../common/PainelHeader";
 
-class Companies extends Component {
+class Orders extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -27,7 +28,7 @@ class Companies extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await CompanyService.list(aqp);
+    const data = await OrderService.list(aqp);
 
     this.setState(prev => ({
       ...prev,
@@ -45,14 +46,14 @@ class Companies extends Component {
 
   changeStatus = async (id, newStatus) => {
     try {
-      await CompanyService.changeStatus(id, newStatus);
+      await OrderService.changeStatus(id, newStatus);
 
       let recordName = "";
 
       let _list = this.state.list.map(item => {
         if (item._id === id) {
           item.status = newStatus;
-          recordName = item.razao_social;
+          recordName = item.numero;
         }
         return item;
       });
@@ -64,76 +65,87 @@ class Companies extends Component {
 
       flashWithSuccess(
         "",
-        `A empresa, ${recordName}, foi ${
+        `O pedido, ${recordName}, foi ${
           newStatus ? "ativado" : "bloqueado"
         } com sucesso!`
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao mudar status da empresa", err);
+      console.log("Erro interno ao mudar status do pedido", err);
     }
   };
 
-  removeRecord = async ({ _id, razao_social }) => {
+  removeRecord = async ({ _id, numero }) => {
     try {
-      await CompanyService.remove(_id);
+      await OrderService.remove(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
 
       this.setState({
         list: _list
       });
 
-      flashWithSuccess("", `A empresa, ${razao_social}, foi removido com sucesso!`);
+      flashWithSuccess("", `O pedido, #${numero}, foi removido com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover uma empresa", err);
+      console.log("Erro interno ao remover um pedido", err);
     }
   };
 
   tableConfig = () => [
     {
-      title: "Razao Social",
-      dataIndex: "razao_social",
-      key: "razao_social",
+      title: "Número",
+      dataIndex: "numero",
+      key: "numero",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
+      },
+      ...simpleTableSearch(this)("numero")
     },
     {
-      title: "Nome Fantasia",
-      dataIndex: "nome_fantasia",
-      key: "nome_fantasia",
-      render: text => text
+      title: "Cliente",
+      dataIndex: "cliente.nome",
+      key: "cliente.nome",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      },
+      ...simpleTableSearch(this)("cliente.nome")
     },
     {
-      title: "CNPJ",
-      dataIndex: "cpf_cnpj",
-      key: "cpf_cnpj",
-      render: text => text
+      title: "Propriedade",
+      dataIndex: "propriedade.nome",
+      key: "propriedade.nome",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      },
+      render: (text, record) => `${text} / IE: ${record.propriedade.ie}`,
+      ...simpleTableSearch(this)("propriedade.nome")
     },
     {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (text, record) => {
-        const statusTxt = record.status ? "desativar" : "ativar";
-        const statusBtn = record.status ? "unlock" : "lock";
-        return (
-          <Popconfirm
-            title={`Tem certeza em ${statusTxt} a empresa?`}
-            onConfirm={e => this.changeStatus(record._id, !record.status)}
-            okText="Sim"
-            cancelText="Não"
-          >
-            <Tooltip title={`${statusTxt.toUpperCase()} a empresa`}>
-              <Button size="small">
-                <FontAwesomeIcon icon={statusBtn} size="lg" />
-              </Button>
-            </Tooltip>
-          </Popconfirm>
-        );
-      }
+      title: "Safra",
+      dataIndex: "safra.descricao",
+      key: "safra.descricao",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      },
+      ...simpleTableSearch(this)("safra.descricao")
+    },
+    {
+      title: "Data do Pedido",
+      dataIndex: "created_at",
+      key: "created_at",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      },
+      render: text => (text ? moment(text).format("DD/MM/YYYY") : ""),
+      ...simpleTableSearch(this)("created_at", {
+        tooltip: { title: "Utilize dd/mm/yyyy" },
+        useRegex: false
+      })
     },
     {
       title: "Ações",
@@ -144,41 +156,26 @@ class Companies extends Component {
             <Button
               size="small"
               onClick={() =>
-                this.props.history.push(`/empresas/${record._id}/edit`)
-              }
-            >
+                this.props.history.push(`/pedidos/${record._id}/edit`)
+              }>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
+
             <Divider
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
 
             <Popconfirm
-              title={`Tem certeza em excluir a empresa?`}
+              title={`Tem certeza em excluir este pedido?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
-              cancelText="Não"
-            >
+              cancelText="Não">
               <Button size="small">
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
             </Popconfirm>
-            <Divider
-              style={{ fontSize: "10px", padding: 0, margin: 2 }}
-              type="vertical"
-            />
 
-            <Tooltip title="Veja as filiais da empresa">
-              <Button
-                size="small"
-                onClick={() =>
-                  this.props.history.push(`/empresas/${record._id}/filiais`)
-                }
-              >
-                <FontAwesomeIcon icon="book" size="lg" />
-              </Button>
-            </Tooltip>
             <Divider
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
@@ -189,7 +186,7 @@ class Companies extends Component {
     }
   ];
 
-  handleTableChange = (pagination, filter, sorter) => {
+  handleTableChange = (pagination, filters, sorter) => {
     const pager = { ...this.state.pagination };
     pager.current = pagination.current;
     this.setState({
@@ -197,19 +194,20 @@ class Companies extends Component {
     });
     this.initializeList({
       page: pagination.current,
-      limit: pagination.pageSize
+      limit: pagination.pageSize,
+      ...filters,
+      ...this.state.tableSearch
     });
   };
 
   render() {
     return (
       <div>
-        <PainelHeader title="Empresas">
+        <PainelHeader title="Pedidos">
           <Button
             type="primary"
             icon="plus"
-            onClick={() => this.props.history.push("/empresas/new")}
-          >
+            onClick={() => this.props.history.push("/pedidos/new")}>
             Adicionar
           </Button>
         </PainelHeader>
@@ -226,4 +224,4 @@ class Companies extends Component {
   }
 }
 
-export default Companies;
+export default Orders;

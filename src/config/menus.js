@@ -27,6 +27,7 @@ import tabelaPreco from "./Menus/tabela-preco";
 import metas from "./Menus/metas";
 import cotas from "./Menus/cotas";
 import tabelaComissao from "./Menus/tabela-comissao";
+import pedidos from "./Menus/pedidos";
 import inscricaoCampo from "./Menus/inscricao-de-campo";
 
 const loadable = loader =>
@@ -69,7 +70,8 @@ const menus = {
     ...tabelaPreco,
     ...tabelaComissao,
     ...metas,
-    ...cotas
+    ...cotas,
+    ...pedidos
   }
 };
 

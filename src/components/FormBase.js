@@ -12,6 +12,7 @@ export default class Form extends Component {
     }
 
     handleChange(event) {
+      if (!event.target.name) return;
         let form = Object.assign({}, this.state, { [event.target.name]: event.target.value });
         this.setState(form);
     }

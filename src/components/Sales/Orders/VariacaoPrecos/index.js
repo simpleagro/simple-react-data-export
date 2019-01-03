@@ -1,19 +1,23 @@
 import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Divider, Button, Icon, Popconfirm, Tooltip } from "antd";
+import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
 
-import * as CompanyService from "../../../services/companies";
-import SimpleTable from "../../common/SimpleTable";
-import { flashWithSuccess } from "../../common/FlashMessages";
-import parseErrors from "../../../lib/parseErrors";
-import { PainelHeader } from "../../common/PainelHeader";
+import * as FeatureTablePricesService from "../../../../services/feature-table-prices";
+import * as PriceVariationsService from "../../../../services/feature-table-prices.price-variations";
+import SimpleTable from "../../../common/SimpleTable";
+import { flashWithSuccess } from "../../../common/FlashMessages";
+import parseErrors from "../../../../lib/parseErrors";
+import { PainelHeader } from "../../../common/PainelHeader";
+import { simpleTableSearch } from "../../../../lib/simpleTableSearch";
 
-class Companies extends Component {
+class PriceVariation extends Component {
   constructor(props) {
     super(props);
     this.state = {
       list: [],
       loadingData: true,
+      tabela_id: this.props.match.params.tabela_id,
+      tabela_data: {},
       pagination: {
         showSizeChanger: true,
         defaultPageSize: 10,
@@ -27,11 +31,13 @@ class Companies extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await CompanyService.list(aqp);
+    const data = await PriceVariationsService.list(this.state.tabela_id)(aqp);
+    const dataFTP = await FeatureTablePricesService.list();
 
     this.setState(prev => ({
       ...prev,
       list: data.docs,
+      listFTP: dataFTP.docs,
       loadingData: false,
       pagination: {
         total: data.total
@@ -45,14 +51,14 @@ class Companies extends Component {
 
   changeStatus = async (id, newStatus) => {
     try {
-      await CompanyService.changeStatus(id, newStatus);
+      await PriceVariationsService.changeStatus(id, newStatus);
 
       let recordName = "";
 
       let _list = this.state.list.map(item => {
         if (item._id === id) {
           item.status = newStatus;
-          recordName = item.razao_social;
+          recordName = item.nome;
         }
         return item;
       });
@@ -64,76 +70,55 @@ class Companies extends Component {
 
       flashWithSuccess(
         "",
-        `A empresa, ${recordName}, foi ${
+        `A variação de preço, ${recordName}, foi ${
           newStatus ? "ativado" : "bloqueado"
         } com sucesso!`
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao mudar status da empresa", err);
+      console.log("Erro interno ao mudar status da variação de preço", err);
     }
   };
 
-  removeRecord = async ({ _id, razao_social }) => {
+  removeRecord = async ({ _id, opcao_chave }) => {
     try {
-      await CompanyService.remove(_id);
+      await PriceVariationsService.remove(this.state.tabela_id)(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
 
       this.setState({
         list: _list
       });
 
-      flashWithSuccess("", `A empresa, ${razao_social}, foi removido com sucesso!`);
+      flashWithSuccess("", `A variação de preço, ${opcao_chave}, foi removido com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover uma empresa", err);
+      console.log("Erro interno ao remover uma variação de preço", err);
     }
   };
 
   tableConfig = () => [
     {
-      title: "Razao Social",
-      dataIndex: "razao_social",
-      key: "razao_social",
+      title: "Opção",
+      dataIndex: "opcao_chave",
+      key: "precos.opcao_chave",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
-    },
-    {
-      title: "Nome Fantasia",
-      dataIndex: "nome_fantasia",
-      key: "nome_fantasia",
+      },
+      ...simpleTableSearch(this)('precos.opcao_chave'),
       render: text => text
     },
     {
-      title: "CNPJ",
-      dataIndex: "cpf_cnpj",
-      key: "cpf_cnpj",
-      render: text => text
+      title: "Valor",
+      dataIndex: "valor",
+      key: "precos.valor",
+      ...simpleTableSearch(this)('precos.valor')
     },
     {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (text, record) => {
-        const statusTxt = record.status ? "desativar" : "ativar";
-        const statusBtn = record.status ? "unlock" : "lock";
-        return (
-          <Popconfirm
-            title={`Tem certeza em ${statusTxt} a empresa?`}
-            onConfirm={e => this.changeStatus(record._id, !record.status)}
-            okText="Sim"
-            cancelText="Não"
-          >
-            <Tooltip title={`${statusTxt.toUpperCase()} a empresa`}>
-              <Button size="small">
-                <FontAwesomeIcon icon={statusBtn} size="lg" />
-              </Button>
-            </Tooltip>
-          </Popconfirm>
-        );
-      }
+      title: "Unidade de Medida",
+      dataIndex: "u_m",
+      key: "precos.u_m",
+      ...simpleTableSearch(this)('precos.u_m')
     },
     {
       title: "Ações",
@@ -143,19 +128,17 @@ class Companies extends Component {
           <span>
             <Button
               size="small"
-              onClick={() =>
-                this.props.history.push(`/empresas/${record._id}/edit`)
-              }
-            >
+              onClick={() => this.props.history.push(`/tabela-preco-caracteristica/${this.state.tabela_id}/variacao-de-preco/${record._id}/edit`)}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
+
             <Divider
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
 
             <Popconfirm
-              title={`Tem certeza em excluir a empresa?`}
+              title={`Tem certeza em excluir a variação de preço?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
               cancelText="Não"
@@ -164,21 +147,6 @@ class Companies extends Component {
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
             </Popconfirm>
-            <Divider
-              style={{ fontSize: "10px", padding: 0, margin: 2 }}
-              type="vertical"
-            />
-
-            <Tooltip title="Veja as filiais da empresa">
-              <Button
-                size="small"
-                onClick={() =>
-                  this.props.history.push(`/empresas/${record._id}/filiais`)
-                }
-              >
-                <FontAwesomeIcon icon="book" size="lg" />
-              </Button>
-            </Tooltip>
             <Divider
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
@@ -204,12 +172,11 @@ class Companies extends Component {
   render() {
     return (
       <div>
-        <PainelHeader title="Empresas">
+        <PainelHeader title="Variação de Preço">
           <Button
             type="primary"
             icon="plus"
-            onClick={() => this.props.history.push("/empresas/new")}
-          >
+            onClick={() => this.props.history.push("/tabela-preco-caracteristica/"+ this.state.tabela_id +"/variacao-de-preco/new")}>
             Adicionar
           </Button>
         </PainelHeader>
@@ -221,9 +188,10 @@ class Companies extends Component {
           dataSource={this.state.list}
           onChange={this.handleTableChange}
         />
+
       </div>
     );
   }
 }
 
-export default Companies;
+export default PriceVariation;

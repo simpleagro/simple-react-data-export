@@ -1,8 +1,11 @@
 import React from "react";
-import { Popover, Input, Button, Icon } from "antd";
+import { Popover, Input, Button, Icon, Tooltip } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-export const simpleTableSearch = self => field => {
+export const simpleTableSearch = self => (
+  field,
+  options = { useRegex: true, tooltip: { title: "" } }
+) => {
   const helpContent = (
     <div>
       <p>
@@ -63,34 +66,40 @@ export const simpleTableSearch = self => field => {
     }) => {
       return (
         <div className="custom-filter-dropdown">
-          <Input
-            ref={ele => (this["searchInput" + field] = ele)}
-            name={field}
-            style={{ width: 200 }}
-            value={selectedKeys}
-            onChange={e => {
-              const val = e.target.value;
-              setSelectedKeys(val ? val : "");
-              self.setState(prev => ({
-                ...prev,
-                tableSearch: {
-                  ...prev.tableSearch,
-                  [field]: `/${val}/i`
-                }
-              }));
-            }}
-            onPressEnter={() => {
+          <Tooltip
+            trigger={["focus"]}
+            title={options.tooltip ? options.tooltip.title : ""}
+            placement="topLeft"
+            overlayClassName="numeric-input">
+            <Input
+              ref={ele => (this["searchInput" + field] = ele)}
+              name={field}
+              style={{ width: 200 }}
+              value={selectedKeys}
+              onChange={e => {
+                const val = e.target.value;
+                setSelectedKeys(val ? val : "");
+                self.setState(prev => ({
+                  ...prev,
+                  tableSearch: {
+                    ...prev.tableSearch,
+                    [field]: options.useRegex ? `/${val}/i` : `${val}`
+                  }
+                }));
+              }}
+              onPressEnter={() => {
+                confirm();
+                // self.setState(prev => ({
+                //   ...prev,
+                //   tableSearch: {
+                //     ...prev.tableSearch,
+                //     [field]: `${val}`
+                //   }
+                // }));
+              }}
+            />
+          </Tooltip>
 
-              confirm();
-              // self.setState(prev => ({
-              //   ...prev,
-              //   tableSearch: {
-              //     ...prev.tableSearch,
-              //     [field]: `${val}`
-              //   }
-              // }));
-            }}
-          />
           <Button
             type="primary"
             onClick={() => {
@@ -108,9 +117,12 @@ export const simpleTableSearch = self => field => {
           <Button
             onClick={() => {
               clearFilters();
+              let { tableSearch } = self.state;
+              if(tableSearch && tableSearch[field])
+                delete tableSearch[field];
               self.setState(prev => ({
                 ...prev,
-                tableSearch: { ...prev.tableSearch, [field]: "" }
+                tableSearch
               }));
             }}>
             Limpar

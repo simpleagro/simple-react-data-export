@@ -42,6 +42,7 @@ class GroupForm extends Component {
   }
 
   handleFormState = event => {
+    if (!event.target.name) return;
     let form = Object.assign({}, this.state.formData, {
       [event.target.name]: event.target.value
     });
@@ -122,7 +123,7 @@ class GroupForm extends Component {
       }
     }));
   };
-  
+
 
   changeStatusFields = async (id, newStatus, chave) => {
     try {
@@ -205,7 +206,7 @@ class GroupForm extends Component {
       });
     }
   }
-  
+
   showModal = (record) => {
     this.setState({
       visible: true,
@@ -235,7 +236,7 @@ class GroupForm extends Component {
           editarField: false
         })
       }
-      
+
       return( {
         visible: false,
         formData: {...prev.formData, fields: [item]},
@@ -257,7 +258,7 @@ class GroupForm extends Component {
           editarField: false
         })
       }
-      
+
       return( {
         visibleRegraPreco: false,
         formData: {...prev.formData, preco_base_regra: [item]},

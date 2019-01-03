@@ -126,7 +126,6 @@ class CustomerWalletForm extends Component {
             !c.cargo.includes("CONSULTOR")
         )
       ),
-      loadingForm: true,
       loadingForm: false
     }));
 
@@ -136,6 +135,7 @@ class CustomerWalletForm extends Component {
   }
 
   handleFormState = event => {
+    if (!event.target.name) return;
     let form = Object.assign({}, this.state.formData, {
       [event.target.name]: event.target.value
     });
@@ -452,13 +452,10 @@ class CustomerWalletForm extends Component {
       formData: { ...prev.formData, clientes }
     }));
 
-    setTimeout(() => {
-      console.log(">>>>>", this.state);
-    }, 1000);
   }
 
   searchClient = async value => {
-    console.log("fetching client", value);
+
     this.lastFetchClientId += 1;
     const fetchId = this.lastFetchClientId;
     this.setState({ clients: [], fetchingClients: true });
