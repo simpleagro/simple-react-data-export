@@ -49,7 +49,7 @@ class FeaturePriceTable extends Component {
       ...prev,
       listType: dataType.docs,
       listSeasons: dataSeasons.docs,
-      listProductGroup: dataProductGroup
+      listProductGroup: dataProductGroup.docs
     }));
 
     if (id) {
@@ -301,12 +301,6 @@ class FeaturePriceTable extends Component {
                       : null )}
                </Select>)}
           </Form.Item>
-
-          {[
-            console.clear(),
-            console.log("state: ",this.state),
-            console.log("props: ",this.props)
-          ]}
 
         </Form>
 
