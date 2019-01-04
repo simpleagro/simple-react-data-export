@@ -38,3 +38,12 @@ export const addMaskReais = number => {
   }
   return number
 }
+
+export const formatDate = data => {
+  const novaData = new Date(data);
+  return `${zeroEsquerda(novaData.getDate())}/${zeroEsquerda(novaData.getMonth() +1)}/${novaData.getFullYear()}`;
+};
+
+const zeroEsquerda = (data) => {
+  return (data < 10 ? '0' : '') + data
+}

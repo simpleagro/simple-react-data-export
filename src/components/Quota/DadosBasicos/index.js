@@ -8,6 +8,7 @@ import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
 import ModalForm from "./modal"
+import { formatDate } from '../../common/utils'
 
 class Quota extends Component {
   constructor(props) {
@@ -130,13 +131,24 @@ class Quota extends Component {
       }
     },
     {
+      title: "Safra",
+      dataIndex: "safra",
+      key: "safra",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      },
+      render: (text) => text.descricao
+    },
+    {
       title: "Validade de",
       dataIndex: "data_validade_de",
       key: "data_validade_de",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
+      },
+      render: (text) => text ? formatDate(text) : ''
     },
     {
       title: "Validade até",
@@ -145,7 +157,8 @@ class Quota extends Component {
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
+      },
+      render: (text) => text ? formatDate(text) : ''
     },
     {
       title: "Versão",

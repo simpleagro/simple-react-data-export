@@ -24,6 +24,14 @@ const menus = {
     key: "/tabela-comissao/regras/grupos-produto/produtos",
     path: "/tabela-comissao/:comissiontable_id/regras/:rule_id/grupos-produto/:productgroup_id/produtos",
     showMenu: false
+  },
+  "/tabela-comissao/:comissiontable_id/regras/:rule_id/grupos-produto/:productgroup_id/produtos/:product_id/variacoes": {
+    component: SimpleLoadable(() =>
+      import("../../components/ComissionTable/Variations")
+    ),
+    key: "/tabela-comissao/regras/grupos-produto/produtos/variacoes",
+    path: "/tabela-comissao/:comissiontable_id/regras/:rule_id/grupos-produto/:productgroup_id/produtos/:product_id/variacoes",
+    showMenu: false
   }
 };
 

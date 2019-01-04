@@ -130,6 +130,16 @@ class Target extends Component {
       }
     },
     {
+      title: "Safra",
+      dataIndex: "safra",
+      key: "safra",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      },
+      render: (text) => text.descricao
+    },
+    {
       title: "Versão",
       dataIndex: "versao",
       key: "versao",

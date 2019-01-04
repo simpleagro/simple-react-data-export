@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import {
-  Breadcrumb,
   Button,
   Icon,
   Input,
@@ -9,8 +8,8 @@ import {
   Affix,
   Spin
 } from "antd";
-import styled from "styled-components";
 
+import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
@@ -18,13 +17,6 @@ import * as AgentSalesService from "../../../services/sales-agents";
 import * as IBGEService from "../../../services/ibge";
 
 const Option = Select.Option;
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 class AgentSalesForm extends Component {
   constructor(props) {
@@ -131,19 +123,14 @@ class AgentSalesForm extends Component {
 
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : "/agente-de-vendas"
-              }>
-              <Icon type="arrow-left" />
-              Voltar para tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={
+            this.props.location.state && this.props.location.state.returnTo
+              ? this.props.location.state.returnTo.pathname
+              : "/agente-de-vendas"
+          }
+          history={this.props.history}
+        />
         <Affix offsetTop={65}>
           <PainelHeader
             title={[

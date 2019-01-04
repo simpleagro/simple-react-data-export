@@ -12,7 +12,7 @@ import {
 } from "antd";
 import { withRouter } from "react-router-dom";
 
-import * as ProductsService from "../../../services/quotas.products";
+import * as ProductsService from "../../../services/comissiontable.products";
 import * as ComissionRulesService from "../../../services/comissiontable.rules";
 import SimpleTable from "../../common/SimpleTable";
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
@@ -139,24 +139,6 @@ class ProductsQuota extends Component {
       }
     },
     {
-      title: "Valor Cota",
-      dataIndex: "cota_valor",
-      key: "cota_valor",
-      sorter: (a, b, sorter) => {
-        if (sorter === "ascendent") return -1;
-        else return 1;
-      }
-    },
-    {
-      title: "UM",
-      dataIndex: "cota_um",
-      key: "cota_um",
-      sorter: (a, b, sorter) => {
-        if (sorter === "ascendent") return -1;
-        else return 1;
-      }
-    },
-    {
       title: "Status",
       dataIndex: "status",
       key: "status",
@@ -206,11 +188,11 @@ class ProductsQuota extends Component {
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             /> 
-            <Tooltip title="Veja as variações da cota">
+            <Tooltip title="Veja as variações da comissão">
               <Button
                 size="small"
                 onClick={() =>
-                  this.props.history.push(`/cotas/${this.state.comissiontable_id}/vendedores/${this.state.rule_id}/grupos-produto/${this.state.productgroup_id}/produtos/${record.id}/variacoes`) 
+                  this.props.history.push(`/tabela-comissao/${this.state.comissiontable_id}/regras/${this.state.rule_id}/grupos-produto/${this.state.productgroup_id}/produtos/${record.id}/variacoes`) 
                 }
               >
                 <FontAwesomeIcon icon="chart-pie" size="lg" />

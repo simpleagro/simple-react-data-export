@@ -6,7 +6,6 @@ import * as FieldRegistrationService from "../../../services/field-registration"
 import SimpleTable from "../../common/SimpleTable";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
-import { simpleTableSearch } from "../../../lib/simpleTableSearch";
 import { PainelHeader } from "../../common/PainelHeader";
 
 class FieldRegistration extends Component {

@@ -37,6 +37,8 @@ const ModalForm = Form.create()(
           <Modal
             visible={visible}
             title="Add Opção"
+            onCancel={onCancel}
+            maskClosable={false}
             footer={[
               <Button key="back" onClick={onCancel}>Cancelar</Button>,
               <Button key="submit" type="primary" onClick={() => this.onSalve()}>

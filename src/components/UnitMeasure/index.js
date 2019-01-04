@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
+import { Divider, Button, Icon, Popconfirm } from "antd";
 
 import * as UnitMeasureService from "../../services/units-measures";
 import SimpleTable from "../common/SimpleTable";
