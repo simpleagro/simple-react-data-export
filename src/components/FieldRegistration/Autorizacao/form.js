@@ -228,7 +228,7 @@ class AuthorizationForm extends Component {
               />)}
           </Form.Item>
 
-          <Form.Item label="responsavel" {...formItemLayout}>
+          <Form.Item label="Responsável" {...formItemLayout}>
             {getFieldDecorator("responsavel", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.responsavel

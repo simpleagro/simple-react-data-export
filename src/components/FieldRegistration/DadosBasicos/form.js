@@ -41,7 +41,10 @@ class FieldRegistrationForm extends Component {
       listSeason: dataSeason.docs,
       formData: {
         ...prev.formData,
-        responsavel: JSON.parse(localStorage.getItem("simpleagro_painel")).painelState.userData.user.nome,
+        responsavel: {
+          nome: JSON.parse(localStorage.getItem("simpleagro_painel")).painelState.userData.user.nome,
+          id: JSON.parse(localStorage.getItem("simpleagro_painel")).painelState.userData.user._id
+        },
         geolocalizacao: {
           latitude: null,
           longitude: null
@@ -167,6 +170,19 @@ class FieldRegistrationForm extends Component {
     });
   };
 
+  async setGeolocalization(cod){
+    this.setState(prev => ({
+      formData: {
+        ...prev.formData,
+        geolocalizacao: {
+          latitude: "11111",
+          longitude: "11111"
+        }
+      }
+    }))
+    console.log("cod: ", cod)
+  }
+
   render() {
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
@@ -245,7 +261,7 @@ class FieldRegistrationForm extends Component {
                   onChange={e => {
                     this.handleFormState({
                       target: { name: "propriedade", value: JSON.parse(e) }
-                    })
+                    }); this.setGeolocalization(this.state.formData.propriedade);
                   }}
                 >
                   {this.state.formData.cliente && this.state.listClient.map(client => (
@@ -279,7 +295,7 @@ class FieldRegistrationForm extends Component {
           <Form.Item label="Safra" {...formItemLayout}>
             {getFieldDecorator("safra", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.safra
+              initialValue: this.state.formData.safra && this.state.formData.safra.descricao
             })(<Select
                 name="safra"
                 showAction={["focus", "click"]}
@@ -536,11 +552,13 @@ class FieldRegistrationForm extends Component {
           <Form.Item label="Responsável" {...formItemLayout}>
             {getFieldDecorator("responsavel", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.responsavel
+              initialValue: this.state.formData.responsavel && this.state.formData.responsavel.nome
             })(<Input name="responsavel" disabled />)}
           </Form.Item>
 
         </Form>
+
+        { console.log(this.state) }
 
       </div>
     );

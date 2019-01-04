@@ -117,17 +117,6 @@ class PreHarvest extends Component {
 
   tableConfig = () => [
     {
-      title: "Responsável",
-      dataIndex: "responsavel.nome",
-      key: "pre-colheita.responsavel.nome",
-      sorter: (a, b, sorter) => {
-        if (sorter === "ascendent") return -1;
-        else return 1;
-      },
-      ...simpleTableSearch(this)("pre-colheita.responsavel.nome"),
-      render: text => text
-    },
-    {
       title: "Talhão",
       dataIndex: "nome_talhao",
       key: "pre-colheita.nome_talhao",
