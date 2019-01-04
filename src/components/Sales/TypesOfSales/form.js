@@ -1,28 +1,13 @@
 import React, { Component } from "react";
-import {
-  Breadcrumb,
-  Button,
-  Icon,
-  Input,
-  Form,
-  Select,
-  Affix
-} from "antd";
-import styled from "styled-components";
+import { Breadcrumb, Button, Icon, Input, Form, Select, Affix } from "antd";
 
+import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
 import * as SalesTypeService from "../../../services/types-of-sale";
 
 const Option = Select.Option;
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 class TypeForm extends Component {
   constructor(props) {
@@ -40,7 +25,7 @@ class TypeForm extends Component {
 
     this.setState(prev => ({
       ...prev,
-      listType: dataType,
+      listType: dataType
     }));
 
     if (id) {
@@ -118,40 +103,42 @@ class TypeForm extends Component {
 
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : "/tipo-venda"
-              }
-            >
-              <Icon type="arrow-left" />
-              Voltar para tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={
+            this.props.location.state && this.props.location.state.returnTo
+              ? this.props.location.state.returnTo.pathname
+              : "/tipo-venda"
+          }
+          history={this.props.history}
+        />
         <Affix offsetTop={65}>
           <PainelHeader
-            title={[ this.state.editMode ? "Editando" : "Novo", " Tipo de Venda" ]}
-          >
-            <Button type="primary" icon="save" onClick={() => this.saveForm()} loading={this.state.savingForm}>
+            title={[
+              this.state.editMode ? "Editando" : "Novo",
+              " Tipo de Venda"
+            ]}>
+            <Button
+              type="primary"
+              icon="save"
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
               Salvar Tipo de Venda
             </Button>
           </PainelHeader>
         </Affix>
         <Form onChange={this.handleFormState}>
-
           <Form.Item label="Descrição" {...formItemLayout}>
             {getFieldDecorator("descricao", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.descricao
-            })(<Input name="descricao" ref={input => (this.titleInput = input)} />)}
+            })(
+              <Input
+                name="descricao"
+                ref={input => (this.titleInput = input)}
+              />
+            )}
           </Form.Item>
-
         </Form>
-
       </div>
     );
   }

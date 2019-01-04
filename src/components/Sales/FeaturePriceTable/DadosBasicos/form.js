@@ -1,8 +1,6 @@
 import React, { Component } from "react";
 import {
-  Breadcrumb,
   Button,
-  Icon,
   Input,
   Form,
   Select,
@@ -10,9 +8,9 @@ import {
   InputNumber,
   DatePicker
 } from "antd";
-import styled from "styled-components";
 import moment from "moment";
 
+import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
 import { flashWithSuccess } from "../../../common/FlashMessages";
 import parseErrors from "../../../../lib/parseErrors";
 import { PainelHeader } from "../../../common/PainelHeader";
@@ -21,13 +19,6 @@ import * as ProductGroupService from "../../../../services/productgroups";
 import * as SeasonsService from "../../../../services/seasons";
 
 const Option = Select.Option;
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 class FeaturePriceTable extends Component {
   constructor(props) {
@@ -59,7 +50,7 @@ class FeaturePriceTable extends Component {
         this.setState(prev => ({
           ...prev,
           formData,
-          editMode: id ? true : false,
+          editMode: id ? true : false
         }));
     }
 
@@ -76,7 +67,7 @@ class FeaturePriceTable extends Component {
     this.setState(prev => ({ ...prev, formData: form }));
   };
 
-  setCaracteristicaId = e =>{
+  setCaracteristicaId = e => {
     this.setState({
       id_caracteristica: JSON.parse(e).id
     });
@@ -144,19 +135,14 @@ class FeaturePriceTable extends Component {
 
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : "/tabela-preco-caracteristica"
-              }>
-              <Icon type="arrow-left" />
-              Voltar para tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={
+            this.props.location.state && this.props.location.state.returnTo
+              ? this.props.location.state.returnTo.pathname
+              : "/tabela-preco-caracteristica"
+          }
+          history={this.props.history}
+        />
         <Affix offsetTop={65}>
           <PainelHeader
             title={[
@@ -334,7 +320,8 @@ class FeaturePriceTable extends Component {
                 {this.state.id_caracteristica &&
                   this.state.listProductGroup.map(
                     pg =>
-                      pg._id === this.state.id_caracteristica
+                      pg._id === this.state.id_caracteristica &&
+                      pg.caracteristicas
                         ? pg.caracteristicas.map(pgc => (
                             <Option
                               key={pgc._id}
@@ -346,12 +333,11 @@ class FeaturePriceTable extends Component {
                               {pgc.label}
                             </Option>
                           ))
-                        : null
+                        : []
                   )}
               </Select>
             )}
           </Form.Item>
-
         </Form>
       </div>
     );

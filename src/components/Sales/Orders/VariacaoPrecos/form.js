@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import { Breadcrumb, Button, Icon, Input, Form, Select, Affix } from "antd";
-import styled from "styled-components";
+import { Button, Icon, Input, Form, Select, Affix } from "antd";
 
 import { flashWithSuccess } from "../../../common/FlashMessages";
 import parseErrors from "../../../../lib/parseErrors";
@@ -9,15 +8,9 @@ import * as PriceVariationsService from "../../../../services/feature-table-pric
 import * as UnitMeasuresService from "../../../../services/units-measures";
 import * as ProductGroupsService from "../../../../services/productgroups";
 import * as FeaturePriceTableService from "../../../../services/feature-table-prices";
+import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
 
 const Option = Select.Option;
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 class PriceVariations extends Component {
   constructor(props) {
@@ -148,21 +141,16 @@ class PriceVariations extends Component {
 
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : `/tabela-preco-caracteristica/${
-                      this.state.tabela_id
-                    }/variacao-de-preco`
-              }>
-              <Icon type="arrow-left" />
-              Voltar para tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={
+            this.props.location.state && this.props.location.state.returnTo
+              ? this.props.location.state.returnTo.pathname
+              : `/tabela-preco-caracteristica/${
+                  this.state.tabela_id
+                }/variacao-de-preco`
+          }
+          history={this.props.history}
+        />
         <Affix offsetTop={65}>
           <PainelHeader
             title={[

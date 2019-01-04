@@ -18,7 +18,7 @@ import {
   Alert,
   Tooltip
 } from "antd";
-import styled from "styled-components";
+
 
 import {
   flashWithSuccess,
@@ -32,13 +32,6 @@ import { list as ConsultantsServiceList } from "../../services/consultants";
 import { list as ClientsServiceList } from "../../services/clients";
 const Option = Select.Option;
 const TreeNode = Tree.TreeNode;
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 class CustomerWalletForm extends Component {
   constructor(props) {
