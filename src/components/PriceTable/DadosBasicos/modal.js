@@ -80,6 +80,8 @@ const ModalForm = Form.create()(
           <Modal
             visible={visible}
             title={`${this.props.record? 'Editar':'Add'} Tabela de Preço`}
+            onCancel={onCancel}
+            maskClosable={false}
             footer={[
               <Button key="back" onClick={onCancel}>Cancelar</Button>,
               <Button key="submit" type="primary" onClick={() => this.onSalve()}>
@@ -156,7 +158,7 @@ const ModalForm = Form.create()(
                   </Select>
                 )}
               </Form.Item> */}
-              <Form.Item label="Data Validade">
+              {/* <Form.Item label="Data Validade">
                 {getFieldDecorator("data_validade", {
                   initialValue: this.state.formData.data_validade
                     ? moment(this.state.formData.data_validade, "DD/MM/YYYY")
@@ -172,6 +174,44 @@ const ModalForm = Form.create()(
                       })}
                     }
                     name="data_validade"
+                  />
+                )}
+              </Form.Item> */}
+              <Form.Item label="Data Validade de">
+                {getFieldDecorator("data_validade_de", {
+                  initialValue: this.state.formData.data_validade_de
+                    ? moment(this.state.formData.data_validade_de)
+                    : undefined
+                })(
+                  <DatePicker
+                    format="DD/MM/YYYY"
+                    locale={locale}
+                    style={{width: '100%'}}
+                    onChange={e => {
+                      this.onHadleChange({
+                        target: { name: "data_validade_de", value: e }
+                      })}
+                    }
+                    name="data_validade_de"
+                  />
+                )}
+              </Form.Item>
+              <Form.Item label="Data Validade até">
+                {getFieldDecorator("data_validade_ate", {
+                  initialValue: this.state.formData.data_validade_ate
+                    ? moment(this.state.formData.data_validade_ate)
+                    : undefined
+                })(
+                  <DatePicker
+                    format="DD/MM/YYYY"
+                    locale={locale}
+                    style={{width: '100%'}}
+                    onChange={e => {
+                      this.onHadleChange({
+                        target: { name: "data_validade_ate", value: e }
+                      })}
+                    }
+                    name="data_validade_ate"
                   />
                 )}
               </Form.Item>

@@ -62,7 +62,10 @@ const ModalForm = Form.create()(
           this.props.form.resetFields();
           if(this.props.record)
             this.setState({formData:{vendedor: {nome: this.props.record.nome, id: this.props.record.id}, ...this.props.record}});
+          else
+            this.setState({formData:{}});
          }
+         
       }
 
       render() {
@@ -73,6 +76,8 @@ const ModalForm = Form.create()(
           <Modal
             visible={visible}
             title={`${this.props.record? 'Editar':'Add'} Vendedor`}
+            onCancel={onCancel}
+            maskClosable={false}
             footer={[
               <Button key="back" onClick={onCancel}>Cancelar</Button>,
               <Button key="submit" type="primary" onClick={() => this.onSalve()}>
@@ -93,6 +98,7 @@ const ModalForm = Form.create()(
                     <Select
                       name="vendedor"
                       showAction={["focus", "click"]}
+                      disabled={!!this.props.record}
                       showSearch
                       placeholder="Selecione um vendedor..."
                       filterOption={(input, option) =>

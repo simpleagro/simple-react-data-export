@@ -49,7 +49,7 @@ class FeaturePriceTable extends Component {
       ...prev,
       listType: dataType.docs,
       listSeasons: dataSeasons.docs,
-      listProductGroup: dataProductGroup
+      listProductGroup: dataProductGroup.docs
     }));
 
     if (id) {
@@ -59,7 +59,7 @@ class FeaturePriceTable extends Component {
         this.setState(prev => ({
           ...prev,
           formData,
-          editMode: id ? true : false
+          editMode: id ? true : false,
         }));
     }
 
@@ -69,14 +69,13 @@ class FeaturePriceTable extends Component {
   }
 
   handleFormState = event => {
-    if (!event.target.name) return;
     let form = Object.assign({}, this.state.formData, {
       [event.target.name]: event.target.value
     });
     this.setState(prev => ({ ...prev, formData: form }));
   };
 
-  setCaracteristicaId = e => {
+  setCaracteristicaId = e =>{
     this.setState({
       id_caracteristica: JSON.parse(e).id
     });
@@ -352,11 +351,6 @@ class FeaturePriceTable extends Component {
             )}
           </Form.Item>
 
-          {[
-            console.clear(),
-            console.log("state: ", this.state),
-            console.log("props: ", this.props)
-          ]}
         </Form>
       </div>
     );
