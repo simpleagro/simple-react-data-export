@@ -8,21 +8,14 @@ import {
   Select,
   Affix
 } from "antd";
-import styled from "styled-components";
 
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
 import * as UseSeedService from "../../../services/seed-use";
+import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 
 const Option = Select.Option;
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 class TypeForm extends Component {
   constructor(props) {
@@ -61,6 +54,7 @@ class TypeForm extends Component {
   }
 
   handleFormState = event => {
+    if (!event.target.name) return;
     let form = Object.assign({}, this.state.formData, {
       [event.target.name]: event.target.value
     });
@@ -117,25 +111,19 @@ class TypeForm extends Component {
 
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : "/uso-da-semente"
-              }
-            >
-              <Icon type="arrow-left" />
-              Voltar para tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={
+            this.props.location.state && this.props.location.state.returnTo
+              ? this.props.location.state.returnTo.pathname
+              : "/uso-da-semente"
+          }
+          history={this.props.history}
+        />
         <Affix offsetTop={65}>
           <PainelHeader
             title={[ this.state.editMode ? "Editando" : "Novo", " Uso de Semente" ]}
           >
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+            <Button type="primary" icon="save" onClick={() => this.saveForm()} loading={this.state.savingForm}>
               Salvar Uso de Semente
             </Button>
           </PainelHeader>

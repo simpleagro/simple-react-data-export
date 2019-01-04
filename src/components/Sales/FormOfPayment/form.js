@@ -1,28 +1,12 @@
 import React, { Component } from "react";
-import {
-  Breadcrumb,
-  Button,
-  Icon,
-  Input,
-  Form,
-  Select,
-  Affix
-} from "antd";
-import styled from "styled-components";
+import { Button, Icon, Input, Form, Select, Affix } from "antd";
 
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
 import * as PaymentFormService from "../../../services/form-of-payment";
-
+import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 const Option = Select.Option;
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 class TypeForm extends Component {
   constructor(props) {
@@ -40,7 +24,7 @@ class TypeForm extends Component {
 
     this.setState(prev => ({
       ...prev,
-      listType: dataType,
+      listType: dataType
     }));
 
     if (id) {
@@ -61,6 +45,7 @@ class TypeForm extends Component {
   }
 
   handleFormState = event => {
+    if (!event.target.name) return;
     let form = Object.assign({}, this.state.formData, {
       [event.target.name]: event.target.value
     });
@@ -87,7 +72,10 @@ class TypeForm extends Component {
             this.props.history.push("/forma-de-pagamento/");
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao adicionar uma forma de pagamento", err);
+            console.log(
+              "Erro interno ao adicionar uma forma de pagamento",
+              err
+            );
             this.setState({ savingForm: false });
           }
         } else {
@@ -100,7 +88,10 @@ class TypeForm extends Component {
             else this.props.history.push("/forma-de-pagamento");
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao atualizar uma forma de pagamento ", err);
+            console.log(
+              "Erro interno ao atualizar uma forma de pagamento ",
+              err
+            );
             this.setState({ savingForm: false });
           }
         }
@@ -117,40 +108,42 @@ class TypeForm extends Component {
 
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : "/forma-de-pagamento"
-              }
-            >
-              <Icon type="arrow-left" />
-              Voltar para tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={
+            this.props.location.state && this.props.location.state.returnTo
+              ? this.props.location.state.returnTo.pathname
+              : "/forma-de-pagamento"
+          }
+          history={this.props.history}
+        />
         <Affix offsetTop={65}>
           <PainelHeader
-            title={[ this.state.editMode ? "Editando" : "Novo", " Forma de Pagamento" ]}
-          >
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+            title={[
+              this.state.editMode ? "Editando" : "Novo",
+              " Forma de Pagamento"
+            ]}>
+            <Button
+              type="primary"
+              icon="save"
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
               Salvar Forma de Pagamento
             </Button>
           </PainelHeader>
         </Affix>
         <Form onChange={this.handleFormState}>
-
           <Form.Item label="Descrição" {...formItemLayout}>
             {getFieldDecorator("descricao", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.descricao
-            })(<Input name="descricao" ref={input => (this.titleInput = input)} />)}
+            })(
+              <Input
+                name="descricao"
+                ref={input => (this.titleInput = input)}
+              />
+            )}
           </Form.Item>
-
         </Form>
-
       </div>
     );
   }

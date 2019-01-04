@@ -159,7 +159,7 @@ class Sellers extends Component {
       await QuotasGroupService.remove(this.state.quota_id)(vendedor_id)(id);
       let _list = this.state.list.map(vendedor => {
         if(vendedor.id == vendedor_id){
-          vendedor.grupo_produto = [ ...vendedor.grupo_produto.filter(gp => gp.id == id)]
+          vendedor.grupo_produto = [ ...vendedor.grupo_produto.filter(gp => gp.id != id)]
         }
         return vendedor
       })

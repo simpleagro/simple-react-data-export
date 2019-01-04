@@ -91,7 +91,9 @@ const ModalForm = Form.create()(
         return (
           <Modal
             visible={visible}
-            title={`${this.props.record? 'Editar':'Add'} Preço`}
+            title={`${this.props.record? 'Editar':'Add'} Variação`}
+            onCancel={onCancel}
+            maskClosable={false}
             footer={[
               <Button key="back" onClick={onCancel}>Cancelar</Button>,
               <Button key="submit" type="primary" onClick={() => this.onSalve()}>

@@ -1,15 +1,7 @@
 import React, { Component } from "react";
-import {
-  Breadcrumb,
-  Button,
-  Icon,
-  Input,
-  Form,
-  Select,
-  Affix
-} from "antd";
-import styled from "styled-components";
+import { Breadcrumb, Button, Icon, Input, Form, Select, Affix } from "antd";
 
+import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
@@ -17,20 +9,13 @@ import * as PaymentTypeService from "../../../services/type-of-payment";
 
 const Option = Select.Option;
 
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
-
 class TypeOfPayment extends Component {
   constructor(props) {
     super(props);
     this.state = {
       editMode: false,
       formData: {},
-      savingForm: false,
+      savingForm: false
     };
   }
 
@@ -40,7 +25,7 @@ class TypeOfPayment extends Component {
 
     this.setState(prev => ({
       ...prev,
-      listType: dataType,
+      listType: dataType
     }));
 
     if (id) {
@@ -61,6 +46,7 @@ class TypeOfPayment extends Component {
   }
 
   handleFormState = event => {
+    if (!event.target.name) return;
     let form = Object.assign({}, this.state.formData, {
       [event.target.name]: event.target.value
     });
@@ -117,40 +103,42 @@ class TypeOfPayment extends Component {
 
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : "/tipo-de-pagamento"
-              }
-            >
-              <Icon type="arrow-left" />
-              Voltar para tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={
+            this.props.location.state && this.props.location.state.returnTo
+              ? this.props.location.state.returnTo.pathname
+              : "/tipo-de-pagamento"
+          }
+          history={this.props.history}
+        />
         <Affix offsetTop={65}>
           <PainelHeader
-            title={[ this.state.editMode ? "Editando" : "Novo", " Tipo de Pagamento" ]}
-          >
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+            title={[
+              this.state.editMode ? "Editando" : "Novo",
+              " Tipo de Pagamento"
+            ]}>
+            <Button
+              type="primary"
+              icon="save"
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
               Salvar Tipo de Pagamento
             </Button>
           </PainelHeader>
         </Affix>
         <Form onChange={this.handleFormState}>
-
           <Form.Item label="Descrição" {...formItemLayout}>
             {getFieldDecorator("descricao", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.descricao
-            })(<Input name="descricao" ref={input => (this.titleInput = input)} />)}
+            })(
+              <Input
+                name="descricao"
+                ref={input => (this.titleInput = input)}
+              />
+            )}
           </Form.Item>
-
         </Form>
-
       </div>
     );
   }

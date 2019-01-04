@@ -1,8 +1,6 @@
 import React, { Component } from "react";
 import {
-  Breadcrumb,
   Button,
-  Icon,
   Input,
   Form,
   Select,
@@ -10,9 +8,9 @@ import {
   InputNumber,
   DatePicker
 } from "antd";
-import styled from "styled-components";
 import moment from "moment";
 
+import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
 import { flashWithSuccess } from "../../../common/FlashMessages";
 import parseErrors from "../../../../lib/parseErrors";
 import { PainelHeader } from "../../../common/PainelHeader";
@@ -21,13 +19,6 @@ import * as ProductGroupService from "../../../../services/productgroups";
 import * as SeasonsService from "../../../../services/seasons";
 
 const Option = Select.Option;
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 class FeaturePriceTable extends Component {
   constructor(props) {
@@ -49,7 +40,7 @@ class FeaturePriceTable extends Component {
       ...prev,
       listType: dataType.docs,
       listSeasons: dataSeasons.docs,
-      listProductGroup: dataProductGroup
+      listProductGroup: dataProductGroup.docs
     }));
 
     if (id) {
@@ -59,7 +50,7 @@ class FeaturePriceTable extends Component {
         this.setState(prev => ({
           ...prev,
           formData,
-          editMode: id ? true : false,
+          editMode: id ? true : false
         }));
     }
 
@@ -69,13 +60,14 @@ class FeaturePriceTable extends Component {
   }
 
   handleFormState = event => {
+    if (!event.target.name) return;
     let form = Object.assign({}, this.state.formData, {
       [event.target.name]: event.target.value
     });
     this.setState(prev => ({ ...prev, formData: form }));
   };
 
-  setCaracteristicaId = e =>{
+  setCaracteristicaId = e => {
     this.setState({
       id_caracteristica: JSON.parse(e).id
     });
@@ -91,7 +83,9 @@ class FeaturePriceTable extends Component {
             flashWithSuccess("Sem alterações para salvar", " ");
 
           try {
-            const created = await FeaturePriceTableService.create(this.state.formData);
+            const created = await FeaturePriceTableService.create(
+              this.state.formData
+            );
             this.setState({
               openForm: false,
               editMode: false
@@ -99,11 +93,16 @@ class FeaturePriceTable extends Component {
             flashWithSuccess();
 
             this.props.history.push(
-              "/tabela-preco-caracteristica/" + created._id + "/variacao-de-preco"
+              "/tabela-preco-caracteristica/" +
+                created._id +
+                "/variacao-de-preco"
             );
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao adicionar uma tabela de preço de caracteristica", err);
+            console.log(
+              "Erro interno ao adicionar uma tabela de preço de caracteristica",
+              err
+            );
             this.setState({ savingForm: false });
           }
         } else {
@@ -116,7 +115,10 @@ class FeaturePriceTable extends Component {
             else this.props.history.push("/tabela-preco-caracteristica/");
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
-            console.log("Erro interno ao atualizar uma tabela de preço de caracteristica ", err);
+            console.log(
+              "Erro interno ao atualizar uma tabela de preço de caracteristica ",
+              err
+            );
             this.setState({ savingForm: false });
           }
         }
@@ -133,31 +135,30 @@ class FeaturePriceTable extends Component {
 
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : "/tabela-preco-caracteristica"
-              }
-            >
-              <Icon type="arrow-left" />
-              Voltar para tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={
+            this.props.location.state && this.props.location.state.returnTo
+              ? this.props.location.state.returnTo.pathname
+              : "/tabela-preco-caracteristica"
+          }
+          history={this.props.history}
+        />
         <Affix offsetTop={65}>
           <PainelHeader
-            title={[ this.state.editMode ? "Editando" : "Novo", " Tabela Preço Caracteristica" ]}
-          >
-            <Button type="primary" icon="save" onClick={() => this.saveForm()}>
+            title={[
+              this.state.editMode ? "Editando" : "Novo",
+              " Tabela Preço Caracteristica"
+            ]}>
+            <Button
+              type="primary"
+              icon="save"
+              onClick={() => this.saveForm()}
+              loading={this.state.savingForm}>
               Salvar Tabela Preço Característica
             </Button>
           </PainelHeader>
         </Affix>
         <Form onChange={this.handleFormState}>
-
           <Form.Item label="Nome" {...formItemLayout}>
             {getFieldDecorator("nome", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
@@ -169,28 +170,30 @@ class FeaturePriceTable extends Component {
             {getFieldDecorator("moeda", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.moeda
-            })(<Select
-                 name="moeda"
-                 allowClear
-                 showAction={["focus", "click"]}
-                 showSearch
-                 style={{ width: 200 }}
-                 placeholder="Selecione uma moeda"
-                 onChange={e => {
-                   this.handleFormState({
-                     target: { name: "moeda", value: e }
-                   });
-                 }}
-               >
-                 <Option value="REAIS"> Reais </Option>
-                 <Option value="SOJA"> Soja </Option>
-               </Select>)}
+            })(
+              <Select
+                name="moeda"
+                allowClear
+                showAction={["focus", "click"]}
+                showSearch
+                style={{ width: 200 }}
+                placeholder="Selecione uma moeda"
+                onChange={e => {
+                  this.handleFormState({
+                    target: { name: "moeda", value: e }
+                  });
+                }}>
+                <Option value="REAIS"> Reais </Option>
+                <Option value="SOJA"> Soja </Option>
+              </Select>
+            )}
           </Form.Item>
 
           <Form.Item label="Safra" {...formItemLayout}>
             {getFieldDecorator("safra", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.safra && this.state.formData.safra.descricao
+              initialValue:
+                this.state.formData.safra && this.state.formData.safra.descricao
             })(
               <Select
                 name="safra"
@@ -201,24 +204,38 @@ class FeaturePriceTable extends Component {
                 placeholder="Selecione uma safra..."
                 onChange={e => {
                   this.handleFormState({
-                    target: { name: "safra", value: JSON.parse(e)}
-                  })
-                }}
-              >
+                    target: { name: "safra", value: JSON.parse(e) }
+                  });
+                }}>
                 {this.state.listSeasons &&
-                  this.state.listSeasons.map(s => (<Option key={s._id} value={ JSON.stringify({id: s._id, descricao: s.descricao }) }>{ s.descricao }</Option>))
-                }
-              </Select>)}
+                  this.state.listSeasons.map(s => (
+                    <Option
+                      key={s._id}
+                      value={JSON.stringify({
+                        id: s._id,
+                        descricao: s.descricao
+                      })}>
+                      {s.descricao}
+                    </Option>
+                  ))}
+              </Select>
+            )}
           </Form.Item>
 
           <Form.Item label="Versão" {...formItemLayout}>
             {getFieldDecorator("versao", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.versao
-            })(<InputNumber name="versao" onChange={e => {
-              this.handleFormState({
-                target: { name: "versao", value: e }
-              })}}/>)}
+            })(
+              <InputNumber
+                name="versao"
+                onChange={e => {
+                  this.handleFormState({
+                    target: { name: "versao", value: e }
+                  });
+                }}
+              />
+            )}
           </Form.Item>
 
           <Form.Item label="Data de Validade" {...formItemLayout}>
@@ -230,86 +247,98 @@ class FeaturePriceTable extends Component {
                   : new Date(),
                 "YYYY-MM-DD"
               )
-            })(<DatePicker
-              onChange={(data, dataString) =>
-                this.handleFormState({
-                  target: {
-                    name: "data_validade",
-                    value: moment(dataString, "DD/MM/YYYY").format(
-                      "YYYY-MM-DD"
-                    )
-                  }
-                })
-              }
-              allowClear
-              format={"DD/MM/YYYY"}
-              style={{ width: 200 }}
-              name="data_validade"
-            />)}
+            })(
+              <DatePicker
+                onChange={(data, dataString) =>
+                  this.handleFormState({
+                    target: {
+                      name: "data_validade",
+                      value: moment(dataString, "DD/MM/YYYY").format(
+                        "YYYY-MM-DD"
+                      )
+                    }
+                  })
+                }
+                allowClear
+                format={"DD/MM/YYYY"}
+                style={{ width: 200 }}
+                name="data_validade"
+              />
+            )}
           </Form.Item>
 
           <Form.Item label="Grupo de Produtos" {...formItemLayout}>
             {getFieldDecorator("grupo_produto", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.grupo_produto && this.state.formData.grupo_produto.nome
-            })(<Select
-                 name="grupo_produto"
-                 allowClear
-                 showAction={["focus", "click"]}
-                 showSearch
-                 style={{ width: 200 }}
-                 placeholder="Selecione um grupo..."
-                 onChange={e => {
-                   this.handleFormState({
-                     target: { name: "grupo_produto", value: JSON.parse(e)}
-                   });
-                   this.setCaracteristicaId(e);
-                 }}
-               >
+              initialValue:
+                this.state.formData.grupo_produto &&
+                this.state.formData.grupo_produto.nome
+            })(
+              <Select
+                name="grupo_produto"
+                allowClear
+                showAction={["focus", "click"]}
+                showSearch
+                style={{ width: 200 }}
+                placeholder="Selecione um grupo..."
+                onChange={e => {
+                  this.handleFormState({
+                    target: { name: "grupo_produto", value: JSON.parse(e) }
+                  });
+                  this.setCaracteristicaId(e);
+                }}>
                 {this.state.listProductGroup &&
-                  this.state.listProductGroup.map(gp => (<Option key={gp._id} value={ JSON.stringify({id: gp._id, nome: gp.nome}) }>{ gp.nome }</Option>))}
-               </Select>)}
+                  this.state.listProductGroup.map(gp => (
+                    <Option
+                      key={gp._id}
+                      value={JSON.stringify({ id: gp._id, nome: gp.nome })}>
+                      {gp.nome}
+                    </Option>
+                  ))}
+              </Select>
+            )}
           </Form.Item>
 
           <Form.Item label="Característica" {...formItemLayout}>
             {getFieldDecorator("caracteristica", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.caracteristica && this.state.formData.caracteristica.label
-            })(<Select
-                 name="caracteristica"
-                 showAction={["focus", "click"]}
-                 showSearch
-                 style={{ width: 200 }}
-                 placeholder="Selecione um caracterista"
-                 onChange={e => {
+              initialValue:
+                this.state.formData.caracteristica &&
+                this.state.formData.caracteristica.label
+            })(
+              <Select
+                name="caracteristica"
+                showAction={["focus", "click"]}
+                showSearch
+                style={{ width: 200 }}
+                placeholder="Selecione um caracterista"
+                onChange={e => {
                   this.handleFormState({
                     target: { name: "caracteristica", value: JSON.parse(e) }
                   });
                 }}>
-                  {this.state.id_caracteristica &&
-                    this.state.listProductGroup.map(pg => pg._id === this.state.id_caracteristica
-                      ? pg.caracteristicas.map(pgc =>
-                          (<Option key={pgc._id}
-                            value={ JSON.stringify({
-                              id: pgc._id,
-                              label: pgc.label,
-                              chave: pgc.chave
-                            })}
-                          >
-                            {pgc.label}
-                          </Option>))
-                      : null )}
-               </Select>)}
+                {this.state.id_caracteristica &&
+                  this.state.listProductGroup.map(
+                    pg =>
+                      pg._id === this.state.id_caracteristica &&
+                      pg.caracteristicas
+                        ? pg.caracteristicas.map(pgc => (
+                            <Option
+                              key={pgc._id}
+                              value={JSON.stringify({
+                                id: pgc._id,
+                                label: pgc.label,
+                                chave: pgc.chave
+                              })}>
+                              {pgc.label}
+                            </Option>
+                          ))
+                        : []
+                  )}
+              </Select>
+            )}
           </Form.Item>
-
-          {[
-            console.clear(),
-            console.log("state: ",this.state),
-            console.log("props: ",this.props)
-          ]}
-
         </Form>
-
       </div>
     );
   }
