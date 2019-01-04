@@ -18,6 +18,7 @@ import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 import { simpleTableSearch } from "../../../lib/simpleTableSearch";
+import moment from "moment";
 
 class PreHarvest extends Component {
   constructor(props) {
@@ -119,26 +120,29 @@ class PreHarvest extends Component {
     {
       title: "Talhão",
       dataIndex: "nome_talhao",
-      key: "pre-colheita.nome_talhao",
-      ...simpleTableSearch(this)("pre-colheita.nome_talhao")
+      key: "pre_colheita.nome_talhao",
+      ...simpleTableSearch(this)("pre_colheita.nome_talhao")
     },
     {
       title: "Data",
       dataIndex: "data",
-      key: "pre-colheita.data",
-      ...simpleTableSearch(this)("pre-colheita.data")
+      key: "pre_colheita.data",
+      ...simpleTableSearch(this)("pre_colheita.data"),
+      render: (text) => {
+        return moment(text).format("DD/MM/YYYY")
+      }
     },
     {
       title: "Número de Colhedoras",
       dataIndex: "num_colhedoras",
-      key: "pre-colheita.num_colhedoras",
-      ...simpleTableSearch(this)("pre-colheita.num_colhedoras")
+      key: "pre_colheita.num_colhedoras",
+      ...simpleTableSearch(this)("pre_colheita.num_colhedoras")
     },
     {
       title: "Produtividade",
       dataIndex: "produtividade",
-      key: "pre-colheita.produtividade",
-      ...simpleTableSearch(this)("pre-colheita.produtividade")
+      key: "pre_colheita.produtividade",
+      ...simpleTableSearch(this)("pre_colheita.produtividade")
     },
     {
       title: "Ações",
@@ -190,6 +194,17 @@ class PreHarvest extends Component {
                   </Button>
                 </Tooltip>
               )}
+              <Button
+              size="small"
+              onClick={() =>
+                this.props.history.push(
+                  `/inscricao-de-campo/${this.state.field_registration_id}/pre-colheita/${
+                    record._id
+                  }/autorizacao`
+                )
+              }>
+              <Icon type="key" style={{ fontSize: "16px" }} />
+            </Button>
           </span>
         );
       }
@@ -223,7 +238,7 @@ class PreHarvest extends Component {
                 boxShadow: "0px 8px 0px 0px #009d55 inset",
                 color: "#009d55"
               }}>
-              <p>{`Inscrição: ${this.state.pre_harvest_data.nome}`}</p>
+              <p>{`Nº Inscrição: ${this.state.pre_harvest_data.numero_inscricao_campo}`}</p>
               <Button
                 style={{ width: "100%" }}
                 onClick={() => {
@@ -263,6 +278,7 @@ class PreHarvest extends Component {
             </Card>
           </Col>
         </Row>
+        {[console.log(this.state), console.log(this.props)]}
       </div>
     );
   }

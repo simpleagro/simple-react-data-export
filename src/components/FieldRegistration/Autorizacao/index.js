@@ -13,13 +13,14 @@ import {
 } from "antd";
 
 import * as PreHarvestService from "../../../services/field-registration.pre-harvest";
-import * as AuthorizationService from "../../../services/field-registration.authorization";
+import * as AuthorizationService from "../../../services/field-registration.transport-authorization";
 
 import SimpleTable from "../../common/SimpleTable";
 import { flashWithSuccess, flashWithError } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 import { simpleTableSearch } from "../../../lib/simpleTableSearch";
+import moment from "moment";
 
 class Plots extends Component {
   constructor(props) {
@@ -131,7 +132,10 @@ class Plots extends Component {
       title: "Data",
       dataIndex: "data",
       key: "pre-colheita.data",
-      ...simpleTableSearch(this)("pre-colheita.data")
+      ...simpleTableSearch(this)("pre-colheita.data"),
+      render: (text) => {
+        return moment(text).format("DD/MM/YYYY")
+      }
     },
     {
       title: "Motorista",
@@ -149,7 +153,10 @@ class Plots extends Component {
       title: "Saída",
       dataIndex: "saida_caminhao",
       key: "pre-colheita.saida_caminhao",
-      ...simpleTableSearch(this)("pre-colheita.saida_caminhao")
+      ...simpleTableSearch(this)("pre-colheita.saida_caminhao"),
+      render: (text) => {
+        return moment(text).format("DD/MM/YYYY")
+      }
     },
     {
       title: "Responsável",
@@ -239,7 +246,7 @@ class Plots extends Component {
                 boxShadow: "0px 8px 0px 0px #009d55 inset",
                 color: "#009d55"
               }}>
-              <p>{`Pré Colheita: ${this.state.pre_harvest_data.nome}`}</p>
+              <p>{`Pré Colheita: ${this.state.pre_harvest_data.nome_talhao}`}</p>
               <Button
                 style={{ width: "100%" }}
                 onClick={() => {
@@ -284,6 +291,7 @@ class Plots extends Component {
             </Card>
           </Col>
         </Row>
+        {[ console.log(this.state), console.log(this.props) ]}
       </div>
     );
   }

@@ -466,14 +466,14 @@ class FieldRegistrationForm extends Component {
             {getFieldDecorator("area_inscrita", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.area_inscrita
-            })(<InputNumber name="area_inscrita" />)}
+            })(<InputNumber min={0} name="area_inscrita" />)}
           </Form.Item>
 
           <Form.Item label="Área Plantada" {...formItemLayout}>
             {getFieldDecorator("area_plantada", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.area_plantada
-            })(<InputNumber name="area_plantada" />)}
+            })(<InputNumber min={0} name="area_plantada" />)}
           </Form.Item>
 
           <Form.Item label="Data do Plantio" {...formItemLayout}>
@@ -546,7 +546,7 @@ class FieldRegistrationForm extends Component {
             {getFieldDecorator("prod_estimada", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.prod_estimada
-            })(<InputNumber name="prod_estimada" />)}
+            })(<InputNumber min={0} name="prod_estimada" />)}
           </Form.Item>
 
           <Form.Item label="Responsável" {...formItemLayout}>

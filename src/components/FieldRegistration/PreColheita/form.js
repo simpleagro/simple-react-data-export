@@ -156,13 +156,13 @@ class PreHarvestForm extends Component {
           <Form.Item label="Responsável" {...formItemLayout}>
             {getFieldDecorator("responsavel", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.responsavel
+              initialValue: this.state.formData.responsavel && this.state.formData.responsavel.nome
             })(<Input name="responsavel" disabled ref={input => (this.titleInput = input)} />)}
           </Form.Item>
 
           <Form.Item label="Reamostra" {...formItemLayout}>
             {getFieldDecorator("reamostra", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              rules: [{ required: false, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.reamostra
             })(<Checkbox
               checked={this.state.formData.reamostra}
@@ -178,7 +178,7 @@ class PreHarvestForm extends Component {
 
           <Form.Item label="Aprovado" {...formItemLayout}>
             {getFieldDecorator("aprovado", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              rules: [{ required: false, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.aprovado
             })(<Checkbox
               checked={this.state.formData.aprovado}
@@ -225,7 +225,7 @@ class PreHarvestForm extends Component {
             {getFieldDecorator("num_colhedoras", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.num_colhedoras
-            })(<InputNumber name="num_colhedoras" />)}
+            })(<InputNumber min={0} name="num_colhedoras" />)}
           </Form.Item>
 
           <Form.Item label="Data da Colheita" {...formItemLayout}>
@@ -254,19 +254,19 @@ class PreHarvestForm extends Component {
             {getFieldDecorator("area_talhao", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.area_talhao
-            })(<InputNumber name="area_talhao" />)}
+            })(<InputNumber min={0} name="area_talhao" />)}
           </Form.Item>
 
           <Form.Item label="Produtividade" {...formItemLayout}>
             {getFieldDecorator("produtividade", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.produtividade
-            })(<InputNumber name="produtividade" />)}
+            })(<InputNumber min={0} name="produtividade" />)}
           </Form.Item>
 
           <Form.Item label="Observação" {...formItemLayout}>
             {getFieldDecorator("observacao", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              rules: [{ required: false, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.observacao
             })(<TextArea name="observacao" />)}
           </Form.Item>

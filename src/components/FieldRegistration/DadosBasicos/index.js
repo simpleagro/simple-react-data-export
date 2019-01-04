@@ -7,6 +7,7 @@ import SimpleTable from "../../common/SimpleTable";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
+import moment from "moment";
 
 class FieldRegistration extends Component {
   constructor(props) {
@@ -132,13 +133,17 @@ class FieldRegistration extends Component {
       title: "Início Colheita",
       dataIndex: "data_inicio_colheita",
       key: "data_inicio_colheita",
-      render: text => text
+      render: (text) => {
+        return moment(text).format("DD/MM/YYYY")
+      }
     },
     {
       title: "Fim Colheita",
       dataIndex: "data_fim_colheita",
       key: "data_fim_colheita",
-      render: text => text
+      render: (text) => {
+        return moment(text).format("DD/MM/YYYY")
+      }
     },
     {
       title: "Produção",
@@ -149,7 +154,7 @@ class FieldRegistration extends Component {
     {
       title: "Ações",
       dataIndex: "action",
-      //fixed: "right",
+      fixed: "right",
       render: (text, record) => {
         return (
           <span>
@@ -185,7 +190,7 @@ class FieldRegistration extends Component {
                     `/inscricao-de-campo/${record._id}/pre-colheita`
                   )
                 }>
-                <FontAwesomeIcon icon="list" size="lg" />
+                <FontAwesomeIcon icon="leaf" size="lg" />
               </Button>
             </Tooltip>
             <Divider
@@ -245,7 +250,7 @@ class FieldRegistration extends Component {
           columns={this.tableConfig()}
           dataSource={this.state.list}
           onChange={this.handleTableChange}
-          scroll={{ x: 1300 }}
+          scroll={{ x: window.innerWidth-400 }}
         />
       </div>
     );
