@@ -1,5 +1,6 @@
 import Loadable from "react-loadable";
 import dashboard from "./Menus/dashboard";
+import dashboardSale from "./Menus/dashboard";
 import empresas from "./Menus/empresas";
 import filiais from "./Menus/filiais";
 import modulos from "./Menus/modulos";
@@ -39,39 +40,49 @@ const loadable = loader =>
 
 const menus = {
   field: {
+    ...carteiraDeClientes,
+    ...clientes,
+    ...consultores,
     ...dashboard,
     ...empresas,
-    ...filiais,
-    ...modulos,
     ...entidades,
-    ...usuarios,
-    ...consultores,
-    ...clientes,
-    ...plantio,
-    ...carteiraDeClientes,
+    ...etapasCultura,
+    ...filiais,
     ...gestaoDeProjetosAgricolas,
     ...gruposDeProdutos,
-    ...safras,
-    ...etapasCultura,
-    ...unidadesMedida,
     ...inscricaoCampo,
+    ...modulos,
+    ...plantio,
+    ...safras,
+    ...unidadesMedida,
+    ...usuarios
   },
   sales: {
-    ...clientes,
     ...agenteVendas,
-    ...tipoVendedores,
-    ...tipoGarantia,
-    ...tipoVenda,
-    ...usoSemente,
+    ...carteiraDeClientes,
+    ...clientes,
+    ...consultores,
+    ...cotas,
+    ...dashboardSale,
+    ...filiais,
     ...formaPagamento,
-    ...tipoPagamento,
-    ...tabelaPrecoCaracteristica,
+    ...gruposDeProdutos,
+    ...metas,
+    ...pedidos,
+    ...safras,
+    ...tabelaComissao,
     ...tabelaFrete,
     ...tabelaPreco,
-    ...tabelaComissao,
-    ...metas,
-    ...cotas,
-    ...pedidos
+    ...tipoGarantia,
+    ...tipoPagamento,
+    ...tipoVenda,
+    ...tipoVendedores,
+    ...unidadesMedida,
+    ...usoSemente,
+    ...usuarios
+    // ...alcadasDeAprovacao,
+    // ...fluxoCaixaComissoes,
+    // ...programacaoDeEntrega,
   }
 };
 
