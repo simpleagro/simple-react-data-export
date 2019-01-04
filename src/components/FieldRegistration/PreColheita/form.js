@@ -42,7 +42,10 @@ class PreHarvestForm extends Component {
       ...prev,
       formData: {
         ...prev.formData,
-        responsavel: JSON.parse(localStorage.getItem("simpleagro_painel")).painelState.userData.user.nome
+        responsavel: {
+          nome: JSON.parse(localStorage.getItem("simpleagro_painel")).painelState.userData.user.nome,
+          id: JSON.parse(localStorage.getItem("simpleagro_painel")).painelState.userData.user._id
+        }
       }
     }))
 

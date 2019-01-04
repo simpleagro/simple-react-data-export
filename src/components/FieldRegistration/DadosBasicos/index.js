@@ -131,14 +131,20 @@ class FieldRegistration extends Component {
     },
     {
       title: "Início Colheita",
-      dataIndex: "inicio_colheita",
-      key: "inicio_colheita",
+      dataIndex: "data_inicio_colheita",
+      key: "data_inicio_colheita",
+      render: text => text
+    },
+    {
+      title: "Fim Colheita",
+      dataIndex: "data_fim_colheita",
+      key: "data_fim_colheita",
       render: text => text
     },
     {
       title: "Produção",
-      dataIndex: "producao",
-      key: "producao",
+      dataIndex: "prod_estimada",
+      key: "prod_estimada",
       render: text => text
     },
     {
@@ -240,7 +246,7 @@ class FieldRegistration extends Component {
           columns={this.tableConfig()}
           dataSource={this.state.list}
           onChange={this.handleTableChange}
-          scroll={{ x: 1500 }}
+          scroll={{ x: 1300 }}
         />
       </div>
     );
