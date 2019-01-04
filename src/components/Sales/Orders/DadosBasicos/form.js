@@ -85,7 +85,7 @@ class OrderForm extends Component {
     }).then(response => response.docs);
     const tabelasDePreco = await PriceTableServiceList({
       limit: -1,
-      fields: "descricao",
+      fields: "nome",
       status: true
     }).then(response => response.docs);
 

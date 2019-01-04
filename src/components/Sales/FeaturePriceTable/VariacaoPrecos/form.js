@@ -38,7 +38,7 @@ class PriceVariations extends Component {
     this.setState(prev => ({
       ...prev,
       listUnit: dataUnitMeasure.docs,
-      listProductGroup: dataProductGroup,
+      listProductGroup: dataProductGroup.docs,
       listFeaturePriceTable: dataFeaturePriceTable.docs,
       tabela_id: this.props.match.params.tabela_id
     }));
