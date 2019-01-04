@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
+import { Divider, Button, Icon, Popconfirm } from "antd";
 
 import * as FeatureTablePricesService from "../../../../services/feature-table-prices";
 import * as PriceVariationsService from "../../../../services/feature-table-prices.price-variations";
@@ -9,6 +8,7 @@ import { flashWithSuccess } from "../../../common/FlashMessages";
 import parseErrors from "../../../../lib/parseErrors";
 import { PainelHeader } from "../../../common/PainelHeader";
 import { simpleTableSearch } from "../../../../lib/simpleTableSearch";
+import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
 
 class PriceVariation extends Component {
   constructor(props) {
@@ -89,7 +89,10 @@ class PriceVariation extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `A variação de preço, ${opcao_chave}, foi removido com sucesso!`);
+      flashWithSuccess(
+        "",
+        `A variação de preço, ${opcao_chave}, foi removido com sucesso!`
+      );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover uma variação de preço", err);
@@ -105,20 +108,20 @@ class PriceVariation extends Component {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      ...simpleTableSearch(this)('precos.opcao_chave'),
+      ...simpleTableSearch(this)("precos.opcao_chave"),
       render: text => text
     },
     {
       title: "Valor",
       dataIndex: "valor",
       key: "precos.valor",
-      ...simpleTableSearch(this)('precos.valor')
+      ...simpleTableSearch(this)("precos.valor")
     },
     {
       title: "Unidade de Medida",
       dataIndex: "u_m",
       key: "precos.u_m",
-      ...simpleTableSearch(this)('precos.u_m')
+      ...simpleTableSearch(this)("precos.u_m")
     },
     {
       title: "Ações",
@@ -128,7 +131,13 @@ class PriceVariation extends Component {
           <span>
             <Button
               size="small"
-              onClick={() => this.props.history.push(`/tabela-preco-caracteristica/${this.state.tabela_id}/variacao-de-preco/${record._id}/edit`)}>
+              onClick={() =>
+                this.props.history.push(
+                  `/tabela-preco-caracteristica/${
+                    this.state.tabela_id
+                  }/variacao-de-preco/${record._id}/edit`
+                )
+              }>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
 
@@ -141,8 +150,7 @@ class PriceVariation extends Component {
               title={`Tem certeza em excluir a variação de preço?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
-              cancelText="Não"
-            >
+              cancelText="Não">
               <Button size="small">
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
@@ -172,11 +180,21 @@ class PriceVariation extends Component {
   render() {
     return (
       <div>
+        <SimpleBreadCrumb
+          to={"/tabela-preco-caracteristica/"}
+          history={this.props.history}
+        />
         <PainelHeader title="Variação de Preço">
           <Button
             type="primary"
             icon="plus"
-            onClick={() => this.props.history.push("/tabela-preco-caracteristica/"+ this.state.tabela_id +"/variacao-de-preco/new")}>
+            onClick={() =>
+              this.props.history.push(
+                "/tabela-preco-caracteristica/" +
+                  this.state.tabela_id +
+                  "/variacao-de-preco/new"
+              )
+            }>
             Adicionar
           </Button>
         </PainelHeader>
@@ -188,7 +206,6 @@ class PriceVariation extends Component {
           dataSource={this.state.list}
           onChange={this.handleTableChange}
         />
-
       </div>
     );
   }

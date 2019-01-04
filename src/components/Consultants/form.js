@@ -169,9 +169,10 @@ class ConsultantForm extends Component {
 
   toggleChecked = () => {
     this.setState({ checked: !this.state.checked });
-  }
+  };
 
   setLogin = email => {
+    if (!email) return;
     const emailRegex = /[@][a-z0-9-_]+[.com]+[.br]*/g;
     let userLogin = email.split(emailRegex).join("");
 
@@ -341,7 +342,7 @@ class ConsultantForm extends Component {
                 }
               ],
               initialValue: this.state.formData.senha
-            })(<Input name="senha" />)}
+            })(<Input type="password" name="senha" />)}
           </Form.Item>
 
           {!this.state.editMode && (
@@ -352,9 +353,6 @@ class ConsultantForm extends Component {
                 display: this.state.userHasSelected ? "none" : "block"
               }}>
               {getFieldDecorator("filiais", {
-                rules: [
-                  { required: true, message: "Este campo é obrigatório!" }
-                ],
                 initialValue: this.state.formData.filiais
               })(
                 <Select
@@ -526,46 +524,49 @@ class ConsultantForm extends Component {
             {getFieldDecorator("vendedor", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.checked
-            })(<Checkbox
-                  name="vendedor"
-                  onClick={this.toggleChecked}
-                  onChange={e => {
-                    this.handleFormState({
-                      target: { name: "vendedor", value: e }
-                    });
-                  }
-                }
-               />)
-            }
+            })(
+              <Checkbox
+                name="vendedor"
+                onClick={this.toggleChecked}
+                onChange={e => {
+                  this.handleFormState({
+                    target: { name: "vendedor", value: e }
+                  });
+                }}
+              />
+            )}
           </Form.Item>
 
-          { this.state.checked &&
-            (<Form.Item label="Tipo de Vendedor" {...formItemLayout}>
-            {getFieldDecorator("tipo_vendedor_id", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.tipo_vendedor_id
-            })(<Select
-                 name="tipo_vendedor_id"
-                 allowClear
-                 showAction={["focus", "click"]}
-                 showSearch
-                 style={{ width: 200 }}
-                 placeholder="Selecione um tipo de vendedor..."
-                 onChange={e => {
-                   this.handleFormState({
-                     target: { name: "tipo_vendedor_id", value: e }
-                   });
-                 }}>
-                    {this.state.listSalesman &&
-                      this.state.listSalesman.map((salesman, index) => (
-                        <Option key={salesman._id} value={salesman._id}>
-                          {salesman.descricao}
-                        </Option>
-                      ))
-                    }
-              </Select>)}
-            </Form.Item>)
-          }
+          {this.state.checked && (
+            <Form.Item label="Tipo de Vendedor" {...formItemLayout}>
+              {getFieldDecorator("tipo_vendedor_id", {
+                rules: [
+                  { required: true, message: "Este campo é obrigatório!" }
+                ],
+                initialValue: this.state.formData.tipo_vendedor_id
+              })(
+                <Select
+                  name="tipo_vendedor_id"
+                  allowClear
+                  showAction={["focus", "click"]}
+                  showSearch
+                  style={{ width: 200 }}
+                  placeholder="Selecione um tipo de vendedor..."
+                  onChange={e => {
+                    this.handleFormState({
+                      target: { name: "tipo_vendedor_id", value: e }
+                    });
+                  }}>
+                  {this.state.listSalesman &&
+                    this.state.listSalesman.map((salesman, index) => (
+                      <Option key={salesman._id} value={salesman._id}>
+                        {salesman.descricao}
+                      </Option>
+                    ))}
+                </Select>
+              )}
+            </Form.Item>
+          )}
         </Form>
       </div>
     );

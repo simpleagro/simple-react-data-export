@@ -181,7 +181,7 @@ class UserForm extends Component {
 
           <Form.Item label="Filial" {...formItemLayout}>
             {getFieldDecorator("filiais", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.filiais
             })(
               <Select
@@ -289,7 +289,7 @@ class UserForm extends Component {
                   <br />{" "}
                 </span>
 
-                <Input name="senha" />
+                <Input type="password" name="senha" />
               </div>
             )}
           </Form.Item>

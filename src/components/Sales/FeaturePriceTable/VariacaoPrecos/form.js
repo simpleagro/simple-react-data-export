@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import { Breadcrumb, Button, Icon, Input, Form, Select, Affix } from "antd";
-import styled from "styled-components";
+import { Button, Icon, Input, Form, Select, Affix } from "antd";
 
+import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
 import { flashWithSuccess } from "../../../common/FlashMessages";
 import parseErrors from "../../../../lib/parseErrors";
 import { PainelHeader } from "../../../common/PainelHeader";
@@ -11,13 +11,6 @@ import * as ProductGroupsService from "../../../../services/productgroups";
 import * as FeaturePriceTableService from "../../../../services/feature-table-prices";
 
 const Option = Select.Option;
-
-const BreadcrumbStyled = styled(Breadcrumb)`
-  background: #eeeeee;
-  height: 45px;
-  margin: -24px;
-  margin-bottom: 30px;
-`;
 
 class PriceVariations extends Component {
   constructor(props) {
@@ -38,7 +31,7 @@ class PriceVariations extends Component {
     this.setState(prev => ({
       ...prev,
       listUnit: dataUnitMeasure.docs,
-      listProductGroup: dataProductGroup,
+      listProductGroup: dataProductGroup.docs,
       listFeaturePriceTable: dataFeaturePriceTable.docs,
       tabela_id: this.props.match.params.tabela_id
     }));
@@ -126,9 +119,11 @@ class PriceVariations extends Component {
       this.state.listFeaturePriceTable.map(
         fpt =>
           fpt._id === this.props.match.params.tabela_id &&
+          this.state.listProductGroup &&
           this.state.listProductGroup.map(
             pg =>
               pg._id === fpt.grupo_produto.id &&
+              pg.caracteristicas &&
               pg.caracteristicas.map(
                 caract =>
                   caract._id === fpt.caracteristica.id &&
@@ -148,21 +143,16 @@ class PriceVariations extends Component {
 
     return (
       <div>
-        <BreadcrumbStyled>
-          <Breadcrumb.Item>
-            <Button
-              href={
-                this.props.location.state && this.props.location.state.returnTo
-                  ? this.props.location.state.returnTo.pathname
-                  : `/tabela-preco-caracteristica/${
-                      this.state.tabela_id
-                    }/variacao-de-preco`
-              }>
-              <Icon type="arrow-left" />
-              Voltar para tela anterior
-            </Button>
-          </Breadcrumb.Item>
-        </BreadcrumbStyled>
+        <SimpleBreadCrumb
+          to={
+            this.props.location.state && this.props.location.state.returnTo
+              ? this.props.location.state.returnTo.pathname
+              : `/tabela-preco-caracteristica/${
+                  this.state.tabela_id
+                }/variacao-de-preco`
+          }
+          history={this.props.history}
+        />
         <Affix offsetTop={65}>
           <PainelHeader
             title={[

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import Styled from "styled-components";
-import { Card, Row, Col, Select } from "antd";
+import { Card, Row, Col, Select, Button } from "antd";
 import { userSwitchedModule } from "../actions/painelActions";
 import { withCookies } from "react-cookie";
 import { bindActionCreators } from "redux";
@@ -63,7 +63,13 @@ class ModuleSwitch extends Component {
                     );
                   })}
               </Select>
-              <br />
+              <Button
+                style={{ marginTop: "56px" }}
+                ghost
+                type="primary"
+                href="/logout">
+                Sair
+              </Button>
             </Card>
           </Col>
         </Row>
