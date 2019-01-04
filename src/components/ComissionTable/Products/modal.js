@@ -1,7 +1,6 @@
 import React from 'react'
 import { Modal, Form, Button, Input, Select } from 'antd';
 import * as ProductService from '../../../services/products'
-import * as UnidadeMedidaService from '../../../services/units-measures'
 
 const ModalForm = Form.create()(
     class extends React.Component {
@@ -22,14 +21,8 @@ const ModalForm = Form.create()(
           status: true,
           fields: "nome,_id,nome_comercial"
         });
-
-        const u_ms = await UnidadeMedidaService.list({
-          limit: 100,
-          status: true,
-          fields: "nome,_id,sigla"
-        });
       
-        this.setState(prev => ({ ...prev, produtos: produtos.docs, u_ms: u_ms.docs }));
+        this.setState(prev => ({ ...prev, produtos: produtos.docs }));
       }
 
       onSalve = () => {
@@ -45,14 +38,6 @@ const ModalForm = Form.create()(
         return produtos.map(produto => (
           <Select.Option key={produto._id} value={JSON.stringify({id:produto._id, nome: produto.nome, nome_comercial: produto.nome_comercial})}>
             {produto.nome}
-          </Select.Option>
-        ))
-      }
-
-      listarUMs = (u_ms) => {
-        return u_ms.map(u_m => (
-          <Select.Option key={u_m._id} value={u_m.sigla}>
-            {u_m.sigla}
           </Select.Option>
         ))
       }
@@ -74,7 +59,9 @@ const ModalForm = Form.create()(
         return (
           <Modal
             visible={visible}
+            maskClosable={false}
             title={`${this.props.record? 'Editar':'Add'} Produto`}
+            onCancel={onCancel}
             footer={[
               <Button key="back" onClick={onCancel}>Cancelar</Button>,
               <Button key="submit" type="primary" onClick={() => this.onSalve()}>
@@ -94,6 +81,7 @@ const ModalForm = Form.create()(
                   })(
                     <Select
                       name="produto"
+                      disabled={!!this.props.record}
                       showAction={["focus", "click"]}
                       showSearch
                       placeholder="Selecione um produto..."
@@ -112,36 +100,7 @@ const ModalForm = Form.create()(
                     </Select>
                   )}
               </Form.Item>
-              <Form.Item label="Unidade de Medida da Cota">
-                  {getFieldDecorator("cota_um", {
-                    rules: [
-                      { required: true, message: "Selecione a unidade de medida!" }
-                    ],
-                    initialValue: this.state.formData.cota_um
-                    ? this.state.formData.cota_um
-                    : undefined
-                  })(
-                    <Select
-                      name="cota_um"
-                      showAction={["focus", "click"]}
-                      showSearch
-                      placeholder="Selecione uma unidade de medida..."
-                      filterOption={(input, option) =>
-                        option.props.children
-                          .toLowerCase()
-                          .indexOf(input.toLowerCase()) >= 0
-                      }
-                      onChange={e =>{
-                        this.onHadleChange({
-                          target: { name: "cota_um", value: e }
-                        })}
-                      }
-                    >
-                      {this.listarUMs(this.state.u_ms)}
-                    </Select>
-                  )}
-              </Form.Item>
-              <Form.Item label="Valor da Cota">
+              {/* <Form.Item label="Valor da Cota">
                 {getFieldDecorator('cota_valor',{
                   rules: [
                     { required: true, message: "Este campo é obrigatório!" }
@@ -152,7 +111,7 @@ const ModalForm = Form.create()(
                     name="cota_valor"
                   />
                 )}
-              </Form.Item>
+              </Form.Item> */}
             </Form>
           </Modal>
         );

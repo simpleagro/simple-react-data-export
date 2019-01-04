@@ -59,6 +59,8 @@ const ModalForm = Form.create()(
           <Modal
             visible={visible}
             title={`${this.props.record? 'Editar':'Add'} Cota`}
+            onCancel={onCancel}
+            maskClosable={false}
             footer={[
               <Button key="back" onClick={onCancel}>Cancelar</Button>,
               <Button key="submit" type="primary" onClick={() => this.onSalve()}>
@@ -74,6 +76,17 @@ const ModalForm = Form.create()(
                 })(
                   <Input
                     name="nome"
+                    ref={input => (this.titleInput = input)}
+                  />
+                )}
+              </Form.Item>
+              <Form.Item label="Versão">
+                {getFieldDecorator('versao', {
+                  rules: [{ required: true, message: "Este campo é obrigatório!" }],
+                  initialValue: this.state.formData.versao
+                })(
+                  <Input
+                    name="versao"
                     ref={input => (this.titleInput = input)}
                   />
                 )}

@@ -1,6 +1,5 @@
 import React from 'react'
 import { Modal, Form, Input, Button, Select } from 'antd';
-import * as GroupsFeaturesService from "../../../services/productgroups.features";
 
 const ModalForm = Form.create()(
     class extends React.Component {
@@ -35,44 +34,20 @@ const ModalForm = Form.create()(
          }
       }
 
-      async componentDidMount() {
-        if(this.props.group_id){
-          const groupData = await GroupsFeaturesService.list(this.props.group_id)();
+      /* async componentDidMount() {
+        console.log('aqqq', this.props.group_caracteristicas)
+        if(this.props.group_caracteristicas){
+          const groupData = this.props.group_caracteristicas
+          console.log('aqqq', this.props.group_caracteristicas)
           
           if (groupData)
             this.setState(prev => ({
               ...prev,
-              group_caracteristicas: groupData.docs
+              group_caracteristicas: groupData
             }));
             
         }
-      }   
-
-      gerarCamposExtras = (caracteristicas, getFieldDecorator) => {
-        let fields = []
-
-        caracteristicas.forEach(item => {
-          if(item.fields)
-            fields = [...fields, ...item.fields]
-        });
-
-        return fields.map( field => 
-          <Form.Item
-            label={`${field.label}`}
-            key= { `${field.chave}` }
-          >
-            {getFieldDecorator(`${field.chave}`, {
-              initialValue: this.state.formData[`${field.chave}`],
-              rules: [{ required: field.obrigatorio, message: 'Este campo é obrigatório!'}],
-            })(
-                <Input
-                  name={`${field.chave}`}
-                />
-            )}
-          </Form.Item>
-        )
-        
-      }
+      }   */
       
       gerarFormulario = (caracteristicas, getFieldDecorator) => {
         return caracteristicas.map( caracteristica => 
@@ -104,6 +79,40 @@ const ModalForm = Form.create()(
         )
       }
 
+      gerarFormularioCarac = (caracteristicas, getFieldDecorator) => {
+        return caracteristicas.map( caracteristica => 
+          <Form.Item
+            label={`${caracteristica.label}  (%)`}
+            key= { `comissao_${caracteristica.chave}` }
+          >
+            {getFieldDecorator(`comissao_${caracteristica.chave}`, {
+              initialValue: this.state.formData[`comissao_${caracteristica.chave}`],
+              //rules: [{ required: caracteristica.obrigatorio, message: 'Selecione!'}],
+            })(
+              <Input
+                name= { `comissao_${caracteristica.chave}` } />
+            )}
+          </Form.Item>
+        )
+      }
+
+      gerarFormularioPreco = (group_regras_preco, getFieldDecorator) => {
+        return group_regras_preco.map( regra_preco => 
+          <Form.Item
+            label={`${regra_preco.label} (%)`}
+            key= { `comissao_${regra_preco.chave}` }
+          >
+            {getFieldDecorator(`comissao_${regra_preco.chave}`, {
+              initialValue: this.state.formData[`comissao_${regra_preco.chave}`],
+              //rules: [{ required: regra_preco.obrigatorio, message: 'Selecione!'}],
+            })(
+              <Input
+                name= { `comissao_${regra_preco.chave}` } />
+            )}
+          </Form.Item>
+        )
+      }
+
       render() {
         const { visible, onCancel, form } = this.props;
         const { getFieldDecorator } = form;
@@ -111,7 +120,7 @@ const ModalForm = Form.create()(
         return (
           <Modal
             visible={visible}
-            title={`${this.props.record? 'Editar':'Add'} Variação`}
+            title={`${this.props.record? 'Editar':'Add'} Preço`}
             onCancel={onCancel}
             maskClosable={false}
             footer={[
@@ -122,8 +131,20 @@ const ModalForm = Form.create()(
             ]}
           >
             <Form layout="vertical" onChange={this.onHadleChange}>
-              {this.state.group_caracteristicas && this.gerarFormulario(this.state.group_caracteristicas, getFieldDecorator)}
-              {this.state.group_caracteristicas && this.gerarCamposExtras(this.state.group_caracteristicas, getFieldDecorator)}
+              {this.props.group_caracteristicas && this.gerarFormulario(this.props.group_caracteristicas, getFieldDecorator)}
+              {this.props.group_regra_preco && this.gerarFormularioPreco(this.props.group_regra_preco, getFieldDecorator)}
+              {this.props.group_caracteristicas && this.gerarFormularioCarac(this.props.group_caracteristicas.filter(item => item.tipo_preco == 'TABELA_CARACTERISTICA'), getFieldDecorator)}
+              <Form.Item label="Frete (%)">
+                {getFieldDecorator('comissao_frete', {
+                  //rules: [{ required: true, message: "Este campo é obrigatório!" }],
+                  initialValue: this.state.formData.comissao_frete
+                })(
+                  <Input
+                    name="comissao_frete"
+                    ref={input => (this.titleInput = input)}
+                  />
+                )}
+              </Form.Item>
             </Form>
           </Modal>
         );

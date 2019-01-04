@@ -12,17 +12,17 @@ import {
 } from "antd";
 import { withRouter } from "react-router-dom";
 
-import * as ProductsService from "../../../services/pricetable.products";
-import * as PriceTableService from "../../../services/pricetable";
+import * as ProductsService from "../../../services/comissiontable.products";
+import * as VariationsService from "../../../services/comissiontable.variations";
 import SimpleTable from "../../common/SimpleTable";
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
 import ModalForm from "./modal"
-import ModalFrete from '../DadosBasicos/modal'
+import * as GroupsFeaturesService from "../../../services/productgroups";
 
-class ProductsPriceTable extends Component {
+class VariationComission extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -33,11 +33,14 @@ class ProductsPriceTable extends Component {
         defaultPageSize: 10,
         pageSizeOptions: ["10", "25", "50", "100"]
       },
-      pricetable_id: this.props.match.params.pricetable_id || 0,
+      comissiontable_id: this.props.match.params.comissiontable_id || 0,
+      rule_id: this.props.match.params.rule_id || 0,
       productgroup_id: this.props.match.params.productgroup_id || 0,
-      price_table_data: {},
+      product_id: this.props.match.params.product_id || 0,
+      product_data: {},
       visible: false,
-      visibleFrete: false
+      group_caracteristicas:[],
+      group_regra_preco:[]
     };
   }
 
@@ -46,8 +49,11 @@ class ProductsPriceTable extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await ProductsService.list(this.state.pricetable_id)(this.state.productgroup_id)(aqp);
-    const priceTableData = await PriceTableService.get(this.state.pricetable_id);
+    const data = await VariationsService.list(this.state.comissiontable_id)(this.state.rule_id)(this.state.productgroup_id)(this.state.product_id)(aqp);
+    const productData = await ProductsService.get(this.state.comissiontable_id)(this.state.rule_id)(this.state.productgroup_id)(this.state.product_id);
+    const groupData = await GroupsFeaturesService.get(this.state.productgroup_id);
+    const groupDataCaracteristicas = groupData.caracteristicas;
+    const groupDataPrecoBase = groupData.preco_base_regra;
 
     this.setState(prev => ({
       ...prev,
@@ -56,7 +62,9 @@ class ProductsPriceTable extends Component {
         total: data.total
       },
       loadingData: false,
-      price_table_data: priceTableData
+      group_caracteristicas: groupDataCaracteristicas,
+      group_regra_preco: groupDataPrecoBase,
+      product_data: productData
     }));
   }
 
@@ -66,12 +74,12 @@ class ProductsPriceTable extends Component {
 
   changeStatus = async (id, newStatus) => {
     try {
-      await ProductsService.changeStatus(this.state.shiptable_id)(
+      await VariationsService.changeStatus(this.state.comissiontable_id)(this.state.rule_id)(this.state.productgroup_id)(this.state.product_id)(
         id,
         newStatus
       );
 
-      let recordName = "";
+      let recordName = ",";
 
       let _list = this.state.list.map(item => {
         if (item._id === id) {
@@ -88,102 +96,113 @@ class ProductsPriceTable extends Component {
 
       flashWithSuccess(
         "",
-        `O produto, ${recordName}, foi ${
-          newStatus ? "ativado" : "bloqueado"
+        `A variação, ${recordName} foi ${
+          newStatus ? "ativada" : "bloqueada"
         } com sucesso!`
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao mudar status do produto", err);
+      console.log("Erro interno ao mudar status da variação", err);
     }
   };
 
   removeRecord = async ({ _id, nome }) => {
     try {
-      await ProductsService.remove(this.state.shiptable_id)(_id);
+      await VariationsService.remove(this.state.comissiontable_id)(this.state.rule_id)(this.state.productgroup_id)(this.state.product_id)(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
 
       this.setState({
         list: _list
       });
 
-      flashWithSuccess("", `O produto, ${nome}, foi removido com sucesso!`);
+      flashWithSuccess("", `A variação, ${nome}, foi removida com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover um produto", err);
+      console.log("Erro interno ao remover uma variação", err);
     }
   };
 
-  tableConfig = () => [
-    {
-      title: "Nome",
-      dataIndex: "nome",
-      key: "nome",
-      sorter: (a, b, sorter) => {
-        if (sorter === "ascendent") return -1;
-        else return 1;
-      }
-    },
-    {
-      title: "Nome Comercial",
-      dataIndex: "nome_comercial",
-      key: "nome_comercial",
-      sorter: (a, b, sorter) => {
-        if (sorter === "ascendent") return -1;
-        else return 1;
-      }
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (text, record) => {
-        const statusTxt = record.status ? "desativar" : "ativar";
-        const statusBtn = record.status ? "unlock" : "lock";
-        return (
-          <Popconfirm
-            title={`Tem certeza em ${statusTxt} o produto?`}
-            onConfirm={e => this.changeStatus(record._id, !record.status)}
-            okText="Sim"
-            cancelText="Não">
-            <Tooltip title={`${statusTxt.toUpperCase()} o produto`}>
-              <Button size="small">
-                <FontAwesomeIcon icon={statusBtn} size="lg" />
-              </Button>
-            </Tooltip>
-          </Popconfirm>
-        );
-      }
-    },
-    {
-      title: "",
-      dataIndex: "action",
-      render: (text, record) => {
-        return (
-          <span>
-            <Button
-              size="small"
-              onClick={() => this.showModal(record) }>
-              <Icon type="edit" style={{ fontSize: "16px" }} />
-            </Button>
-            <Divider
-              style={{ fontSize: "10px", padding: 0, margin: 2 }}
-              type="vertical"
-            />
+  tableConfig = () => {
+    const caracteristicas = this.state.group_caracteristicas //[{chave:'peneira', label:'Peneira'}, {chave:'tratamento', label:'Tratamento'}]
+    const colunasCaracteristicas = caracteristicas.map(item => {
+      return (
+        {
+          title: item.label,
+          dataIndex: `${item.chave}`,
+          key: `${item.chave}`,
+          sorter: (a, b) => this.ordenaTabela(a, b, `${item.chave}`)
+        }
+      )
+    });
+
+    const regra_preco = this.state.group_regra_preco //[{chave:'peneira', label:'Peneira'}, {chave:'tratamento', label:'Tratamento'}]
+    const colunasRegraPreco = regra_preco.map(item => {
+      console.log(item)
+      return (
+        {
+          title: `${item.label} (%)`,
+          dataIndex: `comissao_${item.chave}`,
+          key: `comissao_${item.chave}`,
+          sorter: (a, b) => this.ordenaTabela(a, b, `${item.chave}`)
+        }
+      )
+    });
+
+    return [
+      ...colunasCaracteristicas,
+      ...colunasRegraPreco,
+      {
+        title: "Status",
+        dataIndex: "status",
+        key: "status",
+        render: (text, record) => {
+          const statusTxt = record.status ? "desativar" : "ativar";
+          const statusBtn = record.status ? "unlock" : "lock";
+          return (
             <Popconfirm
-              title={`Tem certeza em excluir o produto?`}
-              onConfirm={() => this.removeRecord(record)}
+              title={`Tem certeza em ${statusTxt} a variação?`}
+              onConfirm={e => this.changeStatus(record._id, !record.status)}
               okText="Sim"
               cancelText="Não">
-              <Button size="small">
-                <Icon type="delete" style={{ fontSize: "16px" }} />
-              </Button>
+              <Tooltip title={`${statusTxt.toUpperCase()} a variação`}>
+                <Button size="small">
+                  <FontAwesomeIcon icon={statusBtn} size="lg" />
+                </Button>
+              </Tooltip>
             </Popconfirm>
-          </span>
-        );
+          );
+        }
+      },
+      {
+        title: "",
+        dataIndex: "action",
+        render: (text, record) => {
+          return (
+            <span>
+              <Button
+                size="small"
+                onClick={() => this.showModal(record) }>
+                <Icon type="edit" style={{ fontSize: "16px" }} />
+              </Button>
+              <Divider
+                style={{ fontSize: "10px", padding: 0, margin: 2 }}
+                type="vertical"
+              />
+              <Popconfirm
+                title={`Tem certeza em excluir a variação?`}
+                onConfirm={() => this.removeRecord(record)}
+                okText="Sim"
+                cancelText="Não">
+                <Button size="small">
+                  <Icon type="delete" style={{ fontSize: "16px" }} />
+                </Button>
+              </Popconfirm>
+            </span>
+          );
+        }
       }
-    }
-  ];
+    ];
+  }
 
   showModal = (record) => {
     this.setState({
@@ -226,7 +245,7 @@ class ProductsPriceTable extends Component {
       /* if (Object.keys(this.state.formData).length === 0)
         flashWithSuccess("Sem alterações para salvar", " "); */
       try {
-        const created = await ProductsService.create(this.state.pricetable_id)(this.state.productgroup_id)(item.produto);
+        const created = await VariationsService.create(this.state.comissiontable_id)(this.state.rule_id)(this.state.productgroup_id)(this.state.product_id)(item);
 
         this.setState(prev => {
           if(prev.list.length > 0){
@@ -247,14 +266,14 @@ class ProductsPriceTable extends Component {
         flashWithSuccess();
       } catch (err) {
         if (err && err.response && err.response.data) parseErrors(err);
-        console.log("Erro interno ao adicionar um produto", err);
+        console.log("Erro interno ao adicionar uma variação", err);
       } finally {
         this.setState({ savingForm: false });
       }
     } else {
       try {
-        const updated = await ProductsService.update(this.state.pricetable_id)(this.state.productgroup_id)(item.produto);
-        const data = await ProductsService.list(this.state.pricetable_id)(this.state.productgroup_id)();
+        const updated = await VariationsService.update(this.state.comissiontable_id)(this.state.rule_id)(this.state.productgroup_id)(this.state.product_id)(item);
+        const data = await VariationsService.list(this.state.comissiontable_id)(this.state.rule_id)(this.state.productgroup_id)(this.state.product_id)();
 
         this.setState({
           openForm: false,
@@ -266,44 +285,7 @@ class ProductsPriceTable extends Component {
         flashWithSuccess();
       } catch (err) {
         if (err && err.response && err.response.data) parseErrors(err);
-        console.log("Erro interno ao atualizar um produto ", err);
-      } finally {
-        this.setState({ savingForm: false });
-      }
-    }
-  }
-
-  showModalFrete = (record) => {
-    this.setState({
-      visibleFrete: true,
-      record,
-      editMode: !!record
-    });
-  }
-
-  handleOkFrete = async (item) => {
-    await this.getDatabase();
-    await this.setStatus();
-
-    this.setState({ savingForm: true });
-    if (this.state.editMode) {
-      try {
-        const updated = await PriceTableService.update(item);
-
-        this.setState({
-          openForm: false,
-          editMode: false,
-          visibleFrete: false,
-          price_table_data: updated
-        });
-
-        flashWithSuccess(
-          "",
-          `O cabeçalho da tabela de preço foi atualizado com sucesso!`
-        );
-      } catch (err) {
-        if (err && err.response && err.response.data) parseErrors(err);
-        console.log("Erro interno ao atualizar um cabeçalho de preço ", err);
+        console.log("Erro interno ao atualizar uma variação", err);
       } finally {
         this.setState({ savingForm: false });
       }
@@ -312,8 +294,7 @@ class ProductsPriceTable extends Component {
 
   handleCancel = (e) => {
     this.setState({
-      visible: false,
-      visibleFrete: false
+      visible: false
     });
   }
 
@@ -324,10 +305,10 @@ class ProductsPriceTable extends Component {
   render() {
     return (
       <div>
-        {this.props.match.params.pricetable_id ? (
+        {this.props.match.params.comissiontable_id ? (
           <div>
-            <SimpleBreadCrumb to={"/tabela-preco"} history={this.props.history} />
-            <Row gutter={24}>
+            <SimpleBreadCrumb to={`/tabela-comissao/${this.state.comissiontable_id}/regras/${this.state.rule_id}/grupos-produto/${this.state.productgroup_id}/produtos`} history={this.props.history} />
+            <Row gutter={24}> 
               <Col span={5}>
                 <Card
                   bordered
@@ -335,17 +316,12 @@ class ProductsPriceTable extends Component {
                     boxShadow: "0px 8px 0px 0px #009d55 inset",
                     color: "#009d55"
                   }}>
-                  <p>{`Tabela de Preço: ${this.state.price_table_data.nome || ''}`}</p>
-                  <Button
-                    style={{ width: "100%" }}
-                    onClick={() => { this.showModalFrete(this.state.price_table_data)}}>
-                    <Icon type="edit" /> Editar
-                  </Button>
+                  <p>{`Produto: ${this.state.product_data.nome || ''}`}</p>
                 </Card>
               </Col>
               <Col span={19}>
                 <Card
-                  title="Produtos"
+                  title="Variação de Comissão"
                   bordered={false}
                   extra={
                     <Button
@@ -358,7 +334,7 @@ class ProductsPriceTable extends Component {
                   <SimpleTable
                     pagination={this.state.pagination}
                     spinning={this.state.loadingData}
-                    rowKey="id"
+                    rowKey="_id"
                     columns={this.tableConfig()}
                     dataSource={this.state.list}
                   />
@@ -368,7 +344,7 @@ class ProductsPriceTable extends Component {
           </div>
         ) : (
           <div>
-            <PainelHeader title="Produtos">
+            <PainelHeader title="Variação de Comissão">
               <Button
                 type="primary"
                 icon="plus"
@@ -379,7 +355,7 @@ class ProductsPriceTable extends Component {
             <SimpleTable
               pagination={this.state.pagination}
               spinning={this.state.loadingData}
-              rowKey="id"
+              rowKey="_id"
               columns={this.tableConfig()}
               dataSource={this.state.list}
               onChange={this.handleTableChange}
@@ -392,18 +368,12 @@ class ProductsPriceTable extends Component {
           onCreate={this.handleOk}
           wrappedComponentRef={this.saveFormRef}
           record={this.state.record}
-          grupo_produto_id={this.state.productgroup_id}
-        />
-        <ModalFrete
-          visible={this.state.visibleFrete}
-          onCancel={this.handleCancel}
-          onCreate={this.handleOkFrete}
-          wrappedComponentRef={this.saveFormRef}
-          record={this.state.price_table_data}
+          group_caracteristicas={this.state.group_caracteristicas}
+          group_regra_preco={this.state.group_regra_preco}
         />
       </div>
     );
   }
 }
 
-export default withRouter(ProductsPriceTable);
+export default withRouter(VariationComission);
