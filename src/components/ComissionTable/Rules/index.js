@@ -14,7 +14,7 @@ import { withRouter } from "react-router-dom";
 
 import * as ComissionRulesService from "../../../services/comissiontable.rules";
 import * as ComissionsService from "../../../services/comissiontable";
-import * as QuotasGroupService from "../../../services/quotas.productsgroup";
+import * as ComissionGroupService from "../../../services/comissiontable.group";
 import SimpleTable from "../../common/SimpleTable";
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 import { flashWithSuccess } from "../../common/FlashMessages";
@@ -99,7 +99,7 @@ class Rules extends Component {
 
   changeStatusGrupo = async (id, newStatus, regra_id) => {
     try {
-      await QuotasGroupService.changeStatus(this.state.comissiontable_id)(regra_id)(id, newStatus);
+      await ComissionGroupService.changeStatus(this.state.comissiontable_id)(regra_id)(id, newStatus);
 
       let recordName = "";
 
@@ -153,10 +153,10 @@ class Rules extends Component {
 
   removeGroup = async ({ id, nome }, regra_id) => {
     try {
-      await QuotasGroupService.remove(this.state.comissiontable_id)(regra_id)(id);
+      await ComissionGroupService.remove(this.state.comissiontable_id)(regra_id)(id);
       let _list = this.state.list.map(regra => {
         if(regra._id == regra_id){
-          regra.grupo_produto = [ ...regra.grupo_produto.filter(gp => gp.id == id)]
+          regra.grupo_produto = [ ...regra.grupo_produto.filter(gp => gp.id != id)]
         }
         return regra
       })
@@ -245,7 +245,7 @@ class Rules extends Component {
             <Tooltip title="Adicionar Grupo de Produto">
               <Button
                 size="small"
-                onClick={() => this.showModalGroup(record.id)} 
+                onClick={() => this.showModalGroup(record._id)} 
               >
                 <FontAwesomeIcon icon="plus" size="lg" />
               </Button>
@@ -257,7 +257,6 @@ class Rules extends Component {
   ];
 
   expandedRowRender = (tabela) => {
-    console.log(tabela)
     const columns = [
       { title: 'Grupo de Produto', dataIndex: 'nome', key: 'nome' },
       {
@@ -270,7 +269,7 @@ class Rules extends Component {
           return (
             <Popconfirm
               title={`Tem certeza em ${statusTxt} o grupo de produto?`}
-              onConfirm={e => this.changeStatusGrupo(record.id, !record.status, tabela.id)}
+              onConfirm={e => this.changeStatusGrupo(record.id, !record.status, tabela._id)}
               okText="Sim"
               cancelText="Não"
             >
@@ -291,7 +290,7 @@ class Rules extends Component {
             <span>
               <Popconfirm
                 title={`Tem certeza em excluir o grupo de produto?`}
-                onConfirm={() => this.removeGroup(record, tabela.id)}
+                onConfirm={() => this.removeGroup(record, tabela._id)}
                 okText="Sim"
                 cancelText="Não"
               >
@@ -437,10 +436,10 @@ class Rules extends Component {
       /* if (Object.keys(this.state.formData).length === 0)
         flashWithSuccess("Sem alterações para salvar", " "); */
       try {
-        const created = await QuotasGroupService.create(this.state.comissiontable_id)(this.state.regra_id)(item.grupo_produto);
+        const created = await ComissionGroupService.create(this.state.comissiontable_id)(this.state.regra_id)(item.grupo_produto);
         this.setState(prev => {
           let _list = prev.list.map(regra => {
-            if(regra.id == this.state.regra_id){
+            if(regra._id == this.state.regra_id){
               regra.grupo_produto = [ ...regra.grupo_produto, created]
             }
             return regra

@@ -10,6 +10,7 @@ import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
 import ModalForm from "./modal"
 import ModalFormGroup from "../../common/ModalProductGroup"
+import { formatDate } from '../../common/utils'
 
 class PriceTable extends Component {
   constructor(props) {
@@ -166,7 +167,7 @@ class PriceTable extends Component {
       await PTGroupService.remove(price_table_id)(id);
       let _list = this.state.list.map(priceTable => {
         if(priceTable._id == price_table_id){
-          priceTable.grupo_produto = [ ...priceTable.grupo_produto.filter(gp => gp.id == id)]
+          priceTable.grupo_produto = [ ...priceTable.grupo_produto.filter(gp => gp.id != id)]
         }
         return priceTable
       })
@@ -192,23 +193,35 @@ class PriceTable extends Component {
         else return 1;
       }
     },
-    /* {
-      title: "Moeda",
-      dataIndex: "moeda",
-      key: "moeda",
-      sorter: (a, b, sorter) => {
-        if (sorter === "ascendent") return -1;
-        else return 1;
-      }
-    }, */
     {
-      title: "Validade",
-      dataIndex: "data_validade",
-      key: "data_validade",
+      title: "Safra",
+      dataIndex: "safra",
+      key: "safra",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
+      },
+      render: (text) => text.descricao
+    },
+    {
+      title: "Validade De",
+      dataIndex: "data_validade_de",
+      key: "data_validade_de",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      },
+      render: (text) => text ? formatDate(text) : ''
+    },
+    {
+      title: "Validade Até",
+      dataIndex: "data_validade_ate",
+      key: "data_validade_ate",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      },
+      render: (text) => text ? formatDate(text) : ''
     },
     {
       title: "Versão",
