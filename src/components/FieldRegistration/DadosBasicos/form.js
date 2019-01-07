@@ -9,6 +9,7 @@ import * as FieldRegistrationService from "../../../services/field-registration"
 import * as ClientService from "../../../services/clients";
 import * as ProductGroupService from "../../../services/productgroups";
 import * as SeasonService from "../../../services/seasons";
+import * as ConsultantService from "../../../services/consultants";
 import * as IBGEService from "../../../services/ibge";
 import moment from "moment";
 
@@ -32,19 +33,21 @@ class FieldRegistrationForm extends Component {
     const dataClient = await ClientService.list({ limit: 9999999999 });
     const dataProductGroup = await ProductGroupService.list({ limit: 9999999999 });
     const dataSeason = await SeasonService.list({ limit: 9999999999 });
+    const dataConsultant = await ConsultantService.list({ tipo: "PRODUCAO" })
 
     this.setState(prev => ({
       ...prev,
       listClient: dataClient.docs,
       listProductGroup: dataProductGroup.docs,
       listSeason: dataSeason.docs,
-      formData: {
+      listConsultant: dataConsultant.docs,
+      /*formData: {
         ...prev.formData,
         responsavel: {
           nome: JSON.parse(localStorage.getItem("simpleagro_painel")).painelState.userData.user.nome,
           id: JSON.parse(localStorage.getItem("simpleagro_painel")).painelState.userData.user._id
         }
-      }
+      }*/
     }))
 
     if (id) {
@@ -170,7 +173,9 @@ class FieldRegistrationForm extends Component {
                 geolocalizacao: {
                   latitude: prop.latitude,
                   longitude: prop.longitude
-                }
+                },
+                cidade: prop.cidade,
+                estado: prop.estado
               }
             }))
             : null)
@@ -208,18 +213,44 @@ class FieldRegistrationForm extends Component {
         </Affix>
         <Form onChange={this.handleFormState}>
 
+        <Form.Item label="Safra" {...formItemLayout}>
+            {getFieldDecorator("safra", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.safra && this.state.formData.safra.descricao
+            })(<Select
+                name="safra"
+                showAction={["focus", "click"]}
+                showSearch
+                style={{ width: 200 }}
+                placeholder="Selecione a safra..."
+                ref={input => (this.titleInput = input)}
+                onChange={e => {
+                  this.handleFormState({
+                    target: { name: "safra", value: JSON.parse(e) }
+                  })
+                }}
+              >
+                {this.state.listSeason && this.state.listSeason.map(season =>
+                  <Option key={season._id} value={JSON.stringify({
+                    id: season._id,
+                    descricao: season.descricao
+                  })}>
+                    {season.descricao}
+                  </Option>)
+                }
+              </Select>)}
+          </Form.Item>
+
           <Form.Item label="Cliente" {...formItemLayout}>
             {getFieldDecorator("cliente", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.cliente && this.state.formData.cliente.nome
             })(<Select
                   name="cliente"
-                  allowClear
                   showAction={["focus", "click"]}
                   showSearch
                   style={{ width: 200 }}
                   placeholder="Selecione um cliente..."
-                  ref={input => (this.titleInput = input)}
                   onChange={e => {
                     this.handleFormState({
                       target: { name: "cliente", value: JSON.parse(e) }
@@ -287,39 +318,14 @@ class FieldRegistrationForm extends Component {
             })(<InputNumber name="longitude" style={{ width: 400 }} />)}
           </Form.Item>
 
-          <Form.Item label="Safra" {...formItemLayout}>
-            {getFieldDecorator("safra", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.safra && this.state.formData.safra.descricao
-            })(<Select
-                name="safra"
-                showAction={["focus", "click"]}
-                showSearch
-                style={{ width: 200 }}
-                placeholder="Selecione a safra..."
-                onChange={e => {
-                  this.handleFormState({
-                    target: { name: "safra", value: JSON.parse(e) }
-                  })
-                }}
-              >
-                {this.state.listSeason && this.state.listSeason.map(season =>
-                  <Option key={season._id} value={JSON.stringify({
-                    id: season._id,
-                    descricao: season.descricao
-                  })}>
-                    {season.descricao}
-                  </Option>)
-                }
-              </Select>)}
-          </Form.Item>
-
+          {/*
           <Form.Item label="Nº Inscrição de Campo" {...formItemLayout}>
             {getFieldDecorator("numero_inscricao_capo", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.numero_inscricao_capo
             })(<Input name="numero_inscricao_capo" />)}
           </Form.Item>
+          */}
 
           <Form.Item label="Estado" {...formItemLayout}>
               {getFieldDecorator("estado", {
@@ -447,14 +453,46 @@ class FieldRegistrationForm extends Component {
             {getFieldDecorator("categ_plantada", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.categ_plantada
-            })(<Input name="categ_plantada" />)}
+            })(<Select
+                  name="categ_plantada"
+                  showAction={["focus","click"]}
+                  style={{ width: 200 }}
+                  placeholder="Selecione..."
+                  onChange={e => {
+                    this.handleFormState({
+                      target: { name: "categ_plantada", value: e }
+                    })
+                  }}>
+                    <Option value="GN" key="GN" >Genética</Option>
+                    <Option value="BS" key="BS" >Básica</Option>
+                    <Option value="C1" key="C1" >Certificada de 1ª Geração</Option>
+                    <Option value="C2" key="C2" >Certificada de 2ª Geração</Option>
+                    <Option value="S1" key="S1" >Fiscalizada de 1ª Geração</Option>
+                    <Option value="S2" key="S2" >Fiscalizada de 2ª Geração</Option>
+              </Select>)}
           </Form.Item>
 
           <Form.Item label="Categoria Colhida" {...formItemLayout}>
             {getFieldDecorator("categ_colhida", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.categ_colhida
-            })(<Input name="categ_colhida" />)}
+            })(<Select
+                  name="categ_colhida"
+                  showAction={["focus","click"]}
+                  style={{ width: 200 }}
+                  placeholder="Selecione..."
+                  onChange={e => {
+                    this.handleFormState({
+                      target: { name: "categ_colhida", value: e }
+                    })
+                  }}>
+                    <Option value="GN" key="GN" >Genética</Option>
+                    <Option value="BS" key="BS" >Básica</Option>
+                    <Option value="C1" key="C1" >Certificada de 1ª Geração</Option>
+                    <Option value="C2" key="C2" >Certificada de 2ª Geração</Option>
+                    <Option value="S1" key="S1" >Fiscalizada de 1ª Geração</Option>
+                    <Option value="S2" key="S2" >Fiscalizada de 2ª Geração</Option>
+                </Select>)}
           </Form.Item>
 
           <Form.Item label="Área Inscrita" {...formItemLayout}>
@@ -548,11 +586,26 @@ class FieldRegistrationForm extends Component {
             {getFieldDecorator("responsavel", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.responsavel && this.state.formData.responsavel.nome
-            })(<Input name="responsavel" disabled />)}
+            })(<Select
+                  name="responsavel"
+                  showAction={["focus","click"]}
+                  style={{ width: 200 }}
+                  placeholder="Selecione..."
+                  onChange={e => {
+                    this.handleFormState({
+                      target: { name: "responsavel", value: JSON.parse(e) }
+                    })
+                  }}>
+                    {this.state.listConsultant && this.state.listConsultant.map(consultant =>
+                      (<Option key={consultant._id} value={JSON.stringify({
+                        id: consultant._id,
+                        nome: consultant.nome
+                      })}>
+                        {consultant.nome}
+                      </Option>))}
+              </Select>)}
           </Form.Item>
-
         </Form>
-
       </div>
     );
   }
