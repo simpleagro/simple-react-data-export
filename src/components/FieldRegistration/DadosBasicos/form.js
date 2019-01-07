@@ -23,8 +23,7 @@ class FieldRegistrationForm extends Component {
       formData: {},
       savingForm: false,
       estados: [],
-      cidades: [],
-      geolocalizacao: []
+      cidades: []
     };
   }
 
@@ -44,10 +43,6 @@ class FieldRegistrationForm extends Component {
         responsavel: {
           nome: JSON.parse(localStorage.getItem("simpleagro_painel")).painelState.userData.user.nome,
           id: JSON.parse(localStorage.getItem("simpleagro_painel")).painelState.userData.user._id
-        },
-        geolocalizacao: {
-          latitude: null,
-          longitude: null
         }
       }
     }))
@@ -78,11 +73,6 @@ class FieldRegistrationForm extends Component {
     });
     this.setState(prev => ({ ...prev, formData: form }));
   };
-
-  setUsername(){
-
-    console.log("foi")
-  }
 
   saveForm = async e => {
     this.setUsername();
@@ -170,17 +160,22 @@ class FieldRegistrationForm extends Component {
     });
   };
 
-  async setGeolocalization(cod){
-    this.setState(prev => ({
-      formData: {
-        ...prev.formData,
-        geolocalizacao: {
-          latitude: "11111",
-          longitude: "11111"
-        }
-      }
-    }))
-    console.log("cod: ", cod)
+  async setGeolocalization(ClientId, PropId){
+    this.state.listClient.map(client =>
+      client._id === ClientId
+        ? client.propriedades.map(prop =>
+          prop._id === PropId
+            ? this.setState( prev => ({
+              formData: {
+                ...prev.formData,
+                geolocalizacao: {
+                  latitude: prop.latitude,
+                  longitude: prop.longitude
+                }
+              }
+            }))
+            : null)
+        : null )
   }
 
   render() {
@@ -261,7 +256,8 @@ class FieldRegistrationForm extends Component {
                   onChange={e => {
                     this.handleFormState({
                       target: { name: "propriedade", value: JSON.parse(e) }
-                    }); this.setGeolocalization(this.state.formData.propriedade);
+                    });
+                    this.setGeolocalization(this.state.formData.cliente.id, JSON.parse(e).id);
                   }}
                 >
                   {this.state.formData.cliente && this.state.listClient.map(client => (
@@ -557,8 +553,6 @@ class FieldRegistrationForm extends Component {
           </Form.Item>
 
         </Form>
-
-        { console.log(this.state) }
 
       </div>
     );

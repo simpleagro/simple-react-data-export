@@ -112,6 +112,12 @@ class FieldRegistration extends Component {
       render: text => text
     },
     {
+      title: "Safra",
+      dataIndex: "safra.descricao",
+      key: "safra.descricao",
+      render: text => text
+    },
+    {
       title: "Propriedade",
       dataIndex: "propriedade.nome",
       key: "propriedade.nome",
@@ -149,6 +155,18 @@ class FieldRegistration extends Component {
       title: "Produção",
       dataIndex: "prod_estimada",
       key: "prod_estimada",
+      render: text => text
+    },
+    {
+      title: "Categoria Plantada",
+      dataIndex: "categ_plantada",
+      key: "categ_plantada",
+      render: text => text
+    },
+    {
+      title: "Categoria Colhida",
+      dataIndex: "categ_colhida",
+      key: "categ_colhida",
       render: text => text
     },
     {
@@ -250,7 +268,7 @@ class FieldRegistration extends Component {
           columns={this.tableConfig()}
           dataSource={this.state.list}
           onChange={this.handleTableChange}
-          scroll={{ x: window.innerWidth-400 }}
+          scroll={{ x: window.innerWidth }}
         />
       </div>
     );
