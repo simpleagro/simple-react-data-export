@@ -1,6 +1,6 @@
 import { baseApi as api } from "../config/api";
 
-const baseURL = "/field_registration/:field_registration_id/pre_harvest/:pre_harvest_id/authorization";
+const baseURL = "/field-registration/:field_registration_id/pre-harvest/:pre_harvest_id/transport-authorization";
 
 export const list = field_registration_id => pre_harvest_id => aqp =>
   api

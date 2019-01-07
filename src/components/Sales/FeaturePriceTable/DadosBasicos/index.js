@@ -7,6 +7,7 @@ import SimpleTable from "../../../common/SimpleTable";
 import { flashWithSuccess } from "../../../common/FlashMessages";
 import parseErrors from "../../../../lib/parseErrors";
 import { PainelHeader } from "../../../common/PainelHeader";
+import moment from "moment";
 
 class PaymentForm extends Component {
   constructor(props) {
@@ -98,34 +99,32 @@ class PaymentForm extends Component {
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
+      },
+      render: text => text
     },
     {
       title: "Moeda",
       dataIndex: "moeda",
       key: "moeda",
-      sorter: (a, b, sorter) => {
-        if (sorter === "ascendent") return -1;
-        else return 1;
-      }
+      render: text => text
     },
     {
       title: "Safra",
       dataIndex: "safra.descricao",
       key: "safra.descricao",
-      sorter: (a, b, sorter) => {
-        if (sorter === "ascendent") return -1;
-        else return 1;
-      }
+      render: text => text
     },
     {
-      title: "Data de Validade",
-      dataIndex: "data_validade",
-      key: "data_validade",
-      sorter: (a, b, sorter) => {
-        if (sorter === "ascendent") return -1;
-        else return 1;
-      }
+      title: "Data Validade de",
+      dataIndex: "data_validade_de",
+      key: "data_validade_de",
+      render: text => text
+    },
+    {
+      title: "Data Validade até",
+      dataIndex: "data_validade_ate",
+      key: "data_validade_ate",
+      render: text => text
     },
     {
       title: "Caracteristica",
@@ -134,7 +133,8 @@ class PaymentForm extends Component {
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
+      },
+      render: text => text
     },
     {
       title: "Ações",

@@ -7,6 +7,8 @@ import SimpleTable from "../../common/SimpleTable";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
+import { simpleTableSearch } from "../../../lib/simpleTableSearch";
+import moment from "moment";
 
 class FieldRegistration extends Component {
   constructor(props) {
@@ -79,7 +81,7 @@ class FieldRegistration extends Component {
     }
   };
 
-  removeRecord = async ({ _id, nome }) => {
+  removeRecord = async ({ _id, numero_inscricao_campo }) => {
     try {
       await FieldRegistrationService.remove(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
@@ -88,7 +90,7 @@ class FieldRegistration extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `A inscrição de campo, ${nome}, foi removido com sucesso!`);
+      flashWithSuccess("", `A inscrição de campo, ${numero_inscricao_campo}, foi removido com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover uma inscrição de campo", err);
@@ -108,18 +110,27 @@ class FieldRegistration extends Component {
       dataIndex: "cliente.nome",
       key: "cliente.nome",
       fixed: "left",
+      ...simpleTableSearch(this)("cliente.nome"),
+      render: text => text
+    },
+    {
+      title: "Safra",
+      dataIndex: "safra.descricao",
+      key: "safra.descricao",
       render: text => text
     },
     {
       title: "Propriedade",
       dataIndex: "propriedade.nome",
       key: "propriedade.nome",
+      ...simpleTableSearch(this)("propriedade.nome"),
       render: text => text
     },
     {
       title: "Cultivar",
       dataIndex: "cultivar.nome",
       key: "cultivar.nome",
+      ...simpleTableSearch(this)("cultivar.nome"),
       render: text => text
     },
     {
@@ -130,20 +141,42 @@ class FieldRegistration extends Component {
     },
     {
       title: "Início Colheita",
-      dataIndex: "inicio_colheita",
-      key: "inicio_colheita",
-      render: text => text
+      dataIndex: "data_inicio_colheita",
+      key: "data_inicio_colheita",
+      render: (text) => {
+        return moment(text).format("DD/MM/YYYY")
+      }
+    },
+    {
+      title: "Fim Colheita",
+      dataIndex: "data_fim_colheita",
+      key: "data_fim_colheita",
+      render: (text) => {
+        return moment(text).format("DD/MM/YYYY")
+      }
     },
     {
       title: "Produção",
-      dataIndex: "producao",
-      key: "producao",
+      dataIndex: "prod_estimada",
+      key: "prod_estimada",
+      render: text => text
+    },
+    {
+      title: "Categoria Plantada",
+      dataIndex: "categ_plantada",
+      key: "categ_plantada",
+      render: text => text
+    },
+    {
+      title: "Categoria Colhida",
+      dataIndex: "categ_colhida",
+      key: "categ_colhida",
       render: text => text
     },
     {
       title: "Ações",
       dataIndex: "action",
-      //fixed: "right",
+      fixed: "right",
       render: (text, record) => {
         return (
           <span>
@@ -179,7 +212,7 @@ class FieldRegistration extends Component {
                     `/inscricao-de-campo/${record._id}/pre-colheita`
                   )
                 }>
-                <FontAwesomeIcon icon="list" size="lg" />
+                <FontAwesomeIcon icon="leaf" size="lg" />
               </Button>
             </Tooltip>
             <Divider
@@ -239,7 +272,7 @@ class FieldRegistration extends Component {
           columns={this.tableConfig()}
           dataSource={this.state.list}
           onChange={this.handleTableChange}
-          scroll={{ x: 1500 }}
+          scroll={{ x: window.innerWidth }}
         />
       </div>
     );

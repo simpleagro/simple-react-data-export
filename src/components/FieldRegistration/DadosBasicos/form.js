@@ -23,8 +23,7 @@ class FieldRegistrationForm extends Component {
       formData: {},
       savingForm: false,
       estados: [],
-      cidades: [],
-      geolocalizacao: []
+      cidades: []
     };
   }
 
@@ -41,10 +40,9 @@ class FieldRegistrationForm extends Component {
       listSeason: dataSeason.docs,
       formData: {
         ...prev.formData,
-        responsavel: JSON.parse(localStorage.getItem("simpleagro_painel")).painelState.userData.user.nome,
-        geolocalizacao: {
-          latitude: null,
-          longitude: null
+        responsavel: {
+          nome: JSON.parse(localStorage.getItem("simpleagro_painel")).painelState.userData.user.nome,
+          id: JSON.parse(localStorage.getItem("simpleagro_painel")).painelState.userData.user._id
         }
       }
     }))
@@ -76,13 +74,7 @@ class FieldRegistrationForm extends Component {
     this.setState(prev => ({ ...prev, formData: form }));
   };
 
-  setUsername(){
-
-    console.log("foi")
-  }
-
   saveForm = async e => {
-    this.setUsername();
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
@@ -167,6 +159,24 @@ class FieldRegistrationForm extends Component {
     });
   };
 
+  async setGeolocalization(ClientId, PropId){
+    this.state.listClient.map(client =>
+      client._id === ClientId
+        ? client.propriedades.map(prop =>
+          prop._id === PropId
+            ? this.setState( prev => ({
+              formData: {
+                ...prev.formData,
+                geolocalizacao: {
+                  latitude: prop.latitude,
+                  longitude: prop.longitude
+                }
+              }
+            }))
+            : null)
+        : null )
+  }
+
   render() {
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
@@ -245,7 +255,8 @@ class FieldRegistrationForm extends Component {
                   onChange={e => {
                     this.handleFormState({
                       target: { name: "propriedade", value: JSON.parse(e) }
-                    })
+                    });
+                    this.setGeolocalization(this.state.formData.cliente.id, JSON.parse(e).id);
                   }}
                 >
                   {this.state.formData.cliente && this.state.listClient.map(client => (
@@ -279,7 +290,7 @@ class FieldRegistrationForm extends Component {
           <Form.Item label="Safra" {...formItemLayout}>
             {getFieldDecorator("safra", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.safra
+              initialValue: this.state.formData.safra && this.state.formData.safra.descricao
             })(<Select
                 name="safra"
                 showAction={["focus", "click"]}
@@ -450,14 +461,14 @@ class FieldRegistrationForm extends Component {
             {getFieldDecorator("area_inscrita", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.area_inscrita
-            })(<InputNumber name="area_inscrita" />)}
+            })(<InputNumber min={0} name="area_inscrita" />)}
           </Form.Item>
 
           <Form.Item label="Área Plantada" {...formItemLayout}>
             {getFieldDecorator("area_plantada", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.area_plantada
-            })(<InputNumber name="area_plantada" />)}
+            })(<InputNumber min={0} name="area_plantada" />)}
           </Form.Item>
 
           <Form.Item label="Data do Plantio" {...formItemLayout}>
@@ -530,13 +541,13 @@ class FieldRegistrationForm extends Component {
             {getFieldDecorator("prod_estimada", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.prod_estimada
-            })(<InputNumber name="prod_estimada" />)}
+            })(<InputNumber min={0} name="prod_estimada" />)}
           </Form.Item>
 
           <Form.Item label="Responsável" {...formItemLayout}>
             {getFieldDecorator("responsavel", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.responsavel
+              initialValue: this.state.formData.responsavel && this.state.formData.responsavel.nome
             })(<Input name="responsavel" disabled />)}
           </Form.Item>
 

@@ -32,7 +32,7 @@ class UserForm extends Component {
 
     const filiais = await BranchsListService(empresa)({
       limit: -1,
-      fields: "filiais.nome_fantasia, filiais._id"
+      fields: "nome_fantasia"
     });
 
     if (id) {
