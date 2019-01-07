@@ -124,12 +124,12 @@ class Plots extends Component {
     {
       title: "Nome",
       dataIndex: "nome",
-      key: "propriedades.talhoes.nome",
+      key: "nome",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      ...simpleTableSearch(this)("propriedades.talhoes.nome"),
+      ...simpleTableSearch(this)("nome"),
       render: (text, record) => {
         return !record.poligonos ||
           (record.poligonos &&
@@ -147,6 +147,15 @@ class Plots extends Component {
         ) : (
           text
         );
+      }
+    },
+    {
+      title: "Área",
+      dataIndex: "area",
+      key: "area",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
       }
     },
     {
@@ -212,7 +221,8 @@ class Plots extends Component {
                   this.props.history.push(
                     `/clientes/${this.state.client_id}/plantio?talhao=${
                       record._id
-                    }`, { propriedade_id: this.state.property_id }
+                    }`,
+                    { propriedade_id: this.state.property_id }
                   );
                 }}>
                 <FontAwesomeIcon icon="seedling" size="lg" />

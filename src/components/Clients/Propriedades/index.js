@@ -120,31 +120,38 @@ class Properties extends Component {
     {
       title: "Nome",
       dataIndex: "nome",
-      key: "propriedades.nome",
+      key: "nome",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      ...simpleTableSearch(this)("propriedades.nome"),
+      ...simpleTableSearch(this)("nome"),
       render: text => text
     },
     {
       title: "Inscrição Estadual",
       dataIndex: "ie",
-      key: "propriedades.ie",
-      ...simpleTableSearch(this)("propriedades.ie")
+      key: "ie",
+      ...simpleTableSearch(this)("ie")
     },
     {
-      title: "Cidade",
+      title: "Cidade/Estado",
       dataIndex: "cidade",
-      key: "propriedades.cidade",
-      ...simpleTableSearch(this)("propriedades.cidade")
+      key: "cidade",
+      ...simpleTableSearch(this)("cidade"),
+      render: (text, record) => `${text}/${record.estado}`
     },
     {
-      title: "Estado",
-      dataIndex: "estado",
-      key: "propriedades.estado",
-      ...simpleTableSearch(this)("propriedades.estado")
+      title: "Área Prop.",
+      dataIndex: "area",
+      key: "area",
+      ...simpleTableSearch(this)("area"),
+      render: text => (text ? text : 0)
+    },
+    {
+      title: "Área Total Talhões",
+      dataIndex: "areaTotalTalhoes",
+      key: "areaTotalTalhoes"
     },
     {
       title: "Status",
