@@ -7,6 +7,7 @@ import SimpleTable from "../../common/SimpleTable";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
+import { simpleTableSearch } from "../../../lib/simpleTableSearch";
 import moment from "moment";
 
 class FieldRegistration extends Component {
@@ -80,7 +81,7 @@ class FieldRegistration extends Component {
     }
   };
 
-  removeRecord = async ({ _id, nome }) => {
+  removeRecord = async ({ _id, numero_inscricao_campo }) => {
     try {
       await FieldRegistrationService.remove(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
@@ -89,7 +90,7 @@ class FieldRegistration extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `A inscrição de campo, ${nome}, foi removido com sucesso!`);
+      flashWithSuccess("", `A inscrição de campo, ${numero_inscricao_campo}, foi removido com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover uma inscrição de campo", err);
@@ -109,6 +110,7 @@ class FieldRegistration extends Component {
       dataIndex: "cliente.nome",
       key: "cliente.nome",
       fixed: "left",
+      ...simpleTableSearch(this)("cliente.nome"),
       render: text => text
     },
     {
@@ -121,12 +123,14 @@ class FieldRegistration extends Component {
       title: "Propriedade",
       dataIndex: "propriedade.nome",
       key: "propriedade.nome",
+      ...simpleTableSearch(this)("propriedade.nome"),
       render: text => text
     },
     {
       title: "Cultivar",
       dataIndex: "cultivar.nome",
       key: "cultivar.nome",
+      ...simpleTableSearch(this)("cultivar.nome"),
       render: text => text
     },
     {

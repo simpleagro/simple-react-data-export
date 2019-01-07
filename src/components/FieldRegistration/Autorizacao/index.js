@@ -103,7 +103,7 @@ class Plots extends Component {
     }
   };
 
-  removeRecord = async ({ _id, nome }) => {
+  removeRecord = async ({ _id, numero_autorizacao }) => {
     try {
       await AuthorizationService.remove(this.state.field_registration_id)(
         this.state.pre_harvest_id
@@ -114,7 +114,7 @@ class Plots extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `A autorização, ${nome}, foi removido com sucesso!`);
+      flashWithSuccess("", `A autorização número ${numero_autorizacao}, foi removida com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover a autorização", err);
@@ -126,13 +126,15 @@ class Plots extends Component {
       title: "Número",
       dataIndex: "numero_autorizacao",
       key: "pre-colheita.numero_autorizacao",
-      ...simpleTableSearch(this)("pre-colheita.numero_autorizacao")
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      }
     },
     {
       title: "Data",
       dataIndex: "data",
       key: "pre-colheita.data",
-      ...simpleTableSearch(this)("pre-colheita.data"),
       render: (text) => {
         return moment(text).format("DD/MM/YYYY")
       }
@@ -153,7 +155,6 @@ class Plots extends Component {
       title: "Saída",
       dataIndex: "saida_caminhao",
       key: "pre-colheita.saida_caminhao",
-      ...simpleTableSearch(this)("pre-colheita.saida_caminhao"),
       render: (text) => {
         return moment(text).format("DD/MM/YYYY")
       }
@@ -291,7 +292,6 @@ class Plots extends Component {
             </Card>
           </Col>
         </Row>
-        {[ console.log(this.state), console.log(this.props) ]}
       </div>
     );
   }

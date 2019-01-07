@@ -240,8 +240,6 @@ class AuthorizationForm extends Component {
 
         </Form>
 
-        {[ console.log(this.state), console.log(this.props) ]}
-
       </div>
     );
   }

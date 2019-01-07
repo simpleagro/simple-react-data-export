@@ -75,7 +75,6 @@ class FieldRegistrationForm extends Component {
   };
 
   saveForm = async e => {
-    this.setUsername();
     this.props.form.validateFields(async err => {
       if (err) return;
       else {

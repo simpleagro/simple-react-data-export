@@ -100,7 +100,7 @@ class PreHarvest extends Component {
     }
   };
 
-  removeRecord = async ({ _id, nome }) => {
+  removeRecord = async ({ _id, nome_talhao }) => {
     try {
       await PreHarvestService.remove(this.state.field_registration_id)(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
@@ -109,7 +109,7 @@ class PreHarvest extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `A pré colheita, ${nome}, foi removida com sucesso!`);
+      flashWithSuccess("", `A pré colheita, ${nome_talhao}, foi removida com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover uma pré colheita", err);
@@ -127,7 +127,6 @@ class PreHarvest extends Component {
       title: "Data",
       dataIndex: "data",
       key: "pre_colheita.data",
-      ...simpleTableSearch(this)("pre_colheita.data"),
       render: (text) => {
         return moment(text).format("DD/MM/YYYY")
       }
@@ -135,14 +134,12 @@ class PreHarvest extends Component {
     {
       title: "Número de Colhedoras",
       dataIndex: "num_colhedoras",
-      key: "pre_colheita.num_colhedoras",
-      ...simpleTableSearch(this)("pre_colheita.num_colhedoras")
+      key: "pre_colheita.num_colhedoras"
     },
     {
       title: "Produtividade",
       dataIndex: "produtividade",
-      key: "pre_colheita.produtividade",
-      ...simpleTableSearch(this)("pre_colheita.produtividade")
+      key: "pre_colheita.produtividade"
     },
     {
       title: "Ações",
@@ -278,7 +275,6 @@ class PreHarvest extends Component {
             </Card>
           </Col>
         </Row>
-        {[console.log(this.state), console.log(this.props)]}
       </div>
     );
   }
