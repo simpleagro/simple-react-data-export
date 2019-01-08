@@ -238,21 +238,21 @@ class FeaturePriceTable extends Component {
             )}
           </Form.Item>
 
-          <Form.Item label="Data de Validade" {...formItemLayout}>
-            {getFieldDecorator("data_validade", {
+          <Form.Item label="Data Validade de" {...formItemLayout}>
+            {getFieldDecorator("data_validade_de", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: moment(
-                this.state.formData.data_validade
-                  ? this.state.formData.data_validade
+              initialValue: this.state.formData.data_validade_de ? moment(
+                this.state.formData.data_validade_de
+                  ? this.state.formData.data_validade_de
                   : new Date(),
                 "YYYY-MM-DD"
-              )
+              ) : null
             })(
               <DatePicker
                 onChange={(data, dataString) =>
                   this.handleFormState({
                     target: {
-                      name: "data_validade",
+                      name: "data_validade_de",
                       value: moment(dataString, "DD/MM/YYYY").format(
                         "YYYY-MM-DD"
                       )
@@ -262,9 +262,52 @@ class FeaturePriceTable extends Component {
                 allowClear
                 format={"DD/MM/YYYY"}
                 style={{ width: 200 }}
-                name="data_validade"
+                name="data_validade_de"
               />
             )}
+          </Form.Item>
+
+          <Form.Item label="Data Validade até" {...formItemLayout}>
+            {getFieldDecorator("data_validade_ate", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.data_validade_ate ? moment(
+                this.state.formData.data_validade_ate
+                  ? this.state.formData.data_validade_ate
+                  : new Date(),
+                "YYYY-MM-DD"
+              ) : null
+            })(
+              <DatePicker
+                onChange={(data, dataString) =>
+                  this.handleFormState({
+                    target: {
+                      name: "data_validade_ate",
+                      value: moment(dataString, "DD/MM/YYYY").format(
+                        "YYYY-MM-DD"
+                      )
+                    }
+                  })
+                }
+                allowClear
+                format={"DD/MM/YYYY"}
+                style={{ width: 200 }}
+                name="data_validade_ate"
+              />
+            )}
+          </Form.Item>
+
+          <Form.Item label="Taxa de Adição" {...formItemLayout}>
+            {getFieldDecorator("taxa_adicao", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.taxa_adicao
+            })(<Input name="taxa_adicao" />)}
+          </Form.Item>
+
+          <Form.Item label="Taxa de Supressão" {...formItemLayout}>
+            {getFieldDecorator("taxa_supressao", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.taxa_supressao
+            })(<Input name="taxa_supressao" />)}
           </Form.Item>
 
           <Form.Item label="Grupo de Produtos" {...formItemLayout}>

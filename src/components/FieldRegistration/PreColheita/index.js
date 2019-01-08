@@ -18,6 +18,7 @@ import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 import { simpleTableSearch } from "../../../lib/simpleTableSearch";
+import moment from "moment";
 
 class PreHarvest extends Component {
   constructor(props) {
@@ -99,7 +100,7 @@ class PreHarvest extends Component {
     }
   };
 
-  removeRecord = async ({ _id, nome }) => {
+  removeRecord = async ({ _id, nome_talhao }) => {
     try {
       await PreHarvestService.remove(this.state.field_registration_id)(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
@@ -108,7 +109,7 @@ class PreHarvest extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `A pré colheita, ${nome}, foi removida com sucesso!`);
+      flashWithSuccess("", `A pré colheita, ${nome_talhao}, foi removida com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover uma pré colheita", err);
@@ -117,39 +118,28 @@ class PreHarvest extends Component {
 
   tableConfig = () => [
     {
-      title: "Responsável",
-      dataIndex: "responsavel.nome",
-      key: "pre-colheita.responsavel.nome",
-      sorter: (a, b, sorter) => {
-        if (sorter === "ascendent") return -1;
-        else return 1;
-      },
-      ...simpleTableSearch(this)("pre-colheita.responsavel.nome"),
-      render: text => text
-    },
-    {
       title: "Talhão",
       dataIndex: "nome_talhao",
-      key: "pre-colheita.nome_talhao",
-      ...simpleTableSearch(this)("pre-colheita.nome_talhao")
+      key: "pre_colheita.nome_talhao",
+      ...simpleTableSearch(this)("pre_colheita.nome_talhao")
     },
     {
       title: "Data",
       dataIndex: "data",
-      key: "pre-colheita.data",
-      ...simpleTableSearch(this)("pre-colheita.data")
+      key: "pre_colheita.data",
+      render: (text) => {
+        return moment(text).format("DD/MM/YYYY")
+      }
     },
     {
       title: "Número de Colhedoras",
       dataIndex: "num_colhedoras",
-      key: "pre-colheita.num_colhedoras",
-      ...simpleTableSearch(this)("pre-colheita.num_colhedoras")
+      key: "pre_colheita.num_colhedoras"
     },
     {
       title: "Produtividade",
       dataIndex: "produtividade",
-      key: "pre-colheita.produtividade",
-      ...simpleTableSearch(this)("pre-colheita.produtividade")
+      key: "pre_colheita.produtividade"
     },
     {
       title: "Ações",
@@ -201,6 +191,17 @@ class PreHarvest extends Component {
                   </Button>
                 </Tooltip>
               )}
+              <Button
+              size="small"
+              onClick={() =>
+                this.props.history.push(
+                  `/inscricao-de-campo/${this.state.field_registration_id}/pre-colheita/${
+                    record._id
+                  }/autorizacao`
+                )
+              }>
+              <Icon type="key" style={{ fontSize: "16px" }} />
+            </Button>
           </span>
         );
       }
@@ -234,7 +235,7 @@ class PreHarvest extends Component {
                 boxShadow: "0px 8px 0px 0px #009d55 inset",
                 color: "#009d55"
               }}>
-              <p>{`Inscrição: ${this.state.pre_harvest_data.nome}`}</p>
+              <p>{`Nº Inscrição: ${this.state.pre_harvest_data.numero_inscricao_campo}`}</p>
               <Button
                 style={{ width: "100%" }}
                 onClick={() => {

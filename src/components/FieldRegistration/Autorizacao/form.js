@@ -12,7 +12,7 @@ import {
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
-import * as AuthorizationService from "../../../services/field-registration.authorization";
+import * as AuthorizationService from "../../../services/field-registration.transport-authorization";
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 import moment from "moment";
 
@@ -38,7 +38,10 @@ class AuthorizationForm extends Component {
       ...prev,
       formData: {
         ...prev.formData,
-        responsavel: JSON.parse(localStorage.getItem("simpleagro_painel")).painelState.userData.user.nome
+        responsavel: {
+          nome: JSON.parse(localStorage.getItem("simpleagro_painel")).painelState.userData.user.nome,
+          id: JSON.parse(localStorage.getItem("simpleagro_painel")).painelState.userData.user._id
+        }
       }
     }))
 
@@ -228,10 +231,10 @@ class AuthorizationForm extends Component {
               />)}
           </Form.Item>
 
-          <Form.Item label="responsavel" {...formItemLayout}>
+          <Form.Item label="Responsável" {...formItemLayout}>
             {getFieldDecorator("responsavel", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.responsavel
+              initialValue: this.state.formData.responsavel && this.state.formData.responsavel.nome
             })(<Input name="responsavel" disabled />)}
           </Form.Item>
 
