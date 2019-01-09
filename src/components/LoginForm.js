@@ -162,7 +162,16 @@ class LoginForm extends Component {
             </FormItem> */}
           </Form>
         </div>
-        <div className="boxRight" />
+        <div
+          className="boxRight"
+          style={
+            window.location.href.includes("homologacao")
+              ? {
+                  backgroundColor: "#F44336"
+                }
+              : {}
+          }
+        />
       </div>
     );
   }

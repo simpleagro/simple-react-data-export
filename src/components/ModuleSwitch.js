@@ -21,7 +21,15 @@ const Option = Select.Option;
 class ModuleSwitch extends Component {
   render() {
     return (
-      <Container className="bg-green">
+      <Container
+        className="bg-green"
+        style={
+          window.location.href.includes("homologacao")
+            ? {
+                backgroundColor: "#F44336"
+              }
+            : {}
+        }>
         <Row
           style={{ height: "100%" }}
           type="flex"
@@ -32,7 +40,13 @@ class ModuleSwitch extends Component {
               style={{
                 width: 400,
                 height: 450,
-                boxShadow: "-1px 8px 14px 0px #056839"
+                ...(window.location.href.includes("homologacao")
+                  ? {
+                      boxShadow: "-1px 8px 14px 0px #992e26"
+                    }
+                  : {
+                      boxShadow: "-1px 8px 14px 0px #056839"
+                    })
               }}>
               <img src="logo.png" className="logo" />
               <p>Selecione um módulo para continuar...</p>

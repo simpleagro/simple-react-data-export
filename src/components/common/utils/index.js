@@ -1,4 +1,4 @@
-export const addMaskNumber = number => {  
+export const addMaskNumber = number => {
     try {
       number =  number.replace(/[^\d]+/g,'');
     } catch(e){
@@ -7,7 +7,7 @@ export const addMaskNumber = number => {
     return number
 }
 
-export const addMaskReais = number => {  
+export const addMaskReais = number => {
   try {
     number =  number.replace(/[^\d]+/g,'');
     let tmp = number+'';
@@ -28,10 +28,10 @@ export const addMaskReais = number => {
 
     if( tmp.length > 6 )
       tmp = tmp.replace(/([0-9]{3}),([0-9]{2}$)/g, ".$1,$2");
-    
+
     if( tmp.length > 10 )
       tmp = tmp.replace(/([0-9]{3}).([0-9]{3}),([0-9]{2}$)/g, ".$1.$2,$3");
-    
+
     number = tmp
   } catch(e){
     return number

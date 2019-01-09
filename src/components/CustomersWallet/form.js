@@ -32,11 +32,10 @@ import { list as ConsultantsServiceList } from "../../services/consultants";
 import { list as UserServiceList } from "../../services/users";
 import { list as ClientsServiceList } from "../../services/clients";
 import { SimpleBreadCrumb } from "../common/SimpleBreadCrumb";
+import { SimpleLazyLoader } from "../common/SimpleLazyLoader";
 
 const Option = Select.Option;
 const TreeNode = Tree.TreeNode;
-
-const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
 class CustomerWalletForm extends Component {
   constructor(props) {
@@ -451,11 +450,9 @@ class CustomerWalletForm extends Component {
       ...prev,
       formData: { ...prev.formData, clientes }
     }));
-
   }
 
   searchClient = async value => {
-
     this.lastFetchClientId += 1;
     const fetchId = this.lastFetchClientId;
     this.setState({ clients: [], fetchingClients: true });
@@ -480,243 +477,250 @@ class CustomerWalletForm extends Component {
       wrapperCol: { span: 12 }
     };
 
-    return this.state.loadingForm ? (
-      <Spin tip="Carregando..." size="large" indicator={antIcon} />
-    ) : (
-      <div>
-        <SimpleBreadCrumb
-          to="/carteiras-de-clientes"
-          history={this.props.history}
-        />
-        <Affix offsetTop={65}>
-          <PainelHeader
-            title={
-              this.state.editMode
-                ? "Editando Carteira de Cliente"
-                : "Nova Carteira de Cliente"
-            }>
-            <Button
-              disabled={this.state.errorOnWalletTree.length > 0}
-              type="primary"
-              icon="save"
-              onClick={() => this.saveForm()}
-              loading={this.state.savingForm}>
-              Salvar Carteira de Cliente
-            </Button>
-          </PainelHeader>
-        </Affix>
-        <Form onChange={this.handleFormState}>
-          <Form.Item label="Nome" {...formItemLayout}>
-            {getFieldDecorator("nome", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.nome
-            })(<Input name="nome" ref={input => (this.titleInput = input)} />)}
-          </Form.Item>
-          <Form.Item label="Consultor" {...formItemLayout}>
-            {getFieldDecorator("consultor_id", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.consultor_id
-            })(
-              <Select
-                defaultActiveFirstOption={false}
-                name="consultor_id"
-                showAction={["focus", "click"]}
-                filterOption={(input, option) =>
-                  option.props.children
-                    .toLowerCase()
-                    .indexOf(input.toLowerCase()) >= 0
-                }
-                showSearch
-                style={{ width: 200 }}
-                placeholder="Selecione..."
-                onChange={e =>
-                  this.handleFormState({
-                    target: { name: "consultor_id", value: e }
-                  })
-                }>
-                {this.state.consultants.map(c => (
-                  <Option key={c._id} value={c._id}>
-                    {c.nome}
-                  </Option>
-                ))}
-              </Select>
-            )}
-          </Form.Item>
-          <Form.Item label="Gerente" {...formItemLayout}>
-            {getFieldDecorator("gerente_id", {
-              initialValue: this.state.formData.gerente_id
-            })(
-              <Select
-                defaultActiveFirstOption={false}
-                name="gerente_id"
-                showAction={["focus", "click"]}
-                filterOption={(input, option) =>
-                  option.props.children
-                    .toLowerCase()
-                    .indexOf(input.toLowerCase()) >= 0
-                }
-                showSearch
-                style={{ width: 200 }}
-                placeholder="Selecione..."
-                onChange={e =>
-                  this.handleFormState({
-                    target: { name: "gerente_id", value: e }
-                  })
-                }>
-                {this.state.users.map(c => (
-                  <Option key={c._id} value={c._id}>
-                    {c.nome}
-                  </Option>
-                ))}
-              </Select>
-            )}
-          </Form.Item>
+    return (
+      <SimpleLazyLoader loadingForm={this.state.loadingForm}>
+        <div>
+          <SimpleBreadCrumb
+            to="/carteiras-de-clientes"
+            history={this.props.history}
+          />
+          <Affix offsetTop={65}>
+            <PainelHeader
+              title={
+                this.state.editMode
+                  ? "Editando Carteira de Cliente"
+                  : "Nova Carteira de Cliente"
+              }>
+              <Button
+                disabled={this.state.errorOnWalletTree.length > 0}
+                type="primary"
+                icon="save"
+                onClick={() => this.saveForm()}
+                loading={this.state.savingForm}>
+                Salvar Carteira de Cliente
+              </Button>
+            </PainelHeader>
+          </Affix>
+          <Form onChange={this.handleFormState}>
+            <Form.Item label="Nome" {...formItemLayout}>
+              {getFieldDecorator("nome", {
+                rules: [
+                  { required: true, message: "Este campo é obrigatório!" }
+                ],
+                initialValue: this.state.formData.nome
+              })(
+                <Input name="nome" ref={input => (this.titleInput = input)} />
+              )}
+            </Form.Item>
+            <Form.Item label="Consultor" {...formItemLayout}>
+              {getFieldDecorator("consultor_id", {
+                rules: [
+                  { required: true, message: "Este campo é obrigatório!" }
+                ],
+                initialValue: this.state.formData.consultor_id
+              })(
+                <Select
+                  defaultActiveFirstOption={false}
+                  name="consultor_id"
+                  showAction={["focus", "click"]}
+                  filterOption={(input, option) =>
+                    option.props.children
+                      .toLowerCase()
+                      .indexOf(input.toLowerCase()) >= 0
+                  }
+                  showSearch
+                  style={{ width: 200 }}
+                  placeholder="Selecione..."
+                  onChange={e =>
+                    this.handleFormState({
+                      target: { name: "consultor_id", value: e }
+                    })
+                  }>
+                  {this.state.consultants.map(c => (
+                    <Option key={c._id} value={c._id}>
+                      {c.nome}
+                    </Option>
+                  ))}
+                </Select>
+              )}
+            </Form.Item>
+            <Form.Item label="Gerente" {...formItemLayout}>
+              {getFieldDecorator("gerente_id", {
+                initialValue: this.state.formData.gerente_id
+              })(
+                <Select
+                  defaultActiveFirstOption={false}
+                  name="gerente_id"
+                  showAction={["focus", "click"]}
+                  filterOption={(input, option) =>
+                    option.props.children
+                      .toLowerCase()
+                      .indexOf(input.toLowerCase()) >= 0
+                  }
+                  showSearch
+                  style={{ width: 200 }}
+                  placeholder="Selecione..."
+                  onChange={e =>
+                    this.handleFormState({
+                      target: { name: "gerente_id", value: e }
+                    })
+                  }>
+                  {this.state.users.map(c => (
+                    <Option key={c._id} value={c._id}>
+                      {c.nome}
+                    </Option>
+                  ))}
+                </Select>
+              )}
+            </Form.Item>
 
-          <Row>
-            <Col>
-              <Card
-                title={
-                  <span>
-                    <p>
-                      {" "}
-                      Selecione um cliente para adicionar a carteira, <br />{" "}
-                      logo após, marque o cliente ou apenas algumas de suas
-                      propriedades que <br /> deseja gerenciar na carteira:{" "}
-                    </p>
-                    {this.state.errorOnWalletTree.length > 0 &&
-                      this.state.errorOnWalletTree.map(err => (
-                        <Alert
-                          key={"err-" + err}
-                          style={{ marginBottom: 20 }}
-                          message="Erro"
-                          description={`É necessário que o cliente: ${err.toUpperCase()}
+            <Row>
+              <Col>
+                <Card
+                  title={
+                    <span>
+                      <p>
+                        {" "}
+                        Selecione um cliente para adicionar a carteira, <br />{" "}
+                        logo após, marque o cliente ou apenas algumas de suas
+                        propriedades que <br /> deseja gerenciar na carteira:{" "}
+                      </p>
+                      {this.state.errorOnWalletTree.length > 0 &&
+                        this.state.errorOnWalletTree.map(err => (
+                          <Alert
+                            key={"err-" + err}
+                            style={{ marginBottom: 20 }}
+                            message="Erro"
+                            description={`É necessário que o cliente: ${err.toUpperCase()}
                           tenha pelo menos 1 propriedade selecionada ou esteja selecionado (caso não seja por propriedade)`}
-                          type="error"
-                          showIcon
-                        />
-                      ))}
-                    <Select
-                      value={this.state.selectedClient._id}
-                      name="cliente"
-                      filterOption={(input, option) =>
-                        option.props.children
-                          .toLowerCase()
-                          .indexOf(input.toLowerCase()) >= 0
-                      }
-                      // filterOption={false}
-                      onSearch={this.searchClient}
-                      showAction={["focus", "click"]}
-                      notFoundContent={
-                        fetchingClients ? <Spin size="small" /> : null
-                      }
-                      showSearch
-                      style={{ width: 200 }}
-                      placeholder="Selecione..."
-                      onChange={e => this.selectedClient(e)}>
-                      {this.state.clients.map(c => (
-                        <Option key={c._id} value={c._id}>
-                          {c.nome}
-                        </Option>
-                      ))}
-                    </Select>
-                    <Divider type="vertical" />
-                    <Button
-                      type="primary"
-                      icon="plus"
-                      onClick={() => this.addClient()}>
-                      Adicionar Cliente
-                    </Button>
-                  </span>
-                }>
-                {this.state.walletTree.length ? (
-                  <Tree
-                    checkable
-                    defaultCheckedKeys={this.state.clientesChecados}
-                    onCheck={(checkedNodes, e) => {
-                      this.checkTreeNodes(checkedNodes, e);
-                    }}>
-                    {this.state.walletTree.map(
-                      cliente => (
-                        console.log(cliente),
-                        (
-                          <TreeNode
-                            key={cliente.cliente_id || cliente._id}
-                            dataRef={cliente}
-                            ehCliente={true}
-                            title={
-                              <div>
-                                {cliente.nome}
-                                {cliente.gerenciarCarteiraPorPropriedade ? (
-                                  <span style={{ fontSize: 10 }}>
-                                    {" "}
-                                    (Por propriedade)
-                                  </span>
-                                ) : (
-                                  <span style={{ fontSize: 10 }}>
-                                    {" "}
-                                    (Por cliente)
-                                  </span>
-                                )}
-                                <Button
-                                  style={{ border: "none", marginLeft: 5 }}
-                                  size="small"
-                                  type="danger"
-                                  shape="circle"
-                                  onClick={e =>
-                                    this.removeClient(
+                            type="error"
+                            showIcon
+                          />
+                        ))}
+                      <Select
+                        value={this.state.selectedClient._id}
+                        name="cliente"
+                        filterOption={(input, option) =>
+                          option.props.children
+                            .toLowerCase()
+                            .indexOf(input.toLowerCase()) >= 0
+                        }
+                        // filterOption={false}
+                        onSearch={this.searchClient}
+                        showAction={["focus", "click"]}
+                        notFoundContent={
+                          fetchingClients ? <Spin size="small" /> : null
+                        }
+                        showSearch
+                        style={{ width: 200 }}
+                        placeholder="Selecione..."
+                        onChange={e => this.selectedClient(e)}>
+                        {this.state.clients.map(c => (
+                          <Option key={c._id} value={c._id}>
+                            {c.nome}
+                          </Option>
+                        ))}
+                      </Select>
+                      <Divider type="vertical" />
+                      <Button
+                        type="primary"
+                        icon="plus"
+                        onClick={() => this.addClient()}>
+                        Adicionar Cliente
+                      </Button>
+                    </span>
+                  }>
+                  {this.state.walletTree.length ? (
+                    <Tree
+                      checkable
+                      defaultCheckedKeys={this.state.clientesChecados}
+                      onCheck={(checkedNodes, e) => {
+                        this.checkTreeNodes(checkedNodes, e);
+                      }}>
+                      {this.state.walletTree.map(
+                        cliente => (
+                          console.log(cliente),
+                          (
+                            <TreeNode
+                              key={cliente.cliente_id || cliente._id}
+                              dataRef={cliente}
+                              ehCliente={true}
+                              title={
+                                <div>
+                                  {cliente.nome}
+                                  {cliente.gerenciarCarteiraPorPropriedade ? (
+                                    <span style={{ fontSize: 10 }}>
+                                      {" "}
+                                      (Por propriedade)
+                                    </span>
+                                  ) : (
+                                    <span style={{ fontSize: 10 }}>
+                                      {" "}
+                                      (Por cliente)
+                                    </span>
+                                  )}
+                                  <Button
+                                    style={{ border: "none", marginLeft: 5 }}
+                                    size="small"
+                                    type="danger"
+                                    shape="circle"
+                                    onClick={e =>
+                                      this.removeClient(
+                                        cliente.cliente_id || cliente._id
+                                      )
+                                    }>
+                                    <Icon type="minus-circle" />
+                                  </Button>
+                                </div>
+                              }>
+                              {cliente.propriedades &&
+                                cliente.propriedades.map(prop => (
+                                  <TreeNode
+                                    disableCheckbox={
+                                      prop.propriedadeJaExisteEmOutraCarteira &&
+                                      prop.propriedadeJaExisteEmOutraCarteira !==
+                                        ""
+                                        ? true
+                                        : false
+                                    }
+                                    clienteID={
                                       cliente.cliente_id || cliente._id
-                                    )
-                                  }>
-                                  <Icon type="minus-circle" />
-                                </Button>
-                              </div>
-                            }>
-                            {cliente.propriedades &&
-                              cliente.propriedades.map(prop => (
-                                <TreeNode
-                                  disableCheckbox={
-                                    prop.propriedadeJaExisteEmOutraCarteira &&
-                                    prop.propriedadeJaExisteEmOutraCarteira !==
-                                      ""
-                                      ? true
-                                      : false
-                                  }
-                                  clienteID={cliente.cliente_id || cliente._id}
-                                  clienteNome={cliente.nome}
-                                  gerenciarCarteiraPorPropriedade={
-                                    cliente.gerenciarCarteiraPorPropriedade
-                                  }
-                                  dataRef={prop}
-                                  title={
-                                    <Tooltip
-                                      title={
-                                        prop.propriedadeJaExisteEmOutraCarteira
-                                          ? `Pertence a carteira.: ${
-                                              prop.propriedadeJaExisteEmOutraCarteira
-                                            }`
-                                          : ""
-                                      }>
-                                      {prop.nome}
-                                    </Tooltip>
-                                  }
-                                  key={`${cliente.cliente_id || cliente._id}-${
-                                    prop._id
-                                  }`}
-                                />
-                              ))}
-                          </TreeNode>
+                                    }
+                                    clienteNome={cliente.nome}
+                                    gerenciarCarteiraPorPropriedade={
+                                      cliente.gerenciarCarteiraPorPropriedade
+                                    }
+                                    dataRef={prop}
+                                    title={
+                                      <Tooltip
+                                        title={
+                                          prop.propriedadeJaExisteEmOutraCarteira
+                                            ? `Pertence a carteira.: ${
+                                                prop.propriedadeJaExisteEmOutraCarteira
+                                              }`
+                                            : ""
+                                        }>
+                                        {prop.nome}
+                                      </Tooltip>
+                                    }
+                                    key={`${cliente.cliente_id ||
+                                      cliente._id}-${prop._id}`}
+                                  />
+                                ))}
+                            </TreeNode>
+                          )
                         )
-                      )
-                    )}
-                  </Tree>
-                ) : (
-                  ""
-                )}
-              </Card>
-            </Col>
-          </Row>
-        </Form>
-      </div>
+                      )}
+                    </Tree>
+                  ) : (
+                    ""
+                  )}
+                </Card>
+              </Col>
+            </Row>
+          </Form>
+        </div>
+      </SimpleLazyLoader>
     );
   }
 }
