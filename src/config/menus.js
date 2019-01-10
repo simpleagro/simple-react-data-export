@@ -73,6 +73,7 @@ const menus = {
     ...tabelaComissao,
     ...tabelaFrete,
     ...tabelaPreco,
+    ...tabelaPrecoCaracteristica,
     ...tipoGarantia,
     ...tipoPagamento,
     ...tipoVenda,
