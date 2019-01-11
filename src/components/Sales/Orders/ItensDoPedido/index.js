@@ -1,15 +1,16 @@
 import React, { Component } from "react";
 import { Divider, Button, Icon, Popconfirm } from "antd";
 
-import * as OrderItemsService from "../../../../services/orders.items";
-import SimpleTable from "../../../common/SimpleTable";
-import { flashWithSuccess } from "../../../common/FlashMessages";
-import parseErrors from "../../../../lib/parseErrors";
-import { PainelHeader } from "../../../common/PainelHeader";
-import { simpleTableSearch } from "../../../../lib/simpleTableSearch";
-import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
+import * as OrderItemsService from "services/orders.items";
+import SimpleTable from "common/SimpleTable";
+import { flashWithSuccess } from "common/FlashMessages";
+import parseErrors from "lib/parseErrors";
+import { PainelHeader } from "common/PainelHeader";
+import { simpleTableSearch } from "lib/simpleTableSearch";
+import { addMaskReais } from "common/utils";
+import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
 
-class PriceVariation extends Component {
+class OrderItem extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -65,13 +66,13 @@ class PriceVariation extends Component {
 
       flashWithSuccess(
         "",
-        `A variação de preço, ${recordName}, foi ${
+        `O item, ${recordName}, foi ${
           newStatus ? "ativado" : "bloqueado"
         } com sucesso!`
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao mudar status da variação de preço", err);
+      console.log("Erro interno ao mudar status do item", err);
     }
   };
 
@@ -109,16 +110,19 @@ class PriceVariation extends Component {
       title: "Quantidade",
       dataIndex: "quantidade",
       key: "quantidade",
+      align: "center",
     },
     {
       title: "Desconto",
       dataIndex: "desconto",
       key: "desconto",
+      align: "center",
     },
     {
       title: "Preço Final",
-      dataIndex: "desconto",
-      key: "desconto",
+      dataIndex: "preco_final_item",
+      key: "preco_final_item",
+      align: "right",
     },
     {
       title: "Ações",
@@ -130,9 +134,9 @@ class PriceVariation extends Component {
               size="small"
               onClick={() =>
                 this.props.history.push(
-                  `/pedidos/${
-                    this.state.order_id
-                  }/itens-do-pedido/${record._id}/edit`
+                  `/pedidos/${this.state.order_id}/itens-do-pedido/${
+                    record._id
+                  }/edit`
                 )
               }>
               <Icon type="edit" style={{ fontSize: "16px" }} />
@@ -185,9 +189,7 @@ class PriceVariation extends Component {
             icon="plus"
             onClick={() =>
               this.props.history.push(
-                "/pedidos/" +
-                  this.state.order_id +
-                  "/itens-do-pedido/new"
+                "/pedidos/" + this.state.order_id + "/itens-do-pedido/new"
               )
             }>
             Adicionar
@@ -206,4 +208,4 @@ class PriceVariation extends Component {
   }
 }
 
-export default PriceVariation;
+export default OrderItem;
