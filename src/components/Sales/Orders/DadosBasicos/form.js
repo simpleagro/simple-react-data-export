@@ -210,7 +210,7 @@ class OrderForm extends Component {
     const { fetchingClients } = this.state;
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
-      labelCol: { span: 3 },
+      labelCol: { span: 4 },
       wrapperCol: { span: 12 }
     };
 

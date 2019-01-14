@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { InputNumber, Button, Form, Select, Affix } from "antd";
+import { InputNumber, Button, Form, Select, Affix, Tooltip } from "antd";
 
 import { flashWithSuccess } from "../../../common/FlashMessages";
 import parseErrors from "../../../../lib/parseErrors";
@@ -13,6 +13,7 @@ const Option = Select.Option;
 
 class OrderItemForm extends Component {
   constructor(props) {
+    debugger
     super(props);
     this.state = {
       editMode: false,
@@ -135,7 +136,7 @@ class OrderItemForm extends Component {
       }
     });
 
-    this.getVariacoes();
+    if (e.possui_variacao) this.getVariacoes();
   }
 
   async getVariacoes(chave, valor) {
@@ -149,16 +150,19 @@ class OrderItemForm extends Component {
       return variacao[caract];
     };
 
-    let variacoes = grupo.caracteristicas.map(c => ({
-      chave: c.chave,
-      label: c.label,
-      obrigatorio: c.obrigatorio,
-      opcoes: new Set(
-        produto.variacoes
-          .filter(v => filterVariacoes(v, chave || c.chave, valor || null))
-          .map(v => v[c.chave])
-      )
-    }));
+    let variacoes = grupo.caracteristicas.map(c => {
+      // this.props.form.resetFields([c.chave]);
+      return {
+        chave: c.chave,
+        label: c.label,
+        obrigatorio: c.obrigatorio,
+        opcoes: new Set(
+          produto.variacoes
+            .filter(v => filterVariacoes(v, chave || c.chave, valor || null))
+            .map(v => v[c.chave])
+        )
+      };
+    });
     // trás as variações obrigatórias para cima
     variacoes = variacoes.sort((a, b) => (b.obrigatorio ? 1 : -1));
     this.setState({ variacoes });
@@ -336,17 +340,28 @@ class OrderItemForm extends Component {
                 rules: [
                   { required: true, message: "Este campo é obrigatório!" }
                 ],
-                initialValue: this.state.formData.desconto
+                initialValue: this.state.formData.desconto || 0
               })(
-                <InputNumber
-                  onChange={e =>
-                    this.handleFormState({
-                      target: { name: "desconto", value: e }
-                    })
-                  }
-                  style={{ width: 200 }}
-                  name="desconto"
-                />
+                <Tooltip title="Informe de 0 a 100 se houver desconto">
+                  <InputNumber
+                    step={0.01}
+                    min={0}
+                    max={1}
+                    formatter={value => `${value*100}`}
+                    parser={value =>
+                      value.replace("%", "").replace(",", ".") / 100
+                    }
+                    onChange={
+                      e => console.log("desconto", e)
+                      // this.handleFormState({
+                      //   target: { name: "desconto", value: e }
+                      // })
+                    }
+                    style={{ width: 200 }}
+                    name="desconto"
+                  />
+                  {" "}%
+                </Tooltip>
               )}
             </Form.Item>
             <Form.Item label="Quantidade" {...formItemLayout}>
@@ -354,7 +369,7 @@ class OrderItemForm extends Component {
                 rules: [
                   { required: true, message: "Este campo é obrigatório!" }
                 ],
-                initialValue: this.state.formData.quantidade
+                initialValue: this.state.formData.quantidade || 1
               })(
                 <InputNumber
                   onChange={e =>
