@@ -106,6 +106,14 @@ class FieldRegistration extends Component {
       render: text => text
     },
     {
+      title: "Contrato",
+      dataIndex: "contrato",
+      key: "contrato",
+      fixed: "left",
+      ...simpleTableSearch(this)("contrato"),
+      render: text => text
+    },
+    {
       title: "Cliente",
       dataIndex: "cliente.nome",
       key: "cliente.nome",

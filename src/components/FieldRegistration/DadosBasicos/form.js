@@ -459,7 +459,7 @@ class FieldRegistrationForm extends Component {
               )}
             </Form.Item>
 
-            <Form.Item label="Nº Contrato" {...formItemLayout}>
+            <Form.Item label="Contrato" {...formItemLayout}>
             {getFieldDecorator("contrato", {
               // rules: [{ required: false, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.contrato
