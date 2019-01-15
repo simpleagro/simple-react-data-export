@@ -8,10 +8,25 @@ import * as TargetService from "../../services/targets";
 import * as VisitService from "../../services/visits";
 import moment from "moment";
 
-import { LineChart, Line, Legend, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Text } from 'recharts';
+import { LineChart, Line, Legend, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Text, Bar, BarChart } from 'recharts';
 
 let arrClientArea = [{}], arrClient = [{}], arrCustomerWallet = [{}], arrQuota = [{}], arrTarget = [{}];
 let sumMonths = [0,0,0,0,0,0,0,0,0,0,0,0];
+let dataMes = [
+  { name: "Janeiro", qtd: 5 },
+  { name: "Fevereiro", qtd: 6 },
+  { name: "Março", qtd: 2 },
+  { name: "Abril", qtd: 9 },
+  { name: "Maio", qtd: 1 },
+  { name: "Junho", qtd: 0 },
+  { name: "Julho", qtd: 3 },
+  { name: "Agosto", qtd: 1 },
+  { name: "Setembro", qtd: 6 },
+  { name: "Outubro", qtd: 5 },
+  { name: "Novembro", qtd: 6 },
+  { name: "Dezembro", qtd: 8 }
+];
+
 const colors = ["#4286f4", "#41f4d9", "#41f462", "#a9f441", "#41c4f4", "#4af441"];
 
 class Dashboard extends Component {
@@ -145,7 +160,6 @@ class Dashboard extends Component {
             { arrClientArea.map((entry, index) => <Cell key={index} />) }
           </Line>
           <Tooltip />
-          <Legend />
         </LineChart>
 
         <h3> Área Total por Cliente </h3>
@@ -154,7 +168,6 @@ class Dashboard extends Component {
             { arrClientArea.map((entry, index) => <Cell key={index} fill={colors[index % colors.length]} />) }
           </Pie>
           <Tooltip />
-          <Legend />
         </PieChart>
 
         <h3> Total de Clientes por Carteira </h3>
@@ -174,10 +187,18 @@ class Dashboard extends Component {
             { arrCustomerWallet.map((entry, index) => <Cell key={index} fill={colors[index % colors.length]} />) }
           </Pie>
           <Tooltip />
-          <Legend />
         </PieChart>
 
-        <h3> Visitas por Mês </h3>
+        <h3> aASdadVisitas por MêsAAAAAAAAAA</h3>
+        <BarChart width={500} height={200} data={dataMes}>
+          <CartesianGrid strokeDasharray="10 0" />
+          <XAxis />
+          <YAxis />
+          <Tooltip />
+          <Bar isAnimationActive={false} dataKey={dataMes} >
+            { dataMes.map((entry, index) => <Cell key={index} fill="red" />) }
+          </Bar>
+        </BarChart>
 
       </div>
     );
