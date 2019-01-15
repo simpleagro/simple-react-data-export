@@ -478,7 +478,7 @@ class CustomerWalletForm extends Component {
     };
 
     return (
-      <SimpleLazyLoader loadingForm={this.state.loadingForm}>
+      <SimpleLazyLoader isLoading={this.state.loadingForm}>
         <div>
           <SimpleBreadCrumb
             to="/carteiras-de-clientes"
