@@ -256,7 +256,7 @@ class FieldRegistrationForm extends Component {
 
         <Form.Item label="Safra" {...formItemLayout}>
             {getFieldDecorator("safra", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.safra && this.state.formData.safra.descricao
             })(<Select
                 name="safra"
@@ -310,7 +310,7 @@ class FieldRegistrationForm extends Component {
 
           <Form.Item label="Cliente" {...formItemLayout}>
             {getFieldDecorator("cliente", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.cliente && this.state.formData.cliente.nome
             })(<Select
                   name="cliente"
@@ -344,7 +344,7 @@ class FieldRegistrationForm extends Component {
             {...formItemLayout}
           >
             {getFieldDecorator("propriedade", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.propriedade && this.state.formData.propriedade.nome
             })(<Select
                   name="propriedade"
@@ -375,21 +375,21 @@ class FieldRegistrationForm extends Component {
 
           <Form.Item label="Inscrição" {...formItemLayout}>
             {getFieldDecorator("ie", {
-              rules: [{ required: false, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: false, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.propriedade && this.state.formData.propriedade.ie
             })(<InputNumber name="ie" disabled style={{ width: 400 }} />)}
           </Form.Item>
 
           <Form.Item label="Latitude" {...formItemLayout}>
             {getFieldDecorator("latitude", {
-              rules: [{ required: false, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: false, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.geolocalizacao && this.state.formData.geolocalizacao.latitude
             })(<InputNumber name="latitude" style={{ width: 400 }} />)}
           </Form.Item>
 
           <Form.Item label="Longitude" {...formItemLayout}>
             {getFieldDecorator("longitude", {
-              rules: [{ required: false, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: false, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.geolocalizacao && this.state.formData.geolocalizacao.longitude
             })(<InputNumber name="longitude" style={{ width: 400 }} />)}
           </Form.Item>
@@ -405,9 +405,9 @@ class FieldRegistrationForm extends Component {
 
           <Form.Item label="Estado" {...formItemLayout}>
               {getFieldDecorator("estado", {
-                rules: [
-                  { required: true, message: "Este campo é obrigatório!" }
-                ],
+                // rules: [
+                //   { required: true, message: "Este campo é obrigatório!" }
+                // ],
                 initialValue: this.state.formData.estado
               })(
                 <Select
@@ -435,7 +435,7 @@ class FieldRegistrationForm extends Component {
               {...formItemLayout}
             >
               {getFieldDecorator("cidade", {
-                rules: [{ required: true, message: "Este campo é obrigatório!" }],
+                // rules: [{ required: true, message: "Este campo é obrigatório!" }],
                 initialValue: this.state.formData.cidade
               })(
                 <Select
@@ -462,14 +462,14 @@ class FieldRegistrationForm extends Component {
 
             <Form.Item label="Nº Contrato" {...formItemLayout}>
             {getFieldDecorator("contrato", {
-              rules: [{ required: false, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: false, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.contrato
             })(<InputNumber style={{ width: 200 }} min={0} name="contrato" />)}
           </Form.Item>
 
           <Form.Item label="Grupo de Produtos" {...formItemLayout}>
             {getFieldDecorator("grupo_produto", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.grupo_produto && this.state.formData.grupo_produto.nome
             })(<Select
                  name="grupo_produto"
@@ -500,7 +500,7 @@ class FieldRegistrationForm extends Component {
             {...formItemLayout}
           >
             {getFieldDecorator("cultivar", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.cultivar && this.state.formData.cultivar.nome
             })(<Select
                 name="cultivar"
@@ -530,7 +530,7 @@ class FieldRegistrationForm extends Component {
 
           <Form.Item label="Categoria Plantada" {...formItemLayout}>
             {getFieldDecorator("categ_plantada", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.categ_plantada
             })(<Select
                   name="categ_plantada"
@@ -552,7 +552,7 @@ class FieldRegistrationForm extends Component {
 
           <Form.Item label="Categoria Colhida" {...formItemLayout}>
             {getFieldDecorator("categ_colhida", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.categ_colhida
             })(<Select
                   name="categ_colhida"
@@ -574,21 +574,21 @@ class FieldRegistrationForm extends Component {
 
           <Form.Item label="Área Inscrita" {...formItemLayout}>
             {getFieldDecorator("area_inscrita", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.area_inscrita
             })(<InputNumber style={{ width: 200 }} min={0} name="area_inscrita" onChange={ e => this.calcProdEstimada(e) } onKeyUp={ e => this.calcProdEstimada(e.target.value) } />)}
           </Form.Item>
 
           <Form.Item label="Área Plantada" {...formItemLayout}>
             {getFieldDecorator("area_plantada", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.area_plantada
             })(<InputNumber style={{ width: 200 }} min={0} name="area_plantada" />)}
           </Form.Item>
 
           <Form.Item label="Plantio" {...formItemLayout}>
             {getFieldDecorator("data_plantio", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue:  this.state.formData.data_plantio ? moment(
                 this.state.formData.data_plantio
                   ? this.state.formData.data_plantio
@@ -609,7 +609,7 @@ class FieldRegistrationForm extends Component {
 
           <Form.Item label="Inicio da Colheira" {...formItemLayout}>
             {getFieldDecorator("data_inicio_colheita", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue:  this.state.formData.data_inicio_colheita ? moment(
                 this.state.formData.data_inicio_colheita
                   ? this.state.formData.data_inicio_colheita
@@ -630,7 +630,7 @@ class FieldRegistrationForm extends Component {
 
           <Form.Item label="Fim da Colheita" {...formItemLayout}>
             {getFieldDecorator("data_fim_colheita", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue:  this.state.formData.data_fim_colheita ? moment(
                 this.state.formData.data_fim_colheita
                   ? this.state.formData.data_fim_colheita
@@ -651,14 +651,14 @@ class FieldRegistrationForm extends Component {
 
           <Form.Item label="Prod Estimada(TON)" {...formItemLayout}>
             {getFieldDecorator("prod_estimada", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.prod_estimada
             })(<InputNumber min={0} name="prod_estimada" />)}
           </Form.Item>
 
           <Form.Item label="Responsável" {...formItemLayout}>
             {getFieldDecorator("responsavel", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.responsavel && this.state.formData.responsavel.nome
             })(<Select
                   name="responsavel"
