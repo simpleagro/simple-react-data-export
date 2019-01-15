@@ -452,7 +452,7 @@ class FieldRegistrationForm extends Component {
                               nome: pgc.nome
                             })}
                           >
-                            {pgc.label}
+                            {pgc.nome}
                           </Option>))
                       : null )}
               </Select>)}
