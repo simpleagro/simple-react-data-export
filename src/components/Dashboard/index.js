@@ -189,7 +189,7 @@ class Dashboard extends Component {
           <Tooltip />
         </PieChart>
 
-        <h3> aASdadVisitas por MêsAAAAAAAAAA</h3>
+        <h3> Visitas por Mês</h3>
         <BarChart width={500} height={200} data={dataMes}>
           <CartesianGrid strokeDasharray="10 0" />
           <XAxis />
