@@ -661,6 +661,7 @@ class FieldRegistrationForm extends Component {
               initialValue: this.state.formData.responsavel && this.state.formData.responsavel.nome
             })(<Select
                   name="responsavel"
+                  showSearch
                   showAction={["focus","click"]}
                   placeholder="Selecione..."
                   onChange={e => {
