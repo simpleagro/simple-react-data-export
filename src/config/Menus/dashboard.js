@@ -2,7 +2,7 @@ import SimpleLoadable from "../../components/common/SimpleLoadable";
 
 const menus = {
   "/dashboard": {
-    component: SimpleLoadable(() => import("../../components/Dashborad")),
+    component: SimpleLoadable(() => import("../../components/Dashboard")),
     key: "/dashboard",
     path: "/dashboard",
     label: "Dashboard",
