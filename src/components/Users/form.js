@@ -222,11 +222,12 @@ class UserForm extends Component {
                 showSearch
                 style={{ width: 200 }}
                 placeholder="Selecione um tipo de Login..."
-                onChange={e =>
+                onChange={e => {
+                  this.props.form.resetFields(['senha']);
                   this.handleFormState({
                     target: { name: "tipoLogin", value: e }
-                  })
-                }>
+                  });
+                }}>
                 <Option value="API">API</Option>
                 <Option value="AD">AD</Option>
               </Select>

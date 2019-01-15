@@ -67,7 +67,7 @@ select,
 }
 .painel-header {
   background-image: url(../assets/pontos.png) !important;
-  background-color: #009e54 !important;
+  background-color: #009e54;
   color: white;
   background-position: -40px -175px !important;
   background-size: 88% !important;
@@ -96,7 +96,7 @@ select,
   opacity: 0;
 }
 .ant-layout-sider-collapsed .ant-menu-item {
-  padding: 0 30px !important;
+  padding: 0 25px !important;
 }
 
 .ant-table td {
@@ -151,4 +151,9 @@ select,
 
 .highlight {
   color: #f50;
+}
+
+.ant-table-thead > tr > th,
+.ant-table-tbody > tr > td {
+  white-space: nowrap;
 }

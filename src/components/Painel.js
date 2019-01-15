@@ -58,11 +58,15 @@ class Painel extends Component {
     cookies: instanceOf(Cookies).isRequired
   };
 
+  componentDidMount() {
+    if (window.screen.availWidth <= 1333) this.toggle();
+  }
+
   toggle = () => {
     this.setState({
       collapsed: !this.state.collapsed,
-      marginContent: this.state.collapsed ? 236 : 80,
-      headerContent: this.state.collapsed ? 236 : 80
+      marginContent: this.state.collapsed ? 256 : 80,
+      headerContent: this.state.collapsed ? 256 : 80
     });
   };
 
@@ -179,7 +183,16 @@ class Painel extends Component {
         <Layout style={{ marginLeft: this.state.marginContent }}>
           <Header
             className="painel-header"
-            style={{ marginLeft: this.state.headerContent }}>
+            style={{
+              marginLeft: this.state.headerContent,
+              ...(window.location.href.includes("homologacao")
+                ? {
+                    backgroundColor: "#F44336"
+                  }
+                : {
+                    backgroundColor: "#009e54 !important"
+                  })
+            }}>
             <div style={{ float: "left" }}>
               <Icon
                 className="trigger"
@@ -224,7 +237,9 @@ class Painel extends Component {
           </Content>
           <Footer style={{ textAlign: "center" }}>
             SimpleAgro ©{moment().format("YYYY")} - v.
-            {version}
+            {version}{" "}
+            {window.location.href.includes("homologacao") && "HOMOLOGAÇÃO !!!"
+          }
           </Footer>
         </Layout>
       </Layout>

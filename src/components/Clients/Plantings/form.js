@@ -15,6 +15,7 @@ import {
 import { connect } from "react-redux";
 import moment from "moment";
 
+import { addMaskReais } from "../../common/utils";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
@@ -93,7 +94,7 @@ class ClientPlantingForm extends Component {
 
     const gruposDeProdutos = await ProductGroupService.list({
       fields: "nome,produtos",
-      limit: -1,
+      limit: -1
     }).then(response => response.docs);
 
     const safras = await SeasonService.list({
@@ -263,7 +264,7 @@ class ClientPlantingForm extends Component {
     return calculo.toFixed(3);
   }
 
-  getAreaTalhao(t){
+  getAreaTalhao(t) {
     this.setState(prev => ({
       ...prev,
       formData: {
@@ -311,7 +312,8 @@ class ClientPlantingForm extends Component {
           <Form.Item label="Safra" {...formItemLayout}>
             {getFieldDecorator("safra", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.safra && this.state.formData.safra.descricao
+              initialValue:
+                this.state.formData.safra && this.state.formData.safra.descricao
             })(
               <Select
                 name="safra"
@@ -411,7 +413,8 @@ class ClientPlantingForm extends Component {
                       name: "talhao",
                       value: { id: e._id, nome: e.nome }
                     }
-                  }); this.getAreaTalhao(e);
+                  });
+                  this.getAreaTalhao(e);
                 }}>
                 {this.state.talhoes && this.state.talhoes.length > 0
                   ? this.state.talhoes.map(t => (
@@ -544,22 +547,26 @@ class ClientPlantingForm extends Component {
           </Form.Item>
           <Form.Item label="Data de Fim" {...formItemLayout}>
             {getFieldDecorator("data_fim", {
-              rules: [{ required: false, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.data_fim ? moment(
-                this.state.formData.data_fim
-                  ? this.state.formData.data_fim
-                  : new Date(),
-                "YYYY-MM-DD"
-              ) : undefined
+              rules: [
+                { required: false, message: "Este campo é obrigatório!" }
+              ],
+              initialValue: this.state.formData.data_fim
+                ? moment(
+                    this.state.formData.data_fim
+                      ? this.state.formData.data_fim
+                      : new Date(),
+                    "YYYY-MM-DD"
+                  )
+                : undefined
             })(
               <DatePicker
                 onChange={(data, dataString) =>
                   this.handleFormState({
                     target: {
                       name: "data_fim",
-                      value: dataString ? moment(dataString, "DD/MM/YYYY").format(
-                        "YYYY-MM-DD"
-                      ) : null
+                      value: dataString
+                        ? moment(dataString, "DD/MM/YYYY").format("YYYY-MM-DD")
+                        : null
                     }
                   })
                 }
@@ -583,12 +590,6 @@ class ClientPlantingForm extends Component {
                 showSearch
                 style={{ width: 200 }}
                 placeholder="Selecione..."
-                // labelInValue
-                filterOption={(input, option) =>
-                  option.props.children
-                    .toLowerCase()
-                    .indexOf(input.toLowerCase()) >= 0
-                }
                 onSelect={e => {
                   this.handleFormState({
                     target: { name: "espacamento", value: e }
@@ -596,9 +597,11 @@ class ClientPlantingForm extends Component {
 
                   this.setState(prev => ({
                     ...prev,
-                    populacaoFinal: this.calculaPopulacaoFinal(
-                      e,
-                      this.state.formData.plantas_metro
+                    populacaoFinal: addMaskReais(
+                      this.calculaPopulacaoFinal(
+                        e,
+                        this.state.formData.plantas_metro
+                      )
                     )
                   }));
                 }}>
@@ -640,9 +643,11 @@ class ClientPlantingForm extends Component {
 
                   this.setState(prev => ({
                     ...prev,
-                    populacaoFinal: this.calculaPopulacaoFinal(
-                      this.state.formData.espacamento,
-                      e
+                    populacaoFinal: addMaskReais(
+                      this.calculaPopulacaoFinal(
+                        this.state.formData.espacamento,
+                        e
+                      )
                     )
                   }));
                 }}
@@ -654,8 +659,8 @@ class ClientPlantingForm extends Component {
           <Form.Item
             style={{
               display:
-                this.state.formData.populacao_final > 0 ||
-                this.state.populacaoFinal > 0
+                this.state.formData.populacao_final ||
+                this.state.populacaoFinal
                   ? "block"
                   : "none"
             }}
@@ -669,7 +674,12 @@ class ClientPlantingForm extends Component {
               style={{ width: 200 }}
             />
           </Form.Item>
-          <Form.Item label="Área" {...formItemLayout} validateStatus={ this.state.formData.talhao === undefined ? "warning" : "" }>
+          <Form.Item
+            label="Área"
+            {...formItemLayout}
+            validateStatus={
+              this.state.formData.talhao === undefined ? "warning" : ""
+            }>
             {getFieldDecorator("area", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.area
@@ -695,7 +705,13 @@ class ClientPlantingForm extends Component {
             {getFieldDecorator("observacoes", {
               rules: [{ required: false }],
               initialValue: this.state.formData.observacoes
-            })(<TextArea name="observacoes" autosize={{ minRows: 2, maxRows: 7 }} style={{ width: 400 }} />)}
+            })(
+              <TextArea
+                name="observacoes"
+                autosize={{ minRows: 2, maxRows: 7 }}
+                style={{ width: 400 }}
+              />
+            )}
           </Form.Item>
         </Form>
       </div>
