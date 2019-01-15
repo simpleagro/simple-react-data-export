@@ -182,6 +182,15 @@ class FieldRegistrationForm extends Component {
         : null )
   }
 
+  calcProdEstimada(valor){
+    this.setState(prev => ({
+      formData: {
+        ...prev.formData,
+        prod_estimada: (valor * 60 * 60) / 1000
+      }
+    }))
+  }
+
   render() {
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
@@ -305,21 +314,21 @@ class FieldRegistrationForm extends Component {
             {getFieldDecorator("ie", {
               rules: [{ required: false, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.propriedade && this.state.formData.propriedade.ie
-            })(<InputNumber name="ie" disabled />)}
+            })(<InputNumber name="ie" disabled style={{ width: 400 }} />)}
           </Form.Item>
 
           <Form.Item label="Latitude" {...formItemLayout}>
             {getFieldDecorator("latitude", {
               rules: [{ required: false, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.geolocalizacao && this.state.formData.geolocalizacao.latitude
-            })(<InputNumber name="latitude"  />)}
+            })(<InputNumber name="latitude" style={{ width: 400 }} />)}
           </Form.Item>
 
           <Form.Item label="Longitude" {...formItemLayout}>
             {getFieldDecorator("longitude", {
               rules: [{ required: false, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.geolocalizacao && this.state.formData.geolocalizacao.longitude
-            })(<InputNumber name="longitude"  />)}
+            })(<InputNumber name="longitude" style={{ width: 400 }} />)}
           </Form.Item>
 
           {/*
@@ -440,7 +449,7 @@ class FieldRegistrationForm extends Component {
                           (<Option key={pgc._id}
                             value={ JSON.stringify({
                               id: pgc._id,
-                              nome: pgc.label
+                              nome: pgc.nome
                             })}
                           >
                             {pgc.label}
@@ -497,7 +506,7 @@ class FieldRegistrationForm extends Component {
             {getFieldDecorator("area_inscrita", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.area_inscrita
-            })(<InputNumber min={0} name="area_inscrita" />)}
+            })(<InputNumber min={0} name="area_inscrita" onChange={ e => this.calcProdEstimada(e) } onKeyUp={ e => this.calcProdEstimada(e.target.value) } />)}
           </Form.Item>
 
           <Form.Item label="Área Plantada" {...formItemLayout}>
@@ -570,7 +579,7 @@ class FieldRegistrationForm extends Component {
               />)}
           </Form.Item>
 
-          <Form.Item label="Produção Estimada" {...formItemLayout}>
+          <Form.Item label="Produção Estimada(TON)" {...formItemLayout}>
             {getFieldDecorator("prod_estimada", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.prod_estimada

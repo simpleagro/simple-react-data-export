@@ -11,6 +11,7 @@ import moment from "moment";
 import { LineChart, Line, Legend, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Text } from 'recharts';
 
 let arrClientArea = [{}], arrClient = [{}], arrCustomerWallet = [{}], arrQuota = [{}], arrTarget = [{}];
+let sumMonths = [0,0,0,0,0,0,0,0,0,0,0,0];
 const colors = ["#4286f4", "#41f4d9", "#41f462", "#a9f441", "#41c4f4", "#4af441"];
 
 class Dashboard extends Component {
@@ -42,7 +43,6 @@ class Dashboard extends Component {
   }
 
   sumMonth(){
-    let sumMonths = [0,0,0,0,0,0,0,0,0,0,0,0];
     let month;
     this.state.listVisit && this.state.listVisit.map(v => (month = new Date(moment(v.data_agenda, "DD/MM/YYYY").format("MM/DD/YYYY")), sumMonths[month.getMonth()]++,console.log("mes: ", month.getMonth())))
     console.log("sumMonths", sumMonths);
@@ -176,6 +176,8 @@ class Dashboard extends Component {
           <Tooltip />
           <Legend />
         </PieChart>
+
+        <h3> Visitas por Mês </h3>
 
       </div>
     );
