@@ -221,7 +221,6 @@ class FieldRegistrationForm extends Component {
                 name="safra"
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione a safra..."
                 ref={input => (this.titleInput = input)}
                 onChange={e => {
@@ -249,7 +248,6 @@ class FieldRegistrationForm extends Component {
                   name="cliente"
                   showAction={["focus", "click"]}
                   showSearch
-                  style={{ width: 200 }}
                   placeholder="Selecione um cliente..."
                   onChange={e => {
                     this.handleFormState({
@@ -281,7 +279,6 @@ class FieldRegistrationForm extends Component {
                   disabled={this.state.formData.cliente === undefined}
                   showAction={["focus", "click"]}
                   showSearch
-                  style={{ width: 200 }}
                   placeholder="Selecione a propriedade..."
                   onChange={e => {
                     this.handleFormState({
@@ -304,18 +301,25 @@ class FieldRegistrationForm extends Component {
               </Select>)}
           </Form.Item>
 
+          <Form.Item label="Inscrição" {...formItemLayout}>
+            {getFieldDecorator("ie", {
+              rules: [{ required: false, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.propriedade && this.state.formData.propriedade.ie
+            })(<InputNumber name="ie" disabled />)}
+          </Form.Item>
+
           <Form.Item label="Latitude" {...formItemLayout}>
             {getFieldDecorator("latitude", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              rules: [{ required: false, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.geolocalizacao && this.state.formData.geolocalizacao.latitude
-            })(<InputNumber name="latitude" style={{ width: 400 }} />)}
+            })(<InputNumber name="latitude"  />)}
           </Form.Item>
 
           <Form.Item label="Longitude" {...formItemLayout}>
             {getFieldDecorator("longitude", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              rules: [{ required: false, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.geolocalizacao && this.state.formData.geolocalizacao.longitude
-            })(<InputNumber name="longitude" style={{ width: 400 }} />)}
+            })(<InputNumber name="longitude"  />)}
           </Form.Item>
 
           {/*
@@ -338,7 +342,6 @@ class FieldRegistrationForm extends Component {
                   name="estado"
                   showAction={["focus", "click"]}
                   showSearch
-                  style={{ width: 200 }}
                   placeholder="Selecione um estado..."
                   filterOption={(input, option) =>
                     option.props.children
@@ -368,7 +371,6 @@ class FieldRegistrationForm extends Component {
                   name="cidade"
                   showAction={["focus", "click"]}
                   showSearch
-                  style={{ width: 200 }}
                   filterOption={(input, option) =>
                     option.props.children
                       .toLowerCase()
@@ -395,7 +397,6 @@ class FieldRegistrationForm extends Component {
                  allowClear
                  showAction={["focus", "click"]}
                  showSearch
-                 style={{ width: 200 }}
                  placeholder="Selecione um grupo..."
                  onChange={e => {
                    this.handleFormState({
@@ -427,7 +428,6 @@ class FieldRegistrationForm extends Component {
                 disabled={this.state.formData.grupo_produto === undefined}
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione um caracterista"
                 onChange={e => {
                   this.handleFormState({
@@ -436,7 +436,7 @@ class FieldRegistrationForm extends Component {
                 }}>
                   {this.state.id_cultivar &&
                     this.state.listProductGroup.map(pg => pg._id === this.state.id_cultivar
-                      ? pg.caracteristicas.map(pgc =>
+                      ? pg.produtos.map(pgc =>
                           (<Option key={pgc._id}
                             value={ JSON.stringify({
                               id: pgc._id,
@@ -456,7 +456,6 @@ class FieldRegistrationForm extends Component {
             })(<Select
                   name="categ_plantada"
                   showAction={["focus","click"]}
-                  style={{ width: 200 }}
                   placeholder="Selecione..."
                   onChange={e => {
                     this.handleFormState({
@@ -479,7 +478,6 @@ class FieldRegistrationForm extends Component {
             })(<Select
                   name="categ_colhida"
                   showAction={["focus","click"]}
-                  style={{ width: 200 }}
                   placeholder="Selecione..."
                   onChange={e => {
                     this.handleFormState({
@@ -526,7 +524,6 @@ class FieldRegistrationForm extends Component {
                     )}})}
               allowClear
               format={"DD/MM/YYYY"}
-              style={{ width: 200 }}
               name="data_plantio"
               />)}
           </Form.Item>
@@ -548,7 +545,6 @@ class FieldRegistrationForm extends Component {
                     )}})}
               allowClear
               format={"DD/MM/YYYY"}
-              style={{ width: 200 }}
               name="data_inicio_colheita"
               />)}
           </Form.Item>
@@ -570,7 +566,6 @@ class FieldRegistrationForm extends Component {
                     )}})}
               allowClear
               format={"DD/MM/YYYY"}
-              style={{ width: 200 }}
               name="data_fim_colheita"
               />)}
           </Form.Item>
@@ -589,7 +584,6 @@ class FieldRegistrationForm extends Component {
             })(<Select
                   name="responsavel"
                   showAction={["focus","click"]}
-                  style={{ width: 200 }}
                   placeholder="Selecione..."
                   onChange={e => {
                     this.handleFormState({
@@ -609,7 +603,6 @@ class FieldRegistrationForm extends Component {
       </div>
     );
   }
-
 }
 
 const WrappepFieldRegistrationForm = Form.create()(FieldRegistrationForm);
