@@ -11,20 +11,34 @@ import moment from "moment";
 import { LineChart, Line, Legend, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Text, Bar, BarChart } from 'recharts';
 
 let arrClientArea = [{}], arrClient = [{}], arrCustomerWallet = [{}], arrQuota = [{}], arrTarget = [{}];
-let sumMonths = [0,0,0,0,0,0,0,0,0,0,0,0];
+let sumMonths = [
+  {name: "Jan", qtdVisitas: 0},
+  {name: "Fev", qtdVisitas: 0},
+  {name: "Mar", qtdVisitas: 0},
+  {name: "Abr", qtdVisitas: 0},
+  {name: "Mai", qtdVisitas: 0},
+  {name: "Jun", qtdVisitas: 0},
+  {name: "Jul", qtdVisitas: 0},
+  {name: "Ago", qtdVisitas: 0},
+  {name: "Set", qtdVisitas: 0},
+  {name: "Out", qtdVisitas: 0},
+  {name: "Nov", qtdVisitas: 0},
+  {name: "Dez", qtdVisitas: 0}
+];
+
 let dataMes = [
-  { name: "Janeiro", qtd: 5 },
-  { name: "Fevereiro", qtd: 6 },
-  { name: "Março", qtd: 2 },
-  { name: "Abril", qtd: 9 },
-  { name: "Maio", qtd: 1 },
-  { name: "Junho", qtd: 0 },
-  { name: "Julho", qtd: 3 },
-  { name: "Agosto", qtd: 1 },
-  { name: "Setembro", qtd: 6 },
-  { name: "Outubro", qtd: 5 },
-  { name: "Novembro", qtd: 6 },
-  { name: "Dezembro", qtd: 8 }
+  { name: "Jan", qtd: 5 },
+  { name: "Fev", qtd: 6 },
+  { name: "Mar", qtd: 2 },
+  { name: "Abr", qtd: 9 },
+  { name: "Mai", qtd: 1 },
+  { name: "Jun", qtd: 7 },
+  { name: "Jul", qtd: 3 },
+  { name: "Ago", qtd: 1 },
+  { name: "Set", qtd: 6 },
+  { name: "Out", qtd: 5 },
+  { name: "Nov", qtd: 6 },
+  { name: "Dez", qtd: 8 }
 ];
 
 const colors = ["#4286f4", "#41f4d9", "#41f462", "#a9f441", "#41c4f4", "#4af441"];
@@ -189,14 +203,14 @@ class Dashboard extends Component {
           <Tooltip />
         </PieChart>
 
-        <h3> aASdadVisitas por MêsAAAAAAAAAA</h3>
+        <h3> Visitas por Mês </h3>
         <BarChart width={500} height={200} data={dataMes}>
           <CartesianGrid strokeDasharray="10 0" />
-          <XAxis />
+          <XAxis dataKey="name" />
           <YAxis />
           <Tooltip />
-          <Bar isAnimationActive={false} dataKey={dataMes} >
-            { dataMes.map((entry, index) => <Cell key={index} fill="red" />) }
+          <Bar isAnimationActive={false} dataKey="qtd" label>
+            { dataMes.map((entry, index) => <Cell key={index} fill="lightBlue" />) }
           </Bar>
         </BarChart>
 
