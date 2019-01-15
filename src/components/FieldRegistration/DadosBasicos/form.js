@@ -12,6 +12,7 @@ import * as SeasonService from "../../../services/seasons";
 import * as ConsultantService from "../../../services/consultants";
 import * as IBGEService from "../../../services/ibge";
 import moment from "moment";
+import debounce from "lodash/debounce";
 
 
 const Option = Select.Option;
@@ -19,28 +20,31 @@ const Option = Select.Option;
 class FieldRegistrationForm extends Component {
   constructor(props) {
     super(props);
+    this.lastFetchClientId = 0;
+    this.searchClient = debounce(this.searchClient, 400);
     this.state = {
       editMode: false,
       formData: {},
       savingForm: false,
       estados: [],
-      cidades: []
+      cidades: [],
+      fetchingClients: false,
     };
   }
 
   async componentDidMount() {
     const { id } = this.props.match.params;
-    const dataClient = await ClientService.list({ limit: 9999999999 });
+    const clients = await this.fetchClients();
     const dataProductGroup = await ProductGroupService.list({ limit: 9999999999 });
     const dataSeason = await SeasonService.list({ limit: 9999999999 });
-    const dataConsultant = await ConsultantService.list({ tipo: "PRODUCAO" })
+    const dataConsultant = await ConsultantService.list({ limit: 9999999999, tipo: "PRODUCAO" })
 
     this.setState(prev => ({
       ...prev,
-      listClient: dataClient.docs,
+      listClient: clients.docs,
       listProductGroup: dataProductGroup.docs,
       listSeason: dataSeason.docs,
-      listConsultant: dataConsultant.docs,
+      listConsultant: dataConsultant.docs
       /*formData: {
         ...prev.formData,
         responsavel: {
@@ -191,8 +195,35 @@ class FieldRegistrationForm extends Component {
     }))
   }
 
+  async fetchClients(aqp = {}) {
+    return await ClientService.list({
+      limit: 25,
+      fields: "nome,_id,propriedades,cpf_cnpj",
+      status: true,
+      ...aqp
+    });
+  }
+
+  searchClient = async value => {
+    this.lastFetchClientId += 1;
+    const fetchId = this.lastFetchClientId;
+    this.setState({ listClient: [], fetchingClients: true });
+
+    const data = await this.fetchClients({ nome: `/${value}/i` });
+
+    if (fetchId !== this.lastFetchClientId) return;
+
+    const listClient = data.docs;
+
+    this.setState({
+      listClient,
+      fetchingClients: false
+    });
+  }
+
   render() {
     const { getFieldDecorator } = this.props.form;
+    const { fetchingClients } = this.state;
     const formItemLayout = {
       labelCol: { span: 3 },
       wrapperCol: { span: 12 }
@@ -249,6 +280,33 @@ class FieldRegistrationForm extends Component {
               </Select>)}
           </Form.Item>
 
+          {/*<Form.Item label="Cliente" {...formItemLayout}>
+            {getFieldDecorator("cliente", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.cliente && this.state.formData.cliente.nome
+            })(<Select
+                  name="cliente"
+                  showAction={["focus", "click"]}
+                  showSearch
+                  placeholder="Selecione um cliente..."
+                  onChange={e => {
+                    this.handleFormState({
+                      target: { name: "cliente", value: JSON.parse(e) }
+                    })
+                  }}
+                >
+                  {this.state.listClient && this.state.listClient.map((client) => (
+                    <Option key={client._id} value={ JSON.stringify({
+                      id: client._id,
+                      nome: client.nome,
+                      cpf_cnpj: client.cpf_cnpj
+                    })}>
+                      {client.nome}
+                    </Option>
+                  ))}
+                </Select>)}
+          </Form.Item>*/}
+
           <Form.Item label="Cliente" {...formItemLayout}>
             {getFieldDecorator("cliente", {
               // rules: [{ required: true, message: "Este campo é obrigatório!" }],
@@ -256,7 +314,11 @@ class FieldRegistrationForm extends Component {
             })(<Select
                   name="cliente"
                   showAction={["focus", "click"]}
+                  onSearch={this.searchClient}
                   showSearch
+                  notFoundContent={
+                    fetchingClients ? <Spin size="small" /> : null
+                  }
                   placeholder="Selecione um cliente..."
                   onChange={e => {
                     this.handleFormState({
@@ -397,7 +459,7 @@ class FieldRegistrationForm extends Component {
               )}
             </Form.Item>
 
-            <Form.Item label="Nº Contrato" {...formItemLayout}>
+            <Form.Item label="Contrato" {...formItemLayout}>
             {getFieldDecorator("contrato", {
               // rules: [{ required: false, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.contrato
@@ -599,6 +661,7 @@ class FieldRegistrationForm extends Component {
               initialValue: this.state.formData.responsavel && this.state.formData.responsavel.nome
             })(<Select
                   name="responsavel"
+                  showSearch
                   showAction={["focus","click"]}
                   placeholder="Selecione..."
                   onChange={e => {
