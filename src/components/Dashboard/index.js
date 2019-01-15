@@ -12,18 +12,18 @@ import { LineChart, Line, Legend, XAxis, YAxis, CartesianGrid, Tooltip, PieChart
 
 let arrClientArea = [{}], arrClient = [{}], arrCustomerWallet = [{}], arrQuota = [{}], arrTarget = [{}];
 let sumMonths = [
-  {name: "Jan", qtdVisitas: 0},
-  {name: "Fev", qtdVisitas: 0},
-  {name: "Mar", qtdVisitas: 0},
-  {name: "Abr", qtdVisitas: 0},
-  {name: "Mai", qtdVisitas: 0},
-  {name: "Jun", qtdVisitas: 0},
-  {name: "Jul", qtdVisitas: 0},
-  {name: "Ago", qtdVisitas: 0},
-  {name: "Set", qtdVisitas: 0},
-  {name: "Out", qtdVisitas: 0},
-  {name: "Nov", qtdVisitas: 0},
-  {name: "Dez", qtdVisitas: 0}
+  { name: "Jan", qtdVisitas: 0 },
+  { name: "Fev", qtdVisitas: 0 },
+  { name: "Mar", qtdVisitas: 0 },
+  { name: "Abr", qtdVisitas: 0 },
+  { name: "Mai", qtdVisitas: 0 },
+  { name: "Jun", qtdVisitas: 0 },
+  { name: "Jul", qtdVisitas: 0 },
+  { name: "Ago", qtdVisitas: 0 },
+  { name: "Set", qtdVisitas: 0 },
+  { name: "Out", qtdVisitas: 0 },
+  { name: "Nov", qtdVisitas: 0 },
+  { name: "Dez", qtdVisitas: 0 }
 ];
 
 let dataMes = [

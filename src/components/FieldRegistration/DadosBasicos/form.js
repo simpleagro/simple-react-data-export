@@ -34,11 +34,10 @@ class FieldRegistrationForm extends Component {
 
   async componentDidMount() {
     const { id } = this.props.match.params;
-    //const dataClient = await ClientService.list({ limit: 9999999999 });
     const clients = await this.fetchClients();
     const dataProductGroup = await ProductGroupService.list({ limit: 9999999999 });
     const dataSeason = await SeasonService.list({ limit: 9999999999 });
-    const dataConsultant = await ConsultantService.list({ tipo: "PRODUCAO" })
+    const dataConsultant = await ConsultantService.list({ limit: 9999999999, tipo: "PRODUCAO" })
 
     this.setState(prev => ({
       ...prev,
