@@ -160,9 +160,9 @@ class FieldRegistrationForm extends Component {
     return null;
   }
 
-  setCultivarId = e =>{
+  setProdutoId = e =>{
     this.setState({
-      id_cultivar: JSON.parse(e).id
+      id_produto: JSON.parse(e).id
     });
   };
 
@@ -480,7 +480,7 @@ class FieldRegistrationForm extends Component {
                    this.handleFormState({
                      target: { name: "grupo_produto", value: JSON.parse(e)}
                    });
-                   this.setCultivarId(e);
+                   this.setProdutoId(e);
                  }}>
                     {this.state.listProductGroup &&
                       this.state.listProductGroup.map(gp => (<Option key={gp._id} value={ JSON.stringify({
@@ -498,22 +498,22 @@ class FieldRegistrationForm extends Component {
             label="Cultivar"
             {...formItemLayout}
           >
-            {getFieldDecorator("cultivar", {
+            {getFieldDecorator("produto", {
               // rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.cultivar && this.state.formData.cultivar.nome
+              initialValue: this.state.formData.produto && this.state.formData.produto.nome
             })(<Select
-                name="cultivar"
+                name="produto"
                 disabled={this.state.formData.grupo_produto === undefined}
                 showAction={["focus", "click"]}
                 showSearch
                 placeholder="Selecione um caracterista"
                 onChange={e => {
                   this.handleFormState({
-                    target: { name: "cultivar", value: JSON.parse(e) }
+                    target: { name: "produto", value: JSON.parse(e) }
                   });
                 }}>
-                  {this.state.id_cultivar &&
-                    this.state.listProductGroup.map(pg => pg._id === this.state.id_cultivar
+                  {this.state.id_produto &&
+                    this.state.listProductGroup.map(pg => pg._id === this.state.id_produto
                       ? pg.produtos.map(pgc =>
                           (<Option key={pgc._id}
                             value={ JSON.stringify({

@@ -136,9 +136,9 @@ class FieldRegistration extends Component {
     },
     {
       title: "Cultivar",
-      dataIndex: "cultivar.nome",
-      key: "cultivar.nome",
-      ...simpleTableSearch(this)("cultivar.nome"),
+      dataIndex: "produto.nome",
+      key: "produto.nome",
+      ...simpleTableSearch(this)("produto.nome"),
       render: text => text
     },
     {
