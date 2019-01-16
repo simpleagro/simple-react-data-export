@@ -182,6 +182,12 @@ class FieldRegistration extends Component {
       render: text => text
     },
     {
+      title: "Responsável",
+      dataIndex: "responsavel.nome",
+      key: "responsavel.nome",
+      render: text => text
+    },
+    {
       title: "Ações",
       dataIndex: "action",
       fixed: "right",
