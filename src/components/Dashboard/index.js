@@ -10,35 +10,21 @@ import moment from "moment";
 
 import { LineChart, Line, Legend, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Text, Bar, BarChart } from 'recharts';
 
-let arrClientArea = [{}], arrClient = [{}], arrCustomerWallet = [{}], arrQuota = [{}], arrTarget = [{}];
-let sumMonths = [
-  { name: "Jan", qtdVisitas: 0 },
-  { name: "Fev", qtdVisitas: 0 },
-  { name: "Mar", qtdVisitas: 0 },
-  { name: "Abr", qtdVisitas: 0 },
-  { name: "Mai", qtdVisitas: 0 },
-  { name: "Jun", qtdVisitas: 0 },
-  { name: "Jul", qtdVisitas: 0 },
-  { name: "Ago", qtdVisitas: 0 },
-  { name: "Set", qtdVisitas: 0 },
-  { name: "Out", qtdVisitas: 0 },
-  { name: "Nov", qtdVisitas: 0 },
-  { name: "Dez", qtdVisitas: 0 }
-];
-
-let dataMes = [
-  { name: "Jan", qtd: 5 },
-  { name: "Fev", qtd: 6 },
-  { name: "Mar", qtd: 2 },
-  { name: "Abr", qtd: 9 },
-  { name: "Mai", qtd: 1 },
-  { name: "Jun", qtd: 7 },
-  { name: "Jul", qtd: 3 },
-  { name: "Ago", qtd: 1 },
-  { name: "Set", qtd: 6 },
-  { name: "Out", qtd: 5 },
-  { name: "Nov", qtd: 6 },
-  { name: "Dez", qtd: 8 }
+let arrClientArea = [{}], arrClient = [{}], arrCustomerWallet = [{}], arrQuota = [{}], arrTarget = [{}], arrVisitasMes = [{}];
+let sumMonths = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+arrVisitasMes = [
+  { name: "Jan" },
+  { name: "Fev" },
+  { name: "Mar" },
+  { name: "Abr" },
+  { name: "Mai" },
+  { name: "Jun" },
+  { name: "Jul" },
+  { name: "Ago" },
+  { name: "Set" },
+  { name: "Out" },
+  { name: "Nov" },
+  { name: "Dez" }
 ];
 
 const colors = ["#4286f4", "#41f4d9", "#41f462", "#a9f441", "#41c4f4", "#4af441"];
@@ -73,8 +59,11 @@ class Dashboard extends Component {
 
   sumMonth(){
     let month;
-    this.state.listVisit && this.state.listVisit.map(v => (month = new Date(moment(v.data_agenda, "DD/MM/YYYY").format("MM/DD/YYYY")), sumMonths[month.getMonth()]++,console.log("mes: ", month.getMonth())))
-    console.log("sumMonths", sumMonths);
+    this.state.listVisit && this.state.listVisit.map(v => ( month = new Date(moment(v.data_agenda, "DD/MM/YYYY").format("MM/DD/YYYY")), sumMonths[month.getMonth()]++,console.log("mes: ", month.getMonth())))
+    arrVisitasMes.forEach((element, index) => {
+      Object.assign(element, {qtd: sumMonths[index]})
+    });
+    console.log("arrVisitasMes", arrVisitasMes);
   }
 
   sum(num, total) {
@@ -204,13 +193,13 @@ class Dashboard extends Component {
         </PieChart>
 
         <h3> Visitas por Mês </h3>
-        <BarChart width={500} height={200} data={dataMes}>
+        <BarChart width={500} height={200}>
           <CartesianGrid strokeDasharray="10 0" />
           <XAxis dataKey="name" />
-          <YAxis />
+          <YAxis dataKey="qtd" />
           <Tooltip />
-          <Bar isAnimationActive={false} dataKey="qtd" label>
-            { dataMes.map((entry, index) => <Cell key={index} fill="lightBlue" />) }
+          <Bar isAnimationActive={false} data={arrVisitasMes} dataKey="qtd" label>
+            { arrVisitasMes.map((entry, index) => <Cell key={index} fill={colors[index % colors.length]} />) }
           </Bar>
         </BarChart>
 
