@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { InputNumber, Button, Form, Select, Affix, Tooltip } from "antd";
+import { InputNumber, Button, Form, Select, Affix, Tooltip, Card } from "antd";
 
 import { flashWithSuccess } from "../../../common/FlashMessages";
 import parseErrors from "../../../../lib/parseErrors";
@@ -8,12 +8,12 @@ import * as ProductGroupService from "services/productgroups";
 import * as OrderItemService from "../../../../services/orders.items";
 import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
 import { SimpleLazyLoader } from "../../../common/SimpleLazyLoader";
+import { openSync } from "fs";
 
 const Option = Select.Option;
 
 class OrderItemForm extends Component {
   constructor(props) {
-    debugger
     super(props);
     this.state = {
       editMode: false,
@@ -26,6 +26,7 @@ class OrderItemForm extends Component {
     };
 
     window.getVariacoes = this.getVariacoes;
+    window.meuState = this.props;
   }
 
   async componentDidMount() {
@@ -58,12 +59,12 @@ class OrderItemForm extends Component {
     }, 0);
   }
 
-  handleFormState = event => {
+  handleFormState = async event => {
     if (!event.target.name) return;
     let form = Object.assign({}, this.state.formData, {
       [event.target.name]: event.target.value
     });
-    this.setState(prev => ({ ...prev, formData: form }));
+    await this.setState(prev => ({ ...prev, formData: form }));
   };
 
   saveForm = async e => {
@@ -139,34 +140,59 @@ class OrderItemForm extends Component {
     if (e.possui_variacao) this.getVariacoes();
   }
 
-  async getVariacoes(chave, valor) {
+  async getVariacoes() {
     const grupo = JSON.parse(this.props.form.getFieldValue("grupo_produto"));
-    console.log(grupo);
     const produto = JSON.parse(this.props.form.getFieldValue("produto"));
+    console.log(grupo);
     console.log(produto);
 
-    const filterVariacoes = (variacao, caract, valor) => {
-      if (valor) return variacao[caract] === valor;
-      return variacao[caract];
-    };
-
-    let variacoes = grupo.caracteristicas.map(c => {
-      // this.props.form.resetFields([c.chave]);
+    let variacoes = grupo.caracteristicas.map((c, index, arr) => {
       return {
         chave: c.chave,
         label: c.label,
         obrigatorio: c.obrigatorio,
+        prevField: index > 0 ? arr[index - 1].chave : null,
+        nextField: index + 1 < arr.length ? arr[index + 1].chave : null,
         opcoes: new Set(
-          produto.variacoes
-            .filter(v => filterVariacoes(v, chave || c.chave, valor || null))
-            .map(v => v[c.chave])
+          produto.variacoes.filter(v => v[c.chave]).map(v => v[c.chave])
         )
       };
     });
+
+    // somente variações que possuem opções
+    // variacoes = variacoes.filter( v => v.opcoes.size );
     // trás as variações obrigatórias para cima
-    variacoes = variacoes.sort((a, b) => (b.obrigatorio ? 1 : -1));
+    // variacoes = variacoes.sort((a, b) => (b.obrigatorio ? 1 : -1));
     this.setState({ variacoes });
-    console.log(variacoes);
+  }
+
+  getVals(chave) {
+    function search(user) {
+      return Object.keys(this).every(key => user[key] === this[key]);
+    }
+
+    let opcoes = JSON.parse(this.props.form.getFieldValue("produto"));
+    let filtro = this.state.variacoesSelecionadas || {};
+
+    opcoes = new Set(
+      opcoes.variacoes.filter(search, filtro).map(c => c[chave])
+    );
+
+    opcoes.delete(undefined);
+
+    let variacoes = this.state.variacoes;
+    variacoes.map(v => {
+      if (v.chave === chave) v.opcoes = opcoes;
+    });
+
+    this.props.form.resetFields([chave]);
+    let variacoesSelecionadas = this.state.variacoesSelecionadas;
+    delete variacoesSelecionadas[chave];
+
+    this.setState({
+      variacoes,
+      variacoesSelecionadas
+    });
   }
 
   render() {
@@ -204,6 +230,7 @@ class OrderItemForm extends Component {
           </Affix>
 
           <Form onChange={this.handleFormState}>
+            //#region agora nao
             <Form.Item label="Grupo de Produto" {...formItemLayout}>
               {getFieldDecorator("grupo_produto", {
                 rules: [
@@ -278,45 +305,79 @@ class OrderItemForm extends Component {
                 </Select>
               )}
             </Form.Item>
-            {this.state.variacoes &&
-              this.state.variacoes.map((v, index) => {
-                console.log(v);
-                const opcoes = Array.from(v.opcoes) || [];
-                return (
-                  <Form.Item key={v.chave} label={v.label} {...formItemLayout}>
-                    {getFieldDecorator(v.chave, {
-                      rules: [
-                        {
-                          required: v.obrigatorio,
-                          message: "Este campo é obrigatório!"
-                        }
-                      ],
-                      initialValue: ""
-                    })(
-                      <Select
-                        // disabled={this.state.formData.grupo_produto === undefined}
-                        name={v.chave}
-                        showAction={["focus", "click"]}
-                        showSearch
-                        style={{ width: 200 }}
-                        onSelect={e => this.getVariacoes(v.chave, e)}
-                        placeholder="Selecione...">
-                        {opcoes.length > 0
-                          ? opcoes.map((t, index) => {
-                              return (
-                                t !== undefined && (
-                                  <Option key={`${v.chave}_${index}`} value={t}>
-                                    {t}
-                                  </Option>
-                                )
-                              );
-                            })
-                          : ""}
-                      </Select>
-                    )}
-                  </Form.Item>
-                );
-              })}
+            //#endregion
+            {this.state.variacoes && (
+              <Card
+                title="Variações do Produto"
+                bordered
+                style={{ marginBottom: 20 }}>
+                {this.state.variacoes
+                  // .sort((a, b) => (b.obrigatorio ? 1 : -1))
+                  .map((v, index, arr) => {
+                    return (
+                      <Form.Item
+                        key={v.chave}
+                        label={v.label}
+                        {...formItemLayout}>
+                        {getFieldDecorator(v.chave, {
+                          valuePropName: "value",
+                          rules: [
+                            {
+                              required: v.obrigatorio,
+                              message: "Este campo é obrigatório!"
+                            }
+                          ],
+                          initialValue: ""
+                        })(
+                          <Select
+                            disabled={
+                              index === 0
+                                ? false
+                                : this.state.formData[v.prevField] === undefined
+                            }
+                            name={v.chave}
+                            showAction={["focus", "click"]}
+                            showSearch
+                            // onFocus={() => this.getVals(v.chave)}
+                            style={{ width: 200 }}
+                            onChange={async e => {
+                              this.setState(prev => ({
+                                ...prev,
+                                variacoesSelecionadas: {
+                                  ...prev.variacoesSelecionadas,
+                                  ...{ [v.chave]: e }
+                                }
+                              }));
+                              await this.handleFormState({
+                                target: { name: v.chave, value: e }
+                              });
+                              arr
+                                .map(v => v.chave)
+                                .splice(index + 1)
+                                .map(v2 => {
+                                  this.setState(prev => ({
+                                    ...prev,
+                                    formData: {
+                                      ...prev.formData,
+                                      [v2]: undefined
+                                    }
+                                  }));
+                                  this.getVals(v2);
+                                });
+                            }}
+                            placeholder="Selecione...">
+                            {Array.from(v.opcoes).map((o, index) => (
+                              <Option key={`${v.chave}_${index}`} value={o}>
+                                {o}
+                              </Option>
+                            ))}
+                          </Select>
+                        )}
+                      </Form.Item>
+                    );
+                  })}
+              </Card>
+            )}
             <Form.Item label="Área" {...formItemLayout}>
               {getFieldDecorator("area", {
                 rules: [
@@ -347,20 +408,19 @@ class OrderItemForm extends Component {
                     step={0.01}
                     min={0}
                     max={1}
-                    formatter={value => `${value*100}`}
+                    formatter={value => `${value * 100}`}
                     parser={value =>
                       value.replace("%", "").replace(",", ".") / 100
                     }
-                    onChange={
-                      e => console.log("desconto", e)
-                      // this.handleFormState({
-                      //   target: { name: "desconto", value: e }
-                      // })
+                    onChange={e =>
+                      this.handleFormState({
+                        target: { name: "desconto", value: e }
+                      })
                     }
                     style={{ width: 200 }}
                     name="desconto"
-                  />
-                  {" "}%
+                  />{" "}
+                  %
                 </Tooltip>
               )}
             </Form.Item>
