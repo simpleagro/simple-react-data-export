@@ -7,6 +7,10 @@ import * as QuotaService from "../../services/quotas";
 import * as TargetService from "../../services/targets";
 import * as VisitService from "../../services/visits";
 import moment from "moment";
+import {
+  Row,
+  Col
+} from "antd";
 
 import { LineChart, Line, Legend, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Text, Bar, BarChart } from 'recharts';
 
@@ -36,8 +40,11 @@ class Dashboard extends Component {
       listClient: [],
       listCustomerWallet: [],
       listQuota: [],
-      listTarget: []
+      listTarget: [],
+      listVisit: []
     };
+
+
   }
 
   async componentDidMount() {
@@ -57,26 +64,28 @@ class Dashboard extends Component {
 
   }
 
-  sumMonth(){
+  showVisitsMonth(){
     let month;
-    this.state.listVisit && this.state.listVisit.map(v => ( month = new Date(moment(v.data_agenda, "DD/MM/YYYY").format("MM/DD/YYYY")), sumMonths[month.getMonth()]++,console.log("mes: ", month.getMonth())))
+    this.state.listVisit.map(v => ( month = new Date(moment(v.data_agenda, "DD/MM/YYYY").format("MM/DD/YYYY")), sumMonths[month.getMonth()]++))
     arrVisitasMes.forEach((element, index) => {
-      Object.assign(element, {qtd: sumMonths[index]})
+      Object.assign(element, { qtdVisitas: Number(sumMonths[index]) })
     });
     console.log("arrVisitasMes", arrVisitasMes);
   }
 
   sum(num, total) {
-    return num + total
+    return num + total;
   }
 
   showClientArea() {
-    Object.assign(arrClientArea, this.state.listClient && this.state.listClient.map(client => (
-      {
-        name: client.nome,
-        areaTotal: client.propriedades.map(p => p.area).reduce(this.sum)
-      }
-    )))
+    Object.assign(
+      arrClientArea, this.state.listClient && this.state.listClient.map(client =>
+        ({
+          name: client.nome,
+          areaTotal: client.propriedades.map(p => p.area).reduce(this.sum)
+        })
+      )
+    );
   }
 
   showClientCredit() {
@@ -91,31 +100,37 @@ class Dashboard extends Component {
   }
 
   showCustomerWalletChart() {
-    Object.assign(arrCustomerWallet, this.state.listCustomerWallet && this.state.listCustomerWallet.map(cw => (
-      {
-        name: cw.nome,
-        totalClientes: cw.clientes.length
-      }
-    )))
+    Object.assign(
+      arrCustomerWallet, this.state.listCustomerWallet && this.state.listCustomerWallet.map(cw =>
+        ({
+          name: cw.nome,
+          totalClientes: cw.clientes.length
+        })
+      )
+    );
   }
 
   showQuotaChart() {
     let totalCotas = 0;
     this.state.listQuota && this.state.listQuota.map((q, index) => (totalCotas++));
-    Object.assign(arrQuota, { value: totalCotas });
+    Object.assign(arrQuota, {
+      value: totalCotas
+    });
   }
 
   showTargetChart() {
     let totalMetas = 0;
     this.state.listTarget && this.state.listTarget.map((t, index) => (totalMetas++));
-    Object.assign(arrTarget, { value: totalMetas })
+    Object.assign(arrTarget, {
+      value: totalMetas
+    });
   }
 
   render() {
     return (
       <div>
         <PainelHeader title="Dashboard" />
-
+        <Row>
         {[ console.clear(),
 
           this.showClientArea(),
@@ -123,17 +138,19 @@ class Dashboard extends Component {
           this.showCustomerWalletChart(),
           this.showQuotaChart(),
           this.showTargetChart(),
-          this.sumMonth(),
+          this.showVisitsMonth(),
 
           console.log("arrClientArea: ", arrClientArea),
           console.log("arrClient: ", arrClient),
           console.log("arrCustomerWallet: ", arrCustomerWallet),
           console.log("arrQuota: ", arrQuota),
           console.log("arrTarget: ", arrTarget),
+          console.log("arrVisitsMonth: ", arrVisitasMes),
 
           console.log("state: ", this.state) ]}
 
         <h3> Limite de Crédito por Cliente </h3>
+        <Col span={15}>
         <LineChart width={500} height={200} margin={{top: 5, right: 5, left: 5, bottom: 1}}>
           <CartesianGrid strokeDasharray="10 0"/>
           <XAxis dataKey="name" />
@@ -144,7 +161,9 @@ class Dashboard extends Component {
           <Tooltip />
           <Text angle={90} />
         </LineChart>
+        </Col>
 
+        <Col>
         <h3> Limite de Crédito por Cliente </h3>
         <PieChart width={400} height={400}>
           <Pie isAnimationActive={false} data={arrClient} dataKey="value" outerRadius={100} label >
@@ -153,6 +172,7 @@ class Dashboard extends Component {
           <Legend />
           <Tooltip />
         </PieChart>
+        </Col>
 
         <h3> Área Total por Cliente </h3>
         <LineChart width={500} height={200} margin={{top: 5, right: 5, left: 5, bottom: 1}}>
@@ -192,21 +212,21 @@ class Dashboard extends Component {
           <Tooltip />
         </PieChart>
 
+        <hr />
         <h3> Visitas por Mês </h3>
         <BarChart width={500} height={200}>
           <CartesianGrid strokeDasharray="10 0" />
-          <XAxis dataKey="name" />
-          <YAxis dataKey="qtd" />
-          <Tooltip />
-          <Bar isAnimationActive={false} data={arrVisitasMes} dataKey="qtd" label>
-            { arrVisitasMes.map((entry, index) => <Cell key={index} fill={colors[index % colors.length]} />) }
+          <Bar isAnimationActive={false} data={arrVisitasMes} dataKey="qtdVisitas" label="Visitas por Mes" >
+            { arrVisitasMes.map((entry, index) => (<Cell key={index} fill={"black"} />)) }
           </Bar>
+          <XAxis dataKey="name" />
+          <YAxis type="number" />
+          <Tooltip />
         </BarChart>
-
+        </Row>
       </div>
     );
   }
 }
 
 export default Dashboard;
-
