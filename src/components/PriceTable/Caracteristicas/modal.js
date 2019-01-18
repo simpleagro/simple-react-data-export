@@ -82,14 +82,14 @@ const ModalForm = Form.create()(
       gerarFormularioPreco = (group_regras_preco, getFieldDecorator) => {
         return group_regras_preco.map( regra_preco => 
           <Form.Item
-            label={`${regra_preco.label}`}
+            label={`Preço ${regra_preco.label}`}
           >
-            {getFieldDecorator(`${regra_preco.chave}`, {
-              initialValue: this.state.formData[`${regra_preco.chave}`],
+            {getFieldDecorator(`preco_${regra_preco.chave}`, {
+              initialValue: this.state.formData[`preco_${regra_preco.chave}`],
               rules: [{ required: regra_preco.obrigatorio, message: 'Selecione!'}],
             })(
               <Input
-                name= { `${regra_preco.chave}` } />
+                name= { `preco_${regra_preco.chave}` } />
             )}
           </Form.Item>
         )
