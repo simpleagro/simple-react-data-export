@@ -259,7 +259,7 @@ class FieldRegistrationForm extends Component {
               initialValue: this.state.formData.safra && this.state.formData.safra.descricao
             })(<Select
                 name="safra"
-                showAction={["focus", "click"]}
+                showAction={ this.state.editMode ? ["",""] : ["focus", "click"] }
                 showSearch
                 placeholder="Selecione a safra..."
                 ref={input => (this.titleInput = input)}
