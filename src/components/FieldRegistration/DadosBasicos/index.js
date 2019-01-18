@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Divider, Button, Icon, Popconfirm, Tooltip } from "antd";
+import { Divider, Button, Icon, Popconfirm, Tooltip, Select } from "antd";
 
 import * as FieldRegistrationService from "../../../services/field-registration";
 import SimpleTable from "../../common/SimpleTable";
@@ -10,12 +10,20 @@ import { PainelHeader } from "../../common/PainelHeader";
 import { simpleTableSearch } from "../../../lib/simpleTableSearch";
 import moment from "moment";
 
+import * as SeasonService from "../../../services/seasons";
+
+
+const Option = Select.Option;
+
 class FieldRegistration extends Component {
   constructor(props) {
     super(props);
     this.state = {
       list: [],
+      listPreHarvest: [],
+      listSafra: [],
       loadingData: true,
+      safra_selecionada: null,
       pagination: {
         showSizeChanger: true,
         defaultPageSize: 10,
@@ -25,15 +33,21 @@ class FieldRegistration extends Component {
   }
 
   async initializeList(aqp) {
+
     this.setState(previousState => {
       return { ...previousState, loadingData: true };
     });
 
+
+
     try {
       const data = await FieldRegistrationService.list(aqp);
+      const dataSafra = await SeasonService.list({ limit: 999999 });
+
       this.setState(prev => ({
         ...prev,
         list: data.docs,
+        listSafra: dataSafra.docs,
         loadingData: false,
         pagination: {
           total: data.total
@@ -119,12 +133,6 @@ class FieldRegistration extends Component {
       key: "cliente.nome",
       fixed: "left",
       ...simpleTableSearch(this)("cliente.nome"),
-      render: text => text
-    },
-    {
-      title: "Safra",
-      dataIndex: "safra.descricao",
-      key: "safra.descricao",
       render: text => text
     },
     {
@@ -271,14 +279,37 @@ class FieldRegistration extends Component {
   render() {
     return (
       <div>
-        <PainelHeader title="Inscrição de Campo">
+        <PainelHeader
+          title={
+            <span>
+              Inscrição de Campo <span style={{ marginLeft: 150}}>Safra</span>:
+              <Select
+                showSearch
+                allowClear
+                showArrow
+                style={{ width: 200, marginLeft: 15 }}
+                value={this.state.safra_selecionada}
+                onChange={e => this.initializeList({ "safra.descricao": e })}
+                placeholder="Selecione a safra...">
+                  {this.state.listSafra &&
+                      this.state.listSafra.map((safra, i) =>
+                        <Option key={i} value={safra.descricao}>
+                          {safra.descricao}
+                        </Option>
+                  )}
+              </Select>
+            </span>
+          }>
+
           <Button
             type="primary"
             icon="plus"
             onClick={() => this.props.history.push("/inscricao-de-campo/new")}>
             Adicionar
           </Button>
+
         </PainelHeader>
+
         <SimpleTable
           pagination={this.state.pagination}
           spinning={this.state.loadingData}
