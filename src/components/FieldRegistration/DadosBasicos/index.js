@@ -106,6 +106,14 @@ class FieldRegistration extends Component {
       render: text => text
     },
     {
+      title: "Contrato",
+      dataIndex: "contrato",
+      key: "contrato",
+      fixed: "left",
+      ...simpleTableSearch(this)("contrato"),
+      render: text => text
+    },
+    {
       title: "Cliente",
       dataIndex: "cliente.nome",
       key: "cliente.nome",
@@ -128,9 +136,9 @@ class FieldRegistration extends Component {
     },
     {
       title: "Cultivar",
-      dataIndex: "cultivar.nome",
-      key: "cultivar.nome",
-      ...simpleTableSearch(this)("cultivar.nome"),
+      dataIndex: "produto.nome",
+      key: "produto.nome",
+      ...simpleTableSearch(this)("produto.nome"),
       render: text => text
     },
     {
@@ -171,6 +179,12 @@ class FieldRegistration extends Component {
       title: "Categoria Colhida",
       dataIndex: "categ_colhida",
       key: "categ_colhida",
+      render: text => text
+    },
+    {
+      title: "Responsável",
+      dataIndex: "responsavel.nome",
+      key: "responsavel.nome",
       render: text => text
     },
     {

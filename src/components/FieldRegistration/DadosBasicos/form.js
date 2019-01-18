@@ -12,6 +12,7 @@ import * as SeasonService from "../../../services/seasons";
 import * as ConsultantService from "../../../services/consultants";
 import * as IBGEService from "../../../services/ibge";
 import moment from "moment";
+import debounce from "lodash/debounce";
 
 
 const Option = Select.Option;
@@ -19,28 +20,31 @@ const Option = Select.Option;
 class FieldRegistrationForm extends Component {
   constructor(props) {
     super(props);
+    this.lastFetchClientId = 0;
+    this.searchClient = debounce(this.searchClient, 400);
     this.state = {
       editMode: false,
       formData: {},
       savingForm: false,
       estados: [],
-      cidades: []
+      cidades: [],
+      fetchingClients: false,
     };
   }
 
   async componentDidMount() {
     const { id } = this.props.match.params;
-    const dataClient = await ClientService.list({ limit: 9999999999 });
+    const clients = await this.fetchClients();
     const dataProductGroup = await ProductGroupService.list({ limit: 9999999999 });
     const dataSeason = await SeasonService.list({ limit: 9999999999 });
-    const dataConsultant = await ConsultantService.list({ tipo: "PRODUCAO" })
+    const dataConsultant = await ConsultantService.list({ limit: 9999999999, tipo: "PRODUCAO" })
 
     this.setState(prev => ({
       ...prev,
-      listClient: dataClient.docs,
+      listClient: clients.docs,
       listProductGroup: dataProductGroup.docs,
       listSeason: dataSeason.docs,
-      listConsultant: dataConsultant.docs,
+      listConsultant: dataConsultant.docs
       /*formData: {
         ...prev.formData,
         responsavel: {
@@ -156,9 +160,9 @@ class FieldRegistrationForm extends Component {
     return null;
   }
 
-  setCultivarId = e =>{
+  setProdutoId = e =>{
     this.setState({
-      id_cultivar: JSON.parse(e).id
+      id_produto: JSON.parse(e).id
     });
   };
 
@@ -182,8 +186,44 @@ class FieldRegistrationForm extends Component {
         : null )
   }
 
+  calcProdEstimada(valor){
+    this.setState(prev => ({
+      formData: {
+        ...prev.formData,
+        prod_estimada: (valor * 60 * 60) / 1000
+      }
+    }))
+  }
+
+  async fetchClients(aqp = {}) {
+    return await ClientService.list({
+      limit: 25,
+      fields: "nome,_id,propriedades,cpf_cnpj",
+      status: true,
+      ...aqp
+    });
+  }
+
+  searchClient = async value => {
+    this.lastFetchClientId += 1;
+    const fetchId = this.lastFetchClientId;
+    this.setState({ listClient: [], fetchingClients: true });
+
+    const data = await this.fetchClients({ nome: `/${value}/i` });
+
+    if (fetchId !== this.lastFetchClientId) return;
+
+    const listClient = data.docs;
+
+    this.setState({
+      listClient,
+      fetchingClients: false
+    });
+  }
+
   render() {
     const { getFieldDecorator } = this.props.form;
+    const { fetchingClients } = this.state;
     const formItemLayout = {
       labelCol: { span: 3 },
       wrapperCol: { span: 12 }
@@ -215,13 +255,12 @@ class FieldRegistrationForm extends Component {
 
         <Form.Item label="Safra" {...formItemLayout}>
             {getFieldDecorator("safra", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.safra && this.state.formData.safra.descricao
             })(<Select
                 name="safra"
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione a safra..."
                 ref={input => (this.titleInput = input)}
                 onChange={e => {
@@ -241,7 +280,7 @@ class FieldRegistrationForm extends Component {
               </Select>)}
           </Form.Item>
 
-          <Form.Item label="Cliente" {...formItemLayout}>
+          {/*<Form.Item label="Cliente" {...formItemLayout}>
             {getFieldDecorator("cliente", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.cliente && this.state.formData.cliente.nome
@@ -249,7 +288,37 @@ class FieldRegistrationForm extends Component {
                   name="cliente"
                   showAction={["focus", "click"]}
                   showSearch
-                  style={{ width: 200 }}
+                  placeholder="Selecione um cliente..."
+                  onChange={e => {
+                    this.handleFormState({
+                      target: { name: "cliente", value: JSON.parse(e) }
+                    })
+                  }}
+                >
+                  {this.state.listClient && this.state.listClient.map((client) => (
+                    <Option key={client._id} value={ JSON.stringify({
+                      id: client._id,
+                      nome: client.nome,
+                      cpf_cnpj: client.cpf_cnpj
+                    })}>
+                      {client.nome}
+                    </Option>
+                  ))}
+                </Select>)}
+          </Form.Item>*/}
+
+          <Form.Item label="Cliente" {...formItemLayout}>
+            {getFieldDecorator("cliente", {
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.cliente && this.state.formData.cliente.nome
+            })(<Select
+                  name="cliente"
+                  showAction={["focus", "click"]}
+                  onSearch={this.searchClient}
+                  showSearch
+                  notFoundContent={
+                    fetchingClients ? <Spin size="small" /> : null
+                  }
                   placeholder="Selecione um cliente..."
                   onChange={e => {
                     this.handleFormState({
@@ -274,14 +343,13 @@ class FieldRegistrationForm extends Component {
             {...formItemLayout}
           >
             {getFieldDecorator("propriedade", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.propriedade && this.state.formData.propriedade.nome
             })(<Select
                   name="propriedade"
                   disabled={this.state.formData.cliente === undefined}
                   showAction={["focus", "click"]}
                   showSearch
-                  style={{ width: 200 }}
                   placeholder="Selecione a propriedade..."
                   onChange={e => {
                     this.handleFormState({
@@ -304,16 +372,23 @@ class FieldRegistrationForm extends Component {
               </Select>)}
           </Form.Item>
 
+          <Form.Item label="Inscrição" {...formItemLayout}>
+            {getFieldDecorator("ie", {
+              // rules: [{ required: false, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.propriedade && this.state.formData.propriedade.ie
+            })(<InputNumber name="ie" disabled style={{ width: 400 }} />)}
+          </Form.Item>
+
           <Form.Item label="Latitude" {...formItemLayout}>
             {getFieldDecorator("latitude", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: false, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.geolocalizacao && this.state.formData.geolocalizacao.latitude
             })(<InputNumber name="latitude" style={{ width: 400 }} />)}
           </Form.Item>
 
           <Form.Item label="Longitude" {...formItemLayout}>
             {getFieldDecorator("longitude", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: false, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.geolocalizacao && this.state.formData.geolocalizacao.longitude
             })(<InputNumber name="longitude" style={{ width: 400 }} />)}
           </Form.Item>
@@ -329,16 +404,15 @@ class FieldRegistrationForm extends Component {
 
           <Form.Item label="Estado" {...formItemLayout}>
               {getFieldDecorator("estado", {
-                rules: [
-                  { required: true, message: "Este campo é obrigatório!" }
-                ],
+                // rules: [
+                //   { required: true, message: "Este campo é obrigatório!" }
+                // ],
                 initialValue: this.state.formData.estado
               })(
                 <Select
                   name="estado"
                   showAction={["focus", "click"]}
                   showSearch
-                  style={{ width: 200 }}
                   placeholder="Selecione um estado..."
                   filterOption={(input, option) =>
                     option.props.children
@@ -360,7 +434,7 @@ class FieldRegistrationForm extends Component {
               {...formItemLayout}
             >
               {getFieldDecorator("cidade", {
-                rules: [{ required: true, message: "Este campo é obrigatório!" }],
+                // rules: [{ required: true, message: "Este campo é obrigatório!" }],
                 initialValue: this.state.formData.cidade
               })(
                 <Select
@@ -368,7 +442,6 @@ class FieldRegistrationForm extends Component {
                   name="cidade"
                   showAction={["focus", "click"]}
                   showSearch
-                  style={{ width: 200 }}
                   filterOption={(input, option) =>
                     option.props.children
                       .toLowerCase()
@@ -386,22 +459,28 @@ class FieldRegistrationForm extends Component {
               )}
             </Form.Item>
 
+            <Form.Item label="Contrato" {...formItemLayout}>
+            {getFieldDecorator("contrato", {
+              // rules: [{ required: false, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.contrato
+            })(<InputNumber style={{ width: 200 }} min={0} name="contrato" />)}
+          </Form.Item>
+
           <Form.Item label="Grupo de Produtos" {...formItemLayout}>
             {getFieldDecorator("grupo_produto", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.grupo_produto && this.state.formData.grupo_produto.nome
             })(<Select
                  name="grupo_produto"
                  allowClear
                  showAction={["focus", "click"]}
                  showSearch
-                 style={{ width: 200 }}
                  placeholder="Selecione um grupo..."
                  onChange={e => {
                    this.handleFormState({
                      target: { name: "grupo_produto", value: JSON.parse(e)}
                    });
-                   this.setCultivarId(e);
+                   this.setProdutoId(e);
                  }}>
                     {this.state.listProductGroup &&
                       this.state.listProductGroup.map(gp => (<Option key={gp._id} value={ JSON.stringify({
@@ -419,31 +498,30 @@ class FieldRegistrationForm extends Component {
             label="Cultivar"
             {...formItemLayout}
           >
-            {getFieldDecorator("cultivar", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.cultivar && this.state.formData.cultivar.nome
+            {getFieldDecorator("produto", {
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.produto && this.state.formData.produto.nome
             })(<Select
-                name="cultivar"
+                name="produto"
                 disabled={this.state.formData.grupo_produto === undefined}
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione um caracterista"
                 onChange={e => {
                   this.handleFormState({
-                    target: { name: "cultivar", value: JSON.parse(e) }
+                    target: { name: "produto", value: JSON.parse(e) }
                   });
                 }}>
-                  {this.state.id_cultivar &&
-                    this.state.listProductGroup.map(pg => pg._id === this.state.id_cultivar
-                      ? pg.caracteristicas.map(pgc =>
+                  {this.state.id_produto &&
+                    this.state.listProductGroup.map(pg => pg._id === this.state.id_produto
+                      ? pg.produtos.map(pgc =>
                           (<Option key={pgc._id}
                             value={ JSON.stringify({
                               id: pgc._id,
-                              nome: pgc.label
+                              nome: pgc.nome
                             })}
                           >
-                            {pgc.label}
+                            {pgc.nome}
                           </Option>))
                       : null )}
               </Select>)}
@@ -451,12 +529,11 @@ class FieldRegistrationForm extends Component {
 
           <Form.Item label="Categoria Plantada" {...formItemLayout}>
             {getFieldDecorator("categ_plantada", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.categ_plantada
             })(<Select
                   name="categ_plantada"
                   showAction={["focus","click"]}
-                  style={{ width: 200 }}
                   placeholder="Selecione..."
                   onChange={e => {
                     this.handleFormState({
@@ -474,12 +551,11 @@ class FieldRegistrationForm extends Component {
 
           <Form.Item label="Categoria Colhida" {...formItemLayout}>
             {getFieldDecorator("categ_colhida", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.categ_colhida
             })(<Select
                   name="categ_colhida"
                   showAction={["focus","click"]}
-                  style={{ width: 200 }}
                   placeholder="Selecione..."
                   onChange={e => {
                     this.handleFormState({
@@ -497,21 +573,21 @@ class FieldRegistrationForm extends Component {
 
           <Form.Item label="Área Inscrita" {...formItemLayout}>
             {getFieldDecorator("area_inscrita", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.area_inscrita
-            })(<InputNumber min={0} name="area_inscrita" />)}
+            })(<InputNumber style={{ width: 200 }} min={0} name="area_inscrita" onChange={ e => this.calcProdEstimada(e) } onKeyUp={ e => this.calcProdEstimada(e.target.value) } />)}
           </Form.Item>
 
           <Form.Item label="Área Plantada" {...formItemLayout}>
             {getFieldDecorator("area_plantada", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.area_plantada
-            })(<InputNumber min={0} name="area_plantada" />)}
+            })(<InputNumber style={{ width: 200 }} min={0} name="area_plantada" />)}
           </Form.Item>
 
-          <Form.Item label="Data do Plantio" {...formItemLayout}>
+          <Form.Item label="Plantio" {...formItemLayout}>
             {getFieldDecorator("data_plantio", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue:  this.state.formData.data_plantio ? moment(
                 this.state.formData.data_plantio
                   ? this.state.formData.data_plantio
@@ -526,14 +602,13 @@ class FieldRegistrationForm extends Component {
                     )}})}
               allowClear
               format={"DD/MM/YYYY"}
-              style={{ width: 200 }}
               name="data_plantio"
               />)}
           </Form.Item>
 
-          <Form.Item label="Data do Inicio da Colheira" {...formItemLayout}>
+          <Form.Item label="Inicio da Colheira" {...formItemLayout}>
             {getFieldDecorator("data_inicio_colheita", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue:  this.state.formData.data_inicio_colheita ? moment(
                 this.state.formData.data_inicio_colheita
                   ? this.state.formData.data_inicio_colheita
@@ -548,14 +623,13 @@ class FieldRegistrationForm extends Component {
                     )}})}
               allowClear
               format={"DD/MM/YYYY"}
-              style={{ width: 200 }}
               name="data_inicio_colheita"
               />)}
           </Form.Item>
 
-          <Form.Item label="Data do Fim da Colheita" {...formItemLayout}>
+          <Form.Item label="Fim da Colheita" {...formItemLayout}>
             {getFieldDecorator("data_fim_colheita", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue:  this.state.formData.data_fim_colheita ? moment(
                 this.state.formData.data_fim_colheita
                   ? this.state.formData.data_fim_colheita
@@ -570,26 +644,25 @@ class FieldRegistrationForm extends Component {
                     )}})}
               allowClear
               format={"DD/MM/YYYY"}
-              style={{ width: 200 }}
               name="data_fim_colheita"
               />)}
           </Form.Item>
 
-          <Form.Item label="Produção Estimada" {...formItemLayout}>
+          <Form.Item label="Prod Estimada(TON)" {...formItemLayout}>
             {getFieldDecorator("prod_estimada", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.prod_estimada
             })(<InputNumber min={0} name="prod_estimada" />)}
           </Form.Item>
 
           <Form.Item label="Responsável" {...formItemLayout}>
             {getFieldDecorator("responsavel", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.responsavel && this.state.formData.responsavel.nome
             })(<Select
                   name="responsavel"
+                  showSearch
                   showAction={["focus","click"]}
-                  style={{ width: 200 }}
                   placeholder="Selecione..."
                   onChange={e => {
                     this.handleFormState({
@@ -609,7 +682,6 @@ class FieldRegistrationForm extends Component {
       </div>
     );
   }
-
 }
 
 const WrappepFieldRegistrationForm = Form.create()(FieldRegistrationForm);

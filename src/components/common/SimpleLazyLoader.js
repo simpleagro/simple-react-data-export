@@ -5,7 +5,7 @@ import { Icon, Spin } from "antd";
 const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
 
 export const SimpleLazyLoader = props => {
-  return props.loadingForm ? (
+  return props.isLoading ? (
     <Spin tip="Carregando..." size="large" indicator={antIcon} />
   ) : (
     props.children
