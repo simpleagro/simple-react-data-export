@@ -184,10 +184,6 @@ class ConsultantForm extends Component {
     }
   };
 
-  toggleChecked = () => {
-    this.setState({ checked: !this.state.checked });
-  };
-
   setLogin = email => {
     if (!email) return;
     const emailRegex = /[@][a-z0-9-_]+[.com]+[.br]*/g;
@@ -569,23 +565,22 @@ class ConsultantForm extends Component {
               )}
             </Form.Item>
 
-            <Form.Item label="Vendedor" {...formItemLayout}>
-              {getFieldDecorator("vendedor", {
-                initialValue: this.state.checked
-              })(
-                <Checkbox
-                  name="vendedor"
-                  onClick={this.toggleChecked}
-                  onChange={e => {
-                    this.handleFormState({
-                      target: { name: "vendedor", value: e }
-                    });
-                  }}
-                />
-              )}
+            <Form.Item wrapperCol={{ span: 12, offset: 2 }}>
+              <Checkbox
+                checked={this.state.formData.vendedor}
+                onChange={e => {
+                  this.handleFormState({
+                    target: {
+                      name: "vendedor",
+                      value: e.target.checked
+                    }
+                  });
+                }}>
+                Vendedor?
+              </Checkbox>
             </Form.Item>
 
-            {this.state.checked && (
+            {this.state.formData.vendedor && (
               <Form.Item label="Tipo de Vendedor" {...formItemLayout}>
                 {getFieldDecorator("tipo_vendedor_id", {
                   rules: [
