@@ -312,9 +312,9 @@ class OrderItemForm extends Component {
                 bordered
                 style={{ marginBottom: 20 }}>
                 {this.state.variacoes
-                  // .sort((a, b) => (b.obrigatorio ? 1 : -1))
+                  .sort((a, b) => (b.obrigatorio ? 1 : -1))
                   .map((v, index, arr) => {
-                    return (
+                    return v.opcoes.size ? (
                       <Form.Item
                         key={v.chave}
                         label={v.label}
@@ -330,11 +330,11 @@ class OrderItemForm extends Component {
                           initialValue: ""
                         })(
                           <Select
-                            disabled={
-                              index === 0
-                                ? false
-                                : this.state.formData[v.prevField] === undefined
-                            }
+                            // disabled={
+                            //   index === 0
+                            //     ? false
+                            //     : this.state.formData[v.prevField] === undefined
+                            // }
                             name={v.chave}
                             showAction={["focus", "click"]}
                             showSearch
@@ -374,7 +374,7 @@ class OrderItemForm extends Component {
                           </Select>
                         )}
                       </Form.Item>
-                    );
+                    ) : ""
                   })}
               </Card>
             )}
