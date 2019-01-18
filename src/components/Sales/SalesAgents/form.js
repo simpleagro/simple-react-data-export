@@ -1,18 +1,11 @@
 import React, { Component } from "react";
-import {
-  Button,
-  Icon,
-  Input,
-  Form,
-  Select,
-  Affix,
-  Spin
-} from "antd";
+import { Button, Icon, Input, Form, Select, Affix, Spin } from "antd";
 
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
+import { SFFPorcentagem } from "../../common/formFields/SFFPorcentagem";
 import * as AgentSalesService from "../../../services/sales-agents";
 import * as IBGEService from "../../../services/ibge";
 
@@ -286,6 +279,14 @@ class AgentSalesForm extends Component {
               initialValue: this.state.formData.cep
             })(<Input name="cep" />)}
           </Form.Item>
+
+          <SFFPorcentagem
+            name="comissao"
+            label="Comissão"
+            formItemLayout={formItemLayout}
+            getFieldDecorator={getFieldDecorator}
+            handleFormState={this.handleFormState}
+          />
         </Form>
       </div>
     );
