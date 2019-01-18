@@ -30,7 +30,6 @@ import cotas from "./Menus/cotas";
 import tabelaComissao from "./Menus/tabela-comissao";
 import pedidos from "./Menus/pedidos";
 import inscricaoCampo from "./Menus/inscricao-de-campo";
-import preColheita from "./Menus/pre-colheita";
 
 const loadable = loader =>
   Loadable({
@@ -53,7 +52,6 @@ const menus = {
     ...gruposDeProdutos,
     ...inscricaoCampo,
     ...modulos,
-    ...preColheita,
     ...plantio,
     ...safras,
     ...unidadesMedida,
