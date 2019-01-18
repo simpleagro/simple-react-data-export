@@ -578,7 +578,7 @@ class ConsultantForm extends Component {
                   onClick={this.toggleChecked}
                   onChange={e => {
                     this.handleFormState({
-                      target: { name: "vendedor", value: e }
+                      target: { name: "vendedor", value: e.target.checked }
                     });
                   }}
                 />
