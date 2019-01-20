@@ -127,7 +127,7 @@ class PriceVariations extends Component {
               pg.caracteristicas.map(
                 caract =>
                   caract._id === fpt.caracteristica.id &&
-                  caract.opcoes.map(opc => arr.push(opc.label))
+                  caract.opcoes.map(opc => arr.push({label: opc.label, value: opc.value}))
               )
           )
       );
@@ -188,9 +188,9 @@ class PriceVariations extends Component {
                   });
                 }}>
                 {this.getProductGroupOption().map(element => (
-                  <Option key={element} value={element}>
+                  <Option key={element.label} value={element.value}>
                     {" "}
-                    {element}{" "}
+                    {element.label}{" "}
                   </Option>
                 ))}
               </Select>
