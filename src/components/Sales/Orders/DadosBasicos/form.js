@@ -761,7 +761,7 @@ class OrderForm extends Component {
                 )}
               </Form.Item>
               <SFFPorcentagem
-                name="comissao"
+                name="comissao_agente"
                 label="Comissão"
                 formItemLayout={formItemLayout}
                 getFieldDecorator={getFieldDecorator}
