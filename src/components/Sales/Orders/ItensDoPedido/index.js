@@ -1,22 +1,22 @@
 import React, { Component } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
+import { Divider, Button, Icon, Popconfirm } from "antd";
 
-import * as FeatureTablePricesService from "../../../../services/feature-table-prices";
-import * as PriceVariationsService from "../../../../services/feature-table-prices.price-variations";
-import SimpleTable from "../../../common/SimpleTable";
-import { flashWithSuccess } from "../../../common/FlashMessages";
-import parseErrors from "../../../../lib/parseErrors";
-import { PainelHeader } from "../../../common/PainelHeader";
-import { simpleTableSearch } from "../../../../lib/simpleTableSearch";
+import * as OrderItemsService from "services/orders.items";
+import SimpleTable from "common/SimpleTable";
+import { flashWithSuccess } from "common/FlashMessages";
+import parseErrors from "lib/parseErrors";
+import { PainelHeader } from "common/PainelHeader";
+import { simpleTableSearch } from "lib/simpleTableSearch";
+import { addMaskReais } from "common/utils";
+import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
 
-class PriceVariation extends Component {
+class OrderItem extends Component {
   constructor(props) {
     super(props);
     this.state = {
       list: [],
       loadingData: true,
-      tabela_id: this.props.match.params.tabela_id,
+      order_id: this.props.match.params.order_id,
       tabela_data: {},
       pagination: {
         showSizeChanger: true,
@@ -27,31 +27,27 @@ class PriceVariation extends Component {
   }
 
   async initializeList(aqp) {
-    this.setState(previousState => {
-      return { ...previousState, loadingData: true };
-    });
-
-    const data = await PriceVariationsService.list(this.state.tabela_id)(aqp);
-    const dataFTP = await FeatureTablePricesService.list();
+    const items = await OrderItemsService.list(this.state.order_id)(aqp);
 
     this.setState(prev => ({
       ...prev,
-      list: data.docs,
-      listFTP: dataFTP.docs,
+      list: items.docs,
       loadingData: false,
       pagination: {
-        total: data.total
+        total: items.total
       }
     }));
   }
 
   async componentDidMount() {
-    await this.initializeList();
+    await this.initializeList({
+      fields: "produto, quantidade, desconto, preco_final_item, status"
+    });
   }
 
   changeStatus = async (id, newStatus) => {
     try {
-      await PriceVariationsService.changeStatus(id, newStatus);
+      await OrderItemsService.changeStatus(id, newStatus);
 
       let recordName = "";
 
@@ -70,55 +66,63 @@ class PriceVariation extends Component {
 
       flashWithSuccess(
         "",
-        `A variação de preço, ${recordName}, foi ${
+        `O item, ${recordName}, foi ${
           newStatus ? "ativado" : "bloqueado"
         } com sucesso!`
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao mudar status da variação de preço", err);
+      console.log("Erro interno ao mudar status do item", err);
     }
   };
 
-  removeRecord = async ({ _id, opcao_chave }) => {
+  removeRecord = async ({ _id, produto }) => {
     try {
-      await PriceVariationsService.remove(this.state.tabela_id)(_id);
+      await OrderItemsService.remove(this.state.order_id)(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
 
       this.setState({
         list: _list
       });
 
-      flashWithSuccess("", `A variação de preço, ${opcao_chave}, foi removido com sucesso!`);
+      flashWithSuccess(
+        "",
+        `O item, ${produto.nome}, foi removido com sucesso!`
+      );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover uma variação de preço", err);
+      console.log("Erro interno ao remover um item do pedido", err);
     }
   };
 
   tableConfig = () => [
     {
-      title: "Opção",
-      dataIndex: "opcao_chave",
-      key: "precos.opcao_chave",
+      title: "Produto",
+      dataIndex: "produto.nome",
+      key: "produto.nome",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      ...simpleTableSearch(this)('precos.opcao_chave'),
-      render: text => text
+      ...simpleTableSearch(this)("produto.nome")
     },
     {
-      title: "Valor",
-      dataIndex: "valor",
-      key: "precos.valor",
-      ...simpleTableSearch(this)('precos.valor')
+      title: "Quantidade",
+      dataIndex: "quantidade",
+      key: "quantidade",
+      align: "center",
     },
     {
-      title: "Unidade de Medida",
-      dataIndex: "u_m",
-      key: "precos.u_m",
-      ...simpleTableSearch(this)('precos.u_m')
+      title: "Desconto",
+      dataIndex: "desconto",
+      key: "desconto",
+      align: "center",
+    },
+    {
+      title: "Preço Final",
+      dataIndex: "preco_final_item",
+      key: "preco_final_item",
+      align: "right",
     },
     {
       title: "Ações",
@@ -128,7 +132,13 @@ class PriceVariation extends Component {
           <span>
             <Button
               size="small"
-              onClick={() => this.props.history.push(`/tabela-preco-caracteristica/${this.state.tabela_id}/variacao-de-preco/${record._id}/edit`)}>
+              onClick={() =>
+                this.props.history.push(
+                  `/pedidos/${this.state.order_id}/itens-do-pedido/${
+                    record._id
+                  }/edit`
+                )
+              }>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
 
@@ -138,11 +148,10 @@ class PriceVariation extends Component {
             />
 
             <Popconfirm
-              title={`Tem certeza em excluir a variação de preço?`}
+              title={`Tem certeza em excluir este item?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
-              cancelText="Não"
-            >
+              cancelText="Não">
               <Button size="small">
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
@@ -165,18 +174,24 @@ class PriceVariation extends Component {
     });
     this.initializeList({
       page: pagination.current,
-      limit: pagination.pageSize
+      limit: pagination.pageSize,
+      ...filter
     });
   };
 
   render() {
     return (
       <div>
-        <PainelHeader title="Variação de Preço">
+        <SimpleBreadCrumb to={`/pedidos`} history={this.props.history} />
+        <PainelHeader title="Itens do Pedido">
           <Button
             type="primary"
             icon="plus"
-            onClick={() => this.props.history.push("/tabela-preco-caracteristica/"+ this.state.tabela_id +"/variacao-de-preco/new")}>
+            onClick={() =>
+              this.props.history.push(
+                "/pedidos/" + this.state.order_id + "/itens-do-pedido/new"
+              )
+            }>
             Adicionar
           </Button>
         </PainelHeader>
@@ -188,10 +203,9 @@ class PriceVariation extends Component {
           dataSource={this.state.list}
           onChange={this.handleTableChange}
         />
-
       </div>
     );
   }
 }
 
-export default PriceVariation;
+export default OrderItem;

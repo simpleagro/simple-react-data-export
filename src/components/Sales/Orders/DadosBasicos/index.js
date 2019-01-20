@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { Divider, Button, Icon, Popconfirm, Tooltip } from "antd";
 import moment from "moment";
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
 
 import { simpleTableSearch } from "../../../../lib/simpleTableSearch";
 import * as OrderService from "../../../../services/orders";
@@ -8,6 +10,7 @@ import SimpleTable from "../../../common/SimpleTable";
 import { flashWithSuccess } from "../../../common/FlashMessages";
 import parseErrors from "../../../../lib/parseErrors";
 import { PainelHeader } from "../../../common/PainelHeader";
+import { dadosPedido } from "actions/pedidoActions";
 
 class Orders extends Component {
   constructor(props) {
@@ -41,7 +44,7 @@ class Orders extends Component {
   }
 
   async componentDidMount() {
-    await this.initializeList();
+    await this.initializeList({ fields: "-itens" });
   }
 
   changeStatus = async (id, newStatus) => {
@@ -180,6 +183,19 @@ class Orders extends Component {
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
+
+            <Tooltip title="Veja os produtos do pedido">
+              <Button
+                size="small"
+                onClick={() => {
+                  this.props.dadosPedido(record);
+                  this.props.history.push(
+                    `/pedidos/${record._id}/itens-do-pedido`
+                  );
+                }}>
+                <Icon type="bars" style={{ fontSize: "16px" }} />
+              </Button>
+            </Tooltip>
           </span>
         );
       }
@@ -224,4 +240,15 @@ class Orders extends Component {
   }
 }
 
-export default Orders;
+const mapDispatchToProps = dispatch =>
+  bindActionCreators(
+    {
+      dadosPedido
+    },
+    dispatch
+  );
+
+export default connect(
+  null,
+  mapDispatchToProps
+)(Orders);
