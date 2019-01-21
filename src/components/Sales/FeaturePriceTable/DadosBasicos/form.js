@@ -10,13 +10,14 @@ import {
 } from "antd";
 import moment from "moment";
 
-import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
-import { flashWithSuccess } from "../../../common/FlashMessages";
-import parseErrors from "../../../../lib/parseErrors";
-import { PainelHeader } from "../../../common/PainelHeader";
-import * as FeaturePriceTableService from "../../../../services/feature-table-prices";
-import * as ProductGroupService from "../../../../services/productgroups";
-import * as SeasonsService from "../../../../services/seasons";
+import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
+import { flashWithSuccess } from "common/FlashMessages";
+import parseErrors from "lib/parseErrors";
+import { PainelHeader } from "common/PainelHeader";
+import * as FeaturePriceTableService from "services/feature-table-prices";
+import * as ProductGroupService from "services/productgroups";
+import * as SeasonsService from "services/seasons";
+import * as UnitMeasureService from "services/units-measures";
 
 const Option = Select.Option;
 
@@ -35,12 +36,14 @@ class FeaturePriceTable extends Component {
     const dataType = await FeaturePriceTableService.list();
     const dataSeasons = await SeasonsService.list();
     const dataProductGroup = await ProductGroupService.list();
+    const dataUnitMeasure = await UnitMeasureService.list();
 
     this.setState(prev => ({
       ...prev,
       listType: dataType.docs,
       listSeasons: dataSeasons.docs,
-      listProductGroup: dataProductGroup.docs
+      listProductGroup: dataProductGroup.docs,
+      listUnitMeasure: dataUnitMeasure.docs
     }));
 
     if (id) {
@@ -381,6 +384,33 @@ class FeaturePriceTable extends Component {
               </Select>
             )}
           </Form.Item>
+
+          <Form.Item label="Unidade de Medida" {...formItemLayout}>
+            {getFieldDecorator("u_m_preco", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.u_m_preco
+            })(
+              <Select
+                name="u_m_preco"
+                allowClear
+                showAction={["focus", "click"]}
+                showSearch
+                style={{ width: 200 }}
+                placeholder="Selecione uma unidade..."
+                onChange={e => {
+                  this.handleFormState({
+                    target: { name: "u_m_preco", value: e }
+                  });
+                }}>
+                { this.state.listUnitMeasure &&
+                    this.state.listUnitMeasure.map(un =>
+                      <Option key={un._id} value={un.nome}>
+                        {un.nome}
+                      </Option>) }
+              </Select>
+            )}
+          </Form.Item>
+
         </Form>
       </div>
     );

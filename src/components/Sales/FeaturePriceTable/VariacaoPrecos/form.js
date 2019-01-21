@@ -1,14 +1,14 @@
 import React, { Component } from "react";
 import { Button, Icon, Input, Form, Select, Affix } from "antd";
 
-import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
-import { flashWithSuccess } from "../../../common/FlashMessages";
-import parseErrors from "../../../../lib/parseErrors";
-import { PainelHeader } from "../../../common/PainelHeader";
-import * as PriceVariationsService from "../../../../services/feature-table-prices.price-variations";
-import * as UnitMeasuresService from "../../../../services/units-measures";
-import * as ProductGroupsService from "../../../../services/productgroups";
-import * as FeaturePriceTableService from "../../../../services/feature-table-prices";
+import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
+import { flashWithSuccess } from "common/FlashMessages";
+import parseErrors from "lib/parseErrors";
+import { PainelHeader } from "common/PainelHeader";
+import * as PriceVariationsService from "services/feature-table-prices.price-variations";
+import * as UnitMeasuresService from "services/units-measures";
+import * as ProductGroupsService from "services/productgroups";
+import * as FeaturePriceTableService from "services/feature-table-prices";
 
 const Option = Select.Option;
 
@@ -211,32 +211,6 @@ class PriceVariations extends Component {
             )}
           </Form.Item>
 
-          <Form.Item label="Unidade de Medida" {...formItemLayout}>
-            {getFieldDecorator("u_m", {
-              rules: [{ required: true, message: "Este campo é obragatório!" }],
-              initialValue: this.state.formData.u_m
-            })(
-              <Select
-                name="u_m"
-                allowClear
-                showAction={["focus", "click"]}
-                showSearch
-                style={{ width: 200 }}
-                placeholder="Selecione uma unidade de medida..."
-                onChange={e => {
-                  this.handleFormState({
-                    target: { name: "u_m", value: e }
-                  });
-                }}>
-                {this.state.listUnit &&
-                  this.state.listUnit.map(unit => (
-                    <Option key={unit._id} value={unit.sigla}>
-                      {unit.nome}
-                    </Option>
-                  ))}
-              </Select>
-            )}
-          </Form.Item>
         </Form>
       </div>
     );
