@@ -2,11 +2,11 @@ import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
 
-import * as FeaturePriceTableService from "../../../../services/feature-table-prices";
-import SimpleTable from "../../../common/SimpleTable";
-import { flashWithSuccess } from "../../../common/FlashMessages";
-import parseErrors from "../../../../lib/parseErrors";
-import { PainelHeader } from "../../../common/PainelHeader";
+import * as FeaturePriceTableService from "services/feature-table-prices";
+import SimpleTable from "common/SimpleTable";
+import { flashWithSuccess } from "common/FlashMessages";
+import parseErrors from "lib/parseErrors";
+import { PainelHeader } from "common/PainelHeader";
 import moment from "moment";
 
 class PaymentForm extends Component {
@@ -129,6 +129,12 @@ class PaymentForm extends Component {
       render: text => {
         return moment(text).format("DD/MM/YYYY")
       }
+    },
+    {
+      title: "Unidade",
+      dataIndex: "u_m_preco",
+      key: "u_m_preco",
+      render: text => text
     },
     {
       title: "Caracteristica",
