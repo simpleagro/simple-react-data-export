@@ -1,14 +1,16 @@
 import React, { Component } from "react";
-import { Divider, Button, Icon, Popconfirm } from "antd";
+import { Divider, Button, Icon, Popconfirm, Row, Col, Card } from "antd";
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
 
+import * as OrderService from "services/orders";
 import * as OrderItemsService from "services/orders.items";
 import SimpleTable from "common/SimpleTable";
 import { flashWithSuccess } from "common/FlashMessages";
 import parseErrors from "lib/parseErrors";
-import { PainelHeader } from "common/PainelHeader";
 import { simpleTableSearch } from "lib/simpleTableSearch";
-import { addMaskReais } from "common/utils";
 import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
+import { dadosPedido } from "actions/pedidoActions";
 
 class OrderItem extends Component {
   constructor(props) {
@@ -17,6 +19,7 @@ class OrderItem extends Component {
       list: [],
       loadingData: true,
       order_id: this.props.match.params.order_id,
+      order_data: null,
       tabela_data: {},
       pagination: {
         showSizeChanger: true,
@@ -27,16 +30,27 @@ class OrderItem extends Component {
   }
 
   async initializeList(aqp) {
-    const items = await OrderItemsService.list(this.state.order_id)(aqp);
-
-    this.setState(prev => ({
-      ...prev,
-      list: items.docs,
-      loadingData: false,
-      pagination: {
-        total: items.total
-      }
-    }));
+    try {
+      const items = await OrderItemsService.list(this.state.order_id)(aqp);
+      const orderData = await OrderService.get(this.state.order_id, {
+        fields: "tabela_preco_base, numero, cliente, propriedade"
+      });
+      this.setState(prev => ({
+        ...prev,
+        list: items.docs,
+        loadingData: false,
+        order_data: orderData,
+        pagination: {
+          total: items.total
+        }
+      }));
+      this.props.dadosPedido(orderData);
+    } catch (error) {
+      if (error && error.response && error.response.data) parseErrors(error);
+      this.props.history.push(`/pedidos`);
+    } finally {
+      this.setState({ loadingData: false });
+    }
   }
 
   async componentDidMount() {
@@ -110,19 +124,19 @@ class OrderItem extends Component {
       title: "Quantidade",
       dataIndex: "quantidade",
       key: "quantidade",
-      align: "center",
+      align: "center"
     },
     {
       title: "Desconto",
       dataIndex: "desconto",
       key: "desconto",
-      align: "center",
+      align: "center"
     },
     {
       title: "Preço Final",
       dataIndex: "preco_final_item",
       key: "preco_final_item",
-      align: "right",
+      align: "right"
     },
     {
       title: "Ações",
@@ -183,29 +197,77 @@ class OrderItem extends Component {
     return (
       <div>
         <SimpleBreadCrumb to={`/pedidos`} history={this.props.history} />
-        <PainelHeader title="Itens do Pedido">
-          <Button
-            type="primary"
-            icon="plus"
-            onClick={() =>
-              this.props.history.push(
-                "/pedidos/" + this.state.order_id + "/itens-do-pedido/new"
-              )
-            }>
-            Adicionar
-          </Button>
-        </PainelHeader>
-        <SimpleTable
-          pagination={this.state.pagination}
-          spinning={this.state.loadingData}
-          rowKey="_id"
-          columns={this.tableConfig()}
-          dataSource={this.state.list}
-          onChange={this.handleTableChange}
-        />
+
+        <Row gutter={24}>
+          <Col span={5}>
+            <Card
+              bordered
+              style={{
+                boxShadow: "0px 8px 0px 0px #009d55 inset",
+                color: "#009d55"
+              }}>
+              {this.state.order_data && (
+                <div>
+                  <p>{`Cliente: ${this.state.order_data.cliente.nome}`}</p>
+                  <p>{`CPF/CNPJ: ${this.state.order_data.cliente.cpf_cnpj}`}</p>
+                  <p>{`Propriedade: ${
+                    this.state.order_data.propriedade.nome
+                  } - ${this.state.order_data.propriedade.ie}`}</p>
+                </div>
+              )}
+              <Button
+                style={{ width: "100%" }}
+                onClick={() => {
+                  this.props.history.push(
+                    `/pedidos/${this.state.order_id}/edit`,
+                    { returnTo: this.props.history.location }
+                  );
+                }}>
+                <Icon type="edit" /> Editar
+              </Button>
+            </Card>
+          </Col>
+          <Col span={19}>
+            <Card
+              title="Itens do Pedido"
+              bordered={false}
+              extra={
+                <Button
+                  type="primary"
+                  icon="plus"
+                  onClick={() =>
+                    this.props.history.push(
+                      "/pedidos/" + this.state.order_id + "/itens-do-pedido/new"
+                    )
+                  }>
+                  Adicionar
+                </Button>
+              }>
+              <SimpleTable
+                pagination={this.state.pagination}
+                spinning={this.state.loadingData}
+                rowKey="_id"
+                columns={this.tableConfig()}
+                dataSource={this.state.list}
+                onChange={this.handleTableChange}
+              />
+            </Card>
+          </Col>
+        </Row>
       </div>
     );
   }
 }
 
-export default OrderItem;
+const mapDispatchToProps = dispatch =>
+  bindActionCreators(
+    {
+      dadosPedido
+    },
+    dispatch
+  );
+
+export default connect(
+  null,
+  mapDispatchToProps
+)(OrderItem);

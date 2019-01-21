@@ -7,21 +7,16 @@ import {
   Affix,
   Tooltip,
   Card,
-  Input,
-  Row,
-  Col
+  Tabs
 } from "antd";
 
-import { connect } from "react-redux";
 import { flashWithSuccess } from "../../../common/FlashMessages";
 import parseErrors from "../../../../lib/parseErrors";
 import { PainelHeader } from "../../../common/PainelHeader";
 import * as ProductGroupService from "services/productgroups";
 import * as OrderItemService from "../../../../services/orders.items";
-import * as PriceTableService from "../../../../services/pricetable";
 import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
 import { SimpleLazyLoader } from "../../../common/SimpleLazyLoader";
-
 
 const Option = Select.Option;
 
@@ -30,19 +25,16 @@ class OrderItemForm extends Component {
     super(props);
     this.state = {
       editMode: false,
-      formData: {
-        tabela_preco_base:
-          this.props.pedido &&
-          this.props.pedido._id === this.props.match.params.order_id &&
-          this.props.pedido.tabela_preco_base
-      },
+      formData: {},
       savingForm: false,
       loadingForm: true,
       gruposDeProdutos: [],
-      tabelaPrecos: [],
       produtos: [],
       order_id: this.props.match.params.order_id
     };
+
+    window.getVariacoes = this.getVariacoes;
+    window.meuState = this.props;
   }
 
   async componentDidMount() {
@@ -60,24 +52,19 @@ class OrderItemForm extends Component {
     }
 
     const gruposDeProdutos = await ProductGroupService.list({
-      fields: "nome, produtos, caracteristicas, preco_base_regra",
+      fields: "nome, produtos, caracteristicas",
       limit: -1
     }).then(response => response.docs);
-
-    const tabelaPrecos = await PriceTableService.list({
-      fields: "nome",
-      status: true,
-      limit: -1
-    }).then(response => response.docs);
-
-    // const pedido = await OrderService.get(order_id, {fields})
 
     this.setState(prev => ({
       ...prev,
       loadingForm: false,
-      gruposDeProdutos,
-      tabelaPrecos
+      gruposDeProdutos
     }));
+
+    setTimeout(() => {
+      // this.titleInput.focus();
+    }, 0);
   }
 
   handleFormState = async event => {
@@ -159,27 +146,19 @@ class OrderItemForm extends Component {
     });
 
     if (e.possui_variacao) this.getVariacoes();
-    else {
-      this.setState({
-        variacoes: undefined,
-        variacoesSelecionadas: undefined
-      });
-    }
   }
 
   async getVariacoes() {
     const grupo = JSON.parse(this.props.form.getFieldValue("grupo_produto"));
     const produto = JSON.parse(this.props.form.getFieldValue("produto"));
+    console.log(grupo);
+    console.log(produto);
 
     let variacoes = grupo.caracteristicas.map((c, index, arr) => {
       return {
         chave: c.chave,
         label: c.label,
         obrigatorio: c.obrigatorio,
-        tipoTabela: c.tipo_preco,
-        regraPrecoBase:
-          c.tipo_preco === "TABELA_BASE" ? grupo.preco_base_regra : null,
-        variacaoPreco: c.variacao_preco,
         prevField: index > 0 ? arr[index - 1].chave : null,
         nextField: index + 1 < arr.length ? arr[index + 1].chave : null,
         opcoes: new Set(
@@ -234,6 +213,7 @@ class OrderItemForm extends Component {
     return (
       <SimpleLazyLoader loadingForm={this.state.loadingForm}>
         <div>
+          //#region agora nao
           <SimpleBreadCrumb
             to={
               this.props.location.state && this.props.location.state.returnTo
@@ -258,47 +238,6 @@ class OrderItemForm extends Component {
             </PainelHeader>
           </Affix>
           <Form onChange={this.handleFormState}>
-            <Form.Item label="Tabela de Preço" {...formItemLayout}>
-              {getFieldDecorator("tabela_preco_base", {
-                rules: [
-                  { required: true, message: "Este campo é obrigatório!" }
-                ],
-                initialValue: this.state.formData.tabela_preco_base
-                  ? this.state.formData.tabela_preco_base.nome
-                  : ""
-              })(
-                <Select
-                  name="tabela_preco_base"
-                  showAction={["focus", "click"]}
-                  showSearch
-                  style={{ width: 200 }}
-                  placeholder="Selecione..."
-                  filterOption={(input, option) =>
-                    option.props.children
-                      .toLowerCase()
-                      .indexOf(input.toLowerCase()) >= 0
-                  }
-                  onChange={e => {
-                    this.handleFormState({
-                      target: {
-                        name: "tabela_preco_base",
-                        value: JSON.parse(e)
-                      }
-                    });
-                  }}>
-                  {this.state.tabelaPrecos.length > 0
-                    ? this.state.tabelaPrecos.map(t => (
-                        <Option
-                          key={t._id}
-                          value={JSON.stringify({ id: t._id, nome: t.nome })}>
-                          {t.nome}
-                        </Option>
-                      ))
-                    : ""}
-                </Select>
-              )}
-            </Form.Item>
-
             <Form.Item label="Grupo de Produto" {...formItemLayout}>
               {getFieldDecorator("grupo_produto", {
                 rules: [
@@ -373,88 +312,81 @@ class OrderItemForm extends Component {
                 </Select>
               )}
             </Form.Item>
-
+            //#endregion agora nao
             {this.state.variacoes && (
               <Card
                 title="Variações do Produto"
-                extra={
-                  <Button onClick={() => this.getVariacoes()}>
-                    Limpar Variações
-                  </Button>
-                }
                 bordered
                 style={{ marginBottom: 20 }}>
                 {this.state.variacoes
                   .sort((a, b) => (b.obrigatorio ? 1 : -1))
                   .map((v, index, arr) => {
                     return v.opcoes.size ? (
-                      <React.Fragment key={`variacao_fragm_${index}`}>
-                        <Form.Item
-                          label={v.label}
-                          key={v.chave}
-                          {...formItemLayout}>
-                          {getFieldDecorator(v.chave, {
-                            valuePropName: "value",
-                            rules: [
-                              {
-                                required: v.obrigatorio,
-                                message: "Este campo é obrigatório!"
-                              }
-                            ],
-                            initialValue: ""
-                          })(
+                      <Form.Item key={v.chave} {...formItemLayout}>
+                        {getFieldDecorator(v.chave, {
+                          valuePropName: "value",
+                          rules: [
+                            {
+                              required: v.obrigatorio,
+                              message: "Este campo é obrigatório!"
+                            }
+                          ],
+                          initialValue: ""
+                        })(
+                          <Tabs
+                            defaultActiveKey="1"
+                            tabPosition={mode}
+                            style={{ height: 220 }}>
+                            <Tabs.TabPane tab={v.label} key={`tab_${v.chave}`}>
                             <Select
-                              // disabled={
-                              //   index === 0
-                              //     ? false
-                              //     : this.state.formData[v.prevField] === undefined
-                              // }
-                              name={v.chave}
-                              showAction={["focus", "click"]}
-                              showSearch
-                              // onFocus={() => this.getVals(v.chave)}
-                              style={{ width: 200 }}
-                              onChange={async e => {
-                                this.setState(prev => ({
-                                  ...prev,
-                                  variacoesSelecionadas: {
-                                    ...prev.variacoesSelecionadas,
-                                    ...{ [v.chave]: e }
-                                  }
-                                }));
-                                await this.handleFormState({
-                                  target: { name: v.chave, value: e }
-                                });
-                                arr
-                                  .map(v => v.chave)
-                                  .splice(index + 1)
-                                  .map(v2 => {
-                                    this.setState(prev => ({
-                                      ...prev,
-                                      formData: {
-                                        ...prev.formData,
-                                        [v2]: undefined
-                                      }
-                                    }));
-                                    this.getVals(v2);
-                                  });
-                                  this.atualizaValorVariacaoTabelaPreco()
-                              }}
-                              placeholder="Selecione...">
-                              {Array.from(v.opcoes).map((o, index) => (
-                                <Option key={`${v.chave}_${index}`} value={o}>
-                                  {o}
-                                </Option>
-                              ))}
-                            </Select>
-                          )}
-                        </Form.Item>
+                          //   // disabled={
+                          //   //   index === 0
+                          //   //     ? false
+                          //   //     : this.state.formData[v.prevField] === undefined
+                          //   // }
+                          //   name={v.chave}
+                          //   showAction={["focus", "click"]}
+                          //   showSearch
+                          //   // onFocus={() => this.getVals(v.chave)}
+                          //   style={{ width: 200 }}
+                          //   onChange={async e => {
+                          //     this.setState(prev => ({
+                          //       ...prev,
+                          //       variacoesSelecionadas: {
+                          //         ...prev.variacoesSelecionadas,
+                          //         ...{ [v.chave]: e }
+                          //       }
+                          //     }));
+                          //     await this.handleFormState({
+                          //       target: { name: v.chave, value: e }
+                          //     });
+                          //     arr
+                          //       .map(v => v.chave)
+                          //       .splice(index + 1)
+                          //       .map(v2 => {
+                          //         this.setState(prev => ({
+                          //           ...prev,
+                          //           formData: {
+                          //             ...prev.formData,
+                          //             [v2]: undefined
+                          //           }
+                          //         }));
+                          //         this.getVals(v2);
+                          //       });
+                          //   }}
+                          //   placeholder="Selecione...">
+                          //   {Array.from(v.opcoes).map((o, index) => (
+                          //     <Option key={`${v.chave}_${index}`} value={o}>
+                          //       {o}
+                          //     </Option>
+                          //   ))}
+                          // </Select>
+                            </Tabs.TabPane>
+                          </Tabs>
 
-                        {this.geraVariacoesInputsDinamicos(
-                          v,
-                          getFieldDecorator
+
                         )}
-                      </React.Fragment>
+                      </Form.Item>
                     ) : (
                       ""
                     );
@@ -548,62 +480,8 @@ class OrderItemForm extends Component {
       </SimpleLazyLoader>
     );
   }
-
-  geraVariacoesInputsDinamicos(variacao, getFieldDecorator) {
-    const compInput = obj => (
-      <Row key={`rowVariacaoDinamico_${obj.chave}`}>
-        <Col span={8}>
-          <Form.Item
-            label={`Preço - ${obj.label}`}
-            {...{
-              labelCol: { span: 12 },
-              wrapperCol: { span: 12 }
-            }}>
-            {getFieldDecorator(`preco_${obj.chave}`, {
-              rules: [
-                {
-                  required: obj.obrigatorio,
-                  message: "Este campo é obrigatório!"
-                }
-              ],
-              initialValue: this.state.formData[`preco_${obj.chave}` || 0]
-            })(<Input name={`preco_${obj.chave}`} />)}
-          </Form.Item>
-        </Col>
-        <Col span={8}>
-          <Form.Item
-            label={`Desconto - ${obj.label}`}
-            {...{
-              labelCol: { span: 12 },
-              wrapperCol: { span: 12 }
-            }}>
-            {getFieldDecorator(`desconto_${obj.chave}`, {
-              initialValue: this.state.formData[`desconto_${obj.chave}` || 0]
-            })(<Input name={`desconto_${obj.chave}`} />)}
-          </Form.Item>
-        </Col>
-      </Row>
-    );
-
-    if (variacao.tipoTabela === "TABELA_CARACTERISTICA") {
-      return compInput(variacao);
-    }
-    if (variacao.tipoTabela === "TABELA_BASE" && variacao.regraPrecoBase) {
-      return variacao.regraPrecoBase.map(rpb => compInput(rpb));
-    }
-  }
-
-  atualizaValorVariacaoTabelaPreco(chave){
-    const tabelaPreco = await 
-  }
 }
-
-const mapStateToProps = ({ pedidoState }) => {
-  return {
-    pedido: pedidoState.pedidoData
-  };
-};
 
 const WrappepOrderItemForm = Form.create()(OrderItemForm);
 
-export default connect(mapStateToProps)(WrappepOrderItemForm);
+export default WrappepOrderItemForm;
