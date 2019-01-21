@@ -11,7 +11,6 @@ import {
   Row,
   Col
 } from "antd";
-
 import { connect } from "react-redux";
 import { flashWithSuccess } from "../../../common/FlashMessages";
 import parseErrors from "../../../../lib/parseErrors";
@@ -21,7 +20,6 @@ import * as OrderItemService from "../../../../services/orders.items";
 import * as PriceTableService from "../../../../services/pricetable";
 import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
 import { SimpleLazyLoader } from "../../../common/SimpleLazyLoader";
-
 
 const Option = Select.Option;
 
@@ -298,7 +296,6 @@ class OrderItemForm extends Component {
                 </Select>
               )}
             </Form.Item>
-
             <Form.Item label="Grupo de Produto" {...formItemLayout}>
               {getFieldDecorator("grupo_produto", {
                 rules: [
@@ -438,7 +435,20 @@ class OrderItemForm extends Component {
                                     }));
                                     this.getVals(v2);
                                   });
-                                  this.atualizaValorVariacaoTabelaPreco()
+                                arr
+                                  .map(v => v.chave)
+                                  .splice(index + 1)
+                                  .map(v2 => {
+                                    this.setState(prev => ({
+                                      ...prev,
+                                      formData: {
+                                        ...prev.formData,
+                                        [v2]: undefined
+                                      }
+                                    }));
+                                    this.getVals(v2);
+                                  });
+                                this.atualizaValorVariacaoTabelaPreco(v.chave);
                               }}
                               placeholder="Selecione...">
                               {Array.from(v.opcoes).map((o, index) => (
@@ -593,8 +603,13 @@ class OrderItemForm extends Component {
     }
   }
 
-  atualizaValorVariacaoTabelaPreco(chave){
-    const tabelaPreco = await 
+  async atualizaValorVariacaoTabelaPreco(chave) {
+    const tabelaPreco = await PriceTableService.get(
+      this.state.formData.tabela_preco_base.id
+    )({
+      fields: "grupo_produto.produtos,grupo_produto.$",
+      "grupo_produto.id": this.state.formData.grupo_produto.id
+    });
   }
 }
 
@@ -603,7 +618,6 @@ const mapStateToProps = ({ pedidoState }) => {
     pedido: pedidoState.pedidoData
   };
 };
-
 const WrappepOrderItemForm = Form.create()(OrderItemForm);
 
 export default connect(mapStateToProps)(WrappepOrderItemForm);
