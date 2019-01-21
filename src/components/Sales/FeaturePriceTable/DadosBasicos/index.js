@@ -115,16 +115,20 @@ class PaymentForm extends Component {
       render: text => text
     },
     {
-      title: "Data Validade de",
+      title: "Validade de",
       dataIndex: "data_validade_de",
       key: "data_validade_de",
-      render: text => text
+      render: text => {
+        return moment(text).format("DD/MM/YYYY")
+      }
     },
     {
-      title: "Data Validade até",
+      title: "Validade até",
       dataIndex: "data_validade_ate",
       key: "data_validade_ate",
-      render: text => text
+      render: text => {
+        return moment(text).format("DD/MM/YYYY")
+      }
     },
     {
       title: "Caracteristica",
