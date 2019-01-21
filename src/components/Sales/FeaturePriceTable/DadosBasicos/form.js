@@ -404,7 +404,7 @@ class FeaturePriceTable extends Component {
                 }}>
                 { this.state.listUnitMeasure &&
                     this.state.listUnitMeasure.map(un =>
-                      <Option key={un._id} value={un.nome}>
+                      <Option key={un._id} value={un.sigla}>
                         {un.nome}
                       </Option>) }
               </Select>
