@@ -9,7 +9,7 @@ import { SimpleMap } from "../SimpleMap";
 
 import { PainelHeader } from "../common/PainelHeader";
 import * as VisitsService from "../../services/visits";
-import { moneyFormat } from "../../lib/formatters";
+import { addMaskReais } from "common/utils";
 import { SimpleBreadCrumb } from "../common/SimpleBreadCrumb";
 
 const TabPane = Tabs.TabPane;
@@ -111,7 +111,7 @@ class VisitForm extends Component {
               <Form.Item label="Potencial de Venda" {...formItemLayout}>
                 {getFieldDecorator("potencial_venda", {
                   initialValue: this.state.formData.potencial_venda
-                    ? moneyFormat(this.state.formData.potencial_venda)
+                    ? addMaskReais(this.state.formData.potencial_venda)
                     : ""
                 })(<Input readOnly />)}
               </Form.Item>

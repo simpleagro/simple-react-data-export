@@ -16,7 +16,8 @@ Store.subscribe(() => {
   console.log("subscribe");
   saveState({
     painelState: Store.getState().painelState,
-    plantioState: Store.getState().plantioState
+    plantioState: Store.getState().plantioState,
+    pedidoState: Store.getState().pedidoState,
   });
 });
 

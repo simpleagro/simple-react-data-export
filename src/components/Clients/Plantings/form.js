@@ -261,7 +261,7 @@ class ClientPlantingForm extends Component {
     if (!espacamento || !plantasPorM) return 0;
 
     const calculo = espacamento == 45 ? plantasPorM * k45 : plantasPorM * k50;
-    return calculo.toFixed(3);
+    return calculo.toFixed(2);
   }
 
   getAreaTalhao(t) {

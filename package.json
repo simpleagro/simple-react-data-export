@@ -28,13 +28,13 @@
         "react-router-dom": "^4.3.1",
         "react-scripts": "^1.1.4",
         "react-scroll": "^1.7.10",
+        "recharts": "^1.4.2",
         "recompose": "^0.30.0",
         "redux": "^4.0.0",
         "redux-saga": "^0.16.0",
         "styled-components": "^3.3.3",
         "turf": "^3.0.14",
-        "universal-cookie": "^2.2.0",
-        "recharts": "^1.4.2"
+        "universal-cookie": "^2.2.0"
     },
     "scripts": {
         "start": "env-cmd .env.development react-app-rewired start",
@@ -49,6 +49,7 @@
         "babel-cli": "^6.26.0",
         "babel-eslint": "^8.2.6",
         "babel-plugin-import": "^1.8.0",
+        "babel-plugin-module-resolver": "^3.1.1",
         "babel-plugin-transform-class-properties": "^6.24.1",
         "babel-preset-env": "^1.7.0",
         "eslint": "^4.19.1",
