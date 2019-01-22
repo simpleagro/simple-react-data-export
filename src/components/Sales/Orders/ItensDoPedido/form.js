@@ -9,7 +9,9 @@ import {
   Card,
   Input,
   Row,
-  Col
+  Col,
+  Spin,
+  Layout
 } from "antd";
 import { connect } from "react-redux";
 import { flashWithSuccess } from "../../../common/FlashMessages";
@@ -17,9 +19,12 @@ import parseErrors from "../../../../lib/parseErrors";
 import { PainelHeader } from "../../../common/PainelHeader";
 import * as ProductGroupService from "services/productgroups";
 import * as OrderItemService from "../../../../services/orders.items";
-import * as PriceTableService from "../../../../services/pricetable";
+import { get as GetVariation } from "../../../../services/microservices/price-table-variations";
+import * as PriceTableService from "services/pricetable";
+import * as FeaturePriceTableService from "services/feature-table-prices";
 import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
 import { SimpleLazyLoader } from "../../../common/SimpleLazyLoader";
+import { SFFPorcentagem } from "../../../common/formFields/SFFPorcentagem";
 
 const Option = Select.Option;
 
@@ -386,84 +391,78 @@ class OrderItemForm extends Component {
                   .map((v, index, arr) => {
                     return v.opcoes.size ? (
                       <React.Fragment key={`variacao_fragm_${index}`}>
-                        <Form.Item
-                          label={v.label}
-                          key={v.chave}
-                          {...formItemLayout}>
-                          {getFieldDecorator(v.chave, {
-                            valuePropName: "value",
-                            rules: [
-                              {
-                                required: v.obrigatorio,
-                                message: "Este campo é obrigatório!"
-                              }
-                            ],
-                            initialValue: ""
-                          })(
-                            <Select
-                              // disabled={
-                              //   index === 0
-                              //     ? false
-                              //     : this.state.formData[v.prevField] === undefined
-                              // }
-                              name={v.chave}
-                              showAction={["focus", "click"]}
-                              showSearch
-                              // onFocus={() => this.getVals(v.chave)}
-                              style={{ width: 200 }}
-                              onChange={async e => {
-                                this.setState(prev => ({
-                                  ...prev,
-                                  variacoesSelecionadas: {
-                                    ...prev.variacoesSelecionadas,
-                                    ...{ [v.chave]: e }
-                                  }
-                                }));
-                                await this.handleFormState({
-                                  target: { name: v.chave, value: e }
-                                });
-                                arr
-                                  .map(v => v.chave)
-                                  .splice(index + 1)
-                                  .map(v2 => {
-                                    this.setState(prev => ({
-                                      ...prev,
-                                      formData: {
-                                        ...prev.formData,
-                                        [v2]: undefined
-                                      }
-                                    }));
-                                    this.getVals(v2);
+                        <Spin
+                          tip={"Carregando variações para " + v.label}
+                          key="spin_loading_inputs_variacoes"
+                          spinning={
+                            this.state[`loadingVariacoes_${v.chave}`] === true
+                          }>
+                          <Form.Item
+                            label={v.label}
+                            key={v.chave}
+                            {...formItemLayout}>
+                            {getFieldDecorator(v.chave, {
+                              valuePropName: "value",
+                              rules: [
+                                {
+                                  required: v.obrigatorio,
+                                  message: "Este campo é obrigatório!"
+                                }
+                              ],
+                              initialValue: ""
+                            })(
+                              <Select
+                                // disabled={
+                                //   index === 0
+                                //     ? false
+                                //     : this.state.formData[v.prevField] === undefined
+                                // }
+                                name={v.chave}
+                                showAction={["focus", "click"]}
+                                showSearch
+                                // onFocus={() => this.getVals(v.chave)}
+                                style={{ width: 200 }}
+                                onChange={async e => {
+                                  this.setState(prev => ({
+                                    ...prev,
+                                    variacoesSelecionadas: {
+                                      ...prev.variacoesSelecionadas,
+                                      ...{ [v.chave]: e }
+                                    }
+                                  }));
+                                  await this.handleFormState({
+                                    target: { name: v.chave, value: e }
                                   });
-                                arr
-                                  .map(v => v.chave)
-                                  .splice(index + 1)
-                                  .map(v2 => {
-                                    this.setState(prev => ({
-                                      ...prev,
-                                      formData: {
-                                        ...prev.formData,
-                                        [v2]: undefined
-                                      }
-                                    }));
-                                    this.getVals(v2);
-                                  });
-                                this.atualizaValorVariacaoTabelaPreco(v.chave);
-                              }}
-                              placeholder="Selecione...">
-                              {Array.from(v.opcoes).map((o, index) => (
-                                <Option key={`${v.chave}_${index}`} value={o}>
-                                  {o}
-                                </Option>
-                              ))}
-                            </Select>
-                          )}
-                        </Form.Item>
+                                  arr
+                                    .map(v => v.chave)
+                                    .splice(index + 1)
+                                    .map(v2 => {
+                                      this.setState(prev => ({
+                                        ...prev,
+                                        formData: {
+                                          ...prev.formData,
+                                          [v2]: undefined
+                                        }
+                                      }));
+                                      this.getVals(v2);
+                                    });
+                                  this.atualizaValorVariacao(v, e);
+                                }}
+                                placeholder="Selecione...">
+                                {Array.from(v.opcoes).map((o, index) => (
+                                  <Option key={`${v.chave}_${index}`} value={o}>
+                                    {o}
+                                  </Option>
+                                ))}
+                              </Select>
+                            )}
+                          </Form.Item>
 
-                        {this.geraVariacoesInputsDinamicos(
-                          v,
-                          getFieldDecorator
-                        )}
+                          {this.geraVariacoesInputsDinamicos(
+                            v,
+                            getFieldDecorator
+                          )}
+                        </Spin>
                       </React.Fragment>
                     ) : (
                       ""
@@ -522,7 +521,7 @@ class OrderItemForm extends Component {
                 rules: [
                   { required: true, message: "Este campo é obrigatório!" }
                 ],
-                initialValue: this.state.formData.quantidade || 1
+                initialValue: this.state.formData.quantidade
               })(
                 <InputNumber
                   onChange={e =>
@@ -535,7 +534,7 @@ class OrderItemForm extends Component {
                 />
               )}
             </Form.Item>
-            <Form.Item label="Preço Final Item" {...formItemLayout}>
+            {/* <Form.Item label="Preço Final Item" {...formItemLayout}>
               {getFieldDecorator("preco_final_item", {
                 rules: [
                   { required: true, message: "Este campo é obrigatório!" }
@@ -552,8 +551,12 @@ class OrderItemForm extends Component {
                   name="preco_final_item"
                 />
               )}
-            </Form.Item>
+            </Form.Item> */}
           </Form>
+
+          <Affix offsetBottom={0}>
+            <Layout.Footer>FOOO</Layout.Footer>
+          </Affix>
         </div>
       </SimpleLazyLoader>
     );
@@ -561,8 +564,10 @@ class OrderItemForm extends Component {
 
   geraVariacoesInputsDinamicos(variacao, getFieldDecorator) {
     const compInput = obj => (
-      <Row key={`rowVariacaoDinamico_${obj.chave}`}>
-        <Col span={8}>
+      <Row
+        key={`rowVariacaoDinamico_${obj.chave}`}
+        id={`rowVariacaoDinamico_${obj.chave}`}>
+        <Col span={12}>
           <Form.Item
             label={`Preço - ${obj.label}`}
             {...{
@@ -576,21 +581,21 @@ class OrderItemForm extends Component {
                   message: "Este campo é obrigatório!"
                 }
               ],
-              initialValue: this.state.formData[`preco_${obj.chave}` || 0]
+              initialValue: this.state.formData[`preco_${obj.chave}`] || 0
             })(<Input name={`preco_${obj.chave}`} />)}
           </Form.Item>
         </Col>
-        <Col span={8}>
-          <Form.Item
+        <Col span={12}>
+          <SFFPorcentagem
+            name={obj.label}
             label={`Desconto - ${obj.label}`}
-            {...{
+            formItemLayout={{
               labelCol: { span: 12 },
               wrapperCol: { span: 12 }
-            }}>
-            {getFieldDecorator(`desconto_${obj.chave}`, {
-              initialValue: this.state.formData[`desconto_${obj.chave}` || 0]
-            })(<Input name={`desconto_${obj.chave}`} />)}
-          </Form.Item>
+            }}
+            getFieldDecorator={getFieldDecorator}
+            handleFormState={this.handleFormState}
+          />
         </Col>
       </Row>
     );
@@ -603,13 +608,80 @@ class OrderItemForm extends Component {
     }
   }
 
-  async atualizaValorVariacaoTabelaPreco(chave) {
-    const tabelaPreco = await PriceTableService.get(
-      this.state.formData.tabela_preco_base.id
-    )({
-      fields: "grupo_produto.produtos,grupo_produto.$",
-      "grupo_produto.id": this.state.formData.grupo_produto.id
-    });
+  async atualizaValorVariacao(variacao, valor) {
+    try {
+      this.setState({ [`loadingVariacoes_${variacao.chave}`]: true });
+
+      if (variacao.tipoTabela === "TABELA_CARACTERISTICA") {
+        const tabelaCaract = await FeaturePriceTableService.list({
+          status: true,
+          "grupo_produto.id": this.state.formData.grupo_produto.id,
+          "caracteristica.chave": variacao.chave,
+          fields: "u_m_preco, grupo_produto,caracteristica,precos.$",
+          "precos.deleted": false,
+          u_m_preco: this.state.formData.embalagem,
+          limit: 1
+        }).then(response => response.docs);
+
+        if (tabelaCaract && tabelaCaract.length) {
+          const precos = tabelaCaract[0].precos || [];
+          this.props.form.resetFields([
+            `preco_${variacao.chave}`,
+            `desconto_${variacao.chave}`
+          ]);
+
+          if (precos.length) {
+            const { valor: valorVariacao } = precos.find(
+              p => p.opcao_chave === valor
+            );
+
+            this.setState(prev => ({
+              ...prev,
+              formData: {
+                ...prev.formData,
+                [`preco_${variacao.chave}`]: valorVariacao || 0,
+                [`desconto_${variacao.chave}`]: 0
+              }
+            }));
+          }
+        }
+      }
+      if (variacao.tipoTabela === "TABELA_BASE") {
+        variacao.regraPrecoBase.map(rpb => {
+          this.props.form.resetFields([
+            `preco_${rpb.chave}`,
+            `desconto_${rpb.chave}`
+          ]);
+          this.setState(prev => ({
+            ...prev,
+            formData: {
+              ...prev.formData,
+              [`preco_${rpb.chave}`]: 0,
+              [`desconto_${rpb.chave}`]: 0
+            }
+          }));
+        });
+
+        const tabelaPreco = await GetVariation({
+          priceTable: this.state.formData.tabela_preco_base.id,
+          productGroup: this.state.formData.grupo_produto.id,
+          productID: this.state.formData.produto.id,
+          variacao: variacao.chave,
+          valor,
+          orderID: this.state.order_id
+        });
+
+        if (tabelaPreco !== false)
+          this.setState(prev => ({
+            ...prev,
+            formData: { ...prev.formData, ...tabelaPreco }
+          }));
+      }
+    } catch (error) {
+      if (error && error.response && error.response.data) parseErrors(error);
+    } finally {
+      this.setState({ [`loadingVariacoes_${variacao.chave}`]: false });
+    }
   }
 }
 
