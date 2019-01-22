@@ -47,7 +47,7 @@ class OrderItemForm extends Component {
       produtos: [],
       order_id: this.props.match.params.order_id
     };
-    window.criaResumo = this.resumoItem;
+    window.calcularResumo = this.calcularResumo.bind(this);
   }
 
   async componentDidMount() {
@@ -198,6 +198,28 @@ class OrderItemForm extends Component {
     // trás as variações obrigatórias para cima
     // variacoes = variacoes.sort((a, b) => (b.obrigatorio ? 1 : -1));
     this.setState({ variacoes });
+    this.calcularResumo();
+  }
+
+  resetVariacoes() {
+    const campos = [
+      ...Object.keys(this.state.formData).filter(
+        f => f.match(/^preco_/i) || f.match(/^desconto_/i)
+      ),
+      ...this.state.variacoes.map(v => v.chave)
+    ];
+    this.props.form.resetFields(campos);
+
+    let formData = this.state.formData;
+
+    campos.forEach(c => {
+      delete formData[c];
+    });
+
+    this.setState({ formData });
+
+    this.getVariacoes();
+
   }
 
   getVals(chave) {
@@ -228,6 +250,7 @@ class OrderItemForm extends Component {
       variacoesSelecionadas,
       mostrarResumo: true
     });
+    this.calcularResumo();
   }
 
   render() {
@@ -383,7 +406,7 @@ class OrderItemForm extends Component {
               <Card
                 title="Variações do Produto"
                 extra={
-                  <Button onClick={() => this.getVariacoes()}>
+                  <Button onClick={() => this.resetVariacoes()}>
                     Limpar Variações
                   </Button>
                 }
@@ -527,12 +550,12 @@ class OrderItemForm extends Component {
                 initialValue: this.state.formData.quantidade
               })(
                 <InputNumber
-                  onChange={e => {
+                  onKeyUp={() => this.calcularResumo()}
+                  onChange={async e => {
                     if (isNaN(e)) return;
-                    this.handleFormState({
+                    await this.handleFormState({
                       target: { name: "quantidade", value: e }
                     });
-                    this.calcularResumo();
                   }}
                   style={{ width: 200 }}
                   name="quantidade"
@@ -568,14 +591,24 @@ class OrderItemForm extends Component {
 
               {this.state.variacoes &&
                 this.state.variacoes.map(v => {
-                  return (
-                    <div key={`resumoItem_${v.chave}`}>
-                      <b>
-                        Total Preço {v.label}:{" "}
-                        {this.state.formData[`preco_total_${v.chave}`]}
-                      </b>
-                    </div>
-                  );
+                  if (v.tipoTabela === "TABELA_CARACTERISTICA")
+                    return (
+                      <div key={`resumoItem_${v.chave}`}>
+                        <b>
+                          Total Preço {v.label}:{" "}
+                          {this.state.formData[`preco_total_${v.chave}`]}
+                        </b>
+                      </div>
+                    );
+                  if (v.tipoTabela === "TABELA_BASE" && v.regraPrecoBase)
+                    return v.regraPrecoBase.map(rpb => (
+                      <div key={`resumoItem_${rpb.chave}`}>
+                        <b>
+                          Total Preço {rpb.label}:{" "}
+                          {this.state.formData[`preco_total_${rpb.chave}`]}
+                        </b>
+                      </div>
+                    ));
                 })}
               <div key={`resumoItem_total`}>
                 <b>Total Geral: {this.state.formData.preco_total_geral}</b>
@@ -612,7 +645,7 @@ class OrderItemForm extends Component {
         </Col>
         <Col span={12}>
           <SFFPorcentagem
-            name={obj.label}
+            name={`desconto_${obj.chave}`}
             label={`Desconto - ${obj.label}`}
             formItemLayout={{
               labelCol: { span: 12 },
@@ -620,6 +653,7 @@ class OrderItemForm extends Component {
             }}
             getFieldDecorator={getFieldDecorator}
             handleFormState={this.handleFormState}
+            trigger={() => this.calcularResumo()}
           />
         </Col>
       </Row>
@@ -702,6 +736,7 @@ class OrderItemForm extends Component {
             formData: { ...prev.formData, ...tabelaPreco }
           }));
       }
+      this.calcularResumo();
     } catch (error) {
       if (error && error.response && error.response.data) parseErrors(error);
     } finally {
@@ -710,9 +745,53 @@ class OrderItemForm extends Component {
   }
 
   calcularResumo() {
-    // Object.keys(variacoesSelecionadas).forEach(vs => {
-    //   var { chave, label } = variacoes.find(v => v.chave === vs);
-    // });
+    //this.state.formData[`preco_total_${v.chave}`]
+    //this.state.formData.preco_total_geral
+    // debugger;
+    let calculaTotal = chave => {
+      // debugger;
+      console.log(
+        `preco_${chave}`,
+        this.state.formData[`preco_${chave}`],
+        `desconto_${chave}`,
+        this.state.formData[`desconto_${chave}`],
+        "quantidade",
+        this.state.formData.quantidade
+      );
+      // debugger
+      return (
+        (this.state.formData[`preco_${chave}`] -
+          this.state.formData[`preco_${chave}`] *
+            this.state.formData[`desconto_${chave}`]) *
+          this.state.formData.quantidade || 0
+      );
+    };
+    calculaTotal = calculaTotal.bind(this);
+
+    if (this.state.formData.quantidade) {
+      // debugger;
+      let preco_total_geral = 0;
+      let totais = {};
+      Object.keys(this.state.variacoesSelecionadas).forEach(vs => {
+        var { tipoTabela, regraPrecoBase } = this.state.variacoes.find(
+          v => v.chave === vs
+        );
+
+        if (tipoTabela === "TABELA_CARACTERISTICA") {
+          totais[`preco_total_${vs}`] = calculaTotal(vs);
+        }
+        if (tipoTabela === "TABELA_BASE" && regraPrecoBase) {
+          return regraPrecoBase.forEach(rpb => {
+            totais[`preco_total_${rpb.chave}`] = calculaTotal(rpb.chave);
+          });
+        }
+      });
+
+      this.setState(prev => ({
+        ...prev,
+        formData: { ...prev.formData, ...totais }
+      }));
+    }
   }
 }
 
