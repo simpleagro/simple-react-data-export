@@ -32,6 +32,7 @@ class OrderItemForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      mostrarResumo: false,
       editMode: false,
       formData: {
         tabela_preco_base:
@@ -46,6 +47,7 @@ class OrderItemForm extends Component {
       produtos: [],
       order_id: this.props.match.params.order_id
     };
+    window.criaResumo = this.resumoItem;
   }
 
   async componentDidMount() {
@@ -223,14 +225,15 @@ class OrderItemForm extends Component {
 
     this.setState({
       variacoes,
-      variacoesSelecionadas
+      variacoesSelecionadas,
+      mostrarResumo: true
     });
   }
 
   render() {
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
-      labelCol: { span: 3 },
+      labelCol: { xl: 4, xxl: 3 },
       wrapperCol: { span: 12 }
     };
 
@@ -524,11 +527,13 @@ class OrderItemForm extends Component {
                 initialValue: this.state.formData.quantidade
               })(
                 <InputNumber
-                  onChange={e =>
+                  onChange={e => {
+                    if (isNaN(e)) return;
                     this.handleFormState({
                       target: { name: "quantidade", value: e }
-                    })
-                  }
+                    });
+                    this.calcularResumo();
+                  }}
                   style={{ width: 200 }}
                   name="quantidade"
                 />
@@ -553,9 +558,29 @@ class OrderItemForm extends Component {
               )}
             </Form.Item> */}
           </Form>
+          <br />
+          <br />
+          <Affix
+            offsetBottom={0}
+            style={{ display: this.state.mostrarResumo ? "block" : "none" }}>
+            <Layout.Footer style={{ borderTop: "2px solid gray" }}>
+              <h3>Resumo:</h3>
 
-          <Affix offsetBottom={0}>
-            <Layout.Footer>FOOO</Layout.Footer>
+              {this.state.variacoes &&
+                this.state.variacoes.map(v => {
+                  return (
+                    <div key={`resumoItem_${v.chave}`}>
+                      <b>
+                        Total Preço {v.label}:{" "}
+                        {this.state.formData[`preco_total_${v.chave}`]}
+                      </b>
+                    </div>
+                  );
+                })}
+              <div key={`resumoItem_total`}>
+                <b>Total Geral: {this.state.formData.preco_total_geral}</b>
+              </div>
+            </Layout.Footer>
           </Affix>
         </div>
       </SimpleLazyLoader>
@@ -682,6 +707,12 @@ class OrderItemForm extends Component {
     } finally {
       this.setState({ [`loadingVariacoes_${variacao.chave}`]: false });
     }
+  }
+
+  calcularResumo() {
+    // Object.keys(variacoesSelecionadas).forEach(vs => {
+    //   var { chave, label } = variacoes.find(v => v.chave === vs);
+    // });
   }
 }
 
