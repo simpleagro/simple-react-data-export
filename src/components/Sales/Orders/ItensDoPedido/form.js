@@ -25,6 +25,7 @@ import * as FeaturePriceTableService from "services/feature-table-prices";
 import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
 import { SimpleLazyLoader } from "../../../common/SimpleLazyLoader";
 import { SFFPorcentagem } from "../../../common/formFields/SFFPorcentagem";
+import debounce from "lodash/debounce";
 
 const Option = Select.Option;
 
@@ -38,7 +39,8 @@ class OrderItemForm extends Component {
         tabela_preco_base:
           this.props.pedido &&
           this.props.pedido._id === this.props.match.params.order_id &&
-          this.props.pedido.tabela_preco_base
+          this.props.pedido.tabela_preco_base,
+        quantidade: 1
       },
       savingForm: false,
       loadingForm: true,
@@ -48,6 +50,7 @@ class OrderItemForm extends Component {
       order_id: this.props.match.params.order_id
     };
     window.calcularResumo = this.calcularResumo.bind(this);
+    this.calcularResumo = debounce(this.calcularResumo, 300);
   }
 
   async componentDidMount() {
@@ -202,6 +205,7 @@ class OrderItemForm extends Component {
   }
 
   resetVariacoes() {
+    // debugger;
     const campos = [
       ...Object.keys(this.state.formData).filter(
         f => f.match(/^preco_/i) || f.match(/^desconto_/i)
@@ -219,7 +223,6 @@ class OrderItemForm extends Component {
     this.setState({ formData });
 
     this.getVariacoes();
-
   }
 
   getVals(chave) {
@@ -286,7 +289,7 @@ class OrderItemForm extends Component {
               </Button>
             </PainelHeader>
           </Affix>
-          <Form onChange={this.handleFormState}>
+          <Form id="orderItemForm" onChange={this.handleFormState}>
             <Form.Item label="Tabela de Preço" {...formItemLayout}>
               {getFieldDecorator("tabela_preco_base", {
                 rules: [
@@ -484,10 +487,7 @@ class OrderItemForm extends Component {
                             )}
                           </Form.Item>
 
-                          {this.geraVariacoesInputsDinamicos(
-                            v,
-                            getFieldDecorator
-                          )}
+                          {this.geraVariacoesInputsDinamicos(v)}
                         </Spin>
                       </React.Fragment>
                     ) : (
@@ -514,40 +514,20 @@ class OrderItemForm extends Component {
                 />
               )}
             </Form.Item>
-            <Form.Item label="Desconto" {...formItemLayout}>
-              {getFieldDecorator("desconto", {
-                rules: [
-                  { required: true, message: "Este campo é obrigatório!" }
-                ],
-                initialValue: this.state.formData.desconto || 0
-              })(
-                <Tooltip title="Informe de 0 a 100 se houver desconto">
-                  <InputNumber
-                    step={0.01}
-                    min={0}
-                    max={1}
-                    formatter={value => `${value * 100}`}
-                    parser={value =>
-                      value.replace("%", "").replace(",", ".") / 100
-                    }
-                    onChange={e =>
-                      this.handleFormState({
-                        target: { name: "desconto", value: e }
-                      })
-                    }
-                    style={{ width: 200 }}
-                    name="desconto"
-                  />{" "}
-                  %
-                </Tooltip>
-              )}
-            </Form.Item>
+            <SFFPorcentagem
+              name={`desconto`}
+              label={`Desconto`}
+              formItemLayout={formItemLayout}
+              getFieldDecorator={getFieldDecorator}
+              handleFormState={this.handleFormState}
+              trigger={() => this.calcularResumo()}
+            />
             <Form.Item label="Quantidade" {...formItemLayout}>
               {getFieldDecorator("quantidade", {
                 rules: [
                   { required: true, message: "Este campo é obrigatório!" }
                 ],
-                initialValue: this.state.formData.quantidade
+                initialValue: this.state.formData.quantidade || 1
               })(
                 <InputNumber
                   onKeyUp={() => this.calcularResumo()}
@@ -583,9 +563,7 @@ class OrderItemForm extends Component {
           </Form>
           <br />
           <br />
-          <Affix
-            offsetBottom={0}
-            style={{ display: this.state.mostrarResumo ? "block" : "none" }}>
+          <Affix offsetBottom={0}>
             <Layout.Footer style={{ borderTop: "2px solid gray" }}>
               <h3>Resumo:</h3>
 
@@ -596,7 +574,7 @@ class OrderItemForm extends Component {
                       <div key={`resumoItem_${v.chave}`}>
                         <b>
                           Total Preço {v.label}:{" "}
-                          {this.state.formData[`preco_total_${v.chave}`]}
+                          {this.state.formData[`preco_total_${v.chave}`] || 0}
                         </b>
                       </div>
                     );
@@ -605,13 +583,13 @@ class OrderItemForm extends Component {
                       <div key={`resumoItem_${rpb.chave}`}>
                         <b>
                           Total Preço {rpb.label}:{" "}
-                          {this.state.formData[`preco_total_${rpb.chave}`]}
+                          {this.state.formData[`preco_total_${rpb.chave}`]  || 0}
                         </b>
                       </div>
                     ));
                 })}
               <div key={`resumoItem_total`}>
-                <b>Total Geral: {this.state.formData.preco_total_geral}</b>
+                <b>Total Geral: {this.state.formData.total_preco_item || 0}</b>
               </div>
             </Layout.Footer>
           </Affix>
@@ -620,31 +598,60 @@ class OrderItemForm extends Component {
     );
   }
 
-  geraVariacoesInputsDinamicos(variacao, getFieldDecorator) {
+  geraVariacoesInputsDinamicos(variacao) {
+    const { getFieldDecorator } = this.props.form;
     const compInput = obj => (
       <Row
         key={`rowVariacaoDinamico_${obj.chave}`}
         id={`rowVariacaoDinamico_${obj.chave}`}>
         <Col span={12}>
           <Form.Item
+            help={
+              !this.state.variacoesSelecionadas ||
+              !this.state.variacoesSelecionadas.hasOwnProperty(variacao.chave)
+                ? "Selecione um(a) " + variacao.label + " primeiro"
+                : ""
+            }
+            validateStatus={
+              !this.state.variacoesSelecionadas ||
+              !this.state.variacoesSelecionadas.hasOwnProperty(variacao.chave)
+                ? "warning"
+                : ""
+            }
             label={`Preço - ${obj.label}`}
             {...{
               labelCol: { span: 12 },
               wrapperCol: { span: 12 }
             }}>
             {getFieldDecorator(`preco_${obj.chave}`, {
+              normalize: value => value && value.toString().replace(",","."),
               rules: [
                 {
                   required: obj.obrigatorio,
                   message: "Este campo é obrigatório!"
                 }
               ],
-              initialValue: this.state.formData[`preco_${obj.chave}`] || 0
-            })(<Input name={`preco_${obj.chave}`} />)}
+              initialValue: this.state.formData[`preco_${obj.chave}`] ? this.state.formData[`preco_${obj.chave}`].toString().replace(",",".") : undefined
+            })(
+              <Input
+                disabled={
+                  !this.state.variacoesSelecionadas ||
+                  !this.state.variacoesSelecionadas.hasOwnProperty(
+                    variacao.chave
+                  )
+                }
+                onKeyUp={() => this.calcularResumo()}
+                name={`preco_${obj.chave}`}
+              />
+            )}
           </Form.Item>
         </Col>
         <Col span={12}>
           <SFFPorcentagem
+            disabled={
+              !this.state.variacoesSelecionadas ||
+              !this.state.variacoesSelecionadas.hasOwnProperty(variacao.chave)
+            }
             name={`desconto_${obj.chave}`}
             label={`Desconto - ${obj.label}`}
             formItemLayout={{
@@ -659,9 +666,9 @@ class OrderItemForm extends Component {
       </Row>
     );
 
-    if (variacao.tipoTabela === "TABELA_CARACTERISTICA") {
+    if (variacao.tipoTabela === "TABELA_CARACTERISTICA")
       return compInput(variacao);
-    }
+
     if (variacao.tipoTabela === "TABELA_BASE" && variacao.regraPrecoBase) {
       return variacao.regraPrecoBase.map(rpb => compInput(rpb));
     }
@@ -698,7 +705,7 @@ class OrderItemForm extends Component {
               ...prev,
               formData: {
                 ...prev.formData,
-                [`preco_${variacao.chave}`]: valorVariacao || 0,
+                [`preco_${variacao.chave}`]: valorVariacao && valorVariacao.toString().replace(",",".") || undefined,
                 [`desconto_${variacao.chave}`]: 0
               }
             }));
@@ -748,17 +755,7 @@ class OrderItemForm extends Component {
     //this.state.formData[`preco_total_${v.chave}`]
     //this.state.formData.preco_total_geral
     // debugger;
-    let calculaTotal = chave => {
-      // debugger;
-      console.log(
-        `preco_${chave}`,
-        this.state.formData[`preco_${chave}`],
-        `desconto_${chave}`,
-        this.state.formData[`desconto_${chave}`],
-        "quantidade",
-        this.state.formData.quantidade
-      );
-      // debugger
+    let calculaTotalCaract = chave => {
       return (
         (this.state.formData[`preco_${chave}`] -
           this.state.formData[`preco_${chave}`] *
@@ -766,26 +763,38 @@ class OrderItemForm extends Component {
           this.state.formData.quantidade || 0
       );
     };
-    calculaTotal = calculaTotal.bind(this);
+    calculaTotalCaract = calculaTotalCaract.bind(this);
 
-    if (this.state.formData.quantidade) {
+    if (
+      this.state.formData.quantidade &&
+      (this.state.variacoesSelecionadas &&
+        Object.keys(this.state.variacoesSelecionadas).length)
+    ) {
       // debugger;
-      let preco_total_geral = 0;
-      let totais = {};
+      let totais = {
+        total_preco_item: 0
+      };
+
       Object.keys(this.state.variacoesSelecionadas).forEach(vs => {
         var { tipoTabela, regraPrecoBase } = this.state.variacoes.find(
           v => v.chave === vs
         );
 
         if (tipoTabela === "TABELA_CARACTERISTICA") {
-          totais[`preco_total_${vs}`] = calculaTotal(vs);
+          totais[`preco_total_${vs}`] = calculaTotalCaract(vs);
+          totais["total_preco_item"] += totais[`preco_total_${vs}`];
         }
         if (tipoTabela === "TABELA_BASE" && regraPrecoBase) {
           return regraPrecoBase.forEach(rpb => {
-            totais[`preco_total_${rpb.chave}`] = calculaTotal(rpb.chave);
+            totais[`preco_total_${rpb.chave}`] = calculaTotalCaract(rpb.chave);
+            totais["total_preco_item"] += totais[`preco_total_${rpb.chave}`];
           });
         }
       });
+
+      // Desconto no item
+      totais["total_preco_item"] -=
+        totais["total_preco_item"] * this.state.formData.desconto || 0;
 
       this.setState(prev => ({
         ...prev,
