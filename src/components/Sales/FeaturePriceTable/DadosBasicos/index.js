@@ -114,18 +114,26 @@ class PaymentForm extends Component {
       key: "safra.descricao",
       render: text => text
     },
+    // {
+    //   title: "Validade de",
+    //   dataIndex: "data_validade_de",
+    //   key: "data_validade_de",
+    //   render: text => {
+    //     return moment(text).format("DD/MM/YYYY")
+    //   }
+    // },
+    // {
+    //   title: "Validade até",
+    //   dataIndex: "data_validade_ate",
+    //   key: "data_validade_ate",
+    //   render: text => {
+    //     return moment(text).format("DD/MM/YYYY")
+    //   }
+    // },
     {
-      title: "Validade de",
-      dataIndex: "data_validade_de",
-      key: "data_validade_de",
-      render: text => {
-        return moment(text).format("DD/MM/YYYY")
-      }
-    },
-    {
-      title: "Validade até",
-      dataIndex: "data_validade_ate",
-      key: "data_validade_ate",
+      title: "Data Base",
+      dataIndex: "data_base",
+      key: "data_base",
       render: text => {
         return moment(text).format("DD/MM/YYYY")
       }
