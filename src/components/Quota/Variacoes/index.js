@@ -142,7 +142,7 @@ class VariacaoCota extends Component {
           else return 1;
         }
       },
-      {
+      /* {
         title: "UM",
         dataIndex: "cota_um",
         key: "cota_um",
@@ -150,7 +150,7 @@ class VariacaoCota extends Component {
           if (sorter === "ascendent") return -1;
           else return 1;
         }
-      },
+      }, */
       {
         title: "Status",
         dataIndex: "status",
