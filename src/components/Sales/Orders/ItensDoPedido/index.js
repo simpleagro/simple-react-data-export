@@ -34,7 +34,7 @@ class OrderItem extends Component {
     try {
       const items = await OrderItemsService.list(this.state.order_id)(aqp);
       const orderData = await OrderService.get(this.state.order_id, {
-        fields: "tabela_preco_base, numero, cliente, propriedade, estado, cidade"
+        fields: "tabela_preco_base, numero, cliente, propriedade, estado, cidade, pgto_royalties, pgto_tratamento, pgto_germoplasma"
       });
       this.setState(prev => ({
         ...prev,

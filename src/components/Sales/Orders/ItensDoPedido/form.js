@@ -84,7 +84,7 @@ class OrderItemForm extends Component {
     }).then(response => response.docs);
 
     const tabelaPrecos = await PriceTableService.list({
-      fields: "nome",
+      fields: "nome, moeda",
       status: true,
       limit: -1
     }).then(response => response.docs);
@@ -842,8 +842,10 @@ class OrderItemForm extends Component {
           }));
         });
 
-        const tabelaPreco = await GetVariation({
+        let tabelaPrecoOrig = await GetVariation({
+          usarConfiguracaoFPCaracteristica: configAPP.usarConfiguracaoFPCaracteristica(),
           priceTable: this.state.formData.tabela_preco_base.id,
+          priceTableName: this.state.formData.tabela_preco_base.nome,
           productGroup: this.state.formData.grupo_produto.id,
           productID: this.state.formData.produto.id,
           variacao: variacao.chave,
@@ -851,13 +853,22 @@ class OrderItemForm extends Component {
           orderID: this.state.order_id
         });
 
-        if (tabelaPreco !== false) {
-          this.setState(prev => ({
-            ...prev,
-            formData: { ...prev.formData, ...tabelaPreco }
-          }));
+        if (tabelaPrecoOrig !== false) {
+          if (!configAPP.usarConfiguracaoFPCaracteristica())
+            this.setState(prev => ({
+              ...prev,
+              formData: { ...prev.formData, ...tabelaPrecoOrig }
+            }));
 
           variacao.regraPrecoBase.map(rpb => {
+            let tabelaPreco = null;
+            if (configAPP.usarConfiguracaoFPCaracteristica()) {
+              if (this.props.pedido[`pgto_${rpb.chave}`] === "GRÃOS") {
+                tabelaPreco = tabelaPrecoOrig["GRÃO"];
+              } else if (this.props.pedido[`pgto_${rpb.chave}`] === "REAIS") {
+                tabelaPreco = tabelaPrecoOrig["REAIS"];
+              }
+            }
             let preco = tabelaPreco[`preco_${rpb.chave}`];
             const periodo = configAPP.usarCalculoDataBaseMes()
               ? moment().diff(tabelaPreco.data_base, "month")
@@ -884,6 +895,7 @@ class OrderItemForm extends Component {
           });
         }
       }
+
       this.calcularResumo();
     } catch (error) {
       if (error && error.response && error.response.data) parseErrors(error);

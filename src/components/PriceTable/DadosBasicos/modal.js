@@ -163,7 +163,7 @@ const ModalForm = Form.create()(
               <Form.Item label="Data Base">
                 {getFieldDecorator("data_base", {
                   initialValue: this.state.formData.data_base
-                    ? moment(this.state.formData.data_base, "YYYY-MM-DD")
+                    ? moment(this.state.formData.data_base, "DD/MM/YYYY")
                     : undefined
                 })(
                   <DatePicker
@@ -172,7 +172,7 @@ const ModalForm = Form.create()(
                     style={{width: '100%'}}
                     onChange={e => {
                       this.onHadleChange({
-                        target: { name: "data_base", value: e.format("YYYY-MM-DD") }
+                        target: { name: "data_base", value: e.format("DD/MM/YYYY") }
                       })}
                     }
                     name="data_base"
