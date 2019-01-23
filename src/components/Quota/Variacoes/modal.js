@@ -103,7 +103,7 @@ const ModalForm = Form.create()(
           >
             <Form layout="vertical" onChange={this.onHadleChange}>
               {this.props.group_caracteristicas && this.gerarFormulario(this.props.group_caracteristicas, getFieldDecorator)}
-              <Form.Item label="Unidade de Medida da Cota">
+              {/* <Form.Item label="Unidade de Medida da Cota">
                   {getFieldDecorator("cota_um", {
                     rules: [
                       { required: true, message: "Selecione a unidade de medida!" }
@@ -131,7 +131,7 @@ const ModalForm = Form.create()(
                       {this.listarUMs(this.state.u_ms)}
                     </Select>
                   )}
-              </Form.Item>
+              </Form.Item> */}
               <Form.Item label="Valor da Cota">
                 {getFieldDecorator('cota_valor',{
                   rules: [
