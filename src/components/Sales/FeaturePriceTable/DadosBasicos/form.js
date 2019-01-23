@@ -225,6 +225,35 @@ class FeaturePriceTable extends Component {
             )}
           </Form.Item>
 
+          <Form.Item label="Data Base" {...formItemLayout}>
+            {getFieldDecorator("data_base", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.data_base ? moment(
+                this.state.formData.data_base
+                  ? this.state.formData.data_base
+                  : new Date(),
+                "YYYY-MM-DD"
+              ) : null
+            })(
+              <DatePicker
+                onChange={(data, dataString) =>
+                  this.handleFormState({
+                    target: {
+                      name: "data_base",
+                      value: moment(dataString, "DD/MM/YYYY").format(
+                        "YYYY-MM-DD"
+                      )
+                    }
+                  })
+                }
+                allowClear
+                format={"DD/MM/YYYY"}
+                style={{ width: 200 }}
+                name="data_base"
+              />
+            )}
+          </Form.Item>
+
           <Form.Item label="Versão" {...formItemLayout}>
             {getFieldDecorator("versao", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
@@ -241,7 +270,7 @@ class FeaturePriceTable extends Component {
             )}
           </Form.Item>
 
-          <Form.Item label="Data Validade de" {...formItemLayout}>
+          <Form.Item label="Validade de" {...formItemLayout}>
             {getFieldDecorator("data_validade_de", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.data_validade_de ? moment(
@@ -270,7 +299,7 @@ class FeaturePriceTable extends Component {
             )}
           </Form.Item>
 
-          <Form.Item label="Data Validade até" {...formItemLayout}>
+          <Form.Item label="Validade até" {...formItemLayout}>
             {getFieldDecorator("data_validade_ate", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.data_validade_ate ? moment(
