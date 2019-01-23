@@ -5,7 +5,6 @@ import {
   Form,
   Select,
   Affix,
-  Tooltip,
   Card,
   Input,
   Row,
@@ -14,14 +13,20 @@ import {
   Layout
 } from "antd";
 import { connect } from "react-redux";
-import { flashWithSuccess } from "../../../common/FlashMessages";
+import {
+  flashWithSuccess,
+  flashWithError
+} from "../../../common/FlashMessages";
 import parseErrors from "../../../../lib/parseErrors";
 import { PainelHeader } from "../../../common/PainelHeader";
 import * as ProductGroupService from "services/productgroups";
 import * as OrderItemService from "../../../../services/orders.items";
 import { get as GetVariation } from "../../../../services/microservices/price-table-variations";
 import * as PriceTableService from "services/pricetable";
+import * as PriceTableProductService from "services/pricetable.products";
 import * as FeaturePriceTableService from "services/feature-table-prices";
+import { list as ListUnitsMeasures } from "services/units-measures";
+import { fatorConversaoUM } from "common/utils";
 import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
 import { SimpleLazyLoader } from "../../../common/SimpleLazyLoader";
 import { SFFPorcentagem } from "../../../common/formFields/SFFPorcentagem";
@@ -196,10 +201,6 @@ class OrderItemForm extends Component {
       };
     });
 
-    // somente variações que possuem opções
-    // variacoes = variacoes.filter( v => v.opcoes.size );
-    // trás as variações obrigatórias para cima
-    // variacoes = variacoes.sort((a, b) => (b.obrigatorio ? 1 : -1));
     this.setState({ variacoes });
     this.calcularResumo();
   }
@@ -583,7 +584,7 @@ class OrderItemForm extends Component {
                       <div key={`resumoItem_${rpb.chave}`}>
                         <b>
                           Total Preço {rpb.label}:{" "}
-                          {this.state.formData[`preco_total_${rpb.chave}`]  || 0}
+                          {this.state.formData[`preco_total_${rpb.chave}`] || 0}
                         </b>
                       </div>
                     ));
@@ -624,14 +625,18 @@ class OrderItemForm extends Component {
               wrapperCol: { span: 12 }
             }}>
             {getFieldDecorator(`preco_${obj.chave}`, {
-              normalize: value => value && value.toString().replace(",","."),
+              normalize: value => value && value.toString().replace(",", "."),
               rules: [
                 {
                   required: obj.obrigatorio,
                   message: "Este campo é obrigatório!"
                 }
               ],
-              initialValue: this.state.formData[`preco_${obj.chave}`] ? this.state.formData[`preco_${obj.chave}`].toString().replace(",",".") : undefined
+              initialValue: this.state.formData[`preco_${obj.chave}`]
+                ? this.state.formData[`preco_${obj.chave}`]
+                    .toString()
+                    .replace(",", ".")
+                : undefined
             })(
               <Input
                 disabled={
@@ -685,7 +690,6 @@ class OrderItemForm extends Component {
           "caracteristica.chave": variacao.chave,
           fields: "u_m_preco, grupo_produto,caracteristica,precos.$",
           "precos.deleted": false,
-          u_m_preco: this.state.formData.embalagem,
           limit: 1
         }).then(response => response.docs);
 
@@ -705,7 +709,10 @@ class OrderItemForm extends Component {
               ...prev,
               formData: {
                 ...prev.formData,
-                [`preco_${variacao.chave}`]: valorVariacao && valorVariacao.toString().replace(",",".") || undefined,
+                [`preco_${variacao.chave}`]:
+                  (valorVariacao &&
+                    valorVariacao.toString().replace(",", ".")) ||
+                  undefined,
                 [`desconto_${variacao.chave}`]: 0
               }
             }));
@@ -751,15 +758,59 @@ class OrderItemForm extends Component {
     }
   }
 
-  calcularResumo() {
-    //this.state.formData[`preco_total_${v.chave}`]
-    //this.state.formData.preco_total_geral
-    // debugger;
+  async calcularResumo() {
+    const {
+      tabela_preco_base: { id: tabelaPrecoID },
+      grupo_produto: { id: grupoProdutoID },
+      produto: { id: produtoID },
+      embalagem
+    } = this.state.formData;
+
+    let fatorConversao = 1;
+
+    if (embalagem && tabelaPrecoID && grupoProdutoID && produtoID) {
+      const produtoTabelaPreco = await PriceTableProductService.get(
+        tabelaPrecoID
+      )(grupoProdutoID)(produtoID);
+
+      // Se a unid. medida que veio da tabela de preço base for diferente, fazer conversão *******
+      if (produtoTabelaPreco && produtoTabelaPreco.u_m_preco !== embalagem) {
+        const unidadesDeMedida = await ListUnitsMeasures({
+          limit: -1,
+          status: true
+        }).then(response => response.docs);
+
+        if (!unidadesDeMedida) {
+          flashWithError(
+            `Não existem unidades de medidas disponíveis para realizar a conversão de ${embalagem} para ${
+              produtoTabelaPreco.u_m_preco
+            }`
+          );
+        } else {
+          fatorConversao = fatorConversaoUM(
+            unidadesDeMedida,
+            embalagem,
+            produtoTabelaPreco.u_m_preco
+          );
+
+          if (fatorConversao === "erro") {
+            fatorConversao = 1;
+            flashWithError(
+              `[fatorConversaoUM] - Não conseguir realizar a conversão de ${embalagem} para ${
+                produtoTabelaPreco.u_m_preco
+              }`
+            );
+          }
+        }
+      }
+    }
+
     let calculaTotalCaract = chave => {
       return (
-        (this.state.formData[`preco_${chave}`] -
-          this.state.formData[`preco_${chave}`] *
-            this.state.formData[`desconto_${chave}`]) *
+        fatorConversao *
+          (this.state.formData[`preco_${chave}`] -
+            this.state.formData[`preco_${chave}`] *
+              this.state.formData[`desconto_${chave}`]) *
           this.state.formData.quantidade || 0
       );
     };

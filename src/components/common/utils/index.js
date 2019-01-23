@@ -47,3 +47,49 @@ export const formatDate = data => {
 const zeroEsquerda = (data) => {
   return (data < 10 ? '0' : '') + data
 }
+
+// Calcular fator de conversão de unidade de medidas recursivamente ********************************
+// by: Jéssika *************************************************************************************
+export const fatorConversaoUM = (um_array, um_pai, um_primaria) => {
+  let flag = true;
+  let um_verificar_obj = um_array.find(item => item.sigla == um_pai);
+  let um_verificar = um_verificar_obj._id;
+  let um_primaria_obj = um_array.find(item => item.sigla == um_primaria)
+  let resultado = {}
+  let aux_fc = 1;
+
+  if(um_primaria_obj){
+    while(flag) {
+      resultado = auxFatorConversaoUM(um_array, um_primaria_obj._id, um_verificar)
+      if(!resultado){
+        flag = false
+        return 'erro'
+      }else if(resultado.um_base){
+        um_verificar = resultado.um_base
+        aux_fc = resultado.fc * aux_fc
+      }else if(resultado.fc){
+        flag = false
+        return resultado.fc * aux_fc
+      }
+    }
+  }else {
+    return 'erro'
+  }
+ }
+
+ const auxFatorConversaoUM = (um_array, um_primaria_id, um_verificar) => {
+  let resultado = undefined;
+  um_array.forEach(um_item => {
+    if(um_item._id == um_verificar){
+      if(um_item.unidade_basica_id == um_primaria_id){
+        resultado = {fc: um_item.fator_conversao}
+        return
+      }else{
+        resultado = { um_base: um_item.unidade_basica_id, fc: um_item.fator_conversao}
+        return
+      }
+    }
+  })
+  return resultado
+ }
+ // ************************************************************************************************
