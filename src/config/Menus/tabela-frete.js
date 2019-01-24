@@ -7,7 +7,8 @@ const menus = {
     path: "/tabela-frete",
     label: "Tabela de Frete",
     icon: "truck",
-    showMenu: true
+    showMenu: true,
+    rule: 'ShipTable',
   },
   "/tabela-frete/:shiptable_id/range-km": {
     component: SimpleLoadable(() =>
