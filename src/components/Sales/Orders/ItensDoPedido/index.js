@@ -55,7 +55,7 @@ class OrderItem extends Component {
 
   async componentDidMount() {
     await this.initializeList({
-      fields: "produto, quantidade, desconto, preco_final_item, status"
+      fields: "produto, quantidade, desconto, total_preco_item, status"
     });
   }
 
@@ -134,8 +134,8 @@ class OrderItem extends Component {
     },
     {
       title: "Preço Final",
-      dataIndex: "preco_final_item",
-      key: "preco_final_item",
+      dataIndex: "total_preco_item",
+      key: "total_preco_item",
       align: "right"
     },
     {
