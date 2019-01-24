@@ -13,6 +13,8 @@ import {
   Layout
 } from "antd";
 import { connect } from "react-redux";
+import * as Promise from "bluebird";
+
 import {
   flashWithSuccess,
   flashWithError
@@ -707,6 +709,7 @@ class OrderItemForm extends Component {
 
             this.setState(prev => ({
               ...prev,
+              [`unid_med_preco_${variacao.chave}`]: tabelaCaract[0].u_m_preco,
               formData: {
                 ...prev.formData,
                 [`preco_${variacao.chave}`]:
@@ -758,7 +761,43 @@ class OrderItemForm extends Component {
     }
   }
 
-  async calcularResumo() {
+  async getFatorConversaoTabelaPrecoCaract(chave) {
+
+    const unid_med_preco = this.state[`unid_med_preco_${chave}`];
+    const { embalagem } = this.state.formData;
+    let fatorConversao = 1;
+
+    // Se a unid. medida que veio da tabela de preço base for diferente, fazer conversão *******
+    if (unid_med_preco !== embalagem) {
+      const unidadesDeMedida = await ListUnitsMeasures({
+        limit: -1,
+        status: true
+      }).then(response => response.docs);
+
+      if (!unidadesDeMedida) {
+        flashWithError(
+          `Não existem unidades de medidas disponíveis para realizar a conversão de ${embalagem} para ${unid_med_preco}`
+        );
+      } else {
+        fatorConversao = fatorConversaoUM(
+          unidadesDeMedida,
+          embalagem,
+          unid_med_preco
+        );
+
+        if (fatorConversao === "erro") {
+          fatorConversao = 1;
+          flashWithError(
+            `[fatorConversaoUM] - Não conseguir realizar a conversão de ${embalagem} para ${unid_med_preco}`
+          );
+        }
+      }
+    }
+
+    return fatorConversao;
+  }
+
+  async getFatorConversaoTabelaBase() {
     const {
       tabela_preco_base: { id: tabelaPrecoID },
       grupo_produto: { id: grupoProdutoID },
@@ -805,7 +844,12 @@ class OrderItemForm extends Component {
       }
     }
 
-    let calculaTotalCaract = chave => {
+    return fatorConversao;
+  }
+
+  async calcularResumo() {
+    let fatorConversaoChaves = {};
+    let calculaTotalCaract = (chave, fatorConversao) => {
       return (
         fatorConversao *
           (this.state.formData[`preco_${chave}`] -
@@ -826,22 +870,40 @@ class OrderItemForm extends Component {
         total_preco_item: 0
       };
 
-      Object.keys(this.state.variacoesSelecionadas).forEach(vs => {
-        var { tipoTabela, regraPrecoBase } = this.state.variacoes.find(
-          v => v.chave === vs
-        );
+      await Promise.all(
+        await Object.keys(this.state.variacoesSelecionadas).map(async vs => {
+          let { tipoTabela, regraPrecoBase } = this.state.variacoes.find(
+            v => v.chave === vs
+          );
 
-        if (tipoTabela === "TABELA_CARACTERISTICA") {
-          totais[`preco_total_${vs}`] = calculaTotalCaract(vs);
-          totais["total_preco_item"] += totais[`preco_total_${vs}`];
-        }
-        if (tipoTabela === "TABELA_BASE" && regraPrecoBase) {
-          return regraPrecoBase.forEach(rpb => {
-            totais[`preco_total_${rpb.chave}`] = calculaTotalCaract(rpb.chave);
-            totais["total_preco_item"] += totais[`preco_total_${rpb.chave}`];
-          });
-        }
-      });
+          if (tipoTabela === "TABELA_CARACTERISTICA") {
+
+            const fatorCaract = await this.getFatorConversaoTabelaPrecoCaract(vs);
+
+            fatorConversaoChaves[`fator_conversao_${vs}`] = this.state.formData
+              .embalagem
+              ? this.state.formData.embalagem
+              : "";
+            totais[`preco_total_${vs}`] = calculaTotalCaract(vs,fatorCaract);
+            totais["total_preco_item"] += totais[`preco_total_${vs}`];
+          }
+          if (tipoTabela === "TABELA_BASE" && regraPrecoBase) {
+            const fatorCaract = await this.getFatorConversaoTabelaBase();
+            return regraPrecoBase.forEach(rpb => {
+              fatorConversaoChaves[`fator_conversao_${rpb.chave}`] = this.state
+                .formData.embalagem
+                ? this.state.formData.embalagem
+                : "";
+              totais[`preco_total_${rpb.chave}`] = calculaTotalCaract(
+                rpb.chave,
+                fatorCaract
+              );
+              totais["total_preco_item"] += totais[`preco_total_${rpb.chave}`];
+            });
+          }
+          return true;
+        })
+      );
 
       // Desconto no item
       totais["total_preco_item"] -=
@@ -849,7 +911,7 @@ class OrderItemForm extends Component {
 
       this.setState(prev => ({
         ...prev,
-        formData: { ...prev.formData, ...totais }
+        formData: { ...prev.formData, ...totais, ...fatorConversaoChaves }
       }));
     }
   }
