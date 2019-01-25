@@ -22,7 +22,7 @@ export const create = order_id => obj =>
 
 export const update = order_id => obj =>
   api
-    .put(`${baseURL.replace(":order_id", order_id)}/${obj.id}`, obj)
+    .put(`${baseURL.replace(":order_id", order_id)}/${obj._id}`, obj)
     .then(response => response.data);
 
 export const remove = order_id => _id =>
@@ -34,4 +34,3 @@ export const get = order_id => _id =>
   api
     .get(`${baseURL.replace(":order_id", order_id)}/${_id}`)
     .then(response => response.data);
-

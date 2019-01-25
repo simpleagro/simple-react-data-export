@@ -1,8 +1,6 @@
 import React, { Component } from "react";
 import { Divider, Button, Icon, Popconfirm, Tooltip } from "antd";
 import moment from "moment";
-import { bindActionCreators } from "redux";
-import { connect } from "react-redux";
 
 import { simpleTableSearch } from "../../../../lib/simpleTableSearch";
 import * as OrderService from "../../../../services/orders";
@@ -10,7 +8,6 @@ import SimpleTable from "../../../common/SimpleTable";
 import { flashWithSuccess } from "../../../common/FlashMessages";
 import parseErrors from "../../../../lib/parseErrors";
 import { PainelHeader } from "../../../common/PainelHeader";
-import { dadosPedido } from "actions/pedidoActions";
 
 class Orders extends Component {
   constructor(props) {
@@ -188,7 +185,6 @@ class Orders extends Component {
               <Button
                 size="small"
                 onClick={() => {
-                  this.props.dadosPedido(record);
                   this.props.history.push(
                     `/pedidos/${record._id}/itens-do-pedido`
                   );
@@ -240,15 +236,4 @@ class Orders extends Component {
   }
 }
 
-const mapDispatchToProps = dispatch =>
-  bindActionCreators(
-    {
-      dadosPedido
-    },
-    dispatch
-  );
-
-export default connect(
-  null,
-  mapDispatchToProps
-)(Orders);
+export default Orders;

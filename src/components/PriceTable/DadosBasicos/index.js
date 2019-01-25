@@ -204,6 +204,16 @@ class PriceTable extends Component {
       render: (text) => text.descricao
     },
     {
+      title: "Data Base",
+      dataIndex: "data_base",
+      key: "data_base",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      },
+      render: (text) => text ? formatDate(text) : ''
+    },
+    /* {
       title: "Validade De",
       dataIndex: "data_validade_de",
       key: "data_validade_de",
@@ -222,7 +232,7 @@ class PriceTable extends Component {
         else return 1;
       },
       render: (text) => text ? formatDate(text) : ''
-    },
+    }, */
     {
       title: "Versão",
       dataIndex: "versao",

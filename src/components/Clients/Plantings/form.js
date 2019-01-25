@@ -21,7 +21,6 @@ import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
 import * as ClientService from "../../../services/clients";
 import * as SeasonService from "../../../services/seasons";
-import * as IBGEService from "../../../services/ibge";
 import * as ClientPlantingService from "../../../services/clients.plantings";
 import * as ProductGroupService from "../../../services/productgroups";
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";

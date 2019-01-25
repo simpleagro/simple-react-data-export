@@ -7,7 +7,8 @@ const menus = {
     path: "/tabela-comissao",
     label: "Tabela de Comissão",
     icon: "hand-holding-usd",
-    showMenu: true
+    showMenu: true,
+    rule: 'Comission',
   },
   "/tabela-comissao/:comissiontable_id/regras": {
     component: SimpleLoadable(() =>

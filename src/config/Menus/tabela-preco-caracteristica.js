@@ -7,7 +7,8 @@ const menus = {
     path: "/tabela-preco-caracteristica",
     label: "Tabela Preço Característica",
     icon: "database",
-    showMenu: true
+    showMenu: true,
+    rule: 'ProductFeaturePriceTable',
   },
   "/tabela-preco-caracteristica/:id/edit": {
     component: SimpleLoadable(() => import("../../components/Sales/FeaturePriceTable/DadosBasicos/form")),

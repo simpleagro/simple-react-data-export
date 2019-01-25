@@ -82,16 +82,16 @@ class OrderForm extends Component {
       fields: "descricao",
       status: true
     }).then(response => response.docs);
-    const formasDePagamento = await FormOfPaymentServiceList({
-      limit: -1,
-      fields: "descricao",
-      status: true
-    }).then(response => response.docs);
-    const tiposDePagamento = await TypeOfPaymentServiceList({
-      limit: -1,
-      fields: "descricao",
-      status: true
-    }).then(response => response.docs);
+    // const formasDePagamento = await FormOfPaymentServiceList({
+    //   limit: -1,
+    //   fields: "descricao",
+    //   status: true
+    // }).then(response => response.docs);
+    // const tiposDePagamento = await TypeOfPaymentServiceList({
+    //   limit: -1,
+    //   fields: "descricao",
+    //   status: true
+    // }).then(response => response.docs);
     const tabelasDePreco = await PriceTableServiceList({
       limit: -1,
       fields: "nome",
@@ -113,8 +113,8 @@ class OrderForm extends Component {
       garantias,
       tiposDeVendas,
       usosDaSemente,
-      formasDePagamento,
-      tiposDePagamento,
+      // formasDePagamento,
+      // tiposDePagamento,
       tabelasDePreco,
       agents,
       consultants,
@@ -613,7 +613,7 @@ class OrderForm extends Component {
               </Select>
             )}
           </Form.Item>
-          <Form.Item label="Forma de Pagamento" {...formItemLayout}>
+          {/* <Form.Item label="Forma de Pagamento" {...formItemLayout}>
             {getFieldDecorator("forma_pagamento", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.forma_pagamento
@@ -642,8 +642,8 @@ class OrderForm extends Component {
                   ))}
               </Select>
             )}
-          </Form.Item>
-          <Form.Item label="Tipo de Pagamento" {...formItemLayout}>
+          </Form.Item> */}
+          {/* <Form.Item label="Tipo de Pagamento" {...formItemLayout}>
             {getFieldDecorator("tipo_pagamento", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.tipo_pagamento
@@ -672,7 +672,7 @@ class OrderForm extends Component {
                   ))}
               </Select>
             )}
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item label="Tabela de Preço Base" {...formItemLayout}>
             {getFieldDecorator("tabela_preco_base", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
@@ -761,6 +761,7 @@ class OrderForm extends Component {
                 )}
               </Form.Item>
               <SFFPorcentagem
+                initialValue={this.state.formData.comissao_agente}
                 name="comissao_agente"
                 label="Comissão"
                 formItemLayout={formItemLayout}
