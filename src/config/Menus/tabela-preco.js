@@ -7,7 +7,8 @@ const menus = {
     path: "/tabela-preco",
     label: "Tabela de Preço",
     icon: "dollar-sign",
-    showMenu: true
+    showMenu: true,
+    rule: 'PriceTable',
   },
   "/tabela-preco/:pricetable_id/grupo-produto/:productgroup_id/produtos": {
     component: SimpleLoadable(() =>

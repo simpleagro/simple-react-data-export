@@ -7,7 +7,8 @@ const menus = {
     path: "/metas",
     label: "Metas",
     icon: "chart-line",
-    showMenu: true
+    showMenu: true,
+    rule: 'Target',
   },
   "/metas/:target_id/vendedores": {
     component: SimpleLoadable(() =>
