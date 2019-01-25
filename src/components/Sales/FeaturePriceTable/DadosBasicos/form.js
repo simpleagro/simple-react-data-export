@@ -161,12 +161,21 @@ class FeaturePriceTable extends Component {
             </Button>
           </PainelHeader>
         </Affix>
+
         <Form onChange={this.handleFormState}>
+
+          <Form.Item label="Centro de Custo" {...formItemLayout}>
+            {getFieldDecorator('centro_custo', {
+              rules: [{ required: false, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.centro_custo
+            })(<Input name="centro_custo" ref={input => (this.titleInput = input)} />)}
+          </Form.Item>
+
           <Form.Item label="Nome" {...formItemLayout}>
             {getFieldDecorator("nome", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.nome
-            })(<Input name="nome" ref={input => (this.titleInput = input)} />)}
+            })(<Input name="nome" />)}
           </Form.Item>
 
           <Form.Item label="Moeda" {...formItemLayout}>
