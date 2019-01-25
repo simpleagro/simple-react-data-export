@@ -11,11 +11,11 @@ export const SFFPorcentagem = props => {
           {props.getFieldDecorator(props.name, {
             rules: [
               { required: props.required, message: "Este campo é obrigatório!" }
-            ],
-            initialValue: props.initialValue || 0
+            ]
           })(
             <span>
               <InputNumber
+              value={props.initialValue || 0}
                 disabled={props.disabled}
                 step={0.01}
                 min={0}
