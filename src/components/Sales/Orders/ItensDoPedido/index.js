@@ -11,6 +11,7 @@ import parseErrors from "lib/parseErrors";
 import { simpleTableSearch } from "lib/simpleTableSearch";
 import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
 import { dadosPedido } from "actions/pedidoActions";
+import { addMaskReais } from "common/utils";
 
 class OrderItem extends Component {
   constructor(props) {
@@ -136,7 +137,8 @@ class OrderItem extends Component {
       title: "Preço Final",
       dataIndex: "total_preco_item",
       key: "total_preco_item",
-      align: "right"
+      align: "right",
+      render: text => addMaskReais(text)
     },
     {
       title: "Ações",
