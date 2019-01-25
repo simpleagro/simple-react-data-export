@@ -89,10 +89,28 @@ class OrderItemForm extends Component {
 
     this.setState(prev => ({
       ...prev,
-      loadingForm: false,
       gruposDeProdutos,
       tabelaPrecos
     }));
+
+    if (id) {
+      this.onSelectGrupoProduto(
+        JSON.stringify(
+          JSON.parse(this.props.form.getFieldValue("grupo_produto"))
+        )
+      );
+
+      setTimeout(() => {
+        this.onSelectProduto(
+          JSON.stringify(JSON.parse(this.props.form.getFieldValue("produto")))
+        );
+      }, 0);
+    }
+    setTimeout(() => {
+      this.setState({
+        loadingForm: false
+      });
+    }, 300);
   }
 
   handleFormState = async event => {
@@ -165,7 +183,6 @@ class OrderItemForm extends Component {
 
   async onSelectProduto(e) {
     e = JSON.parse(e);
-    // debugger
     await this.handleFormState({
       target: {
         name: "produto",
@@ -187,6 +204,14 @@ class OrderItemForm extends Component {
     const produto = JSON.parse(this.props.form.getFieldValue("produto"));
 
     let variacoes = grupo.caracteristicas.map((c, index, arr) => {
+      if (this.state.formData[c.chave])
+        this.setState(prev => ({
+          ...prev,
+          variacoesSelecionadas: {
+            ...prev.variacoesSelecionadas,
+            [c.chave]: this.state.formData[c.chave]
+          }
+        }));
       return {
         chave: c.chave,
         label: c.label,
@@ -267,7 +292,7 @@ class OrderItemForm extends Component {
     };
 
     return (
-      <SimpleLazyLoader loadingForm={this.state.loadingForm}>
+      <SimpleLazyLoader isLoading={this.state.loadingForm}>
         <div>
           <SimpleBreadCrumb
             to={
@@ -339,7 +364,11 @@ class OrderItemForm extends Component {
                   { required: true, message: "Este campo é obrigatório!" }
                 ],
                 initialValue: this.state.formData.grupo_produto
-                  ? this.state.formData.grupo_produto.nome
+                  ? JSON.stringify(
+                      this.state.gruposDeProdutos.find(
+                        g => g._id === this.state.formData.grupo_produto.id
+                      )
+                    )
                   : ""
               })(
                 <Select
@@ -380,7 +409,11 @@ class OrderItemForm extends Component {
                   { required: true, message: "Este campo é obrigatório!" }
                 ],
                 initialValue: this.state.formData.produto
-                  ? this.state.formData.produto.nome
+                  ? JSON.stringify(
+                      this.state.produtos.find(
+                        g => g._id === this.state.formData.produto.id
+                      )
+                    )
                   : ""
               })(
                 <Select
@@ -441,7 +474,7 @@ class OrderItemForm extends Component {
                                   message: "Este campo é obrigatório!"
                                 }
                               ],
-                              initialValue: ""
+                              initialValue: this.state.formData[v.chave]
                             })(
                               <Select
                                 // disabled={
@@ -709,14 +742,14 @@ class OrderItemForm extends Component {
 
             this.setState(prev => ({
               ...prev,
-              [`unid_med_preco_${variacao.chave}`]: tabelaCaract[0].u_m_preco,
               formData: {
                 ...prev.formData,
                 [`preco_${variacao.chave}`]:
                   (valorVariacao &&
                     valorVariacao.toString().replace(",", ".")) ||
                   undefined,
-                [`desconto_${variacao.chave}`]: 0
+                [`desconto_${variacao.chave}`]: 0,
+                [`fator_conversao_${variacao.chave}`]: tabelaCaract[0].u_m_preco
               }
             }));
           }
@@ -762,8 +795,8 @@ class OrderItemForm extends Component {
   }
 
   async getFatorConversaoTabelaPrecoCaract(chave) {
-
-    const unid_med_preco = this.state[`unid_med_preco_${chave}`];
+    // debugger
+    const unid_med_preco = this.state.formData[`fator_conversao_${chave}`];
     const { embalagem } = this.state.formData;
     let fatorConversao = 1;
 
@@ -788,7 +821,7 @@ class OrderItemForm extends Component {
         if (fatorConversao === "erro") {
           fatorConversao = 1;
           flashWithError(
-            `[fatorConversaoUM] - Não conseguir realizar a conversão de ${embalagem} para ${unid_med_preco}`
+            `[fatorConversaoUM TBLPC] - Não conseguir realizar a conversão de ${embalagem} para ${unid_med_preco}`
           );
         }
       }
@@ -835,7 +868,7 @@ class OrderItemForm extends Component {
           if (fatorConversao === "erro") {
             fatorConversao = 1;
             flashWithError(
-              `[fatorConversaoUM] - Não conseguir realizar a conversão de ${embalagem} para ${
+              `[fatorConversaoUM TPB] - Não conseguir realizar a conversão de ${embalagem} para ${
                 produtoTabelaPreco.u_m_preco
               }`
             );
@@ -877,14 +910,15 @@ class OrderItemForm extends Component {
           );
 
           if (tipoTabela === "TABELA_CARACTERISTICA") {
-
-            const fatorCaract = await this.getFatorConversaoTabelaPrecoCaract(vs);
+            const fatorCaract = await this.getFatorConversaoTabelaPrecoCaract(
+              vs
+            );
 
             fatorConversaoChaves[`fator_conversao_${vs}`] = this.state.formData
               .embalagem
               ? this.state.formData.embalagem
               : "";
-            totais[`preco_total_${vs}`] = calculaTotalCaract(vs,fatorCaract);
+            totais[`preco_total_${vs}`] = calculaTotalCaract(vs, fatorCaract);
             totais["total_preco_item"] += totais[`preco_total_${vs}`];
           }
           if (tipoTabela === "TABELA_BASE" && regraPrecoBase) {
