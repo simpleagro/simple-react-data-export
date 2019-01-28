@@ -132,6 +132,7 @@ class FieldRegistration extends Component {
       dataIndex: "cliente.nome",
       key: "cliente.nome",
       fixed: "left",
+      style: { width: 150 },
       ...simpleTableSearch(this)("cliente.nome"),
       render: text => text
     },
@@ -199,6 +200,7 @@ class FieldRegistration extends Component {
       title: "Ações",
       dataIndex: "action",
       fixed: "right",
+      style: { width: 100 },
       render: (text, record) => {
         return (
           <span>
@@ -282,18 +284,18 @@ class FieldRegistration extends Component {
         <PainelHeader
           title={
             <span>
-              Inscrição de Campo <span style={{ marginLeft: 150}}>Safra</span>:
+              Inscrição de Campo <span style={{ marginLeft: 150}}>Safra:</span>
               <Select
                 showSearch
                 allowClear
                 showArrow
                 style={{ width: 200, marginLeft: 15 }}
-                value={this.state.safra_selecionada}
+                //value={this.state.safra_selecionada}
                 onChange={e => this.initializeList({ "safra.descricao": e })}
                 placeholder="Selecione a safra...">
                   {this.state.listSafra &&
                       this.state.listSafra.map((safra, i) =>
-                        <Option key={i} value={safra.descricao}>
+                        <Option key={i} value={safra.id}>
                           {safra.descricao}
                         </Option>
                   )}
@@ -317,7 +319,6 @@ class FieldRegistration extends Component {
           columns={this.tableConfig()}
           dataSource={this.state.list}
           onChange={this.handleTableChange}
-          scroll={{ x: window.innerWidth }}
         />
       </div>
     );
