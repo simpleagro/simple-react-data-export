@@ -19,6 +19,21 @@ const menus = {
     path: "/pedidos/new",
     showMenu: false
   },
+  "/pedidos/:order_id/itens-do-pedido": {
+    component: SimpleLoadable(() => import("../../components/Sales/Orders/ItensDoPedido")),
+    path: "/pedidos/:order_id/itens-do-pedido",
+    showMenu: false
+  },
+  "/pedidos/:order_id/itens-do-pedido/new": {
+    component: SimpleLoadable(() => import("../../components/Sales/Orders/ItensDoPedido/form")),
+    path: "/pedidos/:order_id/itens-do-pedido/new",
+    showMenu: false
+  },
+  "/pedidos/:order_id/itens-do-pedido/:id/edit": {
+    component: SimpleLoadable(() => import("../../components/Sales/Orders/ItensDoPedido/form")),
+    path: "/pedidos/:order_id/itens-do-pedido/:id/edit",
+    showMenu: false
+  },
 };
 
 export default menus;

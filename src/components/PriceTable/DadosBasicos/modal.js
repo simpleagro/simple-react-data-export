@@ -8,7 +8,7 @@ import "moment/locale/pt-br";
 
 const ModalForm = Form.create()(
     class extends React.Component {
-      state = {formData:{}, grupos_produtos: [], moedas: [], safras: []}
+      state = {formData:{}, grupos_produtos: [],/*  moedas: [], */ safras: []}
 
       onHadleChange = event => {
         if (!event.target.name) return;
@@ -56,13 +56,13 @@ const ModalForm = Form.create()(
         ))
       }
 
-      listarMoedas = (moedas) => {
+      /* listarMoedas = (moedas) => {
         return moedas.map(moeda => (
           <Select.Option key={moeda.id} value={moeda.id}>
             {moeda.nome}
           </Select.Option>
         ))
-      }
+      } */
 
       listarSafras = (safras) => {
         return safras.map(safra => (
@@ -131,7 +131,7 @@ const ModalForm = Form.create()(
                   </Select>
                 )}
               </Form.Item>
-              {/* <Form.Item label="Moeda">
+              <Form.Item label="Moeda">
                 {getFieldDecorator("moeda", {
                   rules: [
                     { required: true, message: "Este campo é obrigatório!" }
@@ -154,14 +154,16 @@ const ModalForm = Form.create()(
                       })
                     }
                   >
-                    {this.listarMoedas(this.state.moedas)}
+                    {/* this.listarMoedas(this.state.moedas) */}
+                    <Select.Option key={`GRÃO`} value={`GRÃO`}>{`Grão`}</Select.Option>
+                    <Select.Option key={`REAIS`} value={`REAIS`}>{`Reais`}</Select.Option>
                   </Select>
                 )}
-              </Form.Item> */}
-              {/* <Form.Item label="Data Validade">
-                {getFieldDecorator("data_validade", {
-                  initialValue: this.state.formData.data_validade
-                    ? moment(this.state.formData.data_validade, "DD/MM/YYYY")
+              </Form.Item>
+              <Form.Item label="Data Base">
+                {getFieldDecorator("data_base", {
+                  initialValue: this.state.formData.data_base
+                    ? moment(this.state.formData.data_base, "DD/MM/YYYY")
                     : undefined
                 })(
                   <DatePicker
@@ -170,13 +172,13 @@ const ModalForm = Form.create()(
                     style={{width: '100%'}}
                     onChange={e => {
                       this.onHadleChange({
-                        target: { name: "data_validade", value: e.format("DD/MM/YYYY") }
+                        target: { name: "data_base", value: e.format("DD/MM/YYYY") }
                       })}
                     }
-                    name="data_validade"
+                    name="data_base"
                   />
                 )}
-              </Form.Item> */}
+              </Form.Item>
               <Form.Item label="Data Validade de">
                 {getFieldDecorator("data_validade_de", {
                   initialValue: this.state.formData.data_validade_de

@@ -1,20 +1,24 @@
 import React, { Component } from "react";
-import { Divider, Button, Icon, Popconfirm } from "antd";
+import { Divider, Button, Icon, Popconfirm, Select } from "antd";
 
-import * as FeatureTablePricesService from "../../../../services/feature-table-prices";
-import * as PriceVariationsService from "../../../../services/feature-table-prices.price-variations";
-import SimpleTable from "../../../common/SimpleTable";
-import { flashWithSuccess } from "../../../common/FlashMessages";
-import parseErrors from "../../../../lib/parseErrors";
-import { PainelHeader } from "../../../common/PainelHeader";
-import { simpleTableSearch } from "../../../../lib/simpleTableSearch";
-import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
+import * as FeatureTablePricesService from "services/feature-table-prices";
+import * as PriceVariationsService from "services/feature-table-prices.price-variations";
+import * as UnitMeasurementService from "services/units-measures";
+import SimpleTable from "common/SimpleTable";
+import { flashWithSuccess } from "common/FlashMessages";
+import parseErrors from "lib/parseErrors";
+import { PainelHeader } from "common/PainelHeader";
+import { simpleTableSearch } from "lib/simpleTableSearch";
+import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
+
+const Option = Select.Option;
 
 class PriceVariation extends Component {
   constructor(props) {
     super(props);
     this.state = {
       list: [],
+      listUnit: [],
       loadingData: true,
       tabela_id: this.props.match.params.tabela_id,
       tabela_data: {},
@@ -33,11 +37,13 @@ class PriceVariation extends Component {
 
     const data = await PriceVariationsService.list(this.state.tabela_id)(aqp);
     const dataFTP = await FeatureTablePricesService.list();
+    const dataUnitMeasure = await UnitMeasurementService.list({ limit: 999999 })
 
     this.setState(prev => ({
       ...prev,
       list: data.docs,
       listFTP: dataFTP.docs,
+      listUnit: dataUnitMeasure.docs,
       loadingData: false,
       pagination: {
         total: data.total
@@ -118,12 +124,6 @@ class PriceVariation extends Component {
       ...simpleTableSearch(this)("precos.valor")
     },
     {
-      title: "Unidade de Medida",
-      dataIndex: "u_m",
-      key: "precos.u_m",
-      ...simpleTableSearch(this)("precos.u_m")
-    },
-    {
       title: "Ações",
       dataIndex: "action",
       render: (text, record) => {
@@ -184,7 +184,8 @@ class PriceVariation extends Component {
           to={"/tabela-preco-caracteristica/"}
           history={this.props.history}
         />
-        <PainelHeader title="Variação de Preço">
+        <PainelHeader
+        title={ "Variação de Preço" }>
           <Button
             type="primary"
             icon="plus"
@@ -193,8 +194,7 @@ class PriceVariation extends Component {
                 "/tabela-preco-caracteristica/" +
                   this.state.tabela_id +
                   "/variacao-de-preco/new"
-              )
-            }>
+            )}>
             Adicionar
           </Button>
         </PainelHeader>

@@ -1,11 +1,12 @@
 import React, { Component } from "react";
-import { Button, Form, Select, Affix, Spin, Icon } from "antd";
+import { Button, Form, Select, Affix, Spin, Icon, Checkbox } from "antd";
 import debounce from "lodash/debounce";
 
 import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
 import { flashWithSuccess } from "../../../common/FlashMessages";
 import parseErrors from "../../../../lib/parseErrors";
 import { PainelHeader } from "../../../common/PainelHeader";
+import { SFFPorcentagem } from "../../../common/formFields/SFFPorcentagem";
 import { list as SeasonServiceList } from "../../../../services/seasons";
 import * as OrderService from "../../../../services/orders";
 import { list as ClientsServiceList } from "../../../../services/clients";
@@ -15,6 +16,8 @@ import { list as SeedUseServiceList } from "../../../../services/seed-use";
 import { list as FormOfPaymentServiceList } from "../../../../services/form-of-payment";
 import { list as TypeOfPaymentServiceList } from "../../../../services/type-of-payment";
 import { list as PriceTableServiceList } from "../../../../services/pricetable";
+import { list as AgentSalesServiceList } from "../../../../services/sales-agents";
+import { list as ConsultantServiceList } from "../../../../services/consultants";
 
 const Option = Select.Option;
 const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
@@ -23,13 +26,19 @@ class OrderForm extends Component {
   constructor(props) {
     super(props);
     this.lastFetchClientId = 0;
+    this.lastFetchAgentId = 0;
+    this.lastFetchConsultantId = 0;
     this.searchClient = debounce(this.searchClient, 400);
+    this.searchAgent = debounce(this.searchAgent, 400);
+    this.searchConsultant = debounce(this.searchConsultant, 400);
     this.state = {
       editMode: false,
       loadingForm: true,
       savingForm: false,
       formData: {},
       fetchingClients: false,
+      fetchingAgents: false,
+      fetchingConsultants: false,
       tiposDeFrete: ["FOB", "CIF"]
     };
   }
@@ -73,21 +82,29 @@ class OrderForm extends Component {
       fields: "descricao",
       status: true
     }).then(response => response.docs);
-    const formasDePagamento = await FormOfPaymentServiceList({
-      limit: -1,
-      fields: "descricao",
-      status: true
-    }).then(response => response.docs);
-    const tiposDePagamento = await TypeOfPaymentServiceList({
-      limit: -1,
-      fields: "descricao",
-      status: true
-    }).then(response => response.docs);
+    // const formasDePagamento = await FormOfPaymentServiceList({
+    //   limit: -1,
+    //   fields: "descricao",
+    //   status: true
+    // }).then(response => response.docs);
+    // const tiposDePagamento = await TypeOfPaymentServiceList({
+    //   limit: -1,
+    //   fields: "descricao",
+    //   status: true
+    // }).then(response => response.docs);
     const tabelasDePreco = await PriceTableServiceList({
       limit: -1,
       fields: "nome",
       status: true
     }).then(response => response.docs);
+
+    const agents = await this.fetchAgents({
+      fields: "nome,cpf_cnpj,-endereco,-cidade,-estado,-agente_pai"
+    }).then(response => response.docs);
+
+    const consultants = await this.fetchConsultants().then(
+      response => response.docs
+    );
 
     this.setState(prev => ({
       ...prev,
@@ -96,9 +113,11 @@ class OrderForm extends Component {
       garantias,
       tiposDeVendas,
       usosDaSemente,
-      formasDePagamento,
-      tiposDePagamento,
+      // formasDePagamento,
+      // tiposDePagamento,
       tabelasDePreco,
+      agents,
+      consultants,
       loadingForm: false
     }));
   }
@@ -109,7 +128,6 @@ class OrderForm extends Component {
       [event.target.name]: event.target.value
     });
     this.setState(prev => ({ ...prev, formData: form }));
-    console.log(form);
   };
 
   saveForm = async e => {
@@ -164,6 +182,25 @@ class OrderForm extends Component {
     });
   }
 
+  async fetchAgents(aqp = {}) {
+    return await AgentSalesServiceList({
+      limit: 25,
+      fields: "nome, cpf_cnpj",
+      status: true,
+      ...aqp
+    });
+  }
+
+  async fetchConsultants(aqp = {}) {
+    return await ConsultantServiceList({
+      limit: 25,
+      fields: "nome",
+      status: true,
+      vendedor: true,
+      ...aqp
+    });
+  }
+
   searchClient = async value => {
     console.log("fetching client", value);
     this.lastFetchClientId += 1;
@@ -179,6 +216,40 @@ class OrderForm extends Component {
     this.setState({
       clients,
       fetchingClients: false
+    });
+  };
+
+  searchAgent = async value => {
+    this.lastFetchAgentId += 1;
+    const fetchId = this.lastFetchAgentId;
+    this.setState({ agents: [], fetchingAgents: true });
+
+    const agents = await this.fetchAgents({ nome: `/${value}/i` }).then(
+      response => response.docs
+    );
+
+    if (fetchId !== this.lastFetchAgentId) return;
+
+    this.setState({
+      agents,
+      fetchingAgents: false
+    });
+  };
+
+  searchConsultant = async value => {
+    this.lastFetchConsultantId += 1;
+    const fetchId = this.lastFetchConsultantId;
+    this.setState({ consultants: [], fetchConsultants: true });
+
+    const consultants = await this.fetchConsultants({
+      nome: `/${value}/i`
+    }).then(response => response.docs);
+
+    if (fetchId !== this.lastFetchConsultantId) return;
+
+    this.setState({
+      consultants,
+      fetchConsultants: false
     });
   };
 
@@ -206,11 +277,40 @@ class OrderForm extends Component {
     }));
   }
 
+  onChangeAgente(e) {
+    const { _id: id, nome, cpf_cnpj } = JSON.parse(e);
+
+    this.handleFormState({
+      target: {
+        name: "agente_venda",
+        value: {
+          nome,
+          cpf_cnpj,
+          id
+        }
+      }
+    });
+  }
+
+  onChangeConsultant(e) {
+    const { _id: id, nome } = JSON.parse(e);
+
+    this.handleFormState({
+      target: {
+        name: "vendedor",
+        value: {
+          nome,
+          id
+        }
+      }
+    });
+  }
+
   render() {
-    const { fetchingClients } = this.state;
+    const { fetchingClients, fetchingAgents, fetchingConsultants } = this.state;
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
-      labelCol: { span: 3 },
+      labelCol: { span: 4 },
       wrapperCol: { span: 12 }
     };
 
@@ -273,6 +373,38 @@ class OrderForm extends Component {
                         descricao: s.descricao
                       })}>
                       {s.descricao}
+                    </Option>
+                  ))}
+              </Select>
+            )}
+          </Form.Item>
+          <Form.Item label="Vendedor" {...formItemLayout}>
+            {getFieldDecorator("vendedor", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue:
+                this.state.formData.vendedor &&
+                this.state.formData.vendedor.nome
+            })(
+              <Select
+                name="vendedor"
+                filterOption={(input, option) =>
+                  option.props.children
+                    .toLowerCase()
+                    .indexOf(input.toLowerCase()) >= 0
+                }
+                onSearch={this.searchConsultant}
+                showAction={["focus", "click"]}
+                notFoundContent={
+                  fetchingConsultants ? <Spin size="small" /> : null
+                }
+                showSearch
+                style={{ width: 200 }}
+                placeholder="Selecione..."
+                onChange={e => this.onChangeConsultant(e)}>
+                {this.state.consultants &&
+                  this.state.consultants.map(c => (
+                    <Option key={c._id} value={JSON.stringify(c)}>
+                      {c.nome}
                     </Option>
                   ))}
               </Select>
@@ -481,7 +613,7 @@ class OrderForm extends Component {
               </Select>
             )}
           </Form.Item>
-          <Form.Item label="Forma de Pagamento" {...formItemLayout}>
+          {/* <Form.Item label="Forma de Pagamento" {...formItemLayout}>
             {getFieldDecorator("forma_pagamento", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.forma_pagamento
@@ -510,8 +642,8 @@ class OrderForm extends Component {
                   ))}
               </Select>
             )}
-          </Form.Item>
-          <Form.Item label="Tipo de Pagamento" {...formItemLayout}>
+          </Form.Item> */}
+          {/* <Form.Item label="Tipo de Pagamento" {...formItemLayout}>
             {getFieldDecorator("tipo_pagamento", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.tipo_pagamento
@@ -540,7 +672,7 @@ class OrderForm extends Component {
                   ))}
               </Select>
             )}
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item label="Tabela de Preço Base" {...formItemLayout}>
             {getFieldDecorator("tabela_preco_base", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
@@ -578,6 +710,66 @@ class OrderForm extends Component {
               </Select>
             )}
           </Form.Item>
+          <Form.Item wrapperCol={{ span: 12, offset: 2 }}>
+            <Checkbox
+              checked={this.state.formData.venda_agenciada}
+              onChange={e => {
+                this.handleFormState({
+                  target: {
+                    name: "venda_agenciada",
+                    value: e.target.checked
+                  }
+                });
+              }}>
+              Venda Agenciada?
+            </Checkbox>
+          </Form.Item>
+          {this.state.formData.venda_agenciada && (
+            <React.Fragment>
+              <Form.Item label="Agente de Venda" {...formItemLayout}>
+                {getFieldDecorator("agente_venda", {
+                  rules: [
+                    { required: true, message: "Este campo é obrigatório!" }
+                  ],
+                  initialValue:
+                    this.state.formData.agente_venda &&
+                    this.state.formData.agente_venda.nome
+                })(
+                  <Select
+                    name="agente_venda"
+                    filterOption={(input, option) =>
+                      option.props.children
+                        .toLowerCase()
+                        .indexOf(input.toLowerCase()) >= 0
+                    }
+                    onSearch={this.searchAgent}
+                    showAction={["focus", "click"]}
+                    notFoundContent={
+                      fetchingAgents ? <Spin size="small" /> : null
+                    }
+                    showSearch
+                    style={{ width: 200 }}
+                    placeholder="Selecione..."
+                    onChange={e => this.onChangeAgente(e)}>
+                    {this.state.agents &&
+                      this.state.agents.map(c => (
+                        <Option key={c._id} value={JSON.stringify(c)}>
+                          {c.nome}
+                        </Option>
+                      ))}
+                  </Select>
+                )}
+              </Form.Item>
+              <SFFPorcentagem
+                initialValue={this.state.formData.comissao_agente}
+                name="comissao_agente"
+                label="Comissão"
+                formItemLayout={formItemLayout}
+                getFieldDecorator={getFieldDecorator}
+                handleFormState={this.handleFormState}
+              />
+            </React.Fragment>
+          )}
         </Form>
       </div>
     );

@@ -7,7 +7,8 @@ const menus = {
     path: "/cotas",
     label: "Cotas",
     icon: "chart-pie",
-    showMenu: true
+    showMenu: true,
+    rule: 'Quota',
   },
   "/cotas/:quota_id/vendedores": {
     component: SimpleLoadable(() =>

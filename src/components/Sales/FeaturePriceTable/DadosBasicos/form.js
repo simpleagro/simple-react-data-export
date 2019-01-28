@@ -10,13 +10,14 @@ import {
 } from "antd";
 import moment from "moment";
 
-import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
-import { flashWithSuccess } from "../../../common/FlashMessages";
-import parseErrors from "../../../../lib/parseErrors";
-import { PainelHeader } from "../../../common/PainelHeader";
-import * as FeaturePriceTableService from "../../../../services/feature-table-prices";
-import * as ProductGroupService from "../../../../services/productgroups";
-import * as SeasonsService from "../../../../services/seasons";
+import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
+import { flashWithSuccess } from "common/FlashMessages";
+import parseErrors from "lib/parseErrors";
+import { PainelHeader } from "common/PainelHeader";
+import * as FeaturePriceTableService from "services/feature-table-prices";
+import * as ProductGroupService from "services/productgroups";
+import * as SeasonsService from "services/seasons";
+import * as UnitMeasureService from "services/units-measures";
 
 const Option = Select.Option;
 
@@ -35,12 +36,14 @@ class FeaturePriceTable extends Component {
     const dataType = await FeaturePriceTableService.list();
     const dataSeasons = await SeasonsService.list();
     const dataProductGroup = await ProductGroupService.list();
+    const dataUnitMeasure = await UnitMeasureService.list();
 
     this.setState(prev => ({
       ...prev,
       listType: dataType.docs,
       listSeasons: dataSeasons.docs,
-      listProductGroup: dataProductGroup.docs
+      listProductGroup: dataProductGroup.docs,
+      listUnitMeasure: dataUnitMeasure.docs
     }));
 
     if (id) {
@@ -158,12 +161,21 @@ class FeaturePriceTable extends Component {
             </Button>
           </PainelHeader>
         </Affix>
+
         <Form onChange={this.handleFormState}>
+
+          <Form.Item label="Centro de Custo" {...formItemLayout}>
+            {getFieldDecorator('centro_custo', {
+              rules: [{ required: false, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.centro_custo
+            })(<Input name="centro_custo" ref={input => (this.titleInput = input)} />)}
+          </Form.Item>
+
           <Form.Item label="Nome" {...formItemLayout}>
             {getFieldDecorator("nome", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.nome
-            })(<Input name="nome" ref={input => (this.titleInput = input)} />)}
+            })(<Input name="nome" />)}
           </Form.Item>
 
           <Form.Item label="Moeda" {...formItemLayout}>
@@ -222,6 +234,35 @@ class FeaturePriceTable extends Component {
             )}
           </Form.Item>
 
+          <Form.Item label="Data Base" {...formItemLayout}>
+            {getFieldDecorator("data_base", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.data_base ? moment(
+                this.state.formData.data_base
+                  ? this.state.formData.data_base
+                  : new Date(),
+                "YYYY-MM-DD"
+              ) : null
+            })(
+              <DatePicker
+                onChange={(data, dataString) =>
+                  this.handleFormState({
+                    target: {
+                      name: "data_base",
+                      value: moment(dataString, "DD/MM/YYYY").format(
+                        "YYYY-MM-DD"
+                      )
+                    }
+                  })
+                }
+                allowClear
+                format={"DD/MM/YYYY"}
+                style={{ width: 200 }}
+                name="data_base"
+              />
+            )}
+          </Form.Item>
+
           <Form.Item label="Versão" {...formItemLayout}>
             {getFieldDecorator("versao", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
@@ -238,7 +279,7 @@ class FeaturePriceTable extends Component {
             )}
           </Form.Item>
 
-          <Form.Item label="Data Validade de" {...formItemLayout}>
+          <Form.Item label="Validade de" {...formItemLayout}>
             {getFieldDecorator("data_validade_de", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.data_validade_de ? moment(
@@ -267,7 +308,7 @@ class FeaturePriceTable extends Component {
             )}
           </Form.Item>
 
-          <Form.Item label="Data Validade até" {...formItemLayout}>
+          <Form.Item label="Validade até" {...formItemLayout}>
             {getFieldDecorator("data_validade_ate", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.data_validade_ate ? moment(
@@ -381,6 +422,33 @@ class FeaturePriceTable extends Component {
               </Select>
             )}
           </Form.Item>
+
+          <Form.Item label="Unidade de Medida" {...formItemLayout}>
+            {getFieldDecorator("u_m_preco", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.u_m_preco
+            })(
+              <Select
+                name="u_m_preco"
+                allowClear
+                showAction={["focus", "click"]}
+                showSearch
+                style={{ width: 200 }}
+                placeholder="Selecione uma unidade..."
+                onChange={e => {
+                  this.handleFormState({
+                    target: { name: "u_m_preco", value: e }
+                  });
+                }}>
+                { this.state.listUnitMeasure &&
+                    this.state.listUnitMeasure.map(un =>
+                      <Option key={un._id} value={un.sigla}>
+                        {un.nome}
+                      </Option>) }
+              </Select>
+            )}
+          </Form.Item>
+
         </Form>
       </div>
     );

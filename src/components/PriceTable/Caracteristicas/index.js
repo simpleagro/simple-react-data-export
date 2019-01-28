@@ -141,10 +141,10 @@ class CaracteristicasPriceTable extends Component {
       console.log(item)
       return (
         {
-          title: item.label,
-          dataIndex: `${item.chave}`,
-          key: `${item.chave}`,
-          sorter: (a, b) => this.ordenaTabela(a, b, `${item.chave}`)
+          title: `${item.label} (R$)`,
+          dataIndex: `preco_${item.chave}`,
+          key: `preco_${item.chave}`,
+          sorter: (a, b) => this.ordenaTabela(a, b, `preco_${item.chave}`)
         }
       )
     });
@@ -310,7 +310,7 @@ class CaracteristicasPriceTable extends Component {
   saveFormRef = (formRef) => {
     this.formRef = formRef;
   }
-  
+
   render() {
     return (
       <div>

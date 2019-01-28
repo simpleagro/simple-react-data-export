@@ -52,7 +52,7 @@ class Properties extends Component {
         pagination: {
           total: data.total
         },
-        client_data: clientData
+        client_data: clientData,
       }));
     } catch (error) {
       if (error && error.response && error.response.data) parseErrors(error);

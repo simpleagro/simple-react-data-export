@@ -2,11 +2,11 @@ import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Divider, Button, Icon, Popconfirm, message, Tooltip } from "antd";
 
-import * as FeaturePriceTableService from "../../../../services/feature-table-prices";
-import SimpleTable from "../../../common/SimpleTable";
-import { flashWithSuccess } from "../../../common/FlashMessages";
-import parseErrors from "../../../../lib/parseErrors";
-import { PainelHeader } from "../../../common/PainelHeader";
+import * as FeaturePriceTableService from "services/feature-table-prices";
+import SimpleTable from "common/SimpleTable";
+import { flashWithSuccess } from "common/FlashMessages";
+import parseErrors from "lib/parseErrors";
+import { PainelHeader } from "common/PainelHeader";
 import moment from "moment";
 
 class PaymentForm extends Component {
@@ -114,16 +114,34 @@ class PaymentForm extends Component {
       key: "safra.descricao",
       render: text => text
     },
+    // {
+    //   title: "Validade de",
+    //   dataIndex: "data_validade_de",
+    //   key: "data_validade_de",
+    //   render: text => {
+    //     return moment(text).format("DD/MM/YYYY")
+    //   }
+    // },
+    // {
+    //   title: "Validade até",
+    //   dataIndex: "data_validade_ate",
+    //   key: "data_validade_ate",
+    //   render: text => {
+    //     return moment(text).format("DD/MM/YYYY")
+    //   }
+    // },
     {
-      title: "Data Validade de",
-      dataIndex: "data_validade_de",
-      key: "data_validade_de",
-      render: text => text
+      title: "Data Base",
+      dataIndex: "data_base",
+      key: "data_base",
+      render: text => {
+        return moment(text).format("DD/MM/YYYY")
+      }
     },
     {
-      title: "Data Validade até",
-      dataIndex: "data_validade_ate",
-      key: "data_validade_ate",
+      title: "Unidade",
+      dataIndex: "u_m_preco",
+      key: "u_m_preco",
       render: text => text
     },
     {

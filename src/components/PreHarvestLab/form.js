@@ -9,11 +9,11 @@ import {
   Checkbox
 } from "antd";
 
-import { flashWithSuccess } from "../../common/FlashMessages";
-import parseErrors from "../../../lib/parseErrors";
-import { PainelHeader } from "../../common/PainelHeader";
-import * as PreHarvestService from "../../../services/field-registration.pre-harvest";
-import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
+import { flashWithSuccess } from "../common/FlashMessages";
+import parseErrors from "../../lib/parseErrors";
+import { PainelHeader } from "../common/PainelHeader";
+import * as PreHarvestService from "../../services/field-registration.pre-harvest";
+import { SimpleBreadCrumb } from "../common/SimpleBreadCrumb";
 import moment from "moment";
 import TextArea from "antd/lib/input/TextArea";
 
@@ -132,13 +132,13 @@ class PreHarvestForm extends Component {
     return (
       <div>
         <SimpleBreadCrumb
-          to={ this.props.location.state.returnTo === "preColheitaLab" ? `/pre-colheita` : `/inscricao-de-campo/${this.props.match.params.field_registration_id}/pre-colheita`}
+          to={`/pre-colheita`}
           history={this.props.history}
         />
         <Affix offsetTop={65}>
           <PainelHeader
             title={
-              this.state.editMode ? "Editando Pré Colheita" : "Nova Pré Colheita"
+              this.state.editMode ? "Editando Pré-Colheita" : "Nova Pré-Colheita"
             }>
             <Button
               type="primary"

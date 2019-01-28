@@ -153,7 +153,7 @@ class PreHarvest extends Component {
                 this.props.history.push(
                   `/inscricao-de-campo/${this.state.field_registration_id}/pre-colheita/${
                     record._id
-                  }/edit`
+                  }/edit`, { returnTo: "inscricaoCampo" }
                 )
               }>
               <Icon type="edit" style={{ fontSize: "16px" }} />

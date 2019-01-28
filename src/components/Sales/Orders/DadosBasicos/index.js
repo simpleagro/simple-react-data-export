@@ -41,7 +41,7 @@ class Orders extends Component {
   }
 
   async componentDidMount() {
-    await this.initializeList();
+    await this.initializeList({ fields: "-itens" });
   }
 
   changeStatus = async (id, newStatus) => {
@@ -180,6 +180,18 @@ class Orders extends Component {
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
+
+            <Tooltip title="Veja os produtos do pedido">
+              <Button
+                size="small"
+                onClick={() => {
+                  this.props.history.push(
+                    `/pedidos/${record._id}/itens-do-pedido`
+                  );
+                }}>
+                <Icon type="bars" style={{ fontSize: "16px" }} />
+              </Button>
+            </Tooltip>
           </span>
         );
       }
