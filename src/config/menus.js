@@ -31,7 +31,7 @@ import tabelaComissao from "./Menus/tabela-comissao";
 import pedidos from "./Menus/pedidos";
 import inscricaoCampo from "./Menus/inscricao-de-campo";
 import preColheitaLab from "./Menus/pre-colheita";
-// import moeda from "./Menus/moeda";
+import moeda from "./Menus/moeda";
 
 const loadable = loader =>
   Loadable({
@@ -70,7 +70,7 @@ const menus = {
     ...filiais,
     ...formaPagamento,
     ...gruposDeProdutos,
-    // ...moeda,
+    ...moeda,
     ...metas,
     ...pedidos,
     ...safras,
