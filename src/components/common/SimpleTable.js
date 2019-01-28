@@ -10,8 +10,18 @@ const SimpleTable = ({ spinning, ...props }) => (
       onClick={() => window.location.reload()}>
       Atualizar
     </Button> */}
-    <Table {...{ scroll: { x: true }, ...props }} />
-    {/* scroll={{ y: 240 }} */}
+    <Table
+      {...{
+        scroll: {
+          x:
+            window.innerWidth +
+            props.columns.reduce(function(prev, elem) {
+              return prev + (elem.hasOwnProperty("fixed") && elem.width || 100);
+            }, 0)
+        },
+        ...props
+      }}
+    />
   </Spin>
 );
 

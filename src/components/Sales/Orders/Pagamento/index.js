@@ -122,26 +122,26 @@ class OrderPaymentForm extends Component {
   };
 
   removeRecord = async (index) => {
-    try {
-      
-      let { parcelas } = this.state.order_data.pagamento;
+    // try {
 
-      if(!parcelas) return;
+    //   let { parcelas } = this.state.order_data.pagamento;
 
-      await OrderPaymentService.update(this.state.order_id)(parcelas);
+    //   if(!parcelas) return;
 
-      this.setState({
-        order_data: this.state.form
-      });
+    //   await OrderPaymentService.update(this.state.order_id)(parcelas);
 
-      flashWithSuccess(
-        "",
-        `O item, ${produto.nome}, foi removido com sucesso!`
-      );
-    } catch (err) {
-      if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover um item do pedido", err);
-    }
+    //   this.setState({
+    //     order_data: this.state.form
+    //   });
+
+    //   flashWithSuccess(
+    //     "",
+    //     `O item, ${produto.nome}, foi removido com sucesso!`
+    //   );
+    // } catch (err) {
+    //   if (err && err.response && err.response.data) parseErrors(err);
+    //   console.log("Erro interno ao remover um item do pedido", err);
+    // }
   };
 
   handleFormState = async event => {
