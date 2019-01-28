@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Card, Divider, Button, Icon, Popconfirm, Tooltip, Row, Col } from "antd";
+import { Card, Divider, Button, Icon, Popconfirm, Tooltip, Row, Col, Select } from "antd";
 
 import * as FieldRegistrationService from "services/field-registration";
 import * as PreHarvestService from "services/field-registration.pre-harvest";
@@ -10,6 +10,10 @@ import { flashWithSuccess } from "common/FlashMessages";
 import parseErrors from "lib/parseErrors";
 import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
 import { simpleTableSearch } from "lib/simpleTableSearch";
+
+import * as SeasonService from "services/seasons";
+
+const Option = Select.Option;
 
 class PreHarvest extends Component {
   constructor(props) {
@@ -32,12 +36,9 @@ class PreHarvest extends Component {
   setList(){
     let listData = [];
     let num = 1;
-    this.state.listPreHarvest.map((lph, index) => (
-      console.log("indexLPH: ", index),
-      this.state.listFieldRegistration.map((lfr, index) => (
-        console.log("indexLFR: ", index),
-        lfr._id === lph._id && lph.pre_colheita.map((ph, index) => (
-          console.log("indexPH: ", index),
+    this.state.listPreHarvest.map(lph => (
+      this.state.listFieldRegistration.map(lfr => (
+        lfr._id === lph._id && lph.pre_colheita.map(ph => (
           listData.push(
             Object.assign({
               inscricao_campo_id: lfr._id,
@@ -55,7 +56,8 @@ class PreHarvest extends Component {
               num_colhedoras: ph.num_colhedoras,
               observacao: ph.observacao,
               produtividade: ph.produtividade,
-              responsavel: ph.responsavel,
+              codigo_erp: ph.codigo_erp,
+              responsavel: ph.responsavel.nome,
               _id: ph._id
             })
           ),
@@ -64,29 +66,30 @@ class PreHarvest extends Component {
       ))
     ));
 
-    this.setState(prev => ({
+    this.setState({
       list: listData
-    }))
+    })
 
   }
 
   async initializeList(aqp) {
 
     const dataFieldRegistration = await FieldRegistrationService.list();
-    const dataPreHarvest = await FieldRegistrationService.list({ fields: "pre_colheita,todasPrecolheitasPorInscricaoCampo", "todasPrecolheitasPorInscricaoCampo": true });
+    const dataPreHarvest = await FieldRegistrationService.list({ fields: "pre_colheita,todasPrecolheitasPorInscricaoCampo", "todasPrecolheitasPorInscricaoCampo": true, ...aqp });
+    const dataSafra = await SeasonService.list({ limit: 999999 });
 
     this.setState(previousState => {
       return { ...previousState, loadingData: true };
     });
 
     try {
+
       this.setState(prev => ({
         ...prev,
         loadingData: false,
+        listSafra: dataSafra.docs,
         listFieldRegistration: dataFieldRegistration.docs,
         listPreHarvest: dataPreHarvest.docs,
-        pagination: {
-        }
       }));
     } catch (error) {
       if (error && error.response && error.response.data) parseErrors(error);
@@ -95,11 +98,47 @@ class PreHarvest extends Component {
       this.setState({ loadingData: false });
     }
 
+    this.setList();
+
   }
+
+  changeStatus = async (id, newStatus) => {
+    try {
+      await PreHarvestService.changeStatus(this.state.field_registration_id)(
+        id,
+        newStatus
+      );
+
+      let recordName = "";
+
+      let _list = this.state.list.map(item => {
+        if (item._id === id) {
+          item.status = newStatus;
+          recordName = item.nome;
+        }
+        return item;
+      });
+
+      this.setState(prev => ({
+        ...prev,
+        list: _list
+      }));
+
+      flashWithSuccess(
+        "",
+        `A pré colheita, ${recordName}, foi ${
+          newStatus ? "ativada" : "bloqueada"
+        } com sucesso!`
+      );
+    } catch (err) {
+      if (err && err.response && err.response.data) parseErrors(err);
+      console.log("Erro interno ao mudar status da pré colheita", err);
+    }
+  };
 
   async componentDidMount() {
     await this.initializeList();
-     this.setList();
+
   }
 
   removeRecord = async ({ _id, nome_talhao }, field_registration_id) => {
@@ -133,31 +172,32 @@ class PreHarvest extends Component {
       fixed: "left"
     },
     {
-      title: "Inscrição",
-      dataIndex: "numero_inscricao_campo",
-      key: "numero_inscricao_campo"
+      title: "Código ERP",
+      dataIndex: "codigo_erp",
+      key: "codigo_erp"
     },
     {
       title: "Contrato",
       dataIndex: "contrato",
-      key: "contrato"
+      key: "contrato",
+      ...simpleTableSearch(this)("contrato")
     },
+    // {
+    //   title: "Safra",
+    //   dataIndex: "safra.descricao",
+    //   key: "safra.descricao"
+    // },
     {
-      title: "Safra",
-      dataIndex: "safra.descricao",
-      key: "safra.descricao"
+      title: "Propriedade",
+      dataIndex: "propriedade.nome",
+      key: "propriedade.nome",
+      ...simpleTableSearch(this)("propriedade.nome")
     },
     {
       title: "Talhão",
       dataIndex: "nome_talhao",
       key: "pre_colheita.nome_talhao",
       ...simpleTableSearch(this)("pre_colheita.nome_talhao")
-    },
-    {
-      title: "Propriedade",
-      dataIndex: "propriedade.nome",
-      key: "propriedade.nome",
-      ...simpleTableSearch(this)("propriedade.nome")
     },
     {
       title: "Número de Colhedoras",
@@ -168,6 +208,12 @@ class PreHarvest extends Component {
       title: "Produtividade",
       dataIndex: "produtividade",
       key: "pre_colheita.produtividade"
+    },
+    {
+      title: "Responsável",
+      dataIndex: "responsavel",
+      key: "pre_colheita.responsavel",
+      ...simpleTableSearch(this)("pre_colheita.responsavel")
     },
     {
       title: "Ações",
@@ -246,6 +292,7 @@ class PreHarvest extends Component {
     this.initializeList({
       page: pagination.current,
       limit: pagination.pageSize,
+      ...filters,
       ...this.state.tableSearch
     });
   };
@@ -253,25 +300,29 @@ class PreHarvest extends Component {
   render() {
     return (
       <div>
-        {/* <SimpleBreadCrumb to={"/pre-colheita"} history={this.props.history} /> */}
         <Row gutter={30}>
           <Col>
             <Card
-              title="Pré Colheita"
-              bordered={false}
-              // extra={
-              //   <Button
-              //     type="primary"
-              //     icon="plus"
-              //     onClick={() =>
-              //       this.props.history.push(
-              //         `/inscricao-de-campo/${this.state.field_registration_id}/pre-colheita/new`
-              //       )
-              //     }>
-              //     Adicionar
-              //   </Button>
-              // }
-              >
+              title={
+                <span>
+                  Pré-Colheita <span style={{ marginLeft: 150}}>Safra:</span>
+                  <Select
+                    showSearch
+                    allowClear
+                    showArrow
+                    style={{ width: 200, marginLeft: 15 }}
+                    onChange={e => this.initializeList({ "safra.descricao": e })}
+                    placeholder="Selecione a safra...">
+                      {this.state.listSafra &&
+                          this.state.listSafra.map((safra, i) =>
+                            <Option key={i} value={safra.descricao}>
+                              {safra.descricao}
+                            </Option>
+                      )}
+                  </Select>
+                </span>
+              }
+              bordered={false}>
               <SimpleTable
                 pagination={this.state.pagination}
                 spinning={this.state.loadingData}
@@ -279,7 +330,6 @@ class PreHarvest extends Component {
                 columns={this.tableConfig()}
                 dataSource={this.state.list}
                 onChange={this.handleTableChange}
-                scroll={{ x: window.innerWidth }}
               />
             </Card>
           </Col>

@@ -110,7 +110,9 @@ class PreHarvestForm extends Component {
             )(this.state.formData);
             flashWithSuccess();
             this.props.history.push(
-              `/inscricao-de-campo/${this.props.match.params.field_registration_id}/pre-colheita`
+              this.props.location.state.returnTo === "preColheitaLab"
+              ?  "/pre-colheita"
+              : `/inscricao-de-campo/${this.props.match.params.field_registration_id}/pre-colheita`
             );
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
@@ -132,7 +134,9 @@ class PreHarvestForm extends Component {
     return (
       <div>
         <SimpleBreadCrumb
-          to={ this.props.location.state.returnTo === "preColheitaLab" ? `/pre-colheita` : `/inscricao-de-campo/${this.props.match.params.field_registration_id}/pre-colheita`}
+          to={ this.props.location.state.returnTo === "preColheitaLab"
+            ? "/pre-colheita"
+            : `/inscricao-de-campo/${this.props.match.params.field_registration_id}/pre-colheita`}
           history={this.props.history}
         />
         <Affix offsetTop={65}>
@@ -188,6 +192,13 @@ class PreHarvestForm extends Component {
                   }
                 })
               } />)}
+          </Form.Item>
+
+          <Form.Item label="Código ERP" {...formItemLayout}>
+            {getFieldDecorator("codigo_erp", {
+              rules: [{ required: false, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.codigo_erp
+            })(<InputNumber min={0} name="codigo_erp" />)}
           </Form.Item>
 
           <Form.Item label="Nome do Talhão" {...formItemLayout}>
