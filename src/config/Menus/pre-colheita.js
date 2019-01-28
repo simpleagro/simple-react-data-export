@@ -8,22 +8,8 @@ const menus = {
     label: "Pré-Colheita",
     icon: "users",
     showMenu: true,
-    rule: 'LabPreHarvest',
-  },
-  "/pre-colheita/:id/edit": {
-    component: SimpleLoadable(() =>
-      import("../../components/PreHarvestLab/form")
-    ),
-    path: "/pre-colheita/:id/edit",
-    showMenu: false
-  },
-  "/pre-colheita/new": {
-    component: SimpleLoadable(() =>
-      import("../../components/PreHarvestLab/form")
-    ),
-    path: "/pre-colheita/new",
-    showMenu: false
-  },
+    rule: 'PreHarvestLab',
+  }
 };
 
 export default menus;

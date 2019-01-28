@@ -11,9 +11,6 @@ import parseErrors from "lib/parseErrors";
 import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
 import { simpleTableSearch } from "lib/simpleTableSearch";
 
-let listData = [];
-let num = 1;
-
 class PreHarvest extends Component {
   constructor(props) {
     super(props);
@@ -28,14 +25,19 @@ class PreHarvest extends Component {
         showSizeChanger: true,
         defaultPageSize: 10,
         pageSizeOptions: ["10", "25", "50", "100"]
-      }
+      },
     };
   }
 
   setList(){
-    this.state.listPreHarvest.map((lph, indexLPH) => (
-      this.state.listFieldRegistration.map((lfr, indexLFR) => (
-        lfr._id === lph._id && lph.pre_colheita.map((ph, indexPH) => (
+    let listData = [];
+    let num = 1;
+    this.state.listPreHarvest.map((lph, index) => (
+      console.log("indexLPH: ", index),
+      this.state.listFieldRegistration.map((lfr, index) => (
+        console.log("indexLFR: ", index),
+        lfr._id === lph._id && lph.pre_colheita.map((ph, index) => (
+          console.log("indexPH: ", index),
           listData.push(
             Object.assign({
               inscricao_campo_id: lfr._id,
@@ -63,9 +65,9 @@ class PreHarvest extends Component {
     ));
 
     this.setState(prev => ({
-      ...prev,
       list: listData
     }))
+
   }
 
   async initializeList(aqp) {
@@ -97,8 +99,7 @@ class PreHarvest extends Component {
 
   async componentDidMount() {
     await this.initializeList();
-    // this.setList();
-
+     this.setList();
   }
 
   removeRecord = async ({ _id, nome_talhao }, field_registration_id) => {
@@ -181,7 +182,7 @@ class PreHarvest extends Component {
                 this.props.history.push(
                   `/inscricao-de-campo/${record.inscricao_campo_id}/pre-colheita/${
                     record._id
-                  }/edit`
+                  }/edit`, { returnTo: "preColheitaLab" }
                 )
               }>
               <Icon type="edit" style={{ fontSize: "16px" }} />
@@ -252,7 +253,7 @@ class PreHarvest extends Component {
   render() {
     return (
       <div>
-        <SimpleBreadCrumb to={"/inscricao-de-campo"} history={this.props.history} />
+        {/* <SimpleBreadCrumb to={"/pre-colheita"} history={this.props.history} /> */}
         <Row gutter={30}>
           <Col>
             <Card

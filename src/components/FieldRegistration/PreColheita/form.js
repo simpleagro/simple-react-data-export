@@ -1,10 +1,8 @@
 import React, { Component } from "react";
 import {
   Button,
-  Icon,
   Input,
   Form,
-  Select,
   Affix,
   InputNumber,
   DatePicker,
@@ -134,7 +132,7 @@ class PreHarvestForm extends Component {
     return (
       <div>
         <SimpleBreadCrumb
-          to={`/inscricao-de-campo/${this.props.match.params.field_registration_id}/pre-colheita`}
+          to={ this.props.location.state.returnTo === "preColheitaLab" ? `/pre-colheita` : `/inscricao-de-campo/${this.props.match.params.field_registration_id}/pre-colheita`}
           history={this.props.history}
         />
         <Affix offsetTop={65}>
