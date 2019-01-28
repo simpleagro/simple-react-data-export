@@ -192,6 +192,23 @@ class Orders extends Component {
                 <Icon type="bars" style={{ fontSize: "16px" }} />
               </Button>
             </Tooltip>
+
+            <Divider
+              style={{ fontSize: "10px", padding: 0, margin: 2 }}
+              type="vertical"
+            />
+
+            <Tooltip title="Finalizar Pedido">
+              <Button
+                size="small"
+                onClick={() => {
+                  this.props.history.push(
+                    `/pedidos/${record._id}/finalizar-pedido`
+                  );
+                }}>
+                <Icon type="shopping" style={{ fontSize: "16px" }} />
+              </Button>
+            </Tooltip>
           </span>
         );
       }
