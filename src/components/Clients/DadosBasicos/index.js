@@ -169,6 +169,7 @@ class Clients extends Component {
     {
       title: "Ações",
       dataIndex: "action",
+      width: 200,
       render: (text, record) => {
         return (
           <span>
