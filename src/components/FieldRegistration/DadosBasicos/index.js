@@ -132,7 +132,7 @@ class FieldRegistration extends Component {
       dataIndex: "cliente.nome",
       key: "cliente.nome",
       fixed: "left",
-      style: { width: 150 },
+      // width: 200,
       ...simpleTableSearch(this)("cliente.nome"),
       render: text => text
     },
@@ -200,7 +200,6 @@ class FieldRegistration extends Component {
       title: "Ações",
       dataIndex: "action",
       fixed: "right",
-      style: { width: 100 },
       render: (text, record) => {
         return (
           <span>
