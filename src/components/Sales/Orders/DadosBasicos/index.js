@@ -149,6 +149,7 @@ class Orders extends Component {
     },
     {
       title: "Ações",
+      width: 200,
       dataIndex: "action",
       render: (text, record) => {
         return (

@@ -29,7 +29,7 @@ export const SFFPorcentagem = props => {
 
                   if (props.trigger) {
                     const trigger = debounce(props.trigger, props.delay);
-                    trigger();
+                    trigger(e);
                   }
                 }}
                 style={{ width: 200 }}
