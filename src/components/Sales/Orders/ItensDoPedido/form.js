@@ -680,7 +680,10 @@ class OrderItemForm extends Component {
                     variacao.chave
                   )
                 }
-                onKeyUp={() => this.calcularResumo()}
+                onKeyUp={e => {
+                  this.calcularDescontoPeloPreco(obj.chave, e.target.value);
+                  this.calcularResumo();
+                }}
                 name={`preco_${obj.chave}`}
               />
             )}
@@ -688,6 +691,7 @@ class OrderItemForm extends Component {
         </Col>
         <Col span={12}>
           <SFFPorcentagem
+            initialValue={this.state.formData[`desconto_${obj.chave}`]}
             disabled={
               !this.state.variacoesSelecionadas ||
               !this.state.variacoesSelecionadas.hasOwnProperty(variacao.chave)
@@ -700,7 +704,10 @@ class OrderItemForm extends Component {
             }}
             getFieldDecorator={getFieldDecorator}
             handleFormState={this.handleFormState}
-            trigger={() => this.calcularResumo()}
+            trigger={e => {
+              this.calcularPrecoPeloDesconto(obj.chave, e);
+              this.calcularResumo();
+            }}
           />
         </Col>
       </Row>
@@ -713,6 +720,35 @@ class OrderItemForm extends Component {
       return variacao.regraPrecoBase.map(rpb => compInput(rpb));
     }
   }
+
+  calcularDescontoPeloPreco = (chave, value) => {
+    this.setState(prev => ({
+      ...prev,
+      formData: {
+        ...prev.formData,
+        [`desconto_${chave}`]:
+          Number(this.state.formData[`preco_${chave}_tabela`]) < Number(value)
+            ? 0
+            : (value * 100) / prev.formData[`preco_${chave}_tabela`] / 100
+      }
+    }));
+  };
+
+  calcularPrecoPeloDesconto = (chave, value) => {
+    const novoValor =
+      this.state.formData[`preco_${chave}_tabela`] -
+      this.state.formData[`preco_${chave}_tabela`] * value;
+    this.setState(prev => ({
+      ...prev,
+      formData: {
+        ...prev.formData,
+        [`preco_${chave}`]: novoValor
+      }
+    }));
+    this.props.form.setFieldsValue({
+      [`preco_${chave}`]: novoValor
+    });
+  };
 
   async atualizaValorVariacao(variacao, valor) {
     try {
@@ -744,6 +780,10 @@ class OrderItemForm extends Component {
               ...prev,
               formData: {
                 ...prev.formData,
+                [`preco_${variacao.chave}_tabela`]:
+                  (valorVariacao &&
+                    valorVariacao.toString().replace(",", ".")) ||
+                  undefined,
                 [`preco_${variacao.chave}`]:
                   (valorVariacao &&
                     valorVariacao.toString().replace(",", ".")) ||
@@ -766,6 +806,7 @@ class OrderItemForm extends Component {
             formData: {
               ...prev.formData,
               [`preco_${rpb.chave}`]: 0,
+              [`preco_${rpb.chave}_tabela`]: 0,
               [`desconto_${rpb.chave}`]: 0
             }
           }));
@@ -780,11 +821,22 @@ class OrderItemForm extends Component {
           orderID: this.state.order_id
         });
 
-        if (tabelaPreco !== false)
+        if (tabelaPreco !== false) {
           this.setState(prev => ({
             ...prev,
             formData: { ...prev.formData, ...tabelaPreco }
           }));
+
+          variacao.regraPrecoBase.map(rpb => {
+            this.setState(prev => ({
+              ...prev,
+              formData: {
+                ...prev.formData,
+                [`preco_${rpb.chave}_tabela`]: tabelaPreco[`preco_${rpb.chave}`]
+              }
+            }));
+          });
+        }
       }
       this.calcularResumo();
     } catch (error) {
