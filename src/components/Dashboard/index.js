@@ -15,7 +15,7 @@ import {
 import { LineChart, Line, Legend, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Text, Bar, BarChart } from 'recharts';
 
 let arrClientArea = [{}], arrClient = [{}], arrCustomerWallet = [{}], arrQuota = [{}], arrTarget = [{}], arrVisitasMes = [{}];
-let sumMonths = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+
 arrVisitasMes = [
   { name: "Jan" },
   { name: "Fev" },
@@ -66,6 +66,8 @@ class Dashboard extends Component {
 
   showVisitsMonth(){
     let month;
+    let sumMonths = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+
     this.state.listVisit.map(v => ( month = new Date(moment(v.data_agenda, "DD/MM/YYYY").format("MM/DD/YYYY")), sumMonths[month.getMonth()]++))
     arrVisitasMes.forEach((element, index) => {
       Object.assign(element, { qtdVisitas: Number(sumMonths[index]) })
