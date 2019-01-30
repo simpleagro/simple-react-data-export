@@ -294,7 +294,7 @@ class FieldRegistration extends Component {
                 placeholder="Selecione a safra...">
                   {this.state.listSafra &&
                       this.state.listSafra.map((safra, i) =>
-                        <Option key={i} value={safra.id}>
+                        <Option key={i} value={safra.descricao}>
                           {safra.descricao}
                         </Option>
                   )}

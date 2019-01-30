@@ -1,36 +1,17 @@
 import React, { Component } from "react";
 
-import { PainelHeader } from "../common/PainelHeader";
-import * as ClientService from "../../services/clients";
-import * as CustomerWalletService from "../../services/customerswallet";
-import * as QuotaService from "../../services/quotas";
-import * as TargetService from "../../services/targets";
-import * as VisitService from "../../services/visits";
-import moment from "moment";
-import {
-  Row,
-  Col
-} from "antd";
+import { PainelHeader } from "common/PainelHeader";
+import * as ClientService from "services/clients";
+import * as CustomerWalletService from "services/customerswallet";
+import * as QuotaService from "services/quotas";
+import * as TargetService from "services/targets";
+import * as VisitService from "services/visits";
 
+import moment from "moment";
+import { Select } from "antd";
 import { LineChart, Line, Legend, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Text, Bar, BarChart } from 'recharts';
 
-let arrClientArea = [{}], arrClient = [{}], arrCustomerWallet = [{}], arrQuota = [{}], arrTarget = [{}], arrVisitasMes = [{}];
-
-arrVisitasMes = [
-  { name: "Jan" },
-  { name: "Fev" },
-  { name: "Mar" },
-  { name: "Abr" },
-  { name: "Mai" },
-  { name: "Jun" },
-  { name: "Jul" },
-  { name: "Ago" },
-  { name: "Set" },
-  { name: "Out" },
-  { name: "Nov" },
-  { name: "Dez" }
-];
-
+const Option = Select.Option;
 const colors = ["#4286f4", "#41f4d9", "#41f462", "#a9f441", "#41c4f4", "#4af441"];
 
 class Dashboard extends Component {
@@ -41,9 +22,33 @@ class Dashboard extends Component {
       listCustomerWallet: [],
       listQuota: [],
       listTarget: [],
-      listVisit: []
+      listVisit: [],
+      loadingData: true,
+      arrClient: [],
+      arrClientArea: [],
+      arrCustomerWallet: [],
+      arrQuota: [],
+      arrTarget: []
     };
+  }
 
+  async initializeList(aqp) {
+    this.setState(previousState => {
+      return { ...previousState, loadingData: true };
+    });
+
+    this.setState({
+      loadingData: false
+    });
+
+    this.showClientArea();
+    this.showClientCredit();
+    this.showCustomerWalletChart();
+    this.showQuotaChart();
+    this.showTargetChart();
+    this.showVisitsMonth();
+
+    console.log( this.state );
 
   }
 
@@ -61,18 +66,23 @@ class Dashboard extends Component {
       listTarget: dataTarget.docs,
       listVisit: dataVisit.docs
     });
+    await this.initializeList();
 
   }
 
   showVisitsMonth(){
-    let month;
     let sumMonths = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
-
+    let arrVisitas = [
+      { name: "Jan" }, { name: "Fev" }, { name: "Mar" }, { name: "Abr" },
+      { name: "Mai" }, { name: "Jun" }, { name: "Jul" }, { name: "Ago" },
+      { name: "Set" }, { name: "Out" }, { name: "Nov" }, { name: "Dez" }
+    ];
+    let month;
     this.state.listVisit.map(v => ( month = new Date(moment(v.data_agenda, "DD/MM/YYYY").format("MM/DD/YYYY")), sumMonths[month.getMonth()]++))
-    arrVisitasMes.forEach((element, index) => {
+    arrVisitas.forEach((element, index) => {
       Object.assign(element, { qtdVisitas: Number(sumMonths[index]) })
     });
-    console.log("arrVisitasMes", arrVisitasMes);
+    this.setState({ arrVisitasMes: arrVisitas });
   }
 
   sum(num, total) {
@@ -80,6 +90,7 @@ class Dashboard extends Component {
   }
 
   showClientArea() {
+    let arrClientArea = [];
     Object.assign(
       arrClientArea, this.state.listClient && this.state.listClient.map(client =>
         ({
@@ -88,9 +99,11 @@ class Dashboard extends Component {
         })
       )
     );
+    this.setState({ arrClientArea: arrClientArea });
   }
 
   showClientCredit() {
+    let arrClient = [];
     Object.assign(
       arrClient, this.state.listClient && this.state.listClient.map(client =>
         ({
@@ -99,9 +112,11 @@ class Dashboard extends Component {
         })
       )
     );
+    this.setState({ arrClient: arrClient });
   }
 
   showCustomerWalletChart() {
+    let arrCustomerWallet = [];
     Object.assign(
       arrCustomerWallet, this.state.listCustomerWallet && this.state.listCustomerWallet.map(cw =>
         ({
@@ -110,122 +125,110 @@ class Dashboard extends Component {
         })
       )
     );
+    this.setState({ arrCustomerWallet: arrCustomerWallet });
   }
 
   showQuotaChart() {
+    let arrQuota = [];
     let totalCotas = 0;
     this.state.listQuota && this.state.listQuota.map((q, index) => (totalCotas++));
     Object.assign(arrQuota, {
       value: totalCotas
     });
+    this.setState({ arrQuota: arrQuota });
   }
 
   showTargetChart() {
+    let arrTarget = [];
     let totalMetas = 0;
     this.state.listTarget && this.state.listTarget.map((t, index) => (totalMetas++));
     Object.assign(arrTarget, {
       value: totalMetas
     });
+    this.setState({ arrTarget: arrTarget });
   }
 
   render() {
     return (
       <div>
         <PainelHeader title="Dashboard" />
-        <Row>
-        {[ console.clear(),
-
-          this.showClientArea(),
-          this.showClientCredit(),
-          this.showCustomerWalletChart(),
-          this.showQuotaChart(),
-          this.showTargetChart(),
-          this.showVisitsMonth(),
-
-          console.log("arrClientArea: ", arrClientArea),
-          console.log("arrClient: ", arrClient),
-          console.log("arrCustomerWallet: ", arrCustomerWallet),
-          console.log("arrQuota: ", arrQuota),
-          console.log("arrTarget: ", arrTarget),
-          console.log("arrVisitsMonth: ", arrVisitasMes),
-
-          console.log("state: ", this.state) ]}
-
+        <hr />
         <h3> Limite de Crédito por Cliente </h3>
-        <Col span={15}>
-        <LineChart width={500} height={200} margin={{top: 5, right: 5, left: 5, bottom: 1}}>
+        <LineChart width={500} height={200} data={this.state.arrClient} margin={{top: 5, right: 5, left: 5, bottom: 1}}>
           <CartesianGrid strokeDasharray="10 0"/>
           <XAxis dataKey="name" />
           <YAxis dataKey="value" />
-          <Line isAnimationActive={false} data={arrClient} type="step" dataKey="value" stroke="blue" activeDot={{r: 4}} >
-            { arrClient.map((entry, index) => <Cell key={index} />) }
-          </Line>
+          <Line type="monotone" dataKey="value" stroke="blue" activeDot={{r: 4}} />
           <Tooltip />
-          <Text angle={90} />
         </LineChart>
-        </Col>
 
-        <Col>
+        <hr />
         <h3> Limite de Crédito por Cliente </h3>
         <PieChart width={400} height={400}>
-          <Pie isAnimationActive={false} data={arrClient} dataKey="value" outerRadius={100} label >
-            { arrClient.map((entry, index) => <Cell key={index} fill={colors[index % colors.length]} />) }
+          <Pie isAnimationActive={false} data={this.state.arrClient} dataKey="value" outerRadius={100} label >
+            { this.state.arrClient.map((entry, index) => <Cell key={index} fill={colors[index % colors.length]} />) }
           </Pie>
           <Legend />
           <Tooltip />
         </PieChart>
-        </Col>
 
+        <hr />
         <h3> Área Total por Cliente </h3>
         <LineChart width={500} height={200} margin={{top: 5, right: 5, left: 5, bottom: 1}}>
           <CartesianGrid strokeDasharray="10 0" />
           <XAxis dataKey="name" />
           <YAxis dataKey="areaTotal" />
-          <Line isAnimationActive={false} data={arrClientArea} type="monotone" dataKey="areaTotal" stroke="red" activeDot={{r: 4}} >
-            { arrClientArea.map((entry, index) => <Cell key={index} />) }
+          <Line isAnimationActive={false} data={this.state.arrClientArea} type="monotone" dataKey="areaTotal" stroke="red" activeDot={{r: 4}} >
+            { this.state.arrClientArea.map((entry, index) => <Cell key={index} />) }
           </Line>
           <Tooltip />
         </LineChart>
 
+        <hr />
         <h3> Área Total por Cliente </h3>
+        <Select style={{ width: 150 }}>
+          { this.state.arrClient.map((cliente, index) =>
+            <Option key={cliente.name} value={cliente.name}>{cliente.name}</Option>
+          )}
+        </Select>
         <PieChart width={400} height={400}>
-          <Pie isAnimationActive={false} data={arrClientArea} dataKey="areaTotal" outerRadius={100} label >
-            { arrClientArea.map((entry, index) => <Cell key={index} fill={colors[index % colors.length]} />) }
+          <Pie isAnimationActive={false} data={this.state.arrClientArea} dataKey="areaTotal" outerRadius={100} label >
+            { this.state.arrClientArea.map((entry, index) => <Cell key={index} fill={colors[index % colors.length]} />) }
           </Pie>
           <Tooltip />
         </PieChart>
 
+        <hr />
         <h3> Total de Clientes por Carteira </h3>
         <LineChart width={500} height={200}>
           <CartesianGrid strokeDasharray="10 0" />
           <XAxis dataKey="name" />
           <YAxis dataKey="totalClientes" />
-          <Line isAnimationActive={false} data={arrCustomerWallet} dataKey="totalClientes" stroke="green" activeDot={{r: 4}}>
-            { arrCustomerWallet.map((entry, index) => <Cell key={index} />)}
+          <Line isAnimationActive={false} data={this.state.arrCustomerWallet} dataKey="totalClientes" stroke="green" activeDot={{r: 4}}>
+            { this.state.arrCustomerWallet.map((entry, index) => <Cell key={index} />)}
           </Line>
           <Tooltip />
         </LineChart>
 
+        <hr />
         <h3> Total de Clientes por Carteira </h3>
         <PieChart width={400} height={400}>
-          <Pie isAnimationActive={false} data={arrCustomerWallet} dataKey="totalClientes" outerRadius={100} label >
-            { arrCustomerWallet.map((entry, index) => <Cell key={index} fill={colors[index % colors.length]} />) }
+          <Pie isAnimationActive={false} data={this.state.arrCustomerWallet} dataKey="totalClientes" outerRadius={100} label >
+            { this.state.arrCustomerWallet.map((entry, index) => <Cell key={index} fill={colors[index % colors.length]} />) }
           </Pie>
           <Tooltip />
         </PieChart>
 
         <hr />
         <h3> Visitas por Mês </h3>
-        <BarChart width={500} height={200}>
+        <BarChart width={500} height={200} data={this.state.arrVisitasMes}>
           <CartesianGrid strokeDasharray="10 0" />
-          <Bar isAnimationActive={false} data={arrVisitasMes} dataKey="qtdVisitas" label="Visitas por Mes" >
-            { arrVisitasMes.map((entry, index) => (<Cell key={index} fill={"black"} />)) }
-          </Bar>
           <XAxis dataKey="name" />
-          <YAxis type="number" />
+          <YAxis dataKey="qtdVisitas" />
+          <Bar dataKey="qtdVisitas" fill="#82ca9d" />
           <Tooltip />
         </BarChart>
-        </Row>
+
       </div>
     );
   }
