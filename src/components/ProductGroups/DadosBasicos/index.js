@@ -125,6 +125,7 @@ class ProductGroups extends Component {
     },
     {
       title: "Ações",
+      width: 200,
       dataIndex: "action",
       render: (text, record) => {
         return (
@@ -155,13 +156,13 @@ class ProductGroups extends Component {
             <Divider
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
-            /> 
+            />
 
             <Tooltip title="Veja as características do grupo">
               <Button
                 size="small"
                 onClick={() =>
-                  this.props.history.push(`/grupos-produtos/${record._id}/caracteristicas-produtos`) 
+                  this.props.history.push(`/grupos-produtos/${record._id}/caracteristicas-produtos`)
                 }
               >
                 <FontAwesomeIcon icon="toolbox" size="lg" />
@@ -177,7 +178,7 @@ class ProductGroups extends Component {
               <Button
                 size="small"
                 onClick={() =>
-                  this.props.history.push(`/grupos-produtos/${record._id}/produtos`) 
+                  this.props.history.push(`/grupos-produtos/${record._id}/produtos`)
                 }
               >
                 <FontAwesomeIcon icon="clipboard-list" size="lg" />

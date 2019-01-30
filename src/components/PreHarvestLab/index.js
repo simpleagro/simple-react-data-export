@@ -169,7 +169,8 @@ class PreHarvest extends Component {
       dataIndex: "cliente.nome",
       key: "cliente.nome",
       ...simpleTableSearch(this)("cliente.nome"),
-      fixed: "left"
+      fixed: "left",
+      width: 250,
     },
     {
       title: "Código ERP",

@@ -39,7 +39,7 @@ class OrderForm extends Component {
       fetchingClients: false,
       fetchingAgents: false,
       fetchingConsultants: false,
-      tiposDeFrete: ["FOB", "CIF"]
+      tiposDeFrete: ["SEM FRETE", "FOB", "CIF"]
     };
   }
 
@@ -525,7 +525,6 @@ class OrderForm extends Component {
           </Form.Item>
           <Form.Item label="Garantia" {...formItemLayout}>
             {getFieldDecorator("garantia", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.garantia
             })(
               <Select

@@ -156,7 +156,7 @@ class Filiais extends Component {
       }
     },
     {
-      title: "",
+      title: "Ações",
       dataIndex: "action",
       render: (text, record) => {
         return (
