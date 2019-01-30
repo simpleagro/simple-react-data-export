@@ -12,7 +12,6 @@ import moment from "moment";
 
 import * as SeasonService from "../../../services/seasons";
 
-
 const Option = Select.Option;
 
 class FieldRegistration extends Component {
@@ -33,12 +32,9 @@ class FieldRegistration extends Component {
   }
 
   async initializeList(aqp) {
-
     this.setState(previousState => {
       return { ...previousState, loadingData: true };
     });
-
-
 
     try {
       const data = await FieldRegistrationService.list(aqp);
@@ -104,7 +100,10 @@ class FieldRegistration extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `A inscrição de campo, ${numero_inscricao_campo}, foi removido com sucesso!`);
+      flashWithSuccess(
+        "",
+        `A inscrição de campo, ${numero_inscricao_campo}, foi removido com sucesso!`
+      );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover uma inscrição de campo", err);
@@ -117,6 +116,7 @@ class FieldRegistration extends Component {
       dataIndex: "numero_inscricao_campo",
       key: "numero_inscricao_campo",
       fixed: "left",
+      width: 100,
       render: text => text
     },
     {
@@ -124,6 +124,7 @@ class FieldRegistration extends Component {
       dataIndex: "contrato",
       key: "contrato",
       fixed: "left",
+      width: 100,
       ...simpleTableSearch(this)("contrato"),
       render: text => text
     },
@@ -132,7 +133,7 @@ class FieldRegistration extends Component {
       dataIndex: "cliente.nome",
       key: "cliente.nome",
       fixed: "left",
-      // width: 200,
+      width: 250,
       ...simpleTableSearch(this)("cliente.nome"),
       render: text => text
     },
@@ -160,16 +161,16 @@ class FieldRegistration extends Component {
       title: "Início Colheita",
       dataIndex: "data_inicio_colheita",
       key: "data_inicio_colheita",
-      render: (text) => {
-        return moment(text).format("DD/MM/YYYY")
+      render: text => {
+        return moment(text).format("DD/MM/YYYY");
       }
     },
     {
       title: "Fim Colheita",
       dataIndex: "data_fim_colheita",
       key: "data_fim_colheita",
-      render: (text) => {
-        return moment(text).format("DD/MM/YYYY")
+      render: text => {
+        return moment(text).format("DD/MM/YYYY");
       }
     },
     {
@@ -200,13 +201,16 @@ class FieldRegistration extends Component {
       title: "Ações",
       dataIndex: "action",
       fixed: "right",
+      width: 150,
       render: (text, record) => {
         return (
           <span>
             <Button
               size="small"
               onClick={() =>
-                this.props.history.push(`/inscricao-de-campo/${record._id}/edit`)
+                this.props.history.push(
+                  `/inscricao-de-campo/${record._id}/edit`
+                )
               }>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
@@ -283,7 +287,7 @@ class FieldRegistration extends Component {
         <PainelHeader
           title={
             <span>
-              Inscrição de Campo <span style={{ marginLeft: 150}}>Safra:</span>
+              Inscrição de Campo <span style={{ marginLeft: 150 }}>Safra:</span>
               <Select
                 showSearch
                 allowClear
@@ -301,14 +305,12 @@ class FieldRegistration extends Component {
               </Select>
             </span>
           }>
-
           <Button
             type="primary"
             icon="plus"
             onClick={() => this.props.history.push("/inscricao-de-campo/new")}>
             Adicionar
           </Button>
-
         </PainelHeader>
 
         <SimpleTable
@@ -318,6 +320,7 @@ class FieldRegistration extends Component {
           columns={this.tableConfig()}
           dataSource={this.state.list}
           onChange={this.handleTableChange}
+          scroll={{ x: window.innerWidth + (window.innerWidth * 0.4) }}
         />
       </div>
     );
