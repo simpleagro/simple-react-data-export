@@ -32,6 +32,7 @@ import pedidos from "./Menus/pedidos";
 import inscricaoCampo from "./Menus/inscricao-de-campo";
 import preColheitaLab from "./Menus/pre-colheita";
 import moeda from "./Menus/moeda";
+import configuracoes from "./Menus/configuracoes";
 
 const loadable = loader =>
   Loadable({
@@ -44,6 +45,7 @@ const menus = {
   field: {
     ...carteiraDeClientes,
     ...clientes,
+    ...configuracoes,
     ...consultores,
     ...dashboard,
     ...empresas,

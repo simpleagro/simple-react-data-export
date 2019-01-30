@@ -132,7 +132,7 @@ class FieldRegistration extends Component {
       dataIndex: "cliente.nome",
       key: "cliente.nome",
       fixed: "left",
-      style: { width: 150 },
+      width: 150,
       ...simpleTableSearch(this)("cliente.nome"),
       render: text => text
     },
@@ -200,7 +200,7 @@ class FieldRegistration extends Component {
       title: "Ações",
       dataIndex: "action",
       fixed: "right",
-      style: { width: 100 },
+      width: 100,
       render: (text, record) => {
         return (
           <span>
@@ -295,7 +295,7 @@ class FieldRegistration extends Component {
                 placeholder="Selecione a safra...">
                   {this.state.listSafra &&
                       this.state.listSafra.map((safra, i) =>
-                        <Option key={i} value={safra.id}>
+                        <Option key={i} value={safra.descricao}>
                           {safra.descricao}
                         </Option>
                   )}
