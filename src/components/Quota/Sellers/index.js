@@ -20,9 +20,9 @@ import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
-import ModalForm from "./modal"
-import ModalVendedor from '../DadosBasicos/modal'
-import ModalFormGroup from "../../common/ModalProductGroup"
+import ModalForm from "./modal";
+import ModalVendedor from "../DadosBasicos/modal";
+import ModalFormGroup from "../../common/ModalProductGroup";
 
 class Sellers extends Component {
   constructor(props) {
@@ -102,23 +102,25 @@ class Sellers extends Component {
 
   changeStatusGrupo = async (id, newStatus, vendedor_id) => {
     try {
-      await QuotasGroupService.changeStatus(this.state.quota_id)(vendedor_id)(id, newStatus);
+      await QuotasGroupService.changeStatus(this.state.quota_id)(vendedor_id)(
+        id,
+        newStatus
+      );
 
       let recordName = "";
 
       let _list = this.state.list.map(vendedor => {
-        if(vendedor.id == vendedor_id){
-          let _vendedorGP = vendedor.grupo_produto.map( gp => {
-              if(gp.id == id){
-                gp.status = newStatus
-                recordName = gp.nome
-              }
-              return gp
+        if (vendedor.id == vendedor_id) {
+          let _vendedorGP = vendedor.grupo_produto.map(gp => {
+            if (gp.id == id) {
+              gp.status = newStatus;
+              recordName = gp.nome;
             }
-          )
-          vendedor.grupo_produto = _vendedorGP
+            return gp;
+          });
+          vendedor.grupo_produto = _vendedorGP;
         }
-        return vendedor
+        return vendedor;
       });
 
       this.setState(prev => ({
@@ -158,20 +160,28 @@ class Sellers extends Component {
     try {
       await QuotasGroupService.remove(this.state.quota_id)(vendedor_id)(id);
       let _list = this.state.list.map(vendedor => {
-        if(vendedor.id == vendedor_id){
-          vendedor.grupo_produto = [ ...vendedor.grupo_produto.filter(gp => gp.id != id)]
+        if (vendedor.id == vendedor_id) {
+          vendedor.grupo_produto = [
+            ...vendedor.grupo_produto.filter(gp => gp.id != id)
+          ];
         }
-        return vendedor
-      })
+        return vendedor;
+      });
 
       this.setState({
         list: _list
       });
 
-      flashWithSuccess("", `O grupo de produto, ${nome}, foi removido com sucesso do vendedor!`);
+      flashWithSuccess(
+        "",
+        `O grupo de produto, ${nome}, foi removido com sucesso do vendedor!`
+      );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover um grupo de produto do vendedor", err);
+      console.log(
+        "Erro interno ao remover um grupo de produto do vendedor",
+        err
+      );
     }
   };
 
@@ -213,9 +223,7 @@ class Sellers extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button
-              size="small"
-              onClick={() => this.showModal(record) }>
+            <Button size="small" onClick={() => this.showModal(record)}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
             <Divider
@@ -234,13 +242,12 @@ class Sellers extends Component {
             <Divider
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
-            /> 
+            />
 
             <Tooltip title="Adicionar Grupo de Produto">
               <Button
                 size="small"
-                onClick={() => this.showModalGroup(record.id)} 
-              >
+                onClick={() => this.showModalGroup(record.id)}>
                 <FontAwesomeIcon icon="plus" size="lg" />
               </Button>
             </Tooltip>
@@ -250,9 +257,9 @@ class Sellers extends Component {
     }
   ];
 
-  expandedRowRender = (tabela) => {
+  expandedRowRender = tabela => {
     const columns = [
-      { title: 'Grupo de Produto', dataIndex: 'nome', key: 'nome' },
+      { title: "Grupo de Produto", dataIndex: "nome", key: "nome" },
       {
         title: "Status",
         dataIndex: "status",
@@ -263,10 +270,11 @@ class Sellers extends Component {
           return (
             <Popconfirm
               title={`Tem certeza em ${statusTxt} o grupo de produto?`}
-              onConfirm={e => this.changeStatusGrupo(record.id, !record.status, tabela.id)}
+              onConfirm={e =>
+                this.changeStatusGrupo(record.id, !record.status, tabela.id)
+              }
               okText="Sim"
-              cancelText="Não"
-            >
+              cancelText="Não">
               <Tooltip title={`${statusTxt.toUpperCase()} o grupo de produto`}>
                 <Button size="small">
                   <FontAwesomeIcon icon={statusBtn} size="lg" />
@@ -277,8 +285,8 @@ class Sellers extends Component {
         }
       },
       {
-        title: 'Ação',
-        dataIndex: 'action',
+        title: "Ação",
+        dataIndex: "action",
         render: (text, record) => {
           return (
             <span>
@@ -286,8 +294,7 @@ class Sellers extends Component {
                 title={`Tem certeza em excluir o grupo de produto?`}
                 onConfirm={() => this.removeGroup(record, tabela.id)}
                 okText="Sim"
-                cancelText="Não"
-              >
+                cancelText="Não">
                 <Button size="small">
                   <Icon type="delete" style={{ fontSize: "16px" }} />
                 </Button>
@@ -295,23 +302,25 @@ class Sellers extends Component {
               <Divider
                 style={{ fontSize: "10px", padding: 0, margin: 2 }}
                 type="vertical"
-              /> 
-  
+              />
+
               <Tooltip title="Veja os produtos do grupo de produto">
                 <Button
                   size="small"
                   onClick={() =>
-                    this.props.history.push(`/cotas/${this.state.quota_id}/vendedores/${tabela.id}/grupos-produto/${record.id}/produtos`) 
-                  }
-                >
+                    this.props.history.push(
+                      `/cotas/${this.state.quota_id}/vendedores/${
+                        tabela.id
+                      }/grupos-produto/${record.id}/produtos`
+                    )
+                  }>
                   <FontAwesomeIcon icon="clipboard-list" size="lg" />
                 </Button>
               </Tooltip>
-  
             </span>
           );
         }
-      },
+      }
     ];
 
     return (
@@ -320,18 +329,18 @@ class Sellers extends Component {
         spinning={this.state.loadingData}
         dataSource={tabela.grupo_produto}
         pagination={false}
-        rowKey={'id'}
+        rowKey={"id"}
       />
     );
   };
 
-  showModal = (record) => {
+  showModal = record => {
     this.setState({
       visible: true,
       record,
       editMode: !!record
     });
-  }
+  };
 
   getDatabase = () => {
     const link = window.location.href;
@@ -357,14 +366,14 @@ class Sellers extends Component {
     }));
   };
 
-  handleOk = async (item) => {
+  handleOk = async item => {
     await this.getDatabase();
     await this.setStatus();
 
-    const obj = {...item.vendedor, ...item}
-    delete obj.vendedor
+    const obj = { ...item.vendedor, ...item };
+    delete obj.vendedor;
 
-    console.log(obj)
+    console.log(obj);
 
     this.setState({ savingForm: true });
     if (!this.state.editMode) {
@@ -372,23 +381,25 @@ class Sellers extends Component {
         flashWithSuccess("Sem alterações para salvar", " "); */
 
       try {
-        const created = await QuotasSellersService.create(this.state.quota_id)(obj);
+        const created = await QuotasSellersService.create(this.state.quota_id)(
+          obj
+        );
 
         this.setState(prev => {
-          if(prev.list.length > 0){
-            return({
+          if (prev.list.length > 0) {
+            return {
               openForm: false,
               editMode: false,
               visible: false,
-              list: [...prev.list,created]
-            })
+              list: [...prev.list, created]
+            };
           }
-          return({
+          return {
             openForm: false,
             editMode: false,
             visible: false,
             list: [created]
-          })
+          };
         });
         flashWithSuccess();
       } catch (err) {
@@ -399,7 +410,9 @@ class Sellers extends Component {
       }
     } else {
       try {
-        const updated = await QuotasSellersService.update(this.state.quota_id)(obj);
+        const updated = await QuotasSellersService.update(this.state.quota_id)(
+          obj
+        );
         const data = await QuotasSellersService.list(this.state.quota_id)();
 
         this.setState({
@@ -417,16 +430,16 @@ class Sellers extends Component {
         this.setState({ savingForm: false });
       }
     }
-  }
+  };
 
-  showModalGroup = (vendedor_id) => {
+  showModalGroup = vendedor_id => {
     this.setState({
       visibleGroup: true,
       vendedor_id
     });
-  }
+  };
 
-  handleOkGroup = async (item) => {
+  handleOkGroup = async item => {
     await this.getDatabase();
     await this.setStatus();
 
@@ -435,42 +448,47 @@ class Sellers extends Component {
       /* if (Object.keys(this.state.formData).length === 0)
         flashWithSuccess("Sem alterações para salvar", " "); */
       try {
-        const created = await QuotasGroupService.create(this.state.quota_id)(this.state.vendedor_id)(item.grupo_produto);
+        const created = await QuotasGroupService.create(this.state.quota_id)(
+          this.state.vendedor_id
+        )(item.grupo_produto);
         this.setState(prev => {
           let _list = prev.list.map(vendedor => {
-            if(vendedor.id == this.state.vendedor_id){
-              vendedor.grupo_produto = [ ...vendedor.grupo_produto, created]
+            if (vendedor.id == this.state.vendedor_id) {
+              vendedor.grupo_produto = [...vendedor.grupo_produto, created];
             }
-            return vendedor
-          })
+            return vendedor;
+          });
 
-          return({
+          return {
             openForm: false,
             editMode: false,
             visibleGroup: false,
             list: _list
-          })
+          };
         });
 
         flashWithSuccess();
       } catch (err) {
         if (err && err.response && err.response.data) parseErrors(err);
-        console.log("Erro interno ao adicionar um grupo de produto na tabela de preço", err);
+        console.log(
+          "Erro interno ao adicionar um grupo de produto na tabela de preço",
+          err
+        );
       } finally {
         this.setState({ savingForm: false });
       }
-    } 
-  }
+    }
+  };
 
-  showModalVendedor = (record) => {
+  showModalVendedor = record => {
     this.setState({
       visibleVendedor: true,
       record,
       editMode: !!record
     });
-  }
+  };
 
-  handleOkVendedor = async (item) => {
+  handleOkVendedor = async item => {
     await this.getDatabase();
     await this.setStatus();
 
@@ -486,10 +504,7 @@ class Sellers extends Component {
           quota_data: updated
         });
 
-        flashWithSuccess(
-          "",
-          `O cabeçalho da cota foi atualizado com sucesso!`
-        );
+        flashWithSuccess("", `O cabeçalho da cota foi atualizado com sucesso!`);
       } catch (err) {
         if (err && err.response && err.response.data) parseErrors(err);
         console.log("Erro interno ao atualizar um cabeçalho de cota ", err);
@@ -497,20 +512,20 @@ class Sellers extends Component {
         this.setState({ savingForm: false });
       }
     }
-  }
+  };
 
-  handleCancel = (e) => {
+  handleCancel = e => {
     this.setState({
       visible: false,
       visibleVendedor: false,
-      visibleGroup: false,
+      visibleGroup: false
     });
-  }
+  };
 
-  saveFormRef = (formRef) => {
+  saveFormRef = formRef => {
     this.formRef = formRef;
-  }
-  
+  };
+
   render() {
     return (
       <div>
@@ -525,10 +540,12 @@ class Sellers extends Component {
                     boxShadow: "0px 8px 0px 0px #009d55 inset",
                     color: "#009d55"
                   }}>
-                  <p>{`Cota: ${this.state.quota_data.nome || ''}`}</p>
+                  <p>{`Cota: ${this.state.quota_data.nome || ""}`}</p>
                   <Button
                     style={{ width: "100%" }}
-                    onClick={() => { this.showModalVendedor(this.state.quota_data)}}>
+                    onClick={() => {
+                      this.showModalVendedor(this.state.quota_data);
+                    }}>
                     <Icon type="edit" /> Editar
                   </Button>
                 </Card>
@@ -541,7 +558,7 @@ class Sellers extends Component {
                     <Button
                       type="primary"
                       icon="plus"
-                      onClick={() => this.showModal() }>
+                      onClick={() => this.showModal()}>
                       Adicionar
                     </Button>
                   }>
@@ -564,7 +581,7 @@ class Sellers extends Component {
               <Button
                 type="primary"
                 icon="plus"
-                onClick={() => this.showModal() }>
+                onClick={() => this.showModal()}>
                 Adicionar
               </Button>
             </PainelHeader>
