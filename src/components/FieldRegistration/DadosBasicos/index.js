@@ -200,10 +200,6 @@ class FieldRegistration extends Component {
       title: "Ações",
       dataIndex: "action",
       fixed: "right",
-<<<<<<< HEAD
-      width: 100,
-=======
->>>>>>> 3a12b7f3132b93a20e520160450f18716ebc4369
       render: (text, record) => {
         return (
           <span>
