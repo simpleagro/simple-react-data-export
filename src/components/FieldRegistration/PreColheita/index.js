@@ -258,7 +258,8 @@ class PreHarvest extends Component {
                   icon="plus"
                   onClick={() =>
                     this.props.history.push(
-                      `/inscricao-de-campo/${this.state.field_registration_id}/pre-colheita/new`
+                      `/inscricao-de-campo/${this.state.field_registration_id}/pre-colheita/new`,
+                      { returnTo: "inscricaoCampo" }
                     )
                   }>
                   Adicionar

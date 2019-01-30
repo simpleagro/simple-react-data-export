@@ -107,7 +107,7 @@ class TypeForm extends Component {
           to={
             this.props.location.state && this.props.location.state.returnTo
               ? this.props.location.state.returnTo.pathname
-              : "/tipo-venda"
+              : "/tipo-de-vendas"
           }
           history={this.props.history}
         />
