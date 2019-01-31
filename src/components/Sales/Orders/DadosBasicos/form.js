@@ -13,11 +13,11 @@ import { list as ClientsServiceList } from "../../../../services/clients";
 import { list as TypesOfWarrantyServiceList } from "../../../../services/types-of-warranty";
 import { list as TypesOfSaleServiceList } from "../../../../services/types-of-sale";
 import { list as SeedUseServiceList } from "../../../../services/seed-use";
-import { list as FormOfPaymentServiceList } from "../../../../services/form-of-payment";
-import { list as TypeOfPaymentServiceList } from "../../../../services/type-of-payment";
 import { list as PriceTableServiceList } from "../../../../services/pricetable";
 import { list as AgentSalesServiceList } from "../../../../services/sales-agents";
 import { list as ConsultantServiceList } from "../../../../services/consultants";
+import ConfigurarFPCaracteristica from "./ConfigurarFPCaracteristica";
+import { configAPP } from "config/app";
 
 const Option = Select.Option;
 const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
@@ -709,69 +709,70 @@ class OrderForm extends Component {
               </Select>
             )}
           </Form.Item>
-          <Form.Item wrapperCol={{ span: 12, offset: 2 }}>
-            <Checkbox
-              checked={this.state.formData.venda_agenciada}
-              onChange={e => {
-                this.handleFormState({
-                  target: {
-                    name: "venda_agenciada",
-                    value: e.target.checked
-                  }
-                });
-              }}>
-              Venda Agenciada?
-            </Checkbox>
-          </Form.Item>
-          {this.state.formData.venda_agenciada && (
-            <React.Fragment>
-              <Form.Item label="Agente de Venda" {...formItemLayout}>
-                {getFieldDecorator("agente_venda", {
-                  rules: [
-                    { required: true, message: "Este campo é obrigatório!" }
-                  ],
-                  initialValue:
-                    this.state.formData.agente_venda &&
-                    this.state.formData.agente_venda.nome
-                })(
-                  <Select
-                    name="agente_venda"
-                    filterOption={(input, option) =>
-                      option.props.children
-                        .toLowerCase()
-                        .indexOf(input.toLowerCase()) >= 0
-                    }
-                    onSearch={this.searchAgent}
-                    showAction={["focus", "click"]}
-                    notFoundContent={
-                      fetchingAgents ? <Spin size="small" /> : null
-                    }
-                    showSearch
-                    style={{ width: 200 }}
-                    placeholder="Selecione..."
-                    onChange={e => this.onChangeAgente(e)}>
-                    {this.state.agents &&
-                      this.state.agents.map(c => (
-                        <Option key={c._id} value={JSON.stringify(c)}>
-                          {c.nome}
-                        </Option>
-                      ))}
-                  </Select>
+          {this.state.formData.tipo_venda &&
+            this.ehVendaAgenciada() && (
+              <React.Fragment>
+                <Form.Item label="Agente de Venda" {...formItemLayout}>
+                  {getFieldDecorator("agente_venda", {
+                    rules: [
+                      { required: true, message: "Este campo é obrigatório!" }
+                    ],
+                    initialValue:
+                      this.state.formData.agente_venda &&
+                      this.state.formData.agente_venda.nome
+                  })(
+                    <Select
+                      name="agente_venda"
+                      filterOption={(input, option) =>
+                        option.props.children
+                          .toLowerCase()
+                          .indexOf(input.toLowerCase()) >= 0
+                      }
+                      onSearch={this.searchAgent}
+                      showAction={["focus", "click"]}
+                      notFoundContent={
+                        fetchingAgents ? <Spin size="small" /> : null
+                      }
+                      showSearch
+                      style={{ width: 200 }}
+                      placeholder="Selecione..."
+                      onChange={e => this.onChangeAgente(e)}>
+                      {this.state.agents &&
+                        this.state.agents.map(c => (
+                          <Option key={c._id} value={JSON.stringify(c)}>
+                            {c.nome}
+                          </Option>
+                        ))}
+                    </Select>
+                  )}
+                </Form.Item>
+                <SFFPorcentagem
+                  initialValue={this.state.formData.comissao_agente}
+                  name="comissao_agente"
+                  label="Comissão"
+                  formItemLayout={formItemLayout}
+                  getFieldDecorator={getFieldDecorator}
+                  handleFormState={this.handleFormState}
+                />
+                {/* São Francisco */}
+                {configAPP.usarConfiguracaoFPCaracteristica() && (
+                  <ConfigurarFPCaracteristica
+                    showFrete={this.state.formData.tipo_frete === "CIF"}
+                    handleFormState={this.handleFormState}
+                    form={this.props.form}
+                    formData={this.state.formData}
+                  />
                 )}
-              </Form.Item>
-              <SFFPorcentagem
-                initialValue={this.state.formData.comissao_agente}
-                name="comissao_agente"
-                label="Comissão"
-                formItemLayout={formItemLayout}
-                getFieldDecorator={getFieldDecorator}
-                handleFormState={this.handleFormState}
-              />
-            </React.Fragment>
-          )}
+                {/* São Francisco */}
+              </React.Fragment>
+            )}
         </Form>
       </div>
     );
+  }
+
+  ehVendaAgenciada() {
+    return this.state.formData.tipo_venda.toUpperCase().includes("AGENCIADA"); // tratando como um padrão de CONSTANTE
   }
 }
 
