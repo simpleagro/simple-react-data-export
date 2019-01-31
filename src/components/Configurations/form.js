@@ -3,7 +3,7 @@ import React, { Component } from "react";
 import ModalForm from "./modal";
 import "moment/locale/pt-br";
 
-import { Button, Input, Form, Affix } from "antd";
+import { Button, Input, Form, Affix, Icon, Divider, Popconfirm, Card } from "antd";
 
 import { flashWithSuccess } from "common/FlashMessages";
 import parseErrors from "lib/parseErrors";
@@ -19,12 +19,7 @@ class ConfigurationForm extends Component {
       editMode: false,
       formData: {},
       savingForm: false,
-      list: [],
-      loadingData: true,
-      rules: {
-        labe: null,
-        key: null
-      }
+      loadingData: true
     };
   }
 
@@ -53,6 +48,22 @@ class ConfigurationForm extends Component {
     }, 0);
     await this.initializeList();
   }
+
+  removeRecord = async ({ _id, rules }) => {
+    try {
+      await ConfigurationService.remove(_id);
+      let _list = this.state.list.filter(record => record._id !== _id);
+
+      this.setState({
+        list: _list
+      });
+
+      flashWithSuccess("", `A configuração, ${rules.label}, foi removida com sucesso!`);
+    } catch (err) {
+      if (err && err.response && err.response.data) parseErrors(err);
+      console.log("Erro interno ao remover uma tabela de preço", err);
+    }
+  };
 
   showModal = (record) => {
     this.setState({
@@ -125,9 +136,44 @@ class ConfigurationForm extends Component {
       key: "label"
     },
     {
+      title: "Key",
+      dataIndex: "key",
+      key: "key"
+    },
+    {
       title: "Ações",
-      dataIndex: "acoes",
-      key: "acoes"
+      dataIndex: "action",
+      render: (text, record) => {
+        return (
+          <span>
+            <Button
+              size="small"
+              onClick={() => this.showModal(record)}>
+              <Icon type="edit" style={{ fontSize: "16px" }} />
+            </Button>
+
+            <Divider
+              style={{ fontSize: "10px", padding: 0, margin: 2 }}
+              type="vertical"
+            />
+
+            <Popconfirm
+              title={`Tem certeza em excluir o tipo de venda?`}
+              onConfirm={() => [this.removeRecord(record), console.log("record:", record)]}
+              okText="Sim"
+              cancelText="Não"
+            >
+              <Button size="small">
+                <Icon type="delete" style={{ fontSize: "16px" }} />
+              </Button>
+            </Popconfirm>
+            <Divider
+              style={{ fontSize: "10px", padding: 0, margin: 2 }}
+              type="vertical"
+            />
+          </span>
+        );
+      }
     }
   ];
 
@@ -156,9 +202,6 @@ class ConfigurationForm extends Component {
   };
 
   handleOk = async (item) => {
-    await this.getDatabase();
-    await this.setStatus();
-
     this.setState({ savingForm: true });
     if (!this.state.editMode) {
 
@@ -166,19 +209,25 @@ class ConfigurationForm extends Component {
         const created = await ConfigurationService.create(item);
 
         this.setState(prev => {
-          if(prev.list.length > 0){
+          if(prev.rules.length > 0){
             return({
               openForm: false,
               editMode: false,
               visible: false,
-              list: [...prev.list,created]
+              //rules: [...prev.rules,created],
+              formData: {
+                rules: [...prev.rules,created]
+              }
             })
           }
           return({
             openForm: false,
             editMode: false,
             visible: false,
-            list: [created]
+            //rules: [created],
+            formData: {
+              rules: [created]
+            }
           })
         });
         flashWithSuccess();
@@ -200,7 +249,7 @@ class ConfigurationForm extends Component {
           openForm: false,
           editMode: false,
           visible: false,
-          list: data.docs
+          rules: data.docs
         });
 
         flashWithSuccess();
@@ -256,29 +305,32 @@ class ConfigurationForm extends Component {
         </Affix>
         <Form onChange={this.handleFormState}>
 
-          <Form.Item label="Tela" {...formItemLayout}>
+          <Form.Item label="Tela">
             {getFieldDecorator("screen", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.screen
             })(<Input name="screen" style={{ width: 400 }} ref={input => (this.titleInput = input)} />)}
           </Form.Item>
 
-          <Form.Item label="" {...formItemLayout}>
-            <Button style={{ marginRight: 150 }} type="primary" onClick={() => this.showModal()} > + </Button>
-            <SimpleTable
-              style={{ width: 950 }}
-              rowKey="_id"
-              columns={this.tableConfig()}
-              dataSource={this.state.list}
-              spinning={this.state.loadingData}
-            />
+          <Form.Item label="">
+            <Card
+              title="Regras"
+              extra={<Button style={{ marginRight: 150 }} type="primary" onClick={() => this.showModal()} > + </Button>}
+            >
+              <SimpleTable
+                rowKey="_id"
+                columns={this.tableConfig()}
+                dataSource={this.state.formData.rules}
+                spinning={this.state.loadingData}
+                scroll={{ x: false }}
+              />
+            </Card>
           </Form.Item>
 
         </Form>
         {[
-          console.clear(),
-          console.log("State: ", this.state),
-          console.log("PROPS: ", this.props)
+          console.log("\nForm > State: ", this.state),
+          // console.log("Form > Props: ", this.props)
         ]}
       </div>
     );
