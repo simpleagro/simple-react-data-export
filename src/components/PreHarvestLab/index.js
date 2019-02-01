@@ -74,7 +74,7 @@ class PreHarvest extends Component {
 
   async initializeList(aqp) {
 
-    const dataFieldRegistration = await FieldRegistrationService.list();
+    const dataFieldRegistration = await FieldRegistrationService.list({ limit: 999999 });
     const dataPreHarvest = await FieldRegistrationService.list({ fields: "pre_colheita,todasPrecolheitasPorInscricaoCampo", "todasPrecolheitasPorInscricaoCampo": true, ...aqp });
     const dataSafra = await SeasonService.list({ limit: 999999 });
 

@@ -1,18 +1,20 @@
 import React from 'react'
-import { Modal, Form, Input, Button, Select } from 'antd';
+import { Modal, Form, Input, Button } from 'antd';
 
 const ModalForm = Form.create()(
 
     class extends React.Component {
-      state = { formData: {}, rules: {} }
+      state = { formData: {} }
 
       onHadleChange = event => {
         if (!event.target.name) return;
         let form = Object.assign({}, this.state.formData, {
           [event.target.name]: event.target.value
         });
-        console.log("form: ", form);
-        this.setState(prev => ({ ...prev, formData: form }));
+        this.setState(prev => ({
+          ...prev,
+          formData: form
+        }));
       };
 
       onSalve = () => {
@@ -52,18 +54,21 @@ const ModalForm = Form.create()(
               <Form.Item label="Label">
                 {getFieldDecorator('label', {
                   rules: [{ required: true, message: "Este campo é obrigatório!" }],
-                  initialValue: this.state.formData.rules && this.state.formData.rules.label
+                  initialValue:  this.state.formData.label
                 })(<Input name="label" ref={input => (this.titleInput = input)} />)}
               </Form.Item>
 
-              <Form.Item label="Key" onChange={this.onHadleChange}>
+              <Form.Item label="Key">
                 {getFieldDecorator('key', {
                   rules: [{ required: true, message: "Este campo é obrigatório!" }],
-                  initialValue: this.state.formData.rules && this.state.formData.rules.key
+                  initialValue: this.state.formData.key
                 })( <Input name="key" /> )}
               </Form.Item>
-
             </Form>
+            {[
+              console.log("Modal > State:", this.state),
+              // console.log("Modal > Props:", this.props)
+            ]}
           </Modal>
         );
       }
