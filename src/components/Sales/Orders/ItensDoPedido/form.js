@@ -10,7 +10,8 @@ import {
   Row,
   Col,
   Spin,
-  Layout
+  Layout,
+  Collapse
 } from "antd";
 import { connect } from "react-redux";
 import * as Promise from "bluebird";
@@ -603,7 +604,9 @@ class OrderItemForm extends Component {
             <Layout.Footer style={{ borderTop: "2px solid gray" }}>
               <h3>Resumo:</h3>
 
-              {this.state.variacoes &&
+              <Collapse bordered={false} style={{marginBottom: 10}}>
+                <Collapse.Panel header="Ver outros totais" key="resumo_outros_totais">
+                {this.state.variacoes &&
                 this.state.variacoes.map(v => {
                   if (v.tipoTabela === "TABELA_CARACTERISTICA")
                     return (
@@ -624,6 +627,9 @@ class OrderItemForm extends Component {
                       </div>
                     ));
                 })}
+                </Collapse.Panel>
+              </Collapse>
+
               <div key={`resumoItem_total`}>
                 <b>Total Geral: {this.state.formData.total_preco_item || 0}</b>
               </div>

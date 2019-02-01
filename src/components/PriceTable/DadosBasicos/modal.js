@@ -75,7 +75,7 @@ const ModalForm = Form.create()(
       render() {
         const { visible, onCancel, onCreate, form } = this.props;
         const { getFieldDecorator } = form;
-        
+
         return (
           <Modal
             visible={visible}
@@ -163,7 +163,7 @@ const ModalForm = Form.create()(
               <Form.Item label="Data Base">
                 {getFieldDecorator("data_base", {
                   initialValue: this.state.formData.data_base
-                    ? moment(this.state.formData.data_base, "DD/MM/YYYY")
+                    ? moment(this.state.formData.data_base, "YYYY-MM-DD")
                     : undefined
                 })(
                   <DatePicker
@@ -172,7 +172,7 @@ const ModalForm = Form.create()(
                     style={{width: '100%'}}
                     onChange={e => {
                       this.onHadleChange({
-                        target: { name: "data_base", value: e.format("DD/MM/YYYY") }
+                        target: { name: "data_base", value: e.format("YYYY-MM-DD") }
                       })}
                     }
                     name="data_base"
@@ -276,4 +276,3 @@ const ModalForm = Form.create()(
   );
 
   export default ModalForm;
- 

@@ -1,3 +1,3 @@
 export const configAPP = {
-  usarConfiguracaoFPCaracteristica: () => true
+  usarConfiguracaoFPCaracteristica: () => false
 };
