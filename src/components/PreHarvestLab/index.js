@@ -8,7 +8,6 @@ import * as PreHarvestService from "services/field-registration.pre-harvest";
 import SimpleTable from "common/SimpleTable";
 import { flashWithSuccess } from "common/FlashMessages";
 import parseErrors from "lib/parseErrors";
-import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
 import { simpleTableSearch } from "lib/simpleTableSearch";
 
 import * as SeasonService from "services/seasons";
@@ -29,60 +28,22 @@ class PreHarvest extends Component {
         showSizeChanger: true,
         defaultPageSize: 10,
         pageSizeOptions: ["10", "25", "50", "100"]
-      },
+      }
     };
   }
 
-  setList(){
-    let listData = [];
-    let num = 1;
-    this.state.listPreHarvest.map(lph => (
-      this.state.listFieldRegistration.map(lfr => (
-        lfr._id === lph._id && lph.pre_colheita.map(ph => (
-          listData.push(
-            Object.assign({
-              inscricao_campo_id: lfr._id,
-              numero_pre_colheita: num,
-              numero_inscricao_campo: lfr.numero_inscricao_campo,
-              contrato: lfr.contrato,
-              cliente: lfr.cliente,
-              safra: lfr.safra,
-              propriedade: lfr.propriedade,
-              area_talhao: ph.area_talhao,
-              autorizacao_transporte: ph.autorizacao_transporte,
-              data: ph.data,
-              data_colheita: ph.data_colheita,
-              nome_talhao: ph.nome_talhao,
-              num_colhedoras: ph.num_colhedoras,
-              observacao: ph.observacao,
-              produtividade: ph.produtividade,
-              codigo_erp: ph.codigo_erp,
-              responsavel: ph.responsavel.nome,
-              _id: ph._id
-            })
-          ),
-          num++
-        ))
-      ))
-    ));
-
-    this.setState({
-      list: listData
-    })
-
-  }
-
   async initializeList(aqp) {
-
-    const dataFieldRegistration = await FieldRegistrationService.list({ limit: 999999 });
-    const dataPreHarvest = await FieldRegistrationService.list({ fields: "pre_colheita,todasPrecolheitasPorInscricaoCampo", "todasPrecolheitasPorInscricaoCampo": true, ...aqp });
-    const dataSafra = await SeasonService.list({ limit: 999999 });
-
     this.setState(previousState => {
       return { ...previousState, loadingData: true };
     });
 
     try {
+      const dataFieldRegistration = await FieldRegistrationService.list({ limit: 999999 });
+      const dataPreHarvest = await FieldRegistrationService.list({
+        "todasPrecolheitasPorInscricaoCampo": true,
+        ...aqp
+      });
+      const dataSafra = await SeasonService.list({ limit: 999999 });
 
       this.setState(prev => ({
         ...prev,
@@ -90,15 +51,17 @@ class PreHarvest extends Component {
         listSafra: dataSafra.docs,
         listFieldRegistration: dataFieldRegistration.docs,
         listPreHarvest: dataPreHarvest.docs,
+        pagination: {
+          total: dataPreHarvest.total
+        }
       }));
+
     } catch (error) {
       if (error && error.response && error.response.data) parseErrors(error);
       this.props.history.push(`/inscricao-de-campo/${this.state.field_registration_id}/pre-colheita`);
     } finally {
       this.setState({ loadingData: false });
     }
-
-    this.setList();
 
   }
 
@@ -158,12 +121,12 @@ class PreHarvest extends Component {
   };
 
   tableConfig = () => [
-    {
-      title: "Pré-Colheita",
-      dataIndex: "numero_pre_colheita",
-      key: "numero_pre_colheita",
-      fixed: "left",
-    },
+    // {
+    //   title: "Pré-Colheita",
+    //   dataIndex: "numero_pre_colheita",
+    //   key: "numero_pre_colheita",
+    //   fixed: "left",
+    // },
     {
       title: "Cliente",
       dataIndex: "cliente.nome",
@@ -196,25 +159,25 @@ class PreHarvest extends Component {
     },
     {
       title: "Talhão",
-      dataIndex: "nome_talhao",
+      dataIndex: "pre_colheita.nome_talhao",
       key: "pre_colheita.nome_talhao",
       ...simpleTableSearch(this)("pre_colheita.nome_talhao")
     },
     {
       title: "Número de Colhedoras",
-      dataIndex: "num_colhedoras",
+      dataIndex: "pre_colheita.num_colhedoras",
       key: "pre_colheita.num_colhedoras"
     },
     {
       title: "Produtividade",
-      dataIndex: "produtividade",
+      dataIndex: "pre_colheita.produtividade",
       key: "pre_colheita.produtividade"
     },
     {
       title: "Responsável",
-      dataIndex: "responsavel",
-      key: "pre_colheita.responsavel",
-      ...simpleTableSearch(this)("pre_colheita.responsavel")
+      dataIndex: "pre_colheita.responsavel",
+      key: "pre_colheita.responsavel.nome",
+      ...simpleTableSearch(this)("pre_colheita.responsavel.nome")
     },
     {
       title: "Ações",
@@ -327,15 +290,14 @@ class PreHarvest extends Component {
               <SimpleTable
                 pagination={this.state.pagination}
                 spinning={this.state.loadingData}
-                rowKey="numero_pre_colheita"
+                rowKey={record => record.pre_colheita._id}
                 columns={this.tableConfig()}
-                dataSource={this.state.list}
+                dataSource={this.state.listPreHarvest}
                 onChange={this.handleTableChange}
               />
             </Card>
           </Col>
         </Row>
-        { console.log(this.state) }
       </div>
     );
   }
