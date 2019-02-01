@@ -15,11 +15,14 @@ import {
 } from "antd";
 import { connect } from "react-redux";
 import * as Promise from "bluebird";
+import debounce from "lodash/debounce";
+import moment from "moment";
 
 import {
   flashWithSuccess,
   flashWithError
 } from "../../../common/FlashMessages";
+import { valorFinalJurosCompostos } from "common/utils";
 import parseErrors from "../../../../lib/parseErrors";
 import { PainelHeader } from "../../../common/PainelHeader";
 import * as ProductGroupService from "services/productgroups";
@@ -33,7 +36,7 @@ import { fatorConversaoUM } from "common/utils";
 import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
 import { SimpleLazyLoader } from "../../../common/SimpleLazyLoader";
 import { SFFPorcentagem } from "../../../common/formFields/SFFPorcentagem";
-import debounce from "lodash/debounce";
+import { configAPP } from "config/app";
 
 const Option = Select.Option;
 
@@ -604,29 +607,34 @@ class OrderItemForm extends Component {
             <Layout.Footer style={{ borderTop: "2px solid gray" }}>
               <h3>Resumo:</h3>
 
-              <Collapse bordered={false} style={{marginBottom: 10}}>
-                <Collapse.Panel header="Ver outros totais" key="resumo_outros_totais">
-                {this.state.variacoes &&
-                this.state.variacoes.map(v => {
-                  if (v.tipoTabela === "TABELA_CARACTERISTICA")
-                    return (
-                      <div key={`resumoItem_${v.chave}`}>
-                        <b>
-                          Total Preço {v.label}:{" "}
-                          {this.state.formData[`preco_total_${v.chave}`] || 0}
-                        </b>
-                      </div>
-                    );
-                  if (v.tipoTabela === "TABELA_BASE" && v.regraPrecoBase)
-                    return v.regraPrecoBase.map(rpb => (
-                      <div key={`resumoItem_${rpb.chave}`}>
-                        <b>
-                          Total Preço {rpb.label}:{" "}
-                          {this.state.formData[`preco_total_${rpb.chave}`] || 0}
-                        </b>
-                      </div>
-                    ));
-                })}
+              <Collapse bordered={false} style={{ marginBottom: 10 }}>
+                <Collapse.Panel
+                  header="Ver outros totais"
+                  key="resumo_outros_totais">
+                  {this.state.variacoes &&
+                    this.state.variacoes.map(v => {
+                      if (v.tipoTabela === "TABELA_CARACTERISTICA")
+                        return (
+                          <div key={`resumoItem_${v.chave}`}>
+                            <b>
+                              Total Preço {v.label}:{" "}
+                              {this.state.formData[`preco_total_${v.chave}`] ||
+                                0}
+                            </b>
+                          </div>
+                        );
+                      if (v.tipoTabela === "TABELA_BASE" && v.regraPrecoBase)
+                        return v.regraPrecoBase.map(rpb => (
+                          <div key={`resumoItem_${rpb.chave}`}>
+                            <b>
+                              Total Preço {rpb.label}:{" "}
+                              {this.state.formData[
+                                `preco_total_${rpb.chave}`
+                              ] || 0}
+                            </b>
+                          </div>
+                        ));
+                    })}
                 </Collapse.Panel>
               </Collapse>
 
@@ -834,13 +842,30 @@ class OrderItemForm extends Component {
           }));
 
           variacao.regraPrecoBase.map(rpb => {
-            this.setState(prev => ({
-              ...prev,
-              formData: {
-                ...prev.formData,
-                [`preco_${rpb.chave}_tabela`]: tabelaPreco[`preco_${rpb.chave}`]
-              }
-            }));
+            debugger
+            let preco = tabelaPreco[`preco_${rpb.chave}`];
+            const periodo = configAPP.usarCalculoDataBaseMes()
+              ? moment().diff(tabelaPreco.data_base, "month")
+              : Math.round(
+                  moment().diff(tabelaPreco.data_base, "days") /
+                    (configAPP.quantidadeDeDiasCalculoDataBase() || 30)
+                );
+            const taxa =
+              periodo && periodo > 0
+                ? tabelaPreco.taxa_adicao
+                : tabelaPreco.taxa_supressao;
+
+            if (periodo)
+              preco = valorFinalJurosCompostos(preco, taxa, periodo);
+
+            if (tabelaPreco)
+              this.setState(prev => ({
+                ...prev,
+                formData: {
+                  ...prev.formData,
+                  [`preco_${rpb.chave}_tabela`]: preco
+                }
+              }));
           });
         }
       }
