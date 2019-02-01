@@ -754,18 +754,18 @@ class OrderForm extends Component {
                   getFieldDecorator={getFieldDecorator}
                   handleFormState={this.handleFormState}
                 />
-                {/* São Francisco */}
-                {configAPP.usarConfiguracaoFPCaracteristica() && (
-                  <ConfigurarFPCaracteristica
-                    showFrete={this.state.formData.tipo_frete === "CIF"}
-                    handleFormState={this.handleFormState}
-                    form={this.props.form}
-                    formData={this.state.formData}
-                  />
-                )}
-                {/* São Francisco */}
               </React.Fragment>
             )}
+          {/* São Francisco */}
+          {configAPP.usarConfiguracaoFPCaracteristica() && (
+            <ConfigurarFPCaracteristica
+              showFrete={this.state.formData.tipo_frete === "CIF"}
+              handleFormState={this.handleFormState}
+              form={this.props.form}
+              formData={this.state.formData}
+            />
+          )}
+          {/* São Francisco */}
         </Form>
       </div>
     );
