@@ -769,16 +769,18 @@ class OrderItemForm extends Component {
       this.setState({ [`loadingVariacoes_${variacao.chave}`]: true });
 
       if (variacao.tipoTabela === "TABELA_CARACTERISTICA") {
+
         const tabelaCaract = await FeaturePriceTableService.list({
           status: true,
           "grupo_produto.id": this.state.formData.grupo_produto.id,
           "caracteristica.chave": variacao.chave,
-          fields: "u_m_preco, grupo_produto,caracteristica,precos.$",
+          fields: "u_m_preco, data_base, taxa_adicao, taxa_supressao, grupo_produto,caracteristica,precos.$",
           "precos.deleted": false,
           limit: 1
         }).then(response => response.docs);
-
+        debugger
         if (tabelaCaract && tabelaCaract.length) {
+          debugger
           const precos = tabelaCaract[0].precos || [];
           this.props.form.resetFields([
             `preco_${variacao.chave}`,
@@ -790,17 +792,29 @@ class OrderItemForm extends Component {
               p => p.opcao_chave === valor
             );
 
+            let preco = valorVariacao;
+            const periodo = configAPP.usarCalculoDataBaseMes()
+              ? moment().diff(tabelaCaract[0].data_base, "month")
+              : Math.round(
+                  moment().diff(tabelaCaract[0].data_base, "days") /
+                    (configAPP.quantidadeDeDiasCalculoDataBase() || 30)
+                );
+            const taxa =
+              periodo && periodo > 0
+                ? tabelaCaract[0].taxa_adicao
+                : tabelaCaract[0].taxa_supressao;
+
+            if (periodo) preco = valorFinalJurosCompostos(preco, taxa, periodo);
+
             this.setState(prev => ({
               ...prev,
               formData: {
                 ...prev.formData,
                 [`preco_${variacao.chave}_tabela`]:
-                  (valorVariacao &&
-                    valorVariacao.toString().replace(",", ".")) ||
+                  preco ||
                   undefined,
                 [`preco_${variacao.chave}`]:
-                  (valorVariacao &&
-                    valorVariacao.toString().replace(",", ".")) ||
+                preco ||
                   undefined,
                 [`desconto_${variacao.chave}`]: 0,
                 [`fator_conversao_${variacao.chave}`]: tabelaCaract[0].u_m_preco
@@ -842,7 +856,6 @@ class OrderItemForm extends Component {
           }));
 
           variacao.regraPrecoBase.map(rpb => {
-            debugger
             let preco = tabelaPreco[`preco_${rpb.chave}`];
             const periodo = configAPP.usarCalculoDataBaseMes()
               ? moment().diff(tabelaPreco.data_base, "month")
@@ -855,15 +868,15 @@ class OrderItemForm extends Component {
                 ? tabelaPreco.taxa_adicao
                 : tabelaPreco.taxa_supressao;
 
-            if (periodo)
-              preco = valorFinalJurosCompostos(preco, taxa, periodo);
+            if (periodo) preco = valorFinalJurosCompostos(preco, taxa, periodo);
 
             if (tabelaPreco)
               this.setState(prev => ({
                 ...prev,
                 formData: {
                   ...prev.formData,
-                  [`preco_${rpb.chave}_tabela`]: preco
+                  [`preco_${rpb.chave}_tabela`]: preco,
+                  [`preco_${rpb.chave}`]: preco
                 }
               }));
           });

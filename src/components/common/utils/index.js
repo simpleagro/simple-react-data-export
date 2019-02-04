@@ -108,7 +108,9 @@ export const valorFinalJurosCompostos = (
   periodo,
   precision = 1
 ) => {
-  return Number(capital * Math.pow(1 + parseFloat(taxa) / 100, periodo))
-    .toFixed(3)
-    .slice(0, -precision);
+  return parseFloat(
+    Number(capital * Math.pow(1 + parseFloat(taxa) / 100, periodo))
+      .toFixed(3)
+      .slice(0, -precision)
+  );
 };

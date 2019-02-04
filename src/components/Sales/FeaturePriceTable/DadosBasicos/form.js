@@ -163,12 +163,18 @@ class FeaturePriceTable extends Component {
         </Affix>
 
         <Form onChange={this.handleFormState}>
-
           <Form.Item label="Centro de Custo" {...formItemLayout}>
-            {getFieldDecorator('centro_custo', {
-              rules: [{ required: false, message: "Este campo é obrigatório!" }],
+            {getFieldDecorator("centro_custo", {
+              rules: [
+                { required: false, message: "Este campo é obrigatório!" }
+              ],
               initialValue: this.state.formData.centro_custo
-            })(<Input name="centro_custo" ref={input => (this.titleInput = input)} />)}
+            })(
+              <Input
+                name="centro_custo"
+                ref={input => (this.titleInput = input)}
+              />
+            )}
           </Form.Item>
 
           <Form.Item label="Nome" {...formItemLayout}>
@@ -237,12 +243,14 @@ class FeaturePriceTable extends Component {
           <Form.Item label="Data Base" {...formItemLayout}>
             {getFieldDecorator("data_base", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.data_base ? moment(
-                this.state.formData.data_base
-                  ? this.state.formData.data_base
-                  : new Date(),
-                "YYYY-MM-DD"
-              ) : null
+              initialValue: this.state.formData.data_base
+                ? moment(
+                    this.state.formData.data_base
+                      ? this.state.formData.data_base
+                      : new Date(),
+                    "YYYY-MM-DD"
+                  )
+                : null
             })(
               <DatePicker
                 onChange={(data, dataString) =>
@@ -282,12 +290,14 @@ class FeaturePriceTable extends Component {
           <Form.Item label="Validade de" {...formItemLayout}>
             {getFieldDecorator("data_validade_de", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.data_validade_de ? moment(
-                this.state.formData.data_validade_de
-                  ? this.state.formData.data_validade_de
-                  : new Date(),
-                "YYYY-MM-DD"
-              ) : null
+              initialValue: this.state.formData.data_validade_de
+                ? moment(
+                    this.state.formData.data_validade_de
+                      ? this.state.formData.data_validade_de
+                      : new Date(),
+                    "YYYY-MM-DD"
+                  )
+                : null
             })(
               <DatePicker
                 onChange={(data, dataString) =>
@@ -311,12 +321,14 @@ class FeaturePriceTable extends Component {
           <Form.Item label="Validade até" {...formItemLayout}>
             {getFieldDecorator("data_validade_ate", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.data_validade_ate ? moment(
-                this.state.formData.data_validade_ate
-                  ? this.state.formData.data_validade_ate
-                  : new Date(),
-                "YYYY-MM-DD"
-              ) : null
+              initialValue: this.state.formData.data_validade_ate
+                ? moment(
+                    this.state.formData.data_validade_ate
+                      ? this.state.formData.data_validade_ate
+                      : new Date(),
+                    "YYYY-MM-DD"
+                  )
+                : null
             })(
               <DatePicker
                 onChange={(data, dataString) =>
@@ -341,14 +353,32 @@ class FeaturePriceTable extends Component {
             {getFieldDecorator("taxa_adicao", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.taxa_adicao
-            })(<Input name="taxa_adicao" />)}
+            })(
+              <InputNumber
+                onChange={e => {
+                  this.handleFormState({
+                    target: { name: "taxa_adicao", value: e }
+                  });
+                }}
+                name="taxa_adicao"
+              />
+            )}
           </Form.Item>
 
           <Form.Item label="Taxa de Supressão" {...formItemLayout}>
             {getFieldDecorator("taxa_supressao", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.taxa_supressao
-            })(<Input name="taxa_supressao" />)}
+            })(
+              <InputNumber
+                onChange={e => {
+                  this.handleFormState({
+                    target: { name: "taxa_supressao", value: e }
+                  });
+                }}
+                name="taxa_supressao"
+              />
+            )}
           </Form.Item>
 
           <Form.Item label="Grupo de Produtos" {...formItemLayout}>
@@ -440,15 +470,15 @@ class FeaturePriceTable extends Component {
                     target: { name: "u_m_preco", value: e }
                   });
                 }}>
-                { this.state.listUnitMeasure &&
-                    this.state.listUnitMeasure.map(un =>
-                      <Option key={un._id} value={un.sigla}>
-                        {un.nome}
-                      </Option>) }
+                {this.state.listUnitMeasure &&
+                  this.state.listUnitMeasure.map(un => (
+                    <Option key={un._id} value={un.sigla}>
+                      {un.nome}
+                    </Option>
+                  ))}
               </Select>
             )}
           </Form.Item>
-
         </Form>
       </div>
     );
