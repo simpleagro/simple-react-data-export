@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Button, Input, Form, Select, Affix, Checkbox } from "antd";
 
 import { flashWithSuccess } from "../common/FlashMessages";
+import SFFTelefone from "common/formFields/SFFTelefone";
 import parseErrors from "../../lib/parseErrors";
 import { PainelHeader } from "../common/PainelHeader";
 import * as ConsultantsService from "../../services/consultants";
@@ -12,7 +13,7 @@ import { SimpleLazyLoader } from "../common/SimpleLazyLoader";
 import { list as RulesListService } from "../../services/rules";
 import { list as BranchsListService } from "../../services/companies.branchs";
 
-const Option = Select.Option;
+const { Option } = Select;
 
 class ConsultantForm extends Component {
   constructor(props) {
@@ -450,14 +451,14 @@ class ConsultantForm extends Component {
               </Form.Item>
             )}
 
-            <Form.Item label="Contato" {...formItemLayout}>
-              {getFieldDecorator("contato", {
-                rules: [
-                  { required: true, message: "Este campo é obrigatório!" }
-                ],
-                initialValue: this.state.formData.contato
-              })(<Input name="contato" />)}
-            </Form.Item>
+            <SFFTelefone
+              initialValue={this.state.formData.contato}
+              name="contato"
+              label="Celular"
+              formItemLayout={formItemLayout}
+              getFieldDecorator={getFieldDecorator}
+              handleFormState={this.handleFormState}
+            />
 
             <Form.Item label="Cargo" {...formItemLayout}>
               {getFieldDecorator("cargo", {
