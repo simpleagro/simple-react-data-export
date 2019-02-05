@@ -104,16 +104,17 @@ class PreHarvest extends Component {
 
   }
 
-  removeRecord = async ({ _id, nome_talhao }, field_registration_id) => {
+  removeRecord = async ({ _id, pre_colheita }) => {
+
     try {
-      await PreHarvestService.remove(field_registration_id)(_id);
-      let _list = this.state.list.filter(record => record._id !== _id);
+      await PreHarvestService.remove(_id)(pre_colheita._id);
+      let _list = this.state.listPreHarvest.filter(record => record.pre_colheita._id !== pre_colheita._id);
 
       this.setState({
-        list: _list
+        listPreHarvest: _list
       });
 
-      flashWithSuccess("", `A pré colheita, ${nome_talhao}, foi removida com sucesso!`);
+      flashWithSuccess("", `A pré colheita, ${pre_colheita.nome_talhao}, foi removida com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
       console.log("Erro interno ao remover uma pré colheita", err);
@@ -164,7 +165,7 @@ class PreHarvest extends Component {
       ...simpleTableSearch(this)("pre_colheita.nome_talhao")
     },
     {
-      title: "Número de Colhedoras",
+      title: "Colhedoras",
       dataIndex: "pre_colheita.num_colhedoras",
       key: "pre_colheita.num_colhedoras"
     },
@@ -183,6 +184,7 @@ class PreHarvest extends Component {
       title: "Ações",
       dataIndex: "action",
       fixed: "right",
+      width: 150,
       render: (text, record) => {
         return (
           <span>
@@ -190,8 +192,8 @@ class PreHarvest extends Component {
               size="small"
               onClick={() =>
                 this.props.history.push(
-                  `/inscricao-de-campo/${record.inscricao_campo_id}/pre-colheita/${
-                    record._id
+                  `/inscricao-de-campo/${record._id}/pre-colheita/${
+                    record.pre_colheita._id
                   }/edit`, { returnTo: "preColheitaLab" }
                 )
               }>
@@ -203,7 +205,7 @@ class PreHarvest extends Component {
             />
             <Popconfirm
               title={`Tem certeza em excluir a pré colheita?`}
-              onConfirm={() => this.removeRecord(record, record.inscricao_campo_id)}
+              onConfirm={() => this.removeRecord(record)}
               okText="Sim"
               cancelText="Não">
                 <Button size="small">
@@ -221,8 +223,8 @@ class PreHarvest extends Component {
                     size="small"
                     onClick={() =>
                       this.props.history.push(
-                        `/inscricao-de-campo/${record.inscricao_campo_id}/pre-colheita/${
-                          record._id
+                        `/inscricao-de-campo/${record._id}/pre-colheita/${
+                          record.pre_colheita._id
                         }/autorizacao`
                       )
                     }>
@@ -234,8 +236,8 @@ class PreHarvest extends Component {
               size="small"
               onClick={() =>
                 this.props.history.push(
-                  `/inscricao-de-campo/${record.inscricao_campo_id}/pre-colheita/${
-                    record._id
+                  `/inscricao-de-campo/${record._id}/pre-colheita/${
+                    record.pre_colheita._id
                   }/autorizacao`
                 )
               }>
@@ -275,11 +277,11 @@ class PreHarvest extends Component {
                     allowClear
                     showArrow
                     style={{ width: 200, marginLeft: 15 }}
-                    onChange={e => this.initializeList({ "safra.descricao": e })}
+                    onChange={e => this.initializeList({ "safra.id": e })}
                     placeholder="Selecione a safra...">
                       {this.state.listSafra &&
                           this.state.listSafra.map((safra, i) =>
-                            <Option key={i} value={safra.descricao}>
+                            <Option key={i} value={safra._id}>
                               {safra.descricao}
                             </Option>
                       )}
@@ -294,6 +296,7 @@ class PreHarvest extends Component {
                 columns={this.tableConfig()}
                 dataSource={this.state.listPreHarvest}
                 onChange={this.handleTableChange}
+                scroll={{ x: window.innerWidth + 400 }}
               />
             </Card>
           </Col>
