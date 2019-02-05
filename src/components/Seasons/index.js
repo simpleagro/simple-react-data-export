@@ -47,7 +47,7 @@ class Seasons extends Component {
   }
 
   async componentDidMount() {
-    await this.initializeList();
+    await this.initializeList({sort: "inicio"});
   }
 
   changeStatus = async (id, newStatus) => {
