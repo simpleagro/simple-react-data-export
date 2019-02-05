@@ -529,7 +529,6 @@ class CustomerWalletForm extends Component {
                       .indexOf(input.toLowerCase()) >= 0
                   }
                   showSearch
-                  style={{ width: 200 }}
                   placeholder="Selecione..."
                   onChange={e =>
                     this.handleFormState({
@@ -558,7 +557,6 @@ class CustomerWalletForm extends Component {
                       .indexOf(input.toLowerCase()) >= 0
                   }
                   showSearch
-                  style={{ width: 200 }}
                   placeholder="Selecione..."
                   onChange={e =>
                     this.handleFormState({
@@ -612,7 +610,6 @@ class CustomerWalletForm extends Component {
                           fetchingClients ? <Spin size="small" /> : null
                         }
                         showSearch
-                        style={{ width: 200 }}
                         placeholder="Selecione..."
                         onChange={e => this.selectedClient(e)}>
                         {this.state.clients.map(c => (
@@ -700,7 +697,7 @@ class CustomerWalletForm extends Component {
                                               }`
                                             : ""
                                         }>
-                                        {prop.nome}
+                                        {prop.nome} - {prop.ie} - {prop.estado}
                                       </Tooltip>
                                     }
                                     key={`${cliente.cliente_id ||
