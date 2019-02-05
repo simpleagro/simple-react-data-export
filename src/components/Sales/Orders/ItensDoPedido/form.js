@@ -22,7 +22,7 @@ import {
   flashWithSuccess,
   flashWithError
 } from "../../../common/FlashMessages";
-import { valorFinalJurosCompostos } from "common/utils";
+import { valorFinalJurosCompostos, currency } from "common/utils";
 import parseErrors from "../../../../lib/parseErrors";
 import { PainelHeader } from "../../../common/PainelHeader";
 import * as ProductGroupService from "services/productgroups";
@@ -237,7 +237,7 @@ class OrderItemForm extends Component {
   }
 
   resetVariacoes() {
-    // debugger;
+    // ;
     const campos = [
       ...Object.keys(this.state.formData).filter(
         f => f.match(/^preco_/i) || f.match(/^desconto_/i)
@@ -618,8 +618,10 @@ class OrderItemForm extends Component {
                           <div key={`resumoItem_${v.chave}`}>
                             <b>
                               Total Preço {v.label}:{" "}
-                              {this.state.formData[`preco_total_${v.chave}`] ||
-                                0}
+                              {currency()(
+                                this.state.formData[`preco_total_${v.chave}`] ||
+                                  0
+                              )}
                             </b>
                           </div>
                         );
@@ -628,9 +630,11 @@ class OrderItemForm extends Component {
                           <div key={`resumoItem_${rpb.chave}`}>
                             <b>
                               Total Preço {rpb.label}:{" "}
-                              {this.state.formData[
-                                `preco_total_${rpb.chave}`
-                              ] || 0}
+                              {currency()(
+                                this.state.formData[
+                                  `preco_total_${rpb.chave}`
+                                ] || 0
+                              )}
                             </b>
                           </div>
                         ));
@@ -639,7 +643,10 @@ class OrderItemForm extends Component {
               </Collapse>
 
               <div key={`resumoItem_total`}>
-                <b>Total Geral: {this.state.formData.total_preco_item || 0}</b>
+                <b>
+                  Total Geral:{" "}
+                  {currency()(this.state.formData.total_preco_item || 0)}
+                </b>
               </div>
             </Layout.Footer>
           </Affix>
@@ -769,18 +776,17 @@ class OrderItemForm extends Component {
       this.setState({ [`loadingVariacoes_${variacao.chave}`]: true });
 
       if (variacao.tipoTabela === "TABELA_CARACTERISTICA") {
-
         const tabelaCaract = await FeaturePriceTableService.list({
           status: true,
           "grupo_produto.id": this.state.formData.grupo_produto.id,
           "caracteristica.chave": variacao.chave,
-          fields: "u_m_preco, data_base, taxa_adicao, taxa_supressao, grupo_produto,caracteristica,precos.$",
+          fields:
+            "u_m_preco, data_base, taxa_adicao, taxa_supressao, grupo_produto,caracteristica,precos.$",
           "precos.deleted": false,
           limit: 1
         }).then(response => response.docs);
-        debugger
+
         if (tabelaCaract && tabelaCaract.length) {
-          debugger
           const precos = tabelaCaract[0].precos || [];
           this.props.form.resetFields([
             `preco_${variacao.chave}`,
@@ -810,12 +816,8 @@ class OrderItemForm extends Component {
               ...prev,
               formData: {
                 ...prev.formData,
-                [`preco_${variacao.chave}_tabela`]:
-                  preco ||
-                  undefined,
-                [`preco_${variacao.chave}`]:
-                preco ||
-                  undefined,
+                [`preco_${variacao.chave}_tabela`]: preco || undefined,
+                [`preco_${variacao.chave}`]: preco || undefined,
                 [`desconto_${variacao.chave}`]: 0,
                 [`fator_conversao_${variacao.chave}`]: tabelaCaract[0].u_m_preco
               }
@@ -891,7 +893,7 @@ class OrderItemForm extends Component {
   }
 
   async getFatorConversaoTabelaPrecoCaract(chave) {
-    // debugger
+    //
     const unid_med_preco = this.state.formData[`fator_conversao_${chave}`];
     const { embalagem } = this.state.formData;
     let fatorConversao = 1;
@@ -977,6 +979,7 @@ class OrderItemForm extends Component {
   }
 
   async calcularResumo() {
+    // debugger;
     let fatorConversaoChaves = {};
     let calculaTotalCaract = (chave, fatorConversao) => {
       return (
@@ -994,7 +997,7 @@ class OrderItemForm extends Component {
       (this.state.variacoesSelecionadas &&
         Object.keys(this.state.variacoesSelecionadas).length)
     ) {
-      // debugger;
+      // ;
       let totais = {
         total_preco_item: 0
       };

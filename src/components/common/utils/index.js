@@ -108,9 +108,24 @@ export const valorFinalJurosCompostos = (
   periodo,
   precision = 1
 ) => {
+  capital = capital.toString().replace(",", ".");
   return parseFloat(
     Number(capital * Math.pow(1 + parseFloat(taxa) / 100, periodo))
       .toFixed(3)
       .slice(0, -precision)
   );
+};
+
+// usando https://hacks.mozilla.org/2014/12/introducing-the-javascript-internationalization-api/
+export const currency = (locale = "pt-BR") => (
+  value,
+  options = {
+    style: "decimal",
+    currency: "BRL",
+    minimumFractionDigits: 2
+  }
+) => {
+  const formatter = new Intl.NumberFormat(locale, options);
+
+  return formatter.format(value);
 };
