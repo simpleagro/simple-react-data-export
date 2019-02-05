@@ -165,7 +165,7 @@ class PreHarvest extends Component {
       ...simpleTableSearch(this)("pre_colheita.nome_talhao")
     },
     {
-      title: "Colhedoras",
+      title: "Número de Colhedoras",
       dataIndex: "pre_colheita.num_colhedoras",
       key: "pre_colheita.num_colhedoras"
     },
