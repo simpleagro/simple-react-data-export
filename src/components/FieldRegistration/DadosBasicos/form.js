@@ -11,16 +11,16 @@ import {
   Icon
 } from "antd";
 
-import { flashWithSuccess } from "../../common/FlashMessages";
-import parseErrors from "../../../lib/parseErrors";
-import { PainelHeader } from "../../common/PainelHeader";
-import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
-import * as FieldRegistrationService from "../../../services/field-registration";
-import * as ClientService from "../../../services/clients";
-import * as ProductGroupService from "../../../services/productgroups";
-import * as SeasonService from "../../../services/seasons";
-import * as ConsultantService from "../../../services/consultants";
-import * as IBGEService from "../../../services/ibge";
+import { flashWithSuccess } from "common/FlashMessages";
+import parseErrors from "lib/parseErrors";
+import { PainelHeader } from "common/PainelHeader";
+import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
+import * as FieldRegistrationService from "services/field-registration";
+import * as ClientService from "services/clients";
+import * as ProductGroupService from "services/productgroups";
+import * as SeasonService from "services/seasons";
+import * as ConsultantService from "services/consultants";
+import * as IBGEService from "services/ibge";
 import moment from "moment";
 import debounce from "lodash/debounce";
 
@@ -59,14 +59,7 @@ class FieldRegistrationForm extends Component {
       listProductGroup: dataProductGroup.docs,
       listSeason: dataSeason.docs,
       listConsultant: dataConsultant.docs
-      /*formData: {
-        ...prev.formData,
-        responsavel: {
-          nome: JSON.parse(localStorage.getItem("simpleagro_painel")).painelState.userData.user.nome,
-          id: JSON.parse(localStorage.getItem("simpleagro_painel")).painelState.userData.user._id
-        }
-      }*/
-    }));
+    }))
 
     if (id) {
       const formData = await FieldRegistrationService.get(id);

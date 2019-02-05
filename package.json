@@ -1,6 +1,6 @@
 {
     "name": "simpleagro_paineladm",
-    "version": "0.0.27",
+    "version": "0.0.28",
     "private": true,
     "dependencies": {
         "@fortawesome/fontawesome-svg-core": "^1.2.4",
@@ -29,6 +29,7 @@
         "react-router-dom": "^4.3.1",
         "react-scripts": "^1.1.4",
         "react-scroll": "^1.7.10",
+        "react-text-mask": "^5.4.3",
         "recharts": "^1.4.2",
         "recompose": "^0.30.0",
         "redux": "^4.0.0",
