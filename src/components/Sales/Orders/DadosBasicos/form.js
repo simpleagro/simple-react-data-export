@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Button, Form, Select, Affix, Spin, Icon, Checkbox } from "antd";
+import { Button, Form, Select, Affix, Spin, Icon, Input } from "antd";
 import debounce from "lodash/debounce";
 
 import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
@@ -122,7 +122,7 @@ class OrderForm extends Component {
     }));
   }
 
-  handleFormState = event => {
+  handleFormState = async event => {
     if (!event.target.name) return;
     let form = Object.assign({}, this.state.formData, {
       [event.target.name]: event.target.value
@@ -469,12 +469,7 @@ class OrderForm extends Component {
                     .indexOf(input.toLowerCase()) >= 0
                 }
                 onSelect={e => {
-                  this.handleFormState({
-                    target: {
-                      name: "propriedade",
-                      value: JSON.parse(e)
-                    }
-                  });
+                  this.onSelectPropriedade(e);
                 }}>
                 {this.state.propriedades && this.state.propriedades.length > 0
                   ? this.state.propriedades.map(p => (
@@ -484,7 +479,9 @@ class OrderForm extends Component {
                         value={JSON.stringify({
                           nome: p.nome,
                           ie: p.ie,
-                          id: p._id
+                          id: p._id,
+                          estado: p.estado,
+                          cidade: p.cidade
                         })}>
                         {p.nome} / {p.ie}
                       </Option>
@@ -493,6 +490,25 @@ class OrderForm extends Component {
               </Select>
             )}
           </Form.Item>
+
+          {this.state.formData.propriedade && (
+            <React.Fragment>
+              <Form.Item label="Cidade" {...formItemLayout}>
+                <Input
+                  value={this.state.formData.cidade}
+                  style={{ width: 200 }}
+                  readOnly
+                />
+              </Form.Item>
+
+              <Form.Item label="Estado" {...formItemLayout}>
+                <Input
+                value={this.state.formData.estado}
+                style={{ width: 200 }} readOnly />
+              </Form.Item>
+            </React.Fragment>
+          )}
+
           <Form.Item label="Tipo de Frete" {...formItemLayout}>
             {getFieldDecorator("tipo_frete", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
@@ -769,6 +785,19 @@ class OrderForm extends Component {
         </Form>
       </div>
     );
+  }
+
+  async onSelectPropriedade(e) {
+    const { estado, cidade, ...propriedade } = JSON.parse(e);
+    this.setState(prev =>({
+      ...prev,
+        formData: {
+          ...prev.formData,
+          propriedade,
+          cidade,
+          estado
+        }
+    }));
   }
 
   ehVendaAgenciada() {

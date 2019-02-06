@@ -18,9 +18,11 @@ import "moment/locale/pt-br";
 import * as OrderService from "services/orders";
 import * as OrderItemsService from "services/orders.items";
 import * as OrderPaymentService from "services/orders.payment";
+import { list as ListUnitMeasureService } from "services/units-measures";
 import { list as ListShipTableOrderItemsService } from "services/shiptable";
 import SimpleTable from "common/SimpleTable";
-import { flashWithSuccess } from "common/FlashMessages";
+import { fatorConversaoUM } from "common/utils";
+import { flashWithSuccess, flashWithError } from "common/FlashMessages";
 import parseErrors from "lib/parseErrors";
 import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
 import ModalForm from "./modal";
@@ -42,6 +44,7 @@ class OrderPaymentForm extends Component {
       order_data: null,
       tabelasFrete: [],
       estados: [],
+      unidadesMedidas: [],
       pagination: {
         showSizeChanger: true,
         defaultPageSize: 10,
@@ -55,7 +58,8 @@ class OrderPaymentForm extends Component {
     try {
       const items = await OrderItemsService.list(this.state.order_id)(aqp);
       const orderData = await OrderService.get(this.state.order_id, {
-        fields: "tabela_preco_base, numero, cliente, propriedade, pagamento"
+        fields:
+          "tabela_preco_base, numero, cliente, propriedade, pagamento, cidade, estado"
       });
       this.setState(prev => ({
         ...prev,
@@ -80,14 +84,33 @@ class OrderPaymentForm extends Component {
 
   async componentDidMount() {
     await this.initializeList({
-      fields: "produto, quantidade, desconto, total_preco_item, status"
+      fields:
+        "produto, quantidade, desconto, total_preco_item, status, embalagem"
     });
 
     const estados = await IBGEService.listaEstados();
+
     const tabelasFrete = await ListShipTableOrderItemsService().then(
       response => response.docs
     );
-    this.setState(prev => ({ ...prev, estados, tabelasFrete }));
+
+    const unidadesMedidas = await ListUnitMeasureService({
+      limit: -1,
+      fields: "fator_conversao, nome, sigla, unidade_basica_id"
+    }).then(response => response.docs);
+
+    await this.setState(prev => ({
+      ...prev,
+      estados,
+      tabelasFrete,
+      unidadesMedidas
+    }));
+
+    this.calcularPeso({
+      itens: this.state.list,
+      pagamento: this.state.formData.pagamento,
+      estado: this.state.order_data.estado
+    });
   }
 
   changeStatus = async (id, newStatus) => {
@@ -121,19 +144,14 @@ class OrderPaymentForm extends Component {
     }
   };
 
-  removeRecord = async (index) => {
+  removeRecord = async index => {
     // try {
-
     //   let { parcelas } = this.state.order_data.pagamento;
-
     //   if(!parcelas) return;
-
     //   await OrderPaymentService.update(this.state.order_id)(parcelas);
-
     //   this.setState({
     //     order_data: this.state.form
     //   });
-
     //   flashWithSuccess(
     //     "",
     //     `O item, ${produto.nome}, foi removido com sucesso!`
@@ -235,8 +253,7 @@ class OrderPaymentForm extends Component {
   };
 
   showModal = (record, index) => {
-    debugger
-    this.setState(prev =>({
+    this.setState(prev => ({
       ...prev,
       modalVisible: true,
       record,
@@ -248,19 +265,16 @@ class OrderPaymentForm extends Component {
   handleModalCancel = e => {
     this.setState({
       modalVisible: false,
-      editedRecord: null,
+      editedRecord: null
     });
   };
 
   handleModalOk = async modalData => {
     let { parcelas } = this.state.formData.pagamento;
-    debugger
 
     if (this.state.editedRecord !== null) {
       parcelas[this.state.editedRecord] = modalData;
     } else parcelas = [...this.state.formData.pagamento.parcelas, modalData];
-
-
 
     await this.setState(prev => ({
       modalVisible: false,
@@ -268,11 +282,10 @@ class OrderPaymentForm extends Component {
         ...prev.formData,
         pagamento: {
           ...prev.formData.pagamento,
-          parcelas,
+          parcelas
         }
       }
     }));
-
 
     OrderPaymentService.update(this.state.order_id)(
       this.state.formData.pagamento
@@ -359,6 +372,9 @@ class OrderPaymentForm extends Component {
                   <Col span={8}>
                     <Form.Item label="Estado">
                       <Select
+                        value={
+                          this.state.formData.estado || (this.state.order_data && this.state.order_data.estado)
+                        }
                         name="estado"
                         showAction={["focus", "click"]}
                         showSearch
@@ -391,7 +407,7 @@ class OrderPaymentForm extends Component {
                   </Col>
                   <Col span={8}>
                     <Form.Item label="Peso">
-                      <Input name="peso" />
+                      <Input name="peso" value={this.state.formData.peso} />
                     </Form.Item>
                   </Col>
                 </Row>
@@ -433,7 +449,13 @@ class OrderPaymentForm extends Component {
   calcularFrete = () => {
     const { peso, distancia, estado } = this.state.formData;
     let tab = this.state.tabelasFrete.find(i => i.estado.includes(estado));
-    if (!tab) return;
+    if (!tab) {
+      flashWithError(
+        "Não foi possível encontrar uma tabela de frete para o estado selecionado: " +
+          this.state.order_data.estado
+      );
+      return;
+    }
     let preco_frete = 0;
     tab.range_km.forEach(range => {
       if (
@@ -455,6 +477,30 @@ class OrderPaymentForm extends Component {
       .toString()
       .replace(".", ",");
     console.log("O FRETE EH", preco_frete);
+  };
+
+  calcularPeso = pedido => {
+
+    let peso = 0;
+    let fator = 1;
+    pedido.itens.forEach(item => {
+      fator = fatorConversaoUM(
+        this.state.unidadesMedidas,
+        item.embalagem,
+        "kg"
+      );
+      peso += fator * item.quantidade;
+    });
+    this.setState(prev => ({
+      ...prev,
+      formData: {
+        ...prev.formData,
+        estado: pedido.pagamento.estado
+          ? pedido.pagamento.estado
+          : pedido.estado,
+        peso
+      }
+    }));
   };
 }
 
