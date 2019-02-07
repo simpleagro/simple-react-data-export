@@ -28,6 +28,7 @@ import parseErrors from "lib/parseErrors";
 import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
 import ModalForm from "./modal";
 import * as IBGEService from "services/ibge";
+import { configAPP } from "config/app";
 
 class OrderPaymentForm extends Component {
   constructor(props) {
@@ -347,23 +348,30 @@ class OrderPaymentForm extends Component {
               }}>
               {this.state.order_data && (
                 <div>
-                  <p>{`Preço Total Royalties: ${
-                    this.state.order_data.cliente.cpf_cnpj
-                  }`}</p>
-                  <p>{`Preço Total Germoplasma: ${
-                    this.state.order_data.cliente.cpf_cnpj
-                  }`}</p>
-                  <p>{`Preço Total Tratamento: ${
-                    this.state.order_data.cliente.cpf_cnpj
-                  }`}</p>
+                  {configAPP.detalharPrecoPorCaracteristica() && (
+                    <React.Fragment>
+                      <p>{`Preço Total Royalties: ${
+                        this.state.order_data.cliente.cpf_cnpj
+                      }`}</p>
+                      <p>{`Preço Total Germoplasma: ${
+                        this.state.order_data.cliente.cpf_cnpj
+                      }`}</p>
+                      <p>{`Preço Total Tratamento: ${
+                        this.state.order_data.cliente.cpf_cnpj
+                      }`}</p>
+                    </React.Fragment>
+                  )}
+
                   <p>{`Preço Total Frete: ${currency()(
                     this.state.formData.total_pedido_frete || 0
                   )}`}</p>
                   <p>{`Total Pedido: ${currency()(
-                    Number(this.state.total_pedido) + (Number(this.state.formData.total_pedido_frete || 0)) || 0
+                    Number(this.state.total_pedido) +
+                      Number(this.state.formData.total_pedido_frete || 0) || 0
                   )}`}</p>
                   <p>{`Saldo a parcelar: ${currency()(
-                    Number(this.state.total_pedido) - this.valorTotalParcelas() || 0
+                    Number(this.state.total_pedido) -
+                      this.valorTotalParcelas() || 0
                   )}`}</p>
                 </div>
               )}
@@ -538,8 +546,14 @@ class OrderPaymentForm extends Component {
     }));
   };
 
-  valorTotalParcelas () {
-    return this.state.formData.pagamento && this.state.formData.pagamento.parcelas && this.state.formData.pagamento.parcelas.map( p => Number(p.valor_parcela)).reduce( (a,b) => a + b, 0);
+  valorTotalParcelas() {
+    return (
+      this.state.formData.pagamento &&
+      this.state.formData.pagamento.parcelas &&
+      this.state.formData.pagamento.parcelas
+        .map(p => Number(p.valor_parcela))
+        .reduce((a, b) => a + b, 0)
+    );
   }
 }
 
