@@ -1,28 +1,11 @@
 import React, { Component } from "react";
-import { Form, Input, Card, Col, Row, Select, DatePicker } from "antd";
+import { Form, Card, Col, Row, Select, DatePicker } from "antd";
 import moment from "moment";
 import PropTypes from "prop-types";
-
-import { list as ListFormOfPaymentsService } from "services/form-of-payment";
 
 const { Option } = Select;
 
 class ConfigurarFPCaracteristica extends Component {
-  state = { formasDePagamento: [] };
-
-  async componentDidMount() {
-
-    window.meuState = this;
-
-    ListFormOfPaymentsService({
-      limit: -1,
-      fields: "descricao",
-      status: true
-    })
-      .then(response => response.docs)
-      .then(response => this.setState({ formasDePagamento: response }));
-  }
-
   render() {
     const { getFieldDecorator } = this.props.form;
     return (
@@ -58,8 +41,8 @@ class ConfigurarFPCaracteristica extends Component {
               <Form.Item label="Germoplasma">
                 {getFieldDecorator("venc_germoplasma", {
                   initialValue: this.props.formData.venc_germoplasma
-                  ? moment(this.props.formData.venc_germoplasma, "YYYY-MM-DD")
-                  : undefined
+                    ? moment(this.props.formData.venc_germoplasma, "YYYY-MM-DD")
+                    : undefined
                 })(
                   <DatePicker
                     onChange={(data, dataString) =>
@@ -81,8 +64,8 @@ class ConfigurarFPCaracteristica extends Component {
               <Form.Item label="Tratamento">
                 {getFieldDecorator("venc_tratamento", {
                   initialValue: this.props.formData.venc_tratamento
-                  ? moment(this.props.formData.venc_tratamento, "YYYY-MM-DD")
-                  : undefined
+                    ? moment(this.props.formData.venc_tratamento, "YYYY-MM-DD")
+                    : undefined
                 })(
                   <DatePicker
                     onChange={(data, dataString) =>
@@ -105,8 +88,8 @@ class ConfigurarFPCaracteristica extends Component {
                 <Form.Item label="Frete">
                   {getFieldDecorator("venc_frete", {
                     initialValue: this.props.formData.venc_frete
-                    ? moment(this.props.formData.venc_frete, "YYYY-MM-DD")
-                    : undefined
+                      ? moment(this.props.formData.venc_frete, "YYYY-MM-DD")
+                      : undefined
                   })(
                     <DatePicker
                       onChange={(data, dataString) =>
@@ -158,12 +141,11 @@ class ConfigurarFPCaracteristica extends Component {
                         }
                       });
                     }}>
-                    {this.state.formasDePagamento &&
-                      this.state.formasDePagamento.map(s => (
-                        <Option key={s._id} value={s.descricao}>
-                          {s.descricao}
-                        </Option>
-                      ))}
+                    {["REAIS"].map((s, index) => (
+                      <Option key={`pgto_r_${index}`} value={s}>
+                        {s}
+                      </Option>
+                    ))}
                   </Select>
                 )}
               </Form.Item>
@@ -195,12 +177,11 @@ class ConfigurarFPCaracteristica extends Component {
                         }
                       });
                     }}>
-                    {this.state.formasDePagamento &&
-                      this.state.formasDePagamento.map(s => (
-                        <Option key={s._id} value={s.descricao}>
-                          {s.descricao}
-                        </Option>
-                      ))}
+                    {["REAIS", "GRÃOS"].map((s, index) => (
+                      <Option key={`pgto_g_${index}`} value={s}>
+                        {s}
+                      </Option>
+                    ))}
                   </Select>
                 )}
               </Form.Item>
@@ -232,12 +213,11 @@ class ConfigurarFPCaracteristica extends Component {
                         }
                       });
                     }}>
-                    {this.state.formasDePagamento &&
-                      this.state.formasDePagamento.map(s => (
-                        <Option key={s._id} value={s.descricao}>
-                          {s.descricao}
-                        </Option>
-                      ))}
+                    {["REAIS", "GRÃOS"].map((s, index) => (
+                      <Option key={`pgto_t_${index}`} value={s}>
+                        {s}
+                      </Option>
+                    ))}
                   </Select>
                 )}
               </Form.Item>
@@ -270,12 +250,11 @@ class ConfigurarFPCaracteristica extends Component {
                           }
                         });
                       }}>
-                      {this.state.formasDePagamento &&
-                        this.state.formasDePagamento.map(s => (
-                          <Option key={s._id} value={s.descricao}>
-                            {s.descricao}
-                          </Option>
-                        ))}
+                      {["REAIS"].map((s, index) => (
+                        <Option key={`pgto_frt_${index}`} value={s}>
+                          {s}
+                        </Option>
+                      ))}
                     </Select>
                   )}
                 </Form.Item>
@@ -296,7 +275,7 @@ ConfigurarFPCaracteristica.defaultProps = {
 ConfigurarFPCaracteristica.propTypes = {
   form: PropTypes.object.isRequired,
   handleFormState: PropTypes.func.isRequired,
-  formData: PropTypes.object.isRequired,
+  formData: PropTypes.object.isRequired
 };
 
 export default ConfigurarFPCaracteristica;

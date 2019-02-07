@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import {
   Divider,
   Button,
+  Spin,
   Icon,
   Popconfirm,
   Row,
@@ -21,7 +22,7 @@ import * as OrderPaymentService from "services/orders.payment";
 import { list as ListUnitMeasureService } from "services/units-measures";
 import { list as ListShipTableOrderItemsService } from "services/shiptable";
 import SimpleTable from "common/SimpleTable";
-import { fatorConversaoUM } from "common/utils";
+import { fatorConversaoUM, currency } from "common/utils";
 import { flashWithSuccess, flashWithError } from "common/FlashMessages";
 import parseErrors from "lib/parseErrors";
 import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
@@ -33,6 +34,7 @@ class OrderPaymentForm extends Component {
     super(props);
     this.state = {
       modalVisible: false,
+      calculandoFrete: false,
       formData: {
         pagamento: {
           parcelas: []
@@ -110,6 +112,13 @@ class OrderPaymentForm extends Component {
       itens: this.state.list,
       pagamento: this.state.formData.pagamento,
       estado: this.state.order_data.estado
+    });
+
+    this.setState({
+      total_pedido: this.state.list
+        .map(t => t.total_preco_item)
+        .reduce((a, b) => Number(a) + Number(b), 0)
+      // this.state.saldo_a_parcelar
     });
   }
 
@@ -347,22 +356,33 @@ class OrderPaymentForm extends Component {
                   <p>{`Preço Total Tratamento: ${
                     this.state.order_data.cliente.cpf_cnpj
                   }`}</p>
-                  <p>{`Preço Total Frete: ${
-                    this.state.order_data.cliente.cpf_cnpj
-                  }`}</p>
-                  <p>{`Total Pedido: ${
-                    this.state.order_data.cliente.cpf_cnpj
-                  }`}</p>
-                  <p>{`Saldo a parcelar: ${
-                    this.state.order_data.cliente.cpf_cnpj
-                  }`}</p>
+                  <p>{`Preço Total Frete: ${currency()(
+                    this.state.formData.total_pedido_frete || 0
+                  )}`}</p>
+                  <p>{`Total Pedido: ${currency()(
+                    Number(this.state.total_pedido) + (Number(this.state.formData.total_pedido_frete || 0)) || 0
+                  )}`}</p>
+                  <p>{`Saldo a parcelar: ${currency()(
+                    Number(this.state.total_pedido) - this.valorTotalParcelas() || 0
+                  )}`}</p>
                 </div>
               )}
-              >
             </Card>
           </Col>
           <Col span={19}>
-            <Card title="Frete" bordered={false}>
+            <Card
+              title={
+                <div>
+                  Frete
+                  <Spin
+                    spinning={this.state.calculandoFrete}
+                    indicator={
+                      <Icon type="loading" style={{ fontSize: 24 }} spin />
+                    }
+                  />
+                </div>
+              }
+              bordered={false}>
               <Form onChange={this.handleFormState}>
                 <Row
                   gutter={8}
@@ -373,7 +393,9 @@ class OrderPaymentForm extends Component {
                     <Form.Item label="Estado">
                       <Select
                         value={
-                          this.state.formData.estado || (this.state.order_data && this.state.order_data.estado)
+                          this.state.formData.estado ||
+                          (this.state.order_data &&
+                            this.state.order_data.estado)
                         }
                         name="estado"
                         showAction={["focus", "click"]}
@@ -427,7 +449,7 @@ class OrderPaymentForm extends Component {
               <SimpleTable
                 pagination={this.state.pagination}
                 spinning={this.state.loadingData}
-                rowKey="_id"
+                rowKey={() => new Date().getTime() + Math.random()}
                 columns={this.tableConfig()}
                 dataSource={this.state.formData.pagamento.parcelas}
                 onChange={this.handleTableChange}
@@ -447,9 +469,18 @@ class OrderPaymentForm extends Component {
   }
 
   calcularFrete = () => {
+    this.setState({ calculandoFrete: true });
     const { peso, distancia, estado } = this.state.formData;
     let tab = this.state.tabelasFrete.find(i => i.estado.includes(estado));
     if (!tab) {
+      this.setState(prev => ({
+        ...prev,
+        formData: {
+          ...prev.formData,
+          total_pedido_frete: 0
+        },
+        calculandoFrete: false
+      }));
       flashWithError(
         "Não foi possível encontrar uma tabela de frete para o estado selecionado: " +
           this.state.order_data.estado
@@ -472,15 +503,19 @@ class OrderPaymentForm extends Component {
         });
       }
     });
-    preco_frete = parseFloat(preco_frete)
-      .toFixed(2)
-      .toString()
-      .replace(".", ",");
-    console.log("O FRETE EH", preco_frete);
+    preco_frete = parseFloat(preco_frete).toFixed(2);
+
+    this.setState(prev => ({
+      ...prev,
+      formData: {
+        ...prev.formData,
+        total_pedido_frete: preco_frete
+      },
+      calculandoFrete: false
+    }));
   };
 
   calcularPeso = pedido => {
-
     let peso = 0;
     let fator = 1;
     pedido.itens.forEach(item => {
@@ -502,6 +537,10 @@ class OrderPaymentForm extends Component {
       }
     }));
   };
+
+  valorTotalParcelas () {
+    return this.state.formData.pagamento && this.state.formData.pagamento.parcelas && this.state.formData.pagamento.parcelas.map( p => Number(p.valor_parcela)).reduce( (a,b) => a + b, 0);
+  }
 }
 
 export default OrderPaymentForm;

@@ -177,7 +177,7 @@ const ModalForm = Form.create()(
                   { required: true, message: "Este campo é obrigatório!" }
                 ],
                 initialValue: this.state.formData.valor_parcela || undefined
-              })(<InputNumber name="valor_parcela" />)}
+              })(<InputNumber style={{width: "100%"}} name="valor_parcela" />)}
             </Form.Item>
           </Form>
         </Modal>

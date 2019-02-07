@@ -503,8 +503,10 @@ class OrderForm extends Component {
 
               <Form.Item label="Estado" {...formItemLayout}>
                 <Input
-                value={this.state.formData.estado}
-                style={{ width: 200 }} readOnly />
+                  value={this.state.formData.estado}
+                  style={{ width: 200 }}
+                  readOnly
+                />
               </Form.Item>
             </React.Fragment>
           )}
@@ -526,6 +528,18 @@ class OrderForm extends Component {
                     .indexOf(input.toLowerCase()) >= 0
                 }
                 onChange={e => {
+                  if (e !== "CIF")
+                    setTimeout(() => {
+                      this.setState(prev => ({
+                        ...prev,
+                        formData: {
+                          ...prev.formData,
+                          pgto_frete: "",
+                          venc_frete: ""
+                        }
+                      }));
+                    }, 0);
+
                   this.handleFormState({
                     target: { name: "tipo_frete", value: e }
                   });
@@ -789,14 +803,14 @@ class OrderForm extends Component {
 
   async onSelectPropriedade(e) {
     const { estado, cidade, ...propriedade } = JSON.parse(e);
-    this.setState(prev =>({
+    this.setState(prev => ({
       ...prev,
-        formData: {
-          ...prev.formData,
-          propriedade,
-          cidade,
-          estado
-        }
+      formData: {
+        ...prev.formData,
+        propriedade,
+        cidade,
+        estado
+      }
     }));
   }
 
