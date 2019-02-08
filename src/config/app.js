@@ -1,7 +1,7 @@
 export const configAPP = {
-  usarConfiguracaoFPCaracteristica: () => true,
-  detalharPrecoPorCaracteristica: () => false,
-  usarCalculoDataBaseMes: () => false, // sf
+  usarConfiguracaoFPCaracteristica: () => true, //default false
+  detalharPrecoPorCaracteristica: () => true, //default false
+  usarCalculoDataBaseMes: () => false, // sf, default true
   quantidadeDeDiasCalculoDataBase: () => 30,
 };
 

@@ -10,7 +10,8 @@ import {
   Card,
   Form,
   Select,
-  Input
+  Input,
+  DatePicker
 } from "antd";
 import debounce from "lodash/debounce";
 import moment from "moment";
@@ -62,7 +63,7 @@ class OrderPaymentForm extends Component {
       const items = await OrderItemsService.list(this.state.order_id)(aqp);
       const orderData = await OrderService.get(this.state.order_id, {
         fields:
-          "tabela_preco_base, numero, cliente, propriedade, pagamento, cidade, estado"
+          "tabela_preco_base, numero, cliente, propriedade, pagamento, cidade, estado, pgto_germoplasma, pgto_royalties, pgto_tratamento"
       });
       this.setState(prev => ({
         ...prev,
@@ -88,7 +89,7 @@ class OrderPaymentForm extends Component {
   async componentDidMount() {
     await this.initializeList({
       fields:
-        "produto, quantidade, desconto, total_preco_item, status, embalagem"
+        "produto, quantidade, desconto, total_preco_item, status, embalagem, preco_total_royalties, preco_total_germoplasma, preco_total_tratamento"
     });
 
     const estados = await IBGEService.listaEstados();
@@ -179,6 +180,14 @@ class OrderPaymentForm extends Component {
     });
     await this.setState(prev => ({ ...prev, formData: form }));
     this.calcularFrete();
+  };
+
+  handleGraosFormState = async event => {
+    if (!event.target.name) return;
+    let form = Object.assign({}, this.state.formData, {
+      [event.target.name]: event.target.value
+    });
+    await this.setState(prev => ({ ...prev, formData: form }));
   };
 
   tableConfig = () => [
@@ -306,7 +315,17 @@ class OrderPaymentForm extends Component {
     this.formRef = formRef;
   };
 
+  saveForm = async e => {
+    this.props.form.validateFields(async err => {
+      if (err) return;
+      else {
+      }
+    });
+  };
+
   render() {
+    const { getFieldDecorator } = this.props.form;
+
     return (
       <div>
         <SimpleBreadCrumb to={`/pedidos`} history={this.props.history} />
@@ -348,31 +367,50 @@ class OrderPaymentForm extends Component {
               }}>
               {this.state.order_data && (
                 <div>
-                  {configAPP.detalharPrecoPorCaracteristica() && (
-                    <React.Fragment>
-                      <p>{`Preço Total Royalties: ${
-                        this.state.order_data.cliente.cpf_cnpj
-                      }`}</p>
-                      <p>{`Preço Total Germoplasma: ${
-                        this.state.order_data.cliente.cpf_cnpj
-                      }`}</p>
-                      <p>{`Preço Total Tratamento: ${
-                        this.state.order_data.cliente.cpf_cnpj
-                      }`}</p>
-                    </React.Fragment>
-                  )}
-
                   <p>{`Preço Total Frete: ${currency()(
                     this.state.formData.total_pedido_frete || 0
                   )}`}</p>
-                  <p>{`Total Pedido: ${currency()(
-                    Number(this.state.total_pedido) +
-                      Number(this.state.formData.total_pedido_frete || 0) || 0
-                  )}`}</p>
-                  <p>{`Saldo a parcelar: ${currency()(
-                    Number(this.state.total_pedido) -
-                      this.valorTotalParcelas() || 0
-                  )}`}</p>
+
+                  {configAPP.detalharPrecoPorCaracteristica() && (
+                    <React.Fragment>
+                      <p>{`Preço Total Royalties: ${currency()(
+                        this.precoTotalCaracteristica("royalties") || 0
+                      )}`}</p>
+                      <p>{`Preço Total Germoplasma: ${currency()(
+                        this.precoTotalCaracteristica("germoplasma") || 0
+                      )}`}</p>
+                      <p>{`Preço Total Tratamento: ${currency()(
+                        this.precoTotalCaracteristica("tratamento") || 0
+                      )}`}</p>
+                    </React.Fragment>
+                  )}
+
+                  {configAPP.usarConfiguracaoFPCaracteristica() && (
+                    <React.Fragment>
+                      <p>{`Total Pedido REAIS: ${currency()(
+                        this.state.formData.total_pedido_reais || 0
+                      )}`}</p>
+                      <p>{`Saldo a parcelar REAIS: ${currency()(0)}`}</p>
+                      <p>{`Total Pedido GRÃOS: ${currency()(
+                        this.state.formData.total_pedido_graos || 0
+                      )}`}</p>
+                      <p>{`Saldo a parcelar GRÃOS: ${currency()(0)}`}</p>
+                    </React.Fragment>
+                  )}
+
+                  {!configAPP.usarConfiguracaoFPCaracteristica() && (
+                    <React.Fragment>
+                      <p>{`Total Pedido: ${currency()(
+                        Number(this.state.total_pedido) +
+                          Number(this.state.formData.total_pedido_frete || 0) ||
+                          0
+                      )}`}</p>
+                      <p>{`Saldo a parcelar: ${currency()(
+                        Number(this.state.total_pedido) -
+                          this.valorTotalParcelas() || 0
+                      )}`}</p>
+                    </React.Fragment>
+                  )}
                 </div>
               )}
             </Card>
@@ -443,6 +481,66 @@ class OrderPaymentForm extends Component {
                 </Row>
               </Form>
             </Card>
+            {configAPP.usarConfiguracaoFPCaracteristica() &&
+              this.existePagamentoEmGraos() && (
+                <Card title="Grãos" bordered={false}>
+                  <Form onChange={this.handleGraosFormState}>
+                    <Row
+                      gutter={8}
+                      type="flex"
+                      justify="space-between"
+                      align="middle">
+                      <Col span={8}>
+                        <Form.Item label="Data Pagamento">
+                          {getFieldDecorator("data_pgto_graos", {
+                            initialValue: this.state.formData.data_pgto_graos
+                              ? moment(
+                                  this.state.formData.data_pgto_graos,
+                                  "YYYY-MM-DD"
+                                )
+                              : undefined
+                          })(
+                            <DatePicker
+                              style={{ width: "100%" }}
+                              onChange={(data, dataString) =>
+                                this.handleGraosFormState({
+                                  target: {
+                                    name: "data_pgto_graos",
+                                    value: dataString
+                                      ? moment(dataString, "DD/MM/YYYY").format(
+                                          "YYYY-MM-DD"
+                                        )
+                                      : undefined
+                                  }
+                                })
+                              }
+                              allowClear
+                              format={"DD/MM/YYYY"}
+                              name="data_pgto_graos"
+                            />
+                          )}
+                        </Form.Item>
+                      </Col>
+                      <Col span={8}>
+                        <Form.Item label="Peso">
+                          <Input
+                            name="peso_graos"
+                            value={this.state.formData.peso_graos}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={8}>
+                        <Form.Item label="Local Entrega">
+                          <Input
+                            name="entrega_graos"
+                            value={this.state.formData.entrega_graos}
+                          />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  </Form>
+                </Card>
+              )}
             <Card
               title="Parcelas"
               bordered={false}
@@ -546,6 +644,15 @@ class OrderPaymentForm extends Component {
     }));
   };
 
+  existePagamentoEmGraos() {
+    return (
+      this.state.order_data &&
+      Object.keys(this.state.order_data).some(
+        c => /pgto_/.test(c) && this.state.order_data[c] != "REAIS"
+      )
+    );
+  }
+
   valorTotalParcelas() {
     return (
       this.state.formData.pagamento &&
@@ -555,6 +662,14 @@ class OrderPaymentForm extends Component {
         .reduce((a, b) => a + b, 0)
     );
   }
+
+  precoTotalCaracteristica(c) {
+    return this.state.list
+      .map(t => t[`preco_total_${c}`])
+      .reduce((a, b) => Number(a) + Number(b), 0);
+  }
 }
 
-export default OrderPaymentForm;
+const WrappepOrderPaymentForm = Form.create()(OrderPaymentForm);
+
+export default WrappepOrderPaymentForm;
