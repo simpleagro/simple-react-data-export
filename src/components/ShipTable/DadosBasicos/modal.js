@@ -1,6 +1,9 @@
 import React from 'react'
-import { Modal, Form, Input, Button, Select } from 'antd';
+import { Modal, Form, Input, Button, Select, DatePicker } from 'antd';
 import * as IBGEService from "../../../services/ibge";
+import locale from "antd/lib/date-picker/locale/pt_BR";
+import moment from "moment";
+import "moment/locale/pt-br";
 
 const ModalForm = Form.create()(
     class extends React.Component {
@@ -61,6 +64,25 @@ const ModalForm = Form.create()(
                   <Input
                     name="nome"
                     ref={input => (this.titleInput = input)}
+                  />
+                )}
+              </Form.Item>
+              <Form.Item label="Data Base">
+                {getFieldDecorator("data_base", {
+                  initialValue: this.state.formData.data_base
+                    ? moment(this.state.formData.data_base)
+                    : undefined
+                })(
+                  <DatePicker
+                    format="DD/MM/YYYY"
+                    locale={locale}
+                    style={{width: '100%'}}
+                    onChange={e => {
+                      this.onHadleChange({
+                        target: { name: "data_base", value: e }
+                      })}
+                    }
+                    name="data_base"
                   />
                 )}
               </Form.Item>

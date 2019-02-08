@@ -213,6 +213,15 @@ class PriceTable extends Component {
       },
       render: (text) => text ? formatDate(text) : ''
     },
+    {
+      title: "Moeda",
+      dataIndex: "moeda",
+      key: "moeda",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      }
+    },
     /* {
       title: "Validade De",
       dataIndex: "data_validade_de",

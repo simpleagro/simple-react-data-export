@@ -69,6 +69,17 @@ const ModalForm = Form.create()(
                   />
                 )}
               </Form.Item>
+              <Form.Item label="Centro de Custo">
+                {getFieldDecorator('centro_custo', {
+                  /* rules: [{ required: true, message: "Este campo é obrigatório!" }], */
+                  initialValue: this.state.formData.centro_custo
+                })(
+                  <Input
+                    name="centro_custo"
+                    ref={input => (this.titleInput = input)}
+                  />
+                )}
+              </Form.Item>
               <Form.Item
                 labelCol={{ span: 4 }}
                 wrapperCol={{ span: 12 }}>

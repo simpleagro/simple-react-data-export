@@ -4,7 +4,7 @@ import parseErrors from "../lib/parseErrors";
 
 let API_URL;
 
-if (process.env.REACT_APP_API_SECURE === "true") {
+/*if (process.env.REACT_APP_API_SECURE === "true") {
   API_URL = `https://${process.env.REACT_APP_API_IP}:${
     process.env.REACT_APP_API_PORT
   }/api`;
@@ -12,7 +12,9 @@ if (process.env.REACT_APP_API_SECURE === "true") {
   API_URL = `http://${process.env.REACT_APP_API_IP}:${
     process.env.REACT_APP_API_PORT
   }/api`;
-}
+}*/
+
+API_URL = `https://homologacao.simpleagro.com.br/api`
 
 const cookies = new Cookies();
 

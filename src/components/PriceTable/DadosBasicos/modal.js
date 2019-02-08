@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Form, Input, Button, Select, DatePicker } from 'antd';
+import { Modal, Form, Input, Button, Select, DatePicker, Checkbox } from 'antd';
 import * as GroupsServices from "../../../services/productgroups";
 import * as SeasonsServices from "../../../services/seasons";
 import locale from "antd/lib/date-picker/locale/pt_BR";
@@ -70,6 +70,53 @@ const ModalForm = Form.create()(
             {safra.descricao}
           </Select.Option>
         ))
+      }
+
+      gerarDataBaseRegra = (por_regra_base, getFieldDecorator) => {
+        if(!por_regra_base) {
+          return <Form.Item label="Data Base">
+            {getFieldDecorator("data_base", {
+              initialValue: this.state.formData.data_base
+                ? moment(this.state.formData.data_base)
+                : undefined
+            })(
+              <DatePicker
+                format="DD/MM/YYYY"
+                locale={locale}
+                style={{width: '100%'}}
+                onChange={e => {
+                  this.onHadleChange({
+                    target: { name: "data_base", value: e }
+                  })}
+                }
+                name="data_base"
+              />
+            )}
+          </Form.Item>
+        }else {
+          let group_regras_preco = [{label: "Germoplasma", chave:"germoplasma"}, {label: "Royalties", chave:"royalties"}]
+          return group_regras_preco.map( regra_preco => 
+            <Form.Item label={`Data Base ${regra_preco.label}`}>
+              {getFieldDecorator(`data_base_${regra_preco.chave}`, {
+                initialValue: this.state.formData[`data_base_${regra_preco.chave}`]
+                  ? moment(this.state.formData[`data_base_${regra_preco.chave}`])
+                  : undefined
+              })(
+                <DatePicker
+                  format="DD/MM/YYYY"
+                  locale={locale}
+                  style={{width: '100%'}}
+                  onChange={e => {
+                    this.onHadleChange({
+                      target: { name: `data_base_${regra_preco.chave}`, value: e }
+                    })}
+                  }
+                  name={`data_base_${regra_preco.chave}`}
+                />
+              )}
+            </Form.Item>
+          )
+        }
       }
 
       render() {
@@ -160,25 +207,27 @@ const ModalForm = Form.create()(
                   </Select>
                 )}
               </Form.Item>
-              <Form.Item label="Data Base">
-                {getFieldDecorator("data_base", {
-                  initialValue: this.state.formData.data_base
-                    ? moment(this.state.formData.data_base, "DD/MM/YYYY")
-                    : undefined
+              <Form.Item /*  {...tailFormItemLayout} */>
+                {getFieldDecorator("data_base_por_regra", {
+                    initialValue: this.state.formData.data_base_por_regra
                 })(
-                  <DatePicker
-                    format="DD/MM/YYYY"
-                    locale={locale}
-                    style={{width: '100%'}}
-                    onChange={e => {
-                      this.onHadleChange({
-                        target: { name: "data_base", value: e.format("DD/MM/YYYY") }
-                      })}
-                    }
-                    name="data_base"
-                  />
+                <Checkbox 
+                    checked={this.state.formData.data_base_por_regra}
+                    onChange={e =>
+                    this.onHadleChange({
+                        target: {
+                        name: "data_base_por_regra",
+                        value: e.target.checked
+                        }
+                    })
+                    }>
+                    Data Base por regra de preço?
+                </Checkbox>
                 )}
               </Form.Item>
+
+              {this.gerarDataBaseRegra(this.state.formData.data_base_por_regra, getFieldDecorator)}
+
               <Form.Item label="Data Validade de">
                 {getFieldDecorator("data_validade_de", {
                   initialValue: this.state.formData.data_validade_de
