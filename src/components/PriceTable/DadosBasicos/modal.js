@@ -202,7 +202,7 @@ const ModalForm = Form.create()(
                     }
                   >
                     {/* this.listarMoedas(this.state.moedas) */}
-                    <Select.Option key={`GRÃO`} value={`GRÃO`}>{`Grão`}</Select.Option>
+                    <Select.Option key={`GRÃOS`} value={`GRÃOS`}>{`Grãos`}</Select.Option>
                     <Select.Option key={`REAIS`} value={`REAIS`}>{`Reais`}</Select.Option>
                   </Select>
                 )}
