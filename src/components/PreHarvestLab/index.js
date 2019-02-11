@@ -138,8 +138,8 @@ class PreHarvest extends Component {
     },
     {
       title: "Código ERP",
-      dataIndex: "codigo_erp",
-      key: "codigo_erp"
+      dataIndex: "pre_colheita.codigo_erp",
+      key: "pre_colheita.codigo_erp"
     },
     {
       title: "Contrato",
@@ -176,7 +176,7 @@ class PreHarvest extends Component {
     },
     {
       title: "Responsável",
-      dataIndex: "pre_colheita.responsavel",
+      dataIndex: "pre_colheita.responsavel.nome",
       key: "pre_colheita.responsavel.nome",
       ...simpleTableSearch(this)("pre_colheita.responsavel.nome")
     },
