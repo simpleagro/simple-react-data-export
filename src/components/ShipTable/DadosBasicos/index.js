@@ -8,6 +8,7 @@ import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
 import ModalForm from "./modal"
+import { formatDate } from '../../common/utils'
 
 class ShipTable extends Component {
   constructor(props) {
@@ -128,6 +129,16 @@ class ShipTable extends Component {
         if (sorter === "ascendent") return -1;
         else return 1;
       }
+    },
+    {
+      title: "Data Base",
+      dataIndex: "data_base",
+      key: "data_base",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      },
+      render: (text) => text ? formatDate(text) : ''
     },
     {
       title: "Estado",
