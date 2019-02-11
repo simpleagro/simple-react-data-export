@@ -22,7 +22,11 @@ import {
   flashWithSuccess,
   flashWithError
 } from "../../../common/FlashMessages";
-import { valorFinalJurosCompostos, currency } from "common/utils";
+import {
+  valorFinalJurosCompostos,
+  currency,
+  normalizeString
+} from "common/utils";
 import parseErrors from "../../../../lib/parseErrors";
 import { PainelHeader } from "../../../common/PainelHeader";
 import * as ProductGroupService from "services/productgroups";
@@ -663,18 +667,6 @@ class OrderItemForm extends Component {
         id={`rowVariacaoDinamico_${obj.chave}`}>
         <Col span={12}>
           <Form.Item
-            help={
-              !this.state.variacoesSelecionadas ||
-              !this.state.variacoesSelecionadas.hasOwnProperty(variacao.chave)
-                ? "Selecione um(a) " + variacao.label + " primeiro"
-                : ""
-            }
-            validateStatus={
-              !this.state.variacoesSelecionadas ||
-              !this.state.variacoesSelecionadas.hasOwnProperty(variacao.chave)
-                ? "warning"
-                : ""
-            }
             label={`Preço - ${obj.label}`}
             {...{
               labelCol: { span: 12 },
@@ -771,6 +763,29 @@ class OrderItemForm extends Component {
     });
   };
 
+  /**
+   * totalPrecoItemFormaPagamento
+   * @param  {String} forma
+   * @param  {String} valor
+   * @return {void}@memberof OrderItemForm
+   */
+  async totalPrecoItemFormaPagamento(forma, valor) {
+    forma = normalizeString(forma);
+
+    return this.setState(prev => {
+      return {
+        ...prev,
+        formData: {
+          ...prev.formData,
+          [`total_preco_item_${forma}`]:
+            window.simpleagroapp.getNumber(
+              prev.formData[`total_preco_item_${forma}`] || 0
+            ) + window.simpleagroapp.getNumber(valor)
+        }
+      };
+    });
+  }
+
   async atualizaValorVariacao(variacao, valor) {
     try {
       this.setState({ [`loadingVariacoes_${variacao.chave}`]: true });
@@ -781,9 +796,11 @@ class OrderItemForm extends Component {
           "grupo_produto.id": this.state.formData.grupo_produto.id,
           "caracteristica.chave": variacao.chave,
           fields:
-            "u_m_preco, data_base, taxa_adicao, taxa_supressao, grupo_produto,caracteristica,precos.$",
+            "u_m_preco, data_base, taxa_adicao, taxa_supressao, grupo_produto,caracteristica,precos.$, moeda",
           "precos.deleted": false,
-          limit: 1
+          ...(configAPP.usarConfiguracaoFPCaracteristica() && {
+            moeda: this.props.pedido[`pgto_${variacao.chave}`]
+          })
         }).then(response => response.docs);
 
         if (tabelaCaract && tabelaCaract.length) {
@@ -807,10 +824,17 @@ class OrderItemForm extends Component {
                 );
             const taxa =
               periodo && periodo > 0
-                ? tabelaCaract[0].taxa_adicao
-                : tabelaCaract[0].taxa_supressao;
+                ? window.simpleagroapp.getNumber(tabelaCaract[0].taxa_adicao)
+                : window.simpleagroapp.getNumber(
+                    tabelaCaract[0].taxa_supressao
+                  );
 
             if (periodo) preco = valorFinalJurosCompostos(preco, taxa, periodo);
+
+            await this.totalPrecoItemFormaPagamento(
+              this.props.pedido[`pgto_${variacao.chave}`],
+              preco
+            );
 
             this.setState(prev => ({
               ...prev,
@@ -860,39 +884,51 @@ class OrderItemForm extends Component {
               formData: { ...prev.formData, ...tabelaPrecoOrig }
             }));
 
-          variacao.regraPrecoBase.map(rpb => {
-            let tabelaPreco = null;
-            if (configAPP.usarConfiguracaoFPCaracteristica()) {
-              if (this.props.pedido[`pgto_${rpb.chave}`] === "GRÃOS") {
-                tabelaPreco = tabelaPrecoOrig["GRÃO"];
-              } else if (this.props.pedido[`pgto_${rpb.chave}`] === "REAIS") {
-                tabelaPreco = tabelaPrecoOrig["REAIS"];
-              }
-            }
-            let preco = tabelaPreco[`preco_${rpb.chave}`];
-            const periodo = configAPP.usarCalculoDataBaseMes()
-              ? moment().diff(tabelaPreco.data_base, "month")
-              : Math.round(
-                  moment().diff(tabelaPreco.data_base, "days") /
-                    (configAPP.quantidadeDeDiasCalculoDataBase() || 30)
-                );
-            const taxa =
-              periodo && periodo > 0
-                ? tabelaPreco.taxa_adicao
-                : tabelaPreco.taxa_supressao;
+          await Promise.all(
+            variacao.regraPrecoBase.map(async rpb => {
+              let tabelaPreco = tabelaPrecoOrig;
+              if (configAPP.usarConfiguracaoFPCaracteristica())
+                tabelaPreco =
+                  tabelaPrecoOrig[this.props.pedido[`pgto_${rpb.chave}`]];
 
-            if (periodo) preco = valorFinalJurosCompostos(preco, taxa, periodo);
+              let preco = tabelaPreco[`preco_${rpb.chave}`];
 
-            if (tabelaPreco)
-              this.setState(prev => ({
-                ...prev,
-                formData: {
-                  ...prev.formData,
-                  [`preco_${rpb.chave}_tabela`]: preco,
-                  [`preco_${rpb.chave}`]: preco
-                }
-              }));
-          });
+              // A data base pode ser padrão ou marcado por data royalties, germoplasma ... etc
+              let dataBaseCalculo =
+                tabelaPreco.data_base_por_regra === true
+                  ? tabelaPreco[`data_base_${rpb.chave}`]
+                  : tabelaPreco.data_base;
+              let periodo = configAPP.usarCalculoDataBaseMes()
+                ? moment().diff(dataBaseCalculo, "month")
+                : Math.round(
+                    moment().diff(dataBaseCalculo, "days") /
+                      (configAPP.quantidadeDeDiasCalculoDataBase() || 30)
+                  );
+
+              const taxa =
+                periodo && periodo > 0
+                  ? window.simpleagroapp.getNumber(tabelaPreco.taxa_adicao)
+                  : window.simpleagroapp.getNumber(tabelaPreco.taxa_supressao);
+
+              if (periodo)
+                preco = valorFinalJurosCompostos(preco, taxa, periodo);
+
+              await this.totalPrecoItemFormaPagamento(
+                this.props.pedido[`pgto_${rpb.chave}`],
+                preco
+              );
+
+              if (tabelaPreco)
+                this.setState(prev => ({
+                  ...prev,
+                  formData: {
+                    ...prev.formData,
+                    [`preco_${rpb.chave}_tabela`]: preco,
+                    [`preco_${rpb.chave}`]: preco
+                  }
+                }));
+            })
+          );
         }
       }
 

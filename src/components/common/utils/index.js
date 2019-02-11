@@ -52,7 +52,6 @@ const zeroEsquerda = data => {
 // Calcular fator de conversão de unidade de medidas recursivamente ********************************
 // by: Jéssika *************************************************************************************
 export const fatorConversaoUM = (um_array, um_pai, um_primaria) => {
-
   let flag = true;
   let um_verificar_obj = um_array.find(item => item.sigla == um_pai);
   let um_verificar = um_verificar_obj ? um_verificar_obj._id : "";
@@ -130,3 +129,18 @@ export const currency = (locale = "pt-BR") => (
 
   return formatter.format(value);
 };
+
+export const getNumber = n => {
+  return isNaN(n)
+    ? Number(
+        n
+          .toString()
+          .replace(".", "")
+          .replace(",", ".")
+      )
+    : n;
+};
+
+export const normalizeString = str => {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}

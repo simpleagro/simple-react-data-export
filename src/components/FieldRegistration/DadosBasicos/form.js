@@ -59,7 +59,7 @@ class FieldRegistrationForm extends Component {
       listProductGroup: dataProductGroup.docs,
       listSeason: dataSeason.docs,
       listConsultant: dataConsultant.docs
-    }))
+    }));
 
     if (id) {
       const formData = await FieldRegistrationService.get(id);
@@ -70,12 +70,13 @@ class FieldRegistrationForm extends Component {
           formData,
           editMode: id ? true : false
         }));
-        this.fetchClients({ _id: formData.cliente.id }).then(response => {
-          this.setState(prev => ({
-            ...prev,
-            listClient: [...prev.listClient, ...response.docs]
-          }));
-        });
+        if (!this.state.listClient.some(c => c._id === formData.cliente.id))
+          this.fetchClients({ _id: formData.cliente.id }).then(response => {
+            this.setState(prev => ({
+              ...prev,
+              listClient: [...prev.listClient, ...response.docs]
+            }));
+          });
       }
     }
 

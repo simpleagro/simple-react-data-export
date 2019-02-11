@@ -89,7 +89,7 @@ class OrderPaymentForm extends Component {
   async componentDidMount() {
     await this.initializeList({
       fields:
-        "produto, quantidade, desconto, total_preco_item, status, embalagem, preco_total_royalties, preco_total_germoplasma, preco_total_tratamento"
+        "produto, quantidade, desconto, total_preco_item, status, embalagem, preco_total_royalties, preco_total_germoplasma, preco_total_tratamento, total_preco_item_graos, total_preco_item_reais"
     });
 
     const estados = await IBGEService.listaEstados();
@@ -110,7 +110,7 @@ class OrderPaymentForm extends Component {
       unidadesMedidas
     }));
 
-    this.calcularPeso({
+    this.calcularPesoFrete({
       itens: this.state.list,
       pagamento: this.state.formData.pagamento,
       estado: this.state.order_data.estado
@@ -122,6 +122,25 @@ class OrderPaymentForm extends Component {
         .reduce((a, b) => Number(a) + Number(b), 0)
       // this.state.saldo_a_parcelar
     });
+
+    this.setState(prev => ({
+      ...prev,
+      formData: {
+        ...prev.formData,
+        total_pedido_royalties: this.state.list
+          .map(t => t[`preco_total_royalties`])
+          .reduce((a, b) => Number(a) + Number(b), 0),
+        total_pedido_germoplasma: this.state.list
+          .map(t => t[`preco_total_germoplasma`])
+          .reduce((a, b) => Number(a) + Number(b), 0),
+        total_pedido_tratamento: this.state.list
+          .map(t => t[`preco_total_tratamento`])
+          .reduce((a, b) => Number(a) + Number(b), 0),
+        peso_graos: this.state.list
+          .map(t => t[`total_preco_item_graos`])
+          .reduce((a, b) => Number(a) + Number(b), 0),
+      }
+    }));
   }
 
   changeStatus = async (id, newStatus) => {
@@ -374,13 +393,13 @@ class OrderPaymentForm extends Component {
                   {configAPP.detalharPrecoPorCaracteristica() && (
                     <React.Fragment>
                       <p>{`Preço Total Royalties: ${currency()(
-                        this.precoTotalCaracteristica("royalties") || 0
+                        this.state.formData.total_pedido_royalties || 0
                       )}`}</p>
                       <p>{`Preço Total Germoplasma: ${currency()(
-                        this.precoTotalCaracteristica("germoplasma") || 0
+                        this.state.formData.total_pedido_germoplasma || 0
                       )}`}</p>
                       <p>{`Preço Total Tratamento: ${currency()(
-                        this.precoTotalCaracteristica("tratamento") || 0
+                        this.state.formData.total_pedido_tratamento || 0
                       )}`}</p>
                     </React.Fragment>
                   )}
@@ -388,11 +407,15 @@ class OrderPaymentForm extends Component {
                   {configAPP.usarConfiguracaoFPCaracteristica() && (
                     <React.Fragment>
                       <p>{`Total Pedido REAIS: ${currency()(
-                        this.state.formData.total_pedido_reais || 0
+                        this.state.list
+                          .map(t => t.total_preco_item_reais)
+                          .reduce((a, b) => Number(a) + Number(b), 0) || 0
                       )}`}</p>
                       <p>{`Saldo a parcelar REAIS: ${currency()(0)}`}</p>
                       <p>{`Total Pedido GRÃOS: ${currency()(
-                        this.state.formData.total_pedido_graos || 0
+                        this.state.list
+                          .map(t => t.total_preco_item_graos)
+                          .reduce((a, b) => Number(a) + Number(b), 0) || 0
                       )}`}</p>
                       <p>{`Saldo a parcelar GRÃOS: ${currency()(0)}`}</p>
                     </React.Fragment>
@@ -621,7 +644,7 @@ class OrderPaymentForm extends Component {
     }));
   };
 
-  calcularPeso = pedido => {
+  calcularPesoFrete = pedido => {
     let peso = 0;
     let fator = 1;
     pedido.itens.forEach(item => {
@@ -661,12 +684,6 @@ class OrderPaymentForm extends Component {
         .map(p => Number(p.valor_parcela))
         .reduce((a, b) => a + b, 0)
     );
-  }
-
-  precoTotalCaracteristica(c) {
-    return this.state.list
-      .map(t => t[`preco_total_${c}`])
-      .reduce((a, b) => Number(a) + Number(b), 0);
   }
 }
 
