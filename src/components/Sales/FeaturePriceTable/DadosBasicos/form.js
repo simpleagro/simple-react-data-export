@@ -195,8 +195,8 @@ class FeaturePriceTable extends Component {
                     target: { name: "moeda", value: e }
                   });
                 }}>
-                <Option value="REAIS"> Reais </Option>
-                <Option value="SOJA"> Soja </Option>
+                <Option key="REAIS" value="REAIS"> Reais </Option>
+                <Option key="GRÃOS" value="GRÃOS"> Grãos </Option>
               </Select>
             )}
           </Form.Item>
