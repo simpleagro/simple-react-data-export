@@ -353,32 +353,14 @@ class FeaturePriceTable extends Component {
             {getFieldDecorator("taxa_adicao", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.taxa_adicao
-            })(
-              <InputNumber
-                onChange={e => {
-                  this.handleFormState({
-                    target: { name: "taxa_adicao", value: e }
-                  });
-                }}
-                name="taxa_adicao"
-              />
-            )}
+            })(<Input name="taxa_adicao" />)}
           </Form.Item>
 
           <Form.Item label="Taxa de Supressão" {...formItemLayout}>
             {getFieldDecorator("taxa_supressao", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.taxa_supressao
-            })(
-              <InputNumber
-                onChange={e => {
-                  this.handleFormState({
-                    target: { name: "taxa_supressao", value: e }
-                  });
-                }}
-                name="taxa_supressao"
-              />
-            )}
+            })(<Input name="taxa_supressao" />)}
           </Form.Item>
 
           <Form.Item label="Grupo de Produtos" {...formItemLayout}>
