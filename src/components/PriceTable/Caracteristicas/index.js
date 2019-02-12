@@ -136,21 +136,38 @@ class CaracteristicasPriceTable extends Component {
       )
     });
 
-    const regra_preco = this.state.group_regra_preco //[{chave:'peneira', label:'Peneira'}, {chave:'tratamento', label:'Tratamento'}]
+    const regra_preco = this.state.group_regra_preco
     const colunasRegraPreco = regra_preco.map(item => {
-      console.log(item)
+      //console.log(item)
       return (
         {
-          title: `${item.label} (R$)`,
+          title: item.label,
           dataIndex: `preco_${item.chave}`,
           key: `preco_${item.chave}`,
           sorter: (a, b) => this.ordenaTabela(a, b, `preco_${item.chave}`)
         }
       )
     });
+
+    const regraTotalPreco = dado => {
+      let preco = 0
+      regra_preco.forEach(item => {
+        preco = preco + parseFloat(dado[`preco_${item.chave}`].replace(',', '.'))
+      });
+
+      return preco.toFixed(2).toString().replace('.',',')
+    }
+
     return [
       ...colunasCaracteristicas,
       ...colunasRegraPreco,
+      {
+        title: "Preço Total",
+        dataIndex: `preco_total`,
+        key: `preco_total`,
+        sorter: (a, b) => this.ordenaTabela(a, b, `preco_total`),
+        render: (text, record) => regraTotalPreco(record)
+      },
       {
         title: "Status",
         dataIndex: "status",

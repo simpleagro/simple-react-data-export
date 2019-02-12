@@ -70,13 +70,13 @@ class FieldRegistrationForm extends Component {
           formData,
           editMode: id ? true : false
         }));
-        if (!this.state.listClient.some(c => c._id === formData.cliente.id))
-          this.fetchClients({ _id: formData.cliente.id }).then(response => {
+        this.fetchClients({ _id: formData.cliente.id }).then(response => {
+          if (!this.state.listClient.some(c => c._id === formData.cliente.id))
             this.setState(prev => ({
               ...prev,
               listClient: [...prev.listClient, ...response.docs]
             }));
-          });
+        });
       }
     }
 

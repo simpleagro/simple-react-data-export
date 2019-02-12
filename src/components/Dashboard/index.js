@@ -135,7 +135,7 @@ class Dashboard extends Component {
     let arrClientArea = [];
     Object.assign(
       arrClientArea, this.state.listClient && this.state.listClient.map(client =>
-        ({
+        (console.log(client),{
           name: client.nome,
           areaTotal: client.propriedades && client.propriedades.map(p => p.area).reduce(this.sum)
         })

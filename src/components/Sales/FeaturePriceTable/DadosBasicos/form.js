@@ -35,7 +35,8 @@ class FeaturePriceTable extends Component {
     const { id } = this.props.match.params;
     const dataType = await FeaturePriceTableService.list();
     const dataSeasons = await SeasonsService.list();
-    const dataProductGroup = await ProductGroupService.list();
+    //const dataProductGroup = await ProductGroupService.list();
+    const dataProductGroup = await this.fetchProductGroup();
     const dataUnitMeasure = await UnitMeasureService.list();
 
     this.setState(prev => ({
@@ -49,17 +50,32 @@ class FeaturePriceTable extends Component {
     if (id) {
       const formData = await FeaturePriceTableService.get(id);
 
-      if (formData)
+      if (formData){
         this.setState(prev => ({
           ...prev,
           formData,
           editMode: id ? true : false
         }));
+        this.fetchProductGroup({ _id: formData.grupo_produto.id }).then(response => {
+          if (!this.state.listProductGroup.some(c => c._id === formData.grupo_produto.id))
+            this.setState(prev => ({
+              ...prev,
+              listProductGroup: [...prev.listProductGroup, ...response.docs]
+            }), console.log("response:", response.docs));
+        });
+      }
     }
 
     setTimeout(() => {
       this.titleInput.focus();
     }, 0);
+  }
+
+  async fetchProductGroup(aqp = {}) {
+    return await ProductGroupService.list({
+      status: true,
+      ...aqp
+    });
   }
 
   handleFormState = event => {
@@ -191,7 +207,6 @@ class FeaturePriceTable extends Component {
             })(
               <Select
                 name="moeda"
-                allowClear
                 showAction={["focus", "click"]}
                 showSearch
                 style={{ width: 200 }}
@@ -215,7 +230,6 @@ class FeaturePriceTable extends Component {
             })(
               <Select
                 name="safra"
-                allowClear
                 showAction={["focus", "click"]}
                 showSearch
                 style={{ width: 200 }}
@@ -263,7 +277,6 @@ class FeaturePriceTable extends Component {
                     }
                   })
                 }
-                allowClear
                 format={"DD/MM/YYYY"}
                 style={{ width: 200 }}
                 name="data_base"
@@ -310,7 +323,6 @@ class FeaturePriceTable extends Component {
                     }
                   })
                 }
-                allowClear
                 format={"DD/MM/YYYY"}
                 style={{ width: 200 }}
                 name="data_validade_de"
@@ -341,7 +353,6 @@ class FeaturePriceTable extends Component {
                     }
                   })
                 }
-                allowClear
                 format={"DD/MM/YYYY"}
                 style={{ width: 200 }}
                 name="data_validade_ate"
@@ -372,7 +383,6 @@ class FeaturePriceTable extends Component {
             })(
               <Select
                 name="grupo_produto"
-                allowClear
                 showAction={["focus", "click"]}
                 showSearch
                 style={{ width: 200 }}
@@ -411,14 +421,14 @@ class FeaturePriceTable extends Component {
                 onChange={e => {
                   this.handleFormState({
                     target: { name: "caracteristica", value: JSON.parse(e) }
-                  });
+                  }); this.fetchProductGroup();
                 }}>
                 {this.state.id_caracteristica &&
                   this.state.listProductGroup.map(
                     pg =>
                       pg._id === this.state.id_caracteristica &&
                       pg.caracteristicas
-                        ? pg.caracteristicas.map(pgc => (
+                        ? pg.caracteristicas.map(pgc => ( pgc.variacao_preco && pgc.tipo_preco === "TABELA_CARACTERISTICA" ?
                             <Option
                               key={pgc._id}
                               value={JSON.stringify({
@@ -427,7 +437,7 @@ class FeaturePriceTable extends Component {
                                 chave: pgc.chave
                               })}>
                               {pgc.label}
-                            </Option>
+                            </Option> : null
                           ))
                         : []
                   )}
@@ -442,7 +452,6 @@ class FeaturePriceTable extends Component {
             })(
               <Select
                 name="u_m_preco"
-                allowClear
                 showAction={["focus", "click"]}
                 showSearch
                 style={{ width: 200 }}
