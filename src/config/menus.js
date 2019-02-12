@@ -33,6 +33,7 @@ import inscricaoCampo from "./Menus/inscricao-de-campo";
 import preColheitaLab from "./Menus/pre-colheita";
 import moeda from "./Menus/moeda";
 import configuracoes from "./Menus/configuracoes";
+import fornecedores from "./Menus/fornecedores";
 
 const loadable = loader =>
   Loadable({
@@ -71,6 +72,7 @@ const menus = {
     ...dashboardSale,
     ...filiais,
     ...formaPagamento,
+    ...fornecedores,
     ...gruposDeProdutos,
     ...moeda,
     ...metas,
