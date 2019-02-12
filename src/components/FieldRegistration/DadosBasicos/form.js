@@ -71,10 +71,11 @@ class FieldRegistrationForm extends Component {
           editMode: id ? true : false
         }));
         this.fetchClients({ _id: formData.cliente.id }).then(response => {
-          this.setState(prev => ({
-            ...prev,
-            listClient: [...prev.listClient, ...response.docs]
-          }));
+          if (!this.state.listClient.some(c => c._id === formData.cliente.id))
+            this.setState(prev => ({
+              ...prev,
+              listClient: [...prev.listClient, ...response.docs]
+            }));
         });
       }
     }
@@ -819,6 +820,7 @@ class FieldRegistrationForm extends Component {
             )}
           </Form.Item>
         </Form>
+        {console.log(this.state.formData)}
       </div>
     );
   }
