@@ -188,7 +188,7 @@ class PriceVariations extends Component {
                   });
                 }}>
                 {this.getProductGroupOption().map(element => (
-                  <Option key={element.label} value={element.value}>
+                  <Option key={element.label} value={element.label}>
                     {" "}
                     {element.label}{" "}
                   </Option>
