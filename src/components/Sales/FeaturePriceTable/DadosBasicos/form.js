@@ -50,19 +50,27 @@ class FeaturePriceTable extends Component {
     if (id) {
       const formData = await FeaturePriceTableService.get(id);
 
-      if (formData){
+      if (formData) {
         this.setState(prev => ({
           ...prev,
           formData,
           editMode: id ? true : false
         }));
-        this.fetchProductGroup({ _id: formData.grupo_produto.id }).then(response => {
-          if (!this.state.listProductGroup.some(c => c._id === formData.grupo_produto.id))
-            this.setState(prev => ({
-              ...prev,
-              listProductGroup: [...prev.listProductGroup, ...response.docs]
-            }), console.log("response:", response.docs));
-        });
+        if (
+          !this.state.listProductGroup.some(
+            c => c._id === formData.grupo_produto.id
+          )
+        )
+          this.fetchProductGroup({ _id: formData.grupo_produto.id }).then(
+            response => {
+              this.setState(
+                prev => ({
+                  ...prev,
+                  listProductGroup: [...prev.listProductGroup, ...response.docs]
+                }),
+              );
+            }
+          );
       }
     }
 

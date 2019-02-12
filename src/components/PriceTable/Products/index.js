@@ -192,12 +192,12 @@ class ProductsPriceTable extends Component {
             <Divider
                 style={{ fontSize: "10px", padding: 0, margin: 2 }}
                 type="vertical"
-              /> 
+              />
             <Tooltip title="Veja as características do produto">
               <Button
                 size="small"
                 onClick={() =>
-                  this.props.history.push(`/tabela-preco/${this.state.pricetable_id}/grupo-produto/${this.state.productgroup_id}/produtos/${record.id}/caracteristicas`) 
+                  this.props.history.push(`/tabela-preco/${this.state.pricetable_id}/grupo-produto/${this.state.productgroup_id}/produtos/${record.id}/caracteristicas`)
                 }
               >
                 <FontAwesomeIcon icon="dollar-sign" size="lg" />
@@ -253,7 +253,7 @@ class ProductsPriceTable extends Component {
     if (!this.state.editMode) {
       /* if (Object.keys(this.state.formData).length === 0)
         flashWithSuccess("Sem alterações para salvar", " "); */
-        
+
       try {
         const created = await ProductsService.create(this.state.pricetable_id)(this.state.productgroup_id)(obj);
 
@@ -361,7 +361,7 @@ class ProductsPriceTable extends Component {
       limit: pagination.pageSize
     });
   };
-  
+
   render() {
     return (
       <div>
