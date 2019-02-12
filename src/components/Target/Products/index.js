@@ -137,6 +137,15 @@ class ProductsTarget extends Component {
       }
     },
     {
+      title: "Valor Meta Reais",
+      dataIndex: "meta_valor_reais",
+      key: "meta_valor_reais",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      }
+    },
+    {
       title: "Valor Meta",
       dataIndex: "meta_valor",
       key: "meta_valor",

@@ -39,18 +39,18 @@ const ModalForm = Form.create()(
         if(this.props.group_caracteristicas){
           const groupData = this.props.group_caracteristicas
           console.log('aqqq', this.props.group_caracteristicas)
-          
+
           if (groupData)
             this.setState(prev => ({
               ...prev,
               group_caracteristicas: groupData
             }));
-            
+
         }
       }   */
-      
+
       gerarFormulario = (caracteristicas, getFieldDecorator) => {
-        return caracteristicas.map( caracteristica => 
+        return caracteristicas.map( caracteristica =>
           <Form.Item
             label={`${caracteristica.label}`}
             key= { `${caracteristica.chave}` }
@@ -59,7 +59,7 @@ const ModalForm = Form.create()(
               initialValue: this.state.formData[`${caracteristica.chave}`],
               rules: [{ required: caracteristica.obrigatorio, message: 'Selecione!'}],
             })(
-              <Select 
+              <Select
                 placeholder="Selecione"
                 name= { `${caracteristica.chave}` }
                 showSearch
@@ -70,7 +70,7 @@ const ModalForm = Form.create()(
                   }
                 }
               >
-                {caracteristica.opcoes.map(opcao => 
+                {caracteristica.opcoes.map(opcao =>
                   <Select.Option value={opcao.value} key={opcao.value} >{opcao.label}</Select.Option>
                 )}
               </Select>
@@ -80,8 +80,8 @@ const ModalForm = Form.create()(
       }
 
       gerarFormularioPreco = (group_regras_preco, getFieldDecorator) => {
-        return group_regras_preco.map( regra_preco => 
-          <Form.Item
+        return group_regras_preco.map( regra_preco =>
+          <Form.Item key={`preco_${regra_preco.chave}`}
             label={`Preço ${regra_preco.label}`}
           >
             {getFieldDecorator(`preco_${regra_preco.chave}`, {
@@ -98,7 +98,7 @@ const ModalForm = Form.create()(
       render() {
         const { visible, onCancel, form } = this.props;
         const { getFieldDecorator } = form;
-        
+
         return (
           <Modal
             visible={visible}
@@ -123,4 +123,3 @@ const ModalForm = Form.create()(
   );
 
   export default ModalForm;
- 
