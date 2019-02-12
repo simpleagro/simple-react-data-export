@@ -213,6 +213,15 @@ class PriceTable extends Component {
       },
       render: (text) => text ? formatDate(text) : ''
     },
+    {
+      title: "Moeda",
+      dataIndex: "moeda",
+      key: "moeda",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      }
+    },
     /* {
       title: "Validade De",
       dataIndex: "data_validade_de",
@@ -295,7 +304,7 @@ class PriceTable extends Component {
             <Divider
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
-            /> 
+            />
 
             <Tooltip title="Adicionar Grupo de Produto">
               <Button
@@ -358,19 +367,19 @@ class PriceTable extends Component {
               <Divider
                 style={{ fontSize: "10px", padding: 0, margin: 2 }}
                 type="vertical"
-              /> 
-  
+              />
+
               <Tooltip title="Veja os produtos da tabela de preço">
                 <Button
                   size="small"
                   onClick={() =>
-                    this.props.history.push(`/tabela-preco/${tabela._id}/grupo-produto/${record.id}/produtos`) 
+                    this.props.history.push(`/tabela-preco/${tabela._id}/grupo-produto/${record.id}/produtos`)
                   }
                 >
                   <FontAwesomeIcon icon="clipboard-list" size="lg" />
                 </Button>
               </Tooltip>
-  
+
             </span>
           );
         }
@@ -425,7 +434,7 @@ class PriceTable extends Component {
         flashWithSuccess("Sem alterações para salvar", " "); */
       try {
         const created = await PriceTableService.create(item);
-        
+
         this.setState(prev => {
           if(prev.list.length > 0){
             return({
@@ -453,7 +462,7 @@ class PriceTable extends Component {
       try {
         const tabela_updade = Object.assign({}, item);
         delete tabela_updade.grupo_produto;
-        
+
         const updated = await PriceTableService.update(tabela_updade);
         const data = await PriceTableService.list();
 
@@ -484,7 +493,7 @@ class PriceTable extends Component {
         flashWithSuccess("Sem alterações para salvar", " "); */
       try {
         const created = await PTGroupService.create(this.state.price_table_id)(item.grupo_produto);
-        
+
         this.setState(prev => {
           let _list = prev.list.map(priceTable => {
             if(priceTable._id == this.state.price_table_id){
@@ -508,7 +517,7 @@ class PriceTable extends Component {
       } finally {
         this.setState({ savingForm: false });
       }
-    } 
+    }
   }
 
   handleCancel = (e) => {
@@ -529,7 +538,7 @@ class PriceTable extends Component {
           <Button
             type="primary"
             icon="plus"
-            onClick={() => this.showModal() } 
+            onClick={() => this.showModal() }
           >
             Adicionar
           </Button>
