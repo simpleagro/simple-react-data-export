@@ -9,7 +9,7 @@ import * as VisitService from "services/visits";
 
 import moment from "moment";
 import { Select, Card, Row, Col } from "antd";
-import { LineChart, Line, Legend, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Bar, BarChart } from 'recharts';
+import { Legend, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Bar, BarChart, LabelList } from 'recharts';
 
 const Option = Select.Option;
 const colors = ["#4286f4", "#41f4d9", "#41f462", "#a9f441", "#41c4f4", "#4af441"];
@@ -18,28 +18,21 @@ class Dashboard extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      arrClientArea: [],
+      arrClientCreditLimit: [],
+      arrClientProps: [],
+      arrCustomerWallet: [],
+      arrProps: [],
+      arrQuota: [],
+      arrTarget: [],
+      arrVisitasMes: [],
       listClient: [],
       listCustomerWallet: [],
       listQuota: [],
       listTarget: [],
       listVisit: [],
-      loadingData: true,
-      arrClientArea: [],
-      arrVisitasMes: [],
-      arrClientCreditLimit: [],
-      arrCustomerWallet: [],
-      arrQuota: [],
-      arrTarget: [],
-      arrTeste: [
-        {
-          name: "teste",
-          valor: 1
-        },
-        {
-          name: "teste2",
-          valor: 3
-        }
-      ]
+      listYears: [],
+      loadingData: true
     };
   }
 
@@ -54,8 +47,12 @@ class Dashboard extends Component {
 
     this.showAllClientArea();
     this.showAllClientCredit();
+
+    this.showAllProps();
+
     this.showAllCustomerWallet();
     this.showAllQuotaChart();
+
     this.showAllTargetChart();
     this.showAllVisitsMonth();
 
@@ -81,20 +78,53 @@ class Dashboard extends Component {
 
   }
 
-  showAllVisitsMonth(){
+  showAllProps(){
+    let obj = [];
+    Object.assign(obj, this.state.listClient.map(client =>
+      ({
+        name: client.nome,
+        qtdProps: client.propriedades.length
+      })
+    ))
+    this.setState({ arrProps: obj });
+  }
+
+  showAllVisitsMonth(paramYear){
     let sumMonths = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+    let years = [];
+    let month, year, yearsArray;
+    let actualDate = new Date();
+    let compYear = actualDate.getFullYear();
     let arrVisitas = [
-      { name: "Jan", fullName: "Janeiro" }, { name: "Fev", fullName: "Fevereiro" }, { name: "Mar", fullName: "Março" },
-      { name: "Abr", fullName: "Abril" }, { name: "Mai", fullName: "Maio" }, { name: "Jun", fullName: "Junho" },
-      { name: "Jul", fullName: "Julho" }, { name: "Ago", fullName: "Agosto" }, { name: "Set", fullName: "Setembro" },
-      { name: "Out", fullName: "Outrubro" }, { name: "Nov", fullName: "Novembro" }, { name: "Dez", fullName: "Dezembro" }
+      { name: "Jan", fullName: "Janeiro", index: 1 }, { name: "Fev", fullName: "Fevereiro", index: 2 }, { name: "Mar", fullName: "Março", index: 3 },
+      { name: "Abr", fullName: "Abril", index: 4 }, { name: "Mai", fullName: "Maio", index: 5 }, { name: "Jun", fullName: "Junho", index: 6 },
+      { name: "Jul", fullName: "Julho", index: 7 }, { name: "Ago", fullName: "Agosto", index: 8 }, { name: "Set", fullName: "Setembro", index: 9 },
+      { name: "Out", fullName: "Outrubro", index: 10 }, { name: "Nov", fullName: "Novembro", index: 11 }, { name: "Dez", fullName: "Dezembro", index: 12 }
     ];
-    let month;
-    this.state.listVisit.map(v => ( month = new Date(moment(v.data_agenda, "DD/MM/YYYY").format("MM/DD/YYYY")), sumMonths[month.getMonth()]++))
+
+    if(paramYear){
+      compYear = paramYear
+    }
+
+    this.setState({ ano: compYear });
+
+    this.state.listVisit.map(v => (
+      years.push(year = new Date(moment(v.data_agenda, "DD/MM/YYYY").format("MM/DD/YYYY")).getFullYear()),
+      month = new Date(moment(v.data_agenda, "DD/MM/YYYY").format("MM/DD/YYYY")), month.getFullYear() === compYear
+        ? sumMonths[month.getMonth()]++
+        : null));
+
     arrVisitas.forEach((element, index) => {
-      Object.assign(element, { qtdVisitas: Number(sumMonths[index]) })
+      Object.assign(element, { qtdVisitas: Number(sumMonths[index]) })});
+
+    yearsArray = years.filter( function( elem, index, years ){
+      return years.indexOf(elem) === index
+    }).sort().reverse()
+
+    this.setState({
+      arrVisitasMes: arrVisitas,
+      listYears: yearsArray
     });
-    this.setState({ arrVisitasMes: arrVisitas });
   }
 
   sum(num, total) {
@@ -107,7 +137,7 @@ class Dashboard extends Component {
       arrClientArea, this.state.listClient && this.state.listClient.map(client =>
         ({
           name: client.nome,
-          areaTotal: client.propriedades.map(p => p.area).reduce(this.sum)
+          areaTotal: client.propriedades && client.propriedades.map(p => p.area).reduce(this.sum)
         })
       )
     );
@@ -160,6 +190,17 @@ class Dashboard extends Component {
     this.setState({ arrTarget: arrTarget });
   }
 
+  showClientProps(client){
+    if(client !== "all"){
+      let obj = []
+      Object.assign(obj, this.state.listClient.map(c => c.nome === client ? { name: c.nome, qtdProps: c.propriedades.length } : null))
+      this.setState({ arrProps: obj })
+      console.log(obj)
+    } else {
+      this.showAllProps()
+    }
+  }
+
   showCreditLimitClient(client){
     if (client !== "all"){
       let obj = []
@@ -178,6 +219,7 @@ class Dashboard extends Component {
           c.nome === client && c.propriedades.map(p =>
             obj.push(Object.assign({ name: p.nome, areaTotal: Number(p.area) }))))
         this.setState({ arrClientArea: obj })
+        console.log(obj)
       } else {
         this.showAllClientArea()
       }
@@ -194,6 +236,32 @@ class Dashboard extends Component {
       this.showAllCustomerWallet()
     }
   }
+
+  showVisitsMonth(paramMonth, paramYear){
+    this.state.listVisit.map(visit => (
+      Number(visit.data_agenda.split("/")[1]) === paramMonth && Number(visit.data_agenda.split("/")[2]) === paramYear
+        ? console.log("Clientes visitados no mes", paramMonth, "de", paramYear, ":", visit.cliente.nome)
+        : null
+      )
+    )
+  }
+
+  // showTeste(paramClient){
+  //   if(paramClient.length === 0){
+  //     this.showAllClientArea()
+  //   } else {
+  //     let obj = []
+  //     paramClient.forEach((element) =>
+  //       this.state.listClient.map((cliente) => (
+  //         cliente.nome === element && cliente.propriedades.map((prop) => (
+  //           obj.push(Object.assign({ nameClient: cliente.nome, name: prop.nome, areaTotal: prop.area }))
+  //         ))
+  //       ))
+  //     )
+  //     console.log("obj",obj)
+  //     this.setState({ arrClientArea: obj })
+  //   }
+  // }
 
   render() {
     return (
@@ -219,7 +287,7 @@ class Dashboard extends Component {
                   </Select>
                 </div>
               }>
-                {/* <LineChart width={525} height={300} data={this.state.arrClientCreditLimit} margin={{top: 25, right: 5, left: 5, bottom: 1}}>
+                {/* <LineChart width={525} height={300} data={this.state.arrClientCreditLimit} margin={{top: 0, right: 5, left: 5, bottom: 1}}>
                   <CartesianGrid strokeDasharray="10 0"/>
                   <XAxis dataKey="name" />
                   <YAxis dataKey="value" />
@@ -227,9 +295,19 @@ class Dashboard extends Component {
                   <Tooltip />
                 </LineChart> */}
 
-                <PieChart width={400} height={400} margin={{top: 0, right: 5, left: 5, bottom: 1}}>
-                  <Pie isAnimationActive data={this.state.arrClientCreditLimit} dataKey="value" outerRadius={100} label >
-                    { this.state.arrClientCreditLimit.map((entry, index) => <Cell key={index} fill={colors[index % colors.length]} />) }
+                <PieChart
+                  width={400}
+                  height={400}
+                  margin={{top: 0, right: 5, left: 5, bottom: 1}}>
+                  <Pie
+                    isAnimationActive
+                    data={this.state.arrClientCreditLimit}
+                    dataKey="value"
+                    outerRadius={100}
+                    label
+                    onClick={e => this.showCreditLimitClient(e.name)}>
+                    { this.state.arrClientCreditLimit.map((entry, index) =>
+                      <Cell key={index} fill={colors[index % colors.length]} />)}
                   </Pie>
                   <Tooltip />
                 </PieChart>
@@ -251,12 +329,23 @@ class Dashboard extends Component {
                     style={{ paddingLeft: 10, width: 250 }}
                     onSelect={e => this.showClientArea(e)} >
                       <Option key="all" value="all"> Exibir Todos </Option>
-                      { this.state.listClient.map((cliente) => <Option key={cliente.nome} value={cliente.nome}>{cliente.nome}</Option>) }
+                      { this.state.listClient.map((cliente) =>
+                        <Option key={cliente.nome} value={cliente.nome}> {cliente.nome} </Option>)}
                   </Select>
                 </div>}>
-                <PieChart width={400} height={400} margin={{top: 0, right: 5, left: 5, bottom: 1}}>
-                    <Pie isAnimationActive data={this.state.arrClientArea} dataKey="areaTotal" outerRadius={100} label >
-                      { this.state.arrClientArea.map((entry, index) => <Cell key={index} fill={colors[index % colors.length]} />) }
+                <PieChart
+                  width={400}
+                  height={400}
+                  margin={{top: 0, right: 5, left: 5, bottom: 1}}>
+                    <Pie
+                      isAnimationActive
+                      data={this.state.arrClientArea}
+                      dataKey="areaTotal"
+                      outerRadius={100}
+                      label
+                      onClick={e => this.showClientArea(e.name)}>
+                      { this.state.arrClientArea.map((entry, index) => (
+                        <Cell key={index} fill={colors[index % colors.length]} />)) }
                     </Pie>
                     <Tooltip />
                   </PieChart>
@@ -279,8 +368,9 @@ class Dashboard extends Component {
                     placeholder="Selecione uma cota"
                     style={{ paddingLeft: 10, width: 250 }}
                     onSelect={e => console.log(e)}>
-                      <Option key="all" value="all">Exibir Todos</Option>
-                      { this.state.listQuota.map(quota => <Option key={quota._id} value={quota.nome}>{quota.nome}</Option>) }
+                      <Option key="all" value="all"> Exibir Todos </Option>
+                      { this.state.listQuota.map(quota =>
+                        <Option key={quota._id} value={quota.nome}> {quota.nome} </Option>) }
                     </Select>
                 </div>
               } />
@@ -300,8 +390,9 @@ class Dashboard extends Component {
                     placeholder="Selecione uma meta"
                     style={{ paddingLeft: 10, width: 250 }}
                     onSelect={e => console.log(e)}>
-                      <Option key="all" value="all">Exibir Todos</Option>
-                      { this.state.listTarget.map(target => <Option key={target._id} value={target.nome}>{target.nome}</Option>) }
+                      <Option key="all" value="all"> Exibir Todos </Option>
+                      { this.state.listTarget.map(target =>
+                        <Option key={target._id} value={target.nome}> {target.nome} </Option>) }
                     </Select>
                 </div>
               } />
@@ -324,10 +415,11 @@ class Dashboard extends Component {
                     style={{ paddingLeft: 10, width: 250 }}
                     onSelect={e => this.showCustomerWallet(e)} >
                       <Option key="all" value="all"> Exibir Todos </Option>
-                      { this.state.listCustomerWallet.map((cw) => <Option key={cw.nome} value={cw.nome}>{cw.nome}</Option>) }
+                      { this.state.listCustomerWallet.map((cw) =>
+                        <Option key={cw.nome} value={cw.nome}> {cw.nome} </Option>) }
                   </Select>
                 </div>}>
-                {/* <LineChart width={525} height={300} margin={{top: 25, right: 5, left: 5, bottom: 1}}>
+                {/* <LineChart width={525} height={300} margin={{top: 0, right: 5, left: 5, bottom: 1}}>
                   <CartesianGrid strokeDasharray="10 0" />
                   <XAxis dataKey="name" />
                   <YAxis dataKey="totalClientes" />
@@ -336,9 +428,19 @@ class Dashboard extends Component {
                   </Line>
                   <Tooltip />
                 </LineChart> */}
-              <PieChart width={400} height={400} margin={{top: 25, right: 5, left: 5, bottom: 1}}>
-                  <Pie isAnimationActive data={this.state.arrCustomerWallet} dataKey="totalClientes" outerRadius={100} label >
-                    { this.state.arrCustomerWallet.map((entry, index) => <Cell key={index} fill={colors[index % colors.length]} />) }
+                <PieChart
+                  width={400}
+                  height={400}
+                  margin={{top: 0, right: 5, left: 5, bottom: 1}}>
+                  <Pie
+                    isAnimationActive
+                    data={this.state.arrCustomerWallet}
+                    dataKey="totalClientes"
+                    outerRadius={100}
+                    label
+                    onClick={e => this.showCustomerWallet(e.name)}>
+                    { this.state.arrCustomerWallet.map((entry, index) =>
+                      <Cell key={index} fill={colors[index % colors.length]} />) }
                   </Pie>
                   <Tooltip />
                 </PieChart>
@@ -347,7 +449,7 @@ class Dashboard extends Component {
 
           <Col span={12}>
             <Card
-              title="Visitas por Mês"
+              title="Visitas Mensais"
               type="inner"
               style={{ marginBottom: 15 }}
               extra={
@@ -358,23 +460,109 @@ class Dashboard extends Component {
                     showSearch
                     placeholder="Selecione um mês"
                     style={{ paddingLeft: 10, width: 250 }}
-                    onSelect={(e) => console.log(e)}>
-                      <Option key="all" value="all">Exibir Todos</Option>
-                      { this.state.arrVisitasMes.map(m => <Option key={m.name} value={m.name}>{m.fullName}</Option>) }
+                    onSelect={(e) => this.showAllVisitsMonth(e)}>
+                      { this.state.listYears.map(year =>
+                        <Option key={year} value={year}> {year} </Option>) }
                   </Select>
                 </div>
               }>
-              <BarChart width={525} height={300} data={this.state.arrVisitasMes} margin={{top: 25, right: 5, left: 5, bottom: 1}}>
-                <CartesianGrid strokeDasharray="10 0" />
-                <XAxis dataKey="name" />
-                <YAxis dataKey="qtdVisitas" />
-                <Bar isAnimationActive dataKey="qtdVisitas" fill="#82ca9d" />
-                <Tooltip />
+              <BarChart
+                width={525}
+                height={300}
+                data={this.state.arrVisitasMes}
+                margin={{top: 50, right: 5, left: 5, bottom: 1}}>
+                  <CartesianGrid strokeDasharray="10 0" />
+                  <XAxis dataKey="name" />
+                  <YAxis dataKey="qtdVisitas" />
+                  <Bar
+                    isAnimationActive
+                    dataKey="qtdVisitas"
+                    fill="#82ca9d"
+                    onClick={e => this.showVisitsMonth(e.index, this.state.ano)} >
+                       {/* <LabelList dataKey="name" position="top" angle={270} offset={15} /> */}
+                    </Bar>
+                  <Tooltip />
               </BarChart>
             </Card>
           </Col>
         </Row>
 
+        <Row gutter={16}>
+          <Col span={12}>
+            <Card
+              title="Propriedades"
+              type="inner"
+              style={{ marginBottom: 15 }}
+              extra={
+                <div>
+                  <span>Selecione</span>
+                  <Select
+                    allowClear
+                    showSearch
+                    placeholder="Selecione um cliente..."
+                    style={{ paddingLeft: 10, width: 250 }}
+                    onSelect={e => this.showClientProps(e)} >
+                      <Option key="all" value="all"> Exibir Todos </Option>
+                      { this.state.listClient.map((cliente) =>
+                        <Option key={cliente.nome} value={cliente.nome}> {cliente.nome} </Option>) }
+                  </Select>
+                </div>} >
+                  <PieChart
+                    width={400}
+                    height={400}
+                    margin={{top: 0, right: 5, left: 5, bottom: 1}}>
+                    <Pie
+                      isAnimationActive
+                      data={this.state.arrProps}
+                      dataKey="qtdProps"
+                      outerRadius={100}
+                      label
+                      onClick={e => this.showClientProps(e.name)}>
+                      { this.state.arrProps.map((entry, index) =>
+                        <Cell key={index} fill={colors[index % colors.length]} />) }
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+              </Card>
+          </Col>
+
+          {/* <Col span={12}>
+            <Card
+              title="Teste"
+              type="inner"
+              style={{ marginBottom: 15 }}
+              extra={
+                <div>
+                  <span>Selecione</span>
+                  <Select
+                    allowClear
+                    showSearch
+                    placeholder="Selecione um cliente..."
+                    style={{ paddingLeft: 10, width: 250 }}
+                    onChange={e => this.showTeste(e)}
+                    mode="tags" >
+                      { this.state.listClient.map((cliente) =>
+                        <Option key={cliente.nome} value={cliente.nome}> {cliente.nome} </Option>) }
+                  </Select>
+                </div>}>
+                  <PieChart
+                    width={400}
+                    height={400}
+                    margin={{top: 0, right: 5, left: 5, bottom: 1}}>
+                      <Pie
+                        isAnimationActive
+                        data={this.state.arrClientArea}
+                        dataKey="areaTotal"
+                        outerRadius={100}
+                        onClick={e => this.showClientArea(e.name)}>
+                        { this.state.arrClientArea.map((entry, index) => (
+                          <Cell key={index} fill={colors[index % colors.length]} /> ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                </Card>
+          </Col> */}
+        </Row>
       </div>
     );
   }
