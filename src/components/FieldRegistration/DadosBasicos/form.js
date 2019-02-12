@@ -820,7 +820,6 @@ class FieldRegistrationForm extends Component {
             )}
           </Form.Item>
         </Form>
-        {console.log(this.state.formData)}
       </div>
     );
   }

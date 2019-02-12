@@ -459,7 +459,6 @@ class FeaturePriceTable extends Component {
           </Form.Item>
 
         </Form>
-        {console.log(this.state)}
       </div>
     );
   }
