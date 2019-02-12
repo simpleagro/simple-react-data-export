@@ -402,6 +402,7 @@ class ProductsPriceTable extends Component {
                     rowKey="id"
                     columns={this.tableConfig()}
                     dataSource={this.state.list}
+                    onChange={this.handleTableChange}
                   />
                 </Card>
               </Col>
