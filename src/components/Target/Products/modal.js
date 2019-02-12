@@ -156,6 +156,18 @@ const ModalForm = Form.create()(
                   />
                 )}
               </Form.Item>
+              <Form.Item label="Valor da Meta Reais">
+                {getFieldDecorator('meta_valor_reais',{
+                  /* rules: [
+                    { required: true, message: "Este campo é obrigatório!" }
+                  ], */
+                  initialValue: this.state.formData.meta_valor_reais
+                })(
+                  <Input
+                    name="meta_valor_reais"
+                  />
+                )}
+              </Form.Item>
             </Form>
           </Modal>
         );

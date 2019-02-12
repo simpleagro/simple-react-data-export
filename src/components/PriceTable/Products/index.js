@@ -349,6 +349,18 @@ class ProductsPriceTable extends Component {
   saveFormRef = (formRef) => {
     this.formRef = formRef;
   }
+
+  handleTableChange = (pagination, filter, sorter) => {
+    const pager = { ...this.state.pagination };
+    pager.current = pagination.current;
+    this.setState({
+      pagination: pager
+    });
+    this.initializeList({
+      page: pagination.current,
+      limit: pagination.pageSize
+    });
+  };
   
   render() {
     return (
