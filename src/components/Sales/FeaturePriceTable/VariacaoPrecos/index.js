@@ -108,13 +108,13 @@ class PriceVariation extends Component {
   tableConfig = () => [
     {
       title: "Opção",
-      dataIndex: "opcao_chave",
-      key: "precos.opcao_chave",
+      dataIndex: "label",
+      key: "precos.label",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      ...simpleTableSearch(this)("precos.opcao_chave"),
+      ...simpleTableSearch(this)("precos.label"),
       render: text => text
     },
     {
