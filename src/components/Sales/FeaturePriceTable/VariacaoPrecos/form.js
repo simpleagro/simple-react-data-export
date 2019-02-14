@@ -171,12 +171,12 @@ class PriceVariations extends Component {
 
         <Form onChange={this.handleFormState}>
           <Form.Item label="Opção" {...formItemLayout}>
-            {getFieldDecorator("opcao_chave", {
+            {getFieldDecorator("opcao_label", {
               rules: [{ required: true, message: "Este campo é obragatório!" }],
-              initialValue: this.state.formData.opcao_chave
+              initialValue: this.state.formData.opcao_label
             })(
               <Select
-                name="opcao_chave"
+                name="opcao_label"
                 allowClear
                 showAction={["focus", "click"]}
                 showSearch
@@ -184,12 +184,13 @@ class PriceVariations extends Component {
                 placeholder="Selecione uma opção..."
                 onChange={e => {
                   this.handleFormState({
-                    target: { name: "opcao_chave", value: e }
+                    target: { name: "opcao_label", value: e }
                   });
                 }}>
                 {this.getProductGroupOption().map(element => (
-                  <Option key={element.label} value={element.label}>
+                  <Option key={element.label} value={element.value}>
                     {" "}
+                    { console.log(element) }
                     {element.label}{" "}
                   </Option>
                 ))}
