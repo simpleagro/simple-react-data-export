@@ -17,7 +17,7 @@ const ModalForm = Form.create()(
       };
 
       onSalve = () => {
-        console.log(this.state.formData)
+        //console.log(this.state.formData)
         this.props.form.validateFields(async err => {
             if (err) return;
             else {

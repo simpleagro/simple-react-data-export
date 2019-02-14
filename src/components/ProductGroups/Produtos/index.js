@@ -19,6 +19,7 @@ import SimpleTable from "../../common/SimpleTable";
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
+import { simpleTableSearch } from "../../../lib/simpleTableSearch";
 import { PainelHeader } from "../../common/PainelHeader";
 
 class Produtos extends Component {
@@ -118,7 +119,9 @@ class Produtos extends Component {
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
+      },
+      ...simpleTableSearch(this)("nome"),
+      render: text => text
     },
     {
       title: "Nome Comercial",
@@ -204,7 +207,7 @@ class Produtos extends Component {
       : this.props.history.push(`/produtos/${record._id}/edit`);
   }
 
-  handleTableChange = (pagination, filter, sorter) => {
+  handleTableChange = (pagination, filters, sorter) => {
     const pager = { ...this.state.pagination };
     pager.current = pagination.current;
     this.setState({
@@ -212,7 +215,9 @@ class Produtos extends Component {
     });
     this.initializeList({
       page: pagination.current,
-      limit: pagination.pageSize
+      limit: pagination.pageSize,
+      ...filters,
+      ...this.state.tableSearch
     });
   };
   
