@@ -44,7 +44,7 @@ class ParcelasManual extends Component {
   handleModalOk = async modalData => {
     try {
       let { parcelas } = this.props.pedido.pagamento;
-      debugger
+
       if (this.state.editedRecord !== null) {
         parcelas[this.state.editedRecord] = modalData;
       } else parcelas = [...parcelas, modalData];

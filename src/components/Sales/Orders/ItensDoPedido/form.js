@@ -220,6 +220,16 @@ class OrderItemForm extends Component {
             [c.chave]: this.state.formData[c.chave]
           }
         }));
+
+      let resultOpcoes = [];
+      produto.variacoes
+        .filter(v => v[c.chave])
+        .map(v => v[c.chave])
+        .forEach(function(item) {
+          if (!resultOpcoes.find(r => r.value === item.value)) {
+            resultOpcoes.push(item);
+          }
+        });
       return {
         chave: c.chave,
         label: c.label,
@@ -230,12 +240,9 @@ class OrderItemForm extends Component {
         variacaoPreco: c.variacao_preco,
         prevField: index > 0 ? arr[index - 1].chave : null,
         nextField: index + 1 < arr.length ? arr[index + 1].chave : null,
-        opcoes: new Set(
-          produto.variacoes.filter(v => v[c.chave]).map(v => v[c.chave])
-        )
+        opcoes: resultOpcoes
       };
     });
-
     this.setState({ variacoes });
     this.calcularResumo();
   }
@@ -504,7 +511,7 @@ class OrderItemForm extends Component {
                                     }
                                   }));
                                   await this.handleFormState({
-                                    target: { name: v.chave, value: e }
+                                    target: { name: v.chave, value: JSON.parse(e) }
                                   });
                                   arr
                                     .map(v => v.chave)
@@ -522,9 +529,9 @@ class OrderItemForm extends Component {
                                   this.atualizaValorVariacao(v, e);
                                 }}
                                 placeholder="Selecione...">
-                                {Array.from(v.opcoes).map((o, index) => (
-                                  <Option key={`${v.chave}_${index}`} value={o}>
-                                    {o}
+                                {v.opcoes.map((o, index) => (
+                                  <Option key={`${v.chave}_${index}`} value={JSON.stringify(o)}>
+                                    {o.label}
                                   </Option>
                                 ))}
                               </Select>
@@ -660,6 +667,7 @@ class OrderItemForm extends Component {
   }
 
   geraVariacoesInputsDinamicos(variacao) {
+
     const { getFieldDecorator } = this.props.form;
     const compInput = obj => (
       <Row
@@ -771,6 +779,7 @@ class OrderItemForm extends Component {
    */
   async totalPrecoItemFormaPagamento(forma, valor) {
     forma = normalizeString(forma);
+    console.log(forma, valor);
 
     return this.setState(prev => {
       return {

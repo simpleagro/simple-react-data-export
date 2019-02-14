@@ -42,7 +42,7 @@ class ProductForm extends Component {
 
     if (id) {
       const formData = await ProductsService.get(this.state.group_id)(id);
-      
+
       if (formData)
         this.setState(prev => ({
           ...prev,
@@ -139,11 +139,11 @@ class ProductForm extends Component {
         const dados = prev.formData;
         if(this.state.editarVariacao){
           dados.variacoes = dados.variacoes.map(dado => {
-            if(dado._id == this.state.record._id) 
-              return item; 
+            if(dado._id == this.state.record._id)
+              return item;
             return dado
           })
-          
+
           return ({
             visible: false,
             formData: {...dados },
@@ -188,7 +188,7 @@ class ProductForm extends Component {
 
   ordenaTabela = (a, b, chave) => {
     if(a[chave] && b[chave]) {
-      if(a[chave].toLowerCase() < b[chave].toLowerCase()) 
+      if(a[chave].toLowerCase() < b[chave].toLowerCase())
         return -1
       return 1
     }
@@ -198,7 +198,7 @@ class ProductForm extends Component {
   tableConfig = () => {
     const caracteristicas = this.state.group_caracteristicas //[{chave:'peneira', label:'Peneira'}, {chave:'tratamento', label:'Tratamento'}]
     const colunasCaracteristicas = caracteristicas.map(item => {
-      console.log(item)
+      // console.log(item)
       return (
         {
           title: item.label,
@@ -208,7 +208,7 @@ class ProductForm extends Component {
           render: (text) => {
             /* console.log(text)
             let valor = JSON.parse(text) */
-            return text.label
+            return text ? text.label : ""
           }
         }
       )
@@ -274,7 +274,7 @@ class ProductForm extends Component {
   }
 
   gerarFormulario = (fields, getFieldDecorator, formItemLayout) => {
-    return fields.map( field => 
+    return fields.map( field =>
       <Form.Item
         label={`${field.label}`}
         key= { `${field.chave}` }
@@ -352,7 +352,7 @@ class ProductForm extends Component {
             {getFieldDecorator("possui_variacao", {
                 initialValue: this.state.formData.possui_variacao
             })(
-            <Checkbox 
+            <Checkbox
                 checked={this.state.formData.possui_variacao}
                 onChange={e =>
                 this.handleFormState({
@@ -368,10 +368,10 @@ class ProductForm extends Component {
           </Form.Item>
         </Form>
 
-        {this.state.formData.possui_variacao && <CardStyled 
-          type="inner" 
-          title="Variações" 
-          bordered 
+        {this.state.formData.possui_variacao && <CardStyled
+          type="inner"
+          title="Variações"
+          bordered
           extra={
             <Button
               type="primary"
@@ -400,7 +400,7 @@ class ProductForm extends Component {
           group_id={this.state.group_id}
           record={this.state.record}
         />
-        
+
       </div>
     );
   }
