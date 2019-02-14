@@ -18,7 +18,7 @@ const ModalForm = Form.create()(
       };
 
       onSalve = () => {
-        console.log(this.state.formData)
+        //console.log(this.state.formData)
         this.props.form.validateFields(async err => {
             if (err) return;
             else {
@@ -81,7 +81,10 @@ const ModalForm = Form.create()(
             key= { `${caracteristica.chave}` }
           >
             {getFieldDecorator(`${caracteristica.chave}`, {
-              initialValue: this.state.formData[`${caracteristica.chave}`],
+              //initialValue: JSON.stringify(this.state.formData[`${caracteristica.chave}`]),
+              initialValue: this.state.formData[`${caracteristica.chave}`]
+                    ? `${this.state.formData[`${caracteristica.chave}`].label}`
+                    : undefined,
               rules: [{ required: caracteristica.obrigatorio, message: 'Selecione!'}],
             })(
               <Select 
@@ -90,13 +93,13 @@ const ModalForm = Form.create()(
                 showSearch
                 onChange={e =>{
                     this.onHadleChange({
-                      target: { name: `${caracteristica.chave}`, value: e }
+                      target: { name: `${caracteristica.chave}`, value: JSON.parse(e) }
                     })
                   }
                 }
               >
                 {caracteristica.opcoes.map(opcao => 
-                  <Select.Option value={opcao.value} key={opcao.value} >{opcao.label}</Select.Option>
+                  <Select.Option value={`{"value": "${opcao.value}", "label": "${opcao.label}"}`} key={opcao.value} >{opcao.label}</Select.Option>
                 )}
               </Select>
             )}
