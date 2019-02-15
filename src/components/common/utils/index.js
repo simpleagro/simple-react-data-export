@@ -142,5 +142,27 @@ export const getNumber = n => {
 };
 
 export const normalizeString = str => {
-  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-}
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+};
+
+export const addMaskNumeroPonto = number => {
+  try {
+    number = number.replace(/[^\d]+/g, "");
+    let tmp = number + "";
+
+    if (tmp.length > 3) {
+      tmp = tmp.replace(/([0-9]{3})$/g, ".$1");
+    }
+    if (tmp.length > 7) tmp = tmp.replace(/([0-9]{3}).([0-9]{3}$)/g, ".$1.$2");
+    if (tmp.length > 11)
+      tmp = tmp.replace(/([0-9]{3}).([0-9]{3}).([0-9]{3}$)/g, ".$1.$2.$3");
+
+    number = tmp;
+  } catch (e) {
+    return number;
+  }
+  return number;
+};
