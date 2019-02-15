@@ -54,7 +54,7 @@ const zeroEsquerda = data => {
 export const fatorConversaoUM = (um_array, um_pai, um_primaria) => {
   let flag = true;
   let um_verificar_obj = um_array.find(item => item.sigla == um_pai);
-  let um_verificar = um_verificar_obj._id;
+  let um_verificar = um_verificar_obj ? um_verificar_obj._id : "";
   let um_primaria_obj = um_array.find(item => item.sigla == um_primaria);
   let resultado = {};
   let aux_fc = 1;
@@ -101,26 +101,68 @@ const auxFatorConversaoUM = (um_array, um_primaria_id, um_verificar) => {
   return resultado;
 };
 // ************************************************************************************************
-const zeroEsquerda = (data) => {
-  return (data < 10 ? '0' : '') + data
-}
 
- export const addMaskNumeroPonto = number => {
+export const valorFinalJurosCompostos = (
+  capital,
+  taxa = 0.0,
+  periodo,
+  precision = 1
+) => {
+  capital = capital.toString().replace(",", ".");
+  return parseFloat(
+    Number(capital * Math.pow(1 + parseFloat(taxa) / 100, periodo))
+      .toFixed(3)
+      .slice(0, -precision)
+  );
+};
+
+// usando https://hacks.mozilla.org/2014/12/introducing-the-javascript-internationalization-api/
+export const currency = (locale = "pt-BR") => (
+  value,
+  options = {
+    style: "decimal",
+    currency: "BRL",
+    minimumFractionDigits: 2
+  }
+) => {
+  const formatter = new Intl.NumberFormat(locale, options);
+
+  return formatter.format(value);
+};
+
+export const getNumber = n => {
+  return isNaN(n)
+    ? Number(
+        n
+          .toString()
+          .replace(".", "")
+          .replace(",", ".")
+      )
+    : parseFloat(n);
+};
+
+export const normalizeString = str => {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+};
+
+export const addMaskNumeroPonto = number => {
   try {
-    number =  number.replace(/[^\d]+/g,'');
-    let tmp = number+'';
+    number = number.replace(/[^\d]+/g, "");
+    let tmp = number + "";
 
-    if( tmp.length > 3 ){
+    if (tmp.length > 3) {
       tmp = tmp.replace(/([0-9]{3})$/g, ".$1");
     }
-    if( tmp.length > 7 )
-      tmp = tmp.replace(/([0-9]{3}).([0-9]{3}$)/g, ".$1.$2");
-    if( tmp.length > 11 )
+    if (tmp.length > 7) tmp = tmp.replace(/([0-9]{3}).([0-9]{3}$)/g, ".$1.$2");
+    if (tmp.length > 11)
       tmp = tmp.replace(/([0-9]{3}).([0-9]{3}).([0-9]{3}$)/g, ".$1.$2.$3");
 
-    number = tmp
-  } catch(e){
-    return number
+    number = tmp;
+  } catch (e) {
+    return number;
   }
-  return number
-}
+  return number;
+};
