@@ -1,17 +1,18 @@
 import React from 'react'
-import { Modal, Form, InputNumber, Button } from 'antd';
+import { Modal, Form, Button, Input } from 'antd';
+import { addMaskReais, addMaskNumeroPonto } from '../../common/utils';
 
 const ModalForm = Form.create()(
     class extends React.Component {
       state = {formData:{}}
 
-      onHadleChange = event => {
-        if (!event.target.name) return;
+      onHadleChange = (name, value) => {
+        if (!name) return;
         let form = Object.assign({}, this.state.formData, {
-            [event.target.name]: event.target.value
+            [name]: value
           });
           this.setState(prev => ({ ...prev, formData: form }));
-         // console.log(form)
+         //console.log(name, form)
       };
 
       onSalve = () => {
@@ -47,43 +48,36 @@ const ModalForm = Form.create()(
               </Button>
             ]}
           >
-            <Form layout="vertical" onChange={this.onHadleChange}>
+            <Form layout="vertical" /* onChange={this.onHadleChange} */>
               <Form.Item label="KG de">
                 {getFieldDecorator('pesokg_de', {
                   rules: [{ required: true, message: "Este campo é obrigatório!" }],
-                  initialValue: this.state.formData.pesokg_de
+                  initialValue: this.state.formData.pesokg_de,
+                  getValueFromEvent: e => addMaskNumeroPonto(e.target.value),
+                  onChange: (e) => e.target ? this.onHadleChange(e.target.name, e.target.value) : false
                 })(
-                  <InputNumber
-                    name="pesokg_de"
-                    ref={input => (this.titleInput = input)}
-                    style={{width:'100%'}}
-                    parser={value => value.replace(/[^\d]+/g,'')}
-                  />
+                  <Input name="pesokg_de"/>
                 )}
               </Form.Item>
               <Form.Item label="KG até">
                 {getFieldDecorator('pesokg_ate', {
                   rules: [{ required: true, message: "Este campo é obrigatório!" }],
-                  initialValue: this.state.formData.pesokg_ate
+                  initialValue: this.state.formData.pesokg_ate,
+                  getValueFromEvent: e => addMaskNumeroPonto(e.target.value),
+                  onChange: (e) => e.target ? this.onHadleChange(e.target.name, e.target.value) : false
                 })(
-                  <InputNumber 
-                    name="pesokg_ate"
-                    style={{width:'100%'}}
-                    parser={value => value.replace(/[^\d]+/g,'')} 
-                  />
+                  <Input name="pesokg_ate"/>
                 )}
               </Form.Item>
               <Form.Item label="Preço">
                 {getFieldDecorator('preco', {
                   rules: [{ required: true, message: "Este campo é obrigatório!" }],
-                  initialValue: this.state.formData.preco
+                  initialValue: this.state.formData.preco,
+                  getValueFromEvent: e => addMaskReais(e.target.value),
+                  onChange: (e) => e.target ? this.onHadleChange(e.target.name, addMaskReais(e.target.value)) : false
                 })(
-                  <InputNumber 
-                    name="preco"
-                    style={{width:'100%'}}
-                    //formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-                    parser={value => value.replace(/[^\d]+/g,'')}/>
-)}
+                    <Input name="preco"/>
+                )}
               </Form.Item>
             </Form>
           </Modal>
