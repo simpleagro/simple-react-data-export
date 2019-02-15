@@ -206,9 +206,7 @@ class ProductForm extends Component {
           key: `${item.chave}`,
           sorter: (a, b) => this.ordenaTabela(a, b, `${item.chave}`),
           render: (text) => {
-            /* console.log(text)
-            let valor = JSON.parse(text) */
-            return text ? text.label : ""
+            return text ? text.label : ''
           }
         }
       )

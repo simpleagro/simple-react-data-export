@@ -159,3 +159,6 @@ select,
 .ant-table-tbody > tr > td {
   white-space: normal;
 }
+.ant-select-arrow {
+  pointer-events: none;
+}
