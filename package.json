@@ -1,6 +1,6 @@
 {
     "name": "simpleagro_paineladm",
-    "version": "0.0.29",
+    "version": "0.0.30",
     "private": true,
     "dependencies": {
         "@fortawesome/fontawesome-svg-core": "^1.2.4",
