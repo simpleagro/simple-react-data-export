@@ -198,12 +198,16 @@ class ProductForm extends Component {
   tableConfig = () => {
     const caracteristicas = this.state.group_caracteristicas //[{chave:'peneira', label:'Peneira'}, {chave:'tratamento', label:'Tratamento'}]
     const colunasCaracteristicas = caracteristicas.map(item => {
+      //console.log(item)
       return (
         {
           title: item.label,
           dataIndex: `${item.chave}`,
           key: `${item.chave}`,
-          sorter: (a, b) => this.ordenaTabela(a, b, `${item.chave}`)
+          sorter: (a, b) => this.ordenaTabela(a, b, `${item.chave}`),
+          render: (text) => {
+            return text ? text.label : ''  
+          }
         }
       )
     });

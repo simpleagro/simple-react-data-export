@@ -8,7 +8,7 @@ import * as TargetService from "services/targets";
 import * as VisitService from "services/visits";
 
 import moment from "moment";
-import { Select, Card, Row, Col } from "antd";
+import { Select, Card, Row, Col, Spin } from "antd";
 import { Legend, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Bar, BarChart, LabelList } from 'recharts';
 
 const Option = Select.Option;
@@ -37,6 +37,7 @@ class Dashboard extends Component {
   }
 
   async initializeList(aqp) {
+
     this.setState(previousState => {
       return { ...previousState, loadingData: true };
     });
@@ -45,18 +46,13 @@ class Dashboard extends Component {
       loadingData: false
     });
 
-    this.showAllClientArea();
     this.showAllClientCredit();
-
-    this.showAllProps();
-
-    this.showAllCustomerWallet();
+    this.showAllClientArea();
     this.showAllQuotaChart();
-
     this.showAllTargetChart();
+    this.showAllCustomerWallet();
     this.showAllVisitsMonth();
-
-    console.log( this.state );
+    this.showAllProps();
 
   }
 
@@ -74,6 +70,7 @@ class Dashboard extends Component {
       listTarget: dataTarget.docs,
       listVisit: dataVisit.docs
     });
+
     await this.initializeList();
 
   }
@@ -246,23 +243,6 @@ class Dashboard extends Component {
     )
   }
 
-  // showTeste(paramClient){
-  //   if(paramClient.length === 0){
-  //     this.showAllClientArea()
-  //   } else {
-  //     let obj = []
-  //     paramClient.forEach((element) =>
-  //       this.state.listClient.map((cliente) => (
-  //         cliente.nome === element && cliente.propriedades.map((prop) => (
-  //           obj.push(Object.assign({ nameClient: cliente.nome, name: prop.nome, areaTotal: prop.area }))
-  //         ))
-  //       ))
-  //     )
-  //     console.log("obj",obj)
-  //     this.setState({ arrClientArea: obj })
-  //   }
-  // }
-
   render() {
     return (
       <div>
@@ -287,14 +267,7 @@ class Dashboard extends Component {
                   </Select>
                 </div>
               }>
-                {/* <LineChart width={525} height={300} data={this.state.arrClientCreditLimit} margin={{top: 0, right: 5, left: 5, bottom: 1}}>
-                  <CartesianGrid strokeDasharray="10 0"/>
-                  <XAxis dataKey="name" />
-                  <YAxis dataKey="value" />
-                  <Line type="monotone" dataKey="value" stroke="blue" activeDot={{r: 4}} />
-                  <Tooltip />
-                </LineChart> */}
-
+                <Spin spinning={this.state.loadingData} size="large" style={{ marginLeft: "50%", marginTop: "40%" }} />
                 <PieChart
                   width={400}
                   height={400}
@@ -304,8 +277,8 @@ class Dashboard extends Component {
                     data={this.state.arrClientCreditLimit}
                     dataKey="value"
                     outerRadius={100}
-                    label
-                    onClick={e => this.showCreditLimitClient(e.name)}>
+                    //onClick={e => this.showCreditLimitClient(e.name)}
+                    >
                     { this.state.arrClientCreditLimit.map((entry, index) =>
                       <Cell key={index} fill={colors[index % colors.length]} />)}
                   </Pie>
@@ -332,7 +305,9 @@ class Dashboard extends Component {
                       { this.state.listClient.map((cliente) =>
                         <Option key={cliente.nome} value={cliente.nome}> {cliente.nome} </Option>)}
                   </Select>
-                </div>}>
+                </div>}
+              >
+                <Spin spinning={this.state.loadingData} size="large" style={{ marginLeft: "50%", marginTop: "40%" }} />
                 <PieChart
                   width={400}
                   height={400}
@@ -342,13 +317,13 @@ class Dashboard extends Component {
                       data={this.state.arrClientArea}
                       dataKey="areaTotal"
                       outerRadius={100}
-                      label
-                      onClick={e => this.showClientArea(e.name)}>
+                      //onClick={e => this.showClientArea(e.name)}
+                    >
                       { this.state.arrClientArea.map((entry, index) => (
                         <Cell key={index} fill={colors[index % colors.length]} />)) }
                     </Pie>
-                    <Tooltip />
-                  </PieChart>
+                  <Tooltip />
+                </PieChart>
             </Card>
           </Col>
         </Row>
@@ -373,7 +348,9 @@ class Dashboard extends Component {
                         <Option key={quota._id} value={quota.nome}> {quota.nome} </Option>) }
                     </Select>
                 </div>
-              } />
+              }>
+                <Spin spinning={this.state.loadingData} size="large" style={{ marginLeft: "50%", marginTop: "40%" }} />
+              </Card>
           </Col>
 
           <Col span={12}>
@@ -395,7 +372,9 @@ class Dashboard extends Component {
                         <Option key={target._id} value={target.nome}> {target.nome} </Option>) }
                     </Select>
                 </div>
-              } />
+              }>
+                <Spin spinning={this.state.loadingData} size="large" style={{ marginLeft: "50%", marginTop: "40%" }} />
+              </Card>
           </Col>
         </Row>
 
@@ -419,15 +398,7 @@ class Dashboard extends Component {
                         <Option key={cw.nome} value={cw.nome}> {cw.nome} </Option>) }
                   </Select>
                 </div>}>
-                {/* <LineChart width={525} height={300} margin={{top: 0, right: 5, left: 5, bottom: 1}}>
-                  <CartesianGrid strokeDasharray="10 0" />
-                  <XAxis dataKey="name" />
-                  <YAxis dataKey="totalClientes" />
-                  <Line isAnimationActive={false} data={this.state.arrCustomerWallet} dataKey="totalClientes" stroke="green" activeDot={{r: 4}}>
-                    { this.state.arrCustomerWallet.map((entry, index) => <Cell key={index} />)}
-                  </Line>
-                  <Tooltip />
-                </LineChart> */}
+                <Spin spinning={this.state.loadingData} size="large" style={{ marginLeft: "50%", marginTop: "40%" }} />
                 <PieChart
                   width={400}
                   height={400}
@@ -437,8 +408,8 @@ class Dashboard extends Component {
                     data={this.state.arrCustomerWallet}
                     dataKey="totalClientes"
                     outerRadius={100}
-                    label
-                    onClick={e => this.showCustomerWallet(e.name)}>
+                    //onClick={e => this.showCustomerWallet(e.name)}
+                    >
                     { this.state.arrCustomerWallet.map((entry, index) =>
                       <Cell key={index} fill={colors[index % colors.length]} />) }
                   </Pie>
@@ -466,6 +437,7 @@ class Dashboard extends Component {
                   </Select>
                 </div>
               }>
+              <Spin spinning={this.state.loadingData} size="large" style={{ marginLeft: "50%", marginTop: "40%" }} />
               <BarChart
                 width={525}
                 height={300}
@@ -478,8 +450,8 @@ class Dashboard extends Component {
                     isAnimationActive
                     dataKey="qtdVisitas"
                     fill="#82ca9d"
-                    onClick={e => this.showVisitsMonth(e.index, this.state.ano)} >
-                       {/* <LabelList dataKey="name" position="top" angle={270} offset={15} /> */}
+                    //onClick={e => this.showVisitsMonth(e.index, this.state.ano)}
+                    >
                     </Bar>
                   <Tooltip />
               </BarChart>
@@ -507,6 +479,7 @@ class Dashboard extends Component {
                         <Option key={cliente.nome} value={cliente.nome}> {cliente.nome} </Option>) }
                   </Select>
                 </div>} >
+                  <Spin spinning={this.state.loadingData} size="large" style={{ marginLeft: "50%", marginTop: "40%" }} />
                   <PieChart
                     width={400}
                     height={400}
@@ -516,8 +489,8 @@ class Dashboard extends Component {
                       data={this.state.arrProps}
                       dataKey="qtdProps"
                       outerRadius={100}
-                      label
-                      onClick={e => this.showClientProps(e.name)}>
+                      //onClick={e => this.showClientProps(e.name)}
+                      >
                       { this.state.arrProps.map((entry, index) =>
                         <Cell key={index} fill={colors[index % colors.length]} />) }
                     </Pie>
@@ -525,45 +498,7 @@ class Dashboard extends Component {
                   </PieChart>
               </Card>
           </Col>
-
-          {/* <Col span={12}>
-            <Card
-              title="Teste"
-              type="inner"
-              style={{ marginBottom: 15 }}
-              extra={
-                <div>
-                  <span>Selecione</span>
-                  <Select
-                    allowClear
-                    showSearch
-                    placeholder="Selecione um cliente..."
-                    style={{ paddingLeft: 10, width: 250 }}
-                    onChange={e => this.showTeste(e)}
-                    mode="tags" >
-                      { this.state.listClient.map((cliente) =>
-                        <Option key={cliente.nome} value={cliente.nome}> {cliente.nome} </Option>) }
-                  </Select>
-                </div>}>
-                  <PieChart
-                    width={400}
-                    height={400}
-                    margin={{top: 0, right: 5, left: 5, bottom: 1}}>
-                      <Pie
-                        isAnimationActive
-                        data={this.state.arrClientArea}
-                        dataKey="areaTotal"
-                        outerRadius={100}
-                        onClick={e => this.showClientArea(e.name)}>
-                        { this.state.arrClientArea.map((entry, index) => (
-                          <Cell key={index} fill={colors[index % colors.length]} /> ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                </Card>
-          </Col> */}
         </Row>
-        { console.log(this.state) }
       </div>
     );
   }
