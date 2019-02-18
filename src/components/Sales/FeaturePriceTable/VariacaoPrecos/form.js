@@ -136,7 +136,7 @@ class PriceVariations extends Component {
 
   async onSelectOpcao(e){
     await this.setState(prev => ({
-      formData: {...prev.formData, opcao_label: e.label, opcao_chave: e.value }
+      formData: {...prev.formData, opcao_label: e.value, opcao_chave: e.label }
     }))
   }
 

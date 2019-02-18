@@ -86,7 +86,7 @@ class PriceVariation extends Component {
     }
   };
 
-  removeRecord = async ({ _id, opcao_label }) => {
+  removeRecord = async ({ _id, opcao_chave }) => {
     try {
       await PriceVariationsService.remove(this.state.tabela_id)(_id);
       let _list = this.state.list.filter(record => record._id !== _id);
@@ -97,7 +97,7 @@ class PriceVariation extends Component {
 
       flashWithSuccess(
         "",
-        `A variação de preço, ${opcao_label}, foi removido com sucesso!`
+        `A variação de preço, ${opcao_chave}, foi removido com sucesso!`
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
@@ -108,13 +108,13 @@ class PriceVariation extends Component {
   tableConfig = () => [
     {
       title: "Opção",
-      dataIndex: "opcao_label",
-      key: "precos.opcao_label",
+      dataIndex: "opcao_chave",
+      key: "precos.opcao_chave",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      ...simpleTableSearch(this)("precos.opcao_label"),
+      ...simpleTableSearch(this)("precos.opcao_chave"),
       render: text => text
     },
     {
