@@ -8,6 +8,7 @@ import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
 import ModalForm from "./modal"
+import { simpleTableSearch } from "../../../lib/simpleTableSearch"
 
 class Target extends Component {
   constructor(props) {
@@ -127,7 +128,9 @@ class Target extends Component {
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
+      },
+      ...simpleTableSearch(this)("nome"),
+      render: text => text
     },
     {
       title: "Safra",
@@ -306,6 +309,20 @@ class Target extends Component {
   saveFormRef = (formRef) => {
     this.formRef = formRef;
   }
+
+  handleTableChange = (pagination, filters, sorter) => {
+    const pager = { ...this.state.pagination };
+    pager.current = pagination.current;
+    this.setState({
+      pagination: pager
+    });
+    this.initializeList({
+      page: pagination.current,
+      limit: pagination.pageSize,
+      ...filters,
+      ...this.state.tableSearch
+    });
+  };
 
   render() {
     return (

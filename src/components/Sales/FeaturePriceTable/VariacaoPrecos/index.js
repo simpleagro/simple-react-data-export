@@ -78,7 +78,7 @@ class PriceVariation extends Component {
         "",
         `A variação de preço, ${recordName}, foi ${
           newStatus ? "ativado" : "bloqueado"
-        } com sucesso!`
+        } com sucesso!!`
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);

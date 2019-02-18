@@ -134,6 +134,12 @@ class PriceVariations extends Component {
     return arr;
   }
 
+  async onSelectOpcao(e){
+    await this.setState(prev => ({
+      formData: {...prev.formData, opcao_label: e.label, opcao_chave: e.value }
+    }))
+  }
+
   render() {
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
@@ -181,19 +187,19 @@ class PriceVariations extends Component {
                 showAction={["focus", "click"]}
                 showSearch
                 style={{ width: 200 }}
-                placeholder="Selecione uma opção..."
+                placeholder="Selecione uma opção...."
                 onChange={e => {
                   this.handleFormState({
-                    target: { name: "opcao_label", value: e }
+                    target: { name: "opcao_label", value: JSON.parse(e) }
                   });
+                  this.onSelectOpcao(JSON.parse(e))
                 }}>
-                {this.getProductGroupOption().map(element => (
-                  <Option key={element.label} value={element.value}>
-                    {" "}
-                    { console.log(element) }
-                    {element.label}{" "}
-                  </Option>
-                ))}
+                  {this.getProductGroupOption().map(element => (
+                    <Option key={element.label} value={JSON.stringify(element)}>
+                      {" "}
+                      {element.label}{" "}
+                    </Option>
+                  ))}
               </Select>
             )}
           </Form.Item>

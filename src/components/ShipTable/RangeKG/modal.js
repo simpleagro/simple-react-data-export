@@ -12,7 +12,7 @@ const ModalForm = Form.create()(
             [name]: value
           });
           this.setState(prev => ({ ...prev, formData: form }));
-         //console.log(name, form)
+         console.log(name, form)
       };
 
       onSalve = () => {
@@ -52,9 +52,9 @@ const ModalForm = Form.create()(
               <Form.Item label="KG de">
                 {getFieldDecorator('pesokg_de', {
                   rules: [{ required: true, message: "Este campo é obrigatório!" }],
-                  initialValue: this.state.formData.pesokg_de,
+                  initialValue:  addMaskNumeroPonto(`${this.state.formData.pesokg_de}`),
                   getValueFromEvent: e => addMaskNumeroPonto(e.target.value),
-                  onChange: (e) => e.target ? this.onHadleChange(e.target.name, e.target.value) : false
+                  onChange: (e) => e.target ? this.onHadleChange(e.target.name, e.target.value.replace(/\./g,'')) : false
                 })(
                   <Input name="pesokg_de"/>
                 )}
@@ -62,9 +62,9 @@ const ModalForm = Form.create()(
               <Form.Item label="KG até">
                 {getFieldDecorator('pesokg_ate', {
                   rules: [{ required: true, message: "Este campo é obrigatório!" }],
-                  initialValue: this.state.formData.pesokg_ate,
+                  initialValue:  addMaskNumeroPonto(`${this.state.formData.pesokg_ate}`),
                   getValueFromEvent: e => addMaskNumeroPonto(e.target.value),
-                  onChange: (e) => e.target ? this.onHadleChange(e.target.name, e.target.value) : false
+                  onChange: (e) => e.target ? this.onHadleChange(e.target.name, e.target.value.replace(/\./g,'')) : false
                 })(
                   <Input name="pesokg_ate"/>
                 )}
@@ -72,7 +72,7 @@ const ModalForm = Form.create()(
               <Form.Item label="Preço">
                 {getFieldDecorator('preco', {
                   rules: [{ required: true, message: "Este campo é obrigatório!" }],
-                  initialValue: this.state.formData.preco,
+                  initialValue: addMaskReais(this.state.formData.preco),
                   getValueFromEvent: e => addMaskReais(e.target.value),
                   onChange: (e) => e.target ? this.onHadleChange(e.target.name, addMaskReais(e.target.value)) : false
                 })(
