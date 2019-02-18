@@ -9,6 +9,7 @@ import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
 import ModalForm from "./modal"
 import { formatDate } from '../../common/utils'
+import { simpleTableSearch } from "../../../lib/simpleTableSearch"
 
 class Quota extends Component {
   constructor(props) {
@@ -128,7 +129,9 @@ class Quota extends Component {
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
+      },
+      ...simpleTableSearch(this)("nome"),
+      render: text => text
     },
     {
       title: "Safra",
@@ -327,6 +330,20 @@ class Quota extends Component {
   saveFormRef = (formRef) => {
     this.formRef = formRef;
   }
+
+  handleTableChange = (pagination, filters, sorter) => {
+    const pager = { ...this.state.pagination };
+    pager.current = pagination.current;
+    this.setState({
+      pagination: pager
+    });
+    this.initializeList({
+      page: pagination.current,
+      limit: pagination.pageSize,
+      ...filters,
+      ...this.state.tableSearch
+    });
+  };
 
   render() {
     return (

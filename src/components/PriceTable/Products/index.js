@@ -21,6 +21,7 @@ import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
 import ModalForm from "./modal"
 import ModalPriceTable from '../DadosBasicos/modal'
+import { simpleTableSearch } from "../../../lib/simpleTableSearch"
 
 class ProductsPriceTable extends Component {
   constructor(props) {
@@ -123,7 +124,9 @@ class ProductsPriceTable extends Component {
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
+      },
+      ...simpleTableSearch(this)("nome"),
+      render: text => text
     },
     {
       title: "Nome Comercial",
@@ -132,7 +135,9 @@ class ProductsPriceTable extends Component {
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
+      },
+      ...simpleTableSearch(this)("nome_comercial"),
+      render: text => text
     },
     {
       title: "UM",
@@ -350,7 +355,7 @@ class ProductsPriceTable extends Component {
     this.formRef = formRef;
   }
 
-  handleTableChange = (pagination, filter, sorter) => {
+  handleTableChange = (pagination, filters, sorter) => {
     const pager = { ...this.state.pagination };
     pager.current = pagination.current;
     this.setState({
@@ -358,7 +363,9 @@ class ProductsPriceTable extends Component {
     });
     this.initializeList({
       page: pagination.current,
-      limit: pagination.pageSize
+      limit: pagination.pageSize,
+      ...filters,
+      ...this.state.tableSearch
     });
   };
 
