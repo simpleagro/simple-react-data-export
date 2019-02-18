@@ -135,7 +135,6 @@ class PriceVariations extends Component {
   }
 
   async onSelectOpcao(e){
-    console.log("onSlectOpcao:", e.label)
     await this.setState(prev => ({
       formData: {...prev.formData, opcao_label: e.label, opcao_chave: e.value }
     }))
@@ -178,12 +177,12 @@ class PriceVariations extends Component {
 
         <Form onChange={this.handleFormState}>
           <Form.Item label="Opção" {...formItemLayout}>
-            {getFieldDecorator("opcao_chave", {
+            {getFieldDecorator("opcao_label", {
               rules: [{ required: true, message: "Este campo é obragatório!" }],
-              initialValue: this.state.formData.opcao_chave
+              initialValue: this.state.formData.opcao_label
             })(
               <Select
-                name="opcao_chave"
+                name="opcao_label"
                 allowClear
                 showAction={["focus", "click"]}
                 showSearch
@@ -191,14 +190,13 @@ class PriceVariations extends Component {
                 placeholder="Selecione uma opção...."
                 onChange={e => {
                   this.handleFormState({
-                    target: { name: "opcao_chave", value: JSON.parse(e) }
+                    target: { name: "opcao_label", value: JSON.parse(e) }
                   });
                   this.onSelectOpcao(JSON.parse(e))
                 }}>
                   {this.getProductGroupOption().map(element => (
                     <Option key={element.label} value={JSON.stringify(element)}>
                       {" "}
-                      {console.log("element:", element)}
                       {element.label}{" "}
                     </Option>
                   ))}
@@ -221,7 +219,6 @@ class PriceVariations extends Component {
           </Form.Item>
 
         </Form>
-        { console.log("State: ", this.state) }
       </div>
     );
   }
