@@ -21,6 +21,7 @@ import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
 import ModalForm from "./modal"
 import * as GroupsFeaturesService from "../../../services/productgroups.features";
+import { simpleTableSearch } from "../../../lib/simpleTableSearch"
 
 class VariacaoCota extends Component {
   constructor(props) {
@@ -126,7 +127,9 @@ class VariacaoCota extends Component {
           title: item.label,
           dataIndex: `${item.chave}`,
           key: `${item.chave}`,
-          sorter: (a, b) => this.ordenaTabela(a, b, `${item.chave}`)
+          sorter: (a, b) => this.ordenaTabela(a, b, `${item.chave}`),
+          ...simpleTableSearch(this)(`${item.chave}`),
+          render: text => text
         }
       )
     });
@@ -302,6 +305,20 @@ class VariacaoCota extends Component {
     this.formRef = formRef;
   }
   
+  handleTableChange = (pagination, filters, sorter) => {
+    const pager = { ...this.state.pagination };
+    pager.current = pagination.current;
+    this.setState({
+      pagination: pager
+    });
+    this.initializeList({
+      page: pagination.current,
+      limit: pagination.pageSize,
+      ...filters,
+      ...this.state.tableSearch
+    });
+  };
+
   render() {
     return (
       <div>
@@ -338,6 +355,7 @@ class VariacaoCota extends Component {
                     rowKey="_id"
                     columns={this.tableConfig()}
                     dataSource={this.state.list}
+                    onChange={this.handleTableChange}
                   />
                 </Card>
               </Col>
