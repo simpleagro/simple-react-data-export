@@ -11,6 +11,7 @@ import { PainelHeader } from "../../common/PainelHeader";
 import ModalForm from "./modal"
 import ModalFormGroup from "../../common/ModalProductGroup"
 import { formatDate } from '../../common/utils'
+import { simpleTableSearch } from "../../../lib/simpleTableSearch"
 
 class PriceTable extends Component {
   constructor(props) {
@@ -191,7 +192,9 @@ class PriceTable extends Component {
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
+      },
+      ...simpleTableSearch(this)("nome"),
+      render: text => text
     },
     {
       title: "Safra",
@@ -397,7 +400,7 @@ class PriceTable extends Component {
     );
   };
 
-  handleTableChange = (pagination, filter, sorter) => {
+  handleTableChange = (pagination, filters, sorter) => {
     const pager = { ...this.state.pagination };
     pager.current = pagination.current;
     this.setState({
@@ -405,7 +408,9 @@ class PriceTable extends Component {
     });
     this.initializeList({
       page: pagination.current,
-      limit: pagination.pageSize
+      limit: pagination.pageSize,
+      ...filters,
+      ...this.state.tableSearch
     });
   };
 

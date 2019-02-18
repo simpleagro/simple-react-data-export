@@ -22,6 +22,7 @@ import { PainelHeader } from "../../common/PainelHeader";
 import ModalForm from "./modal"
 import ModalProduct from '../Products/modal'
 import * as GroupsFeaturesService from "../../../services/productgroups";
+import { simpleTableSearch } from "../../../lib/simpleTableSearch"
 
 class CaracteristicasPriceTable extends Component {
   constructor(props) {
@@ -131,7 +132,9 @@ class CaracteristicasPriceTable extends Component {
           title: item.label,
           dataIndex: `${item.chave}`,
           key: `${item.chave}`,
-          sorter: (a, b) => this.ordenaTabela(a, b, `${item.chave}`)
+          sorter: (a, b) => this.ordenaTabela(a, b, `${item.chave}`),
+          ...simpleTableSearch(this)(`${item.chave}`),
+          render: text => text
         }
       )
     });
@@ -328,7 +331,7 @@ class CaracteristicasPriceTable extends Component {
     this.formRef = formRef;
   }
 
-  handleTableChange = (pagination, filter, sorter) => {
+  handleTableChange = (pagination, filters, sorter) => {
     const pager = { ...this.state.pagination };
     pager.current = pagination.current;
     this.setState({
@@ -336,7 +339,9 @@ class CaracteristicasPriceTable extends Component {
     });
     this.initializeList({
       page: pagination.current,
-      limit: pagination.pageSize
+      limit: pagination.pageSize,
+      ...filters,
+      ...this.state.tableSearch
     });
   };
 

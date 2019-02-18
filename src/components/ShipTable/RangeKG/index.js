@@ -22,6 +22,7 @@ import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
 import ModalForm from "./modal"
 import ModalKMForm from '../RangeKM/modal'
+import { addMaskNumeroPonto } from '../../common/utils'
 
 class RangeKG extends Component {
   constructor(props) {
@@ -123,12 +124,18 @@ class RangeKG extends Component {
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return a.pesokg_de-b.pesokg_de;
         else return b.pesokg_de-a.pesokg_de;
+      },
+      render: (text) => {
+        return addMaskNumeroPonto(`${text}`)
       }
     },
     {
       title: "KG até",
       dataIndex: "pesokg_ate",
-      key: "pesokg_ate"
+      key: "pesokg_ate",
+      render: (text) => {
+        return addMaskNumeroPonto(`${text}`)
+      }
     },
     {
       title: "Preço",
@@ -323,6 +330,18 @@ class RangeKG extends Component {
   saveFormRef = (formRef) => {
     this.formRef = formRef;
   }
+
+  handleTableChange = (pagination, filters, sorter) => {
+    const pager = { ...this.state.pagination };
+    pager.current = pagination.current;
+    this.setState({
+      pagination: pager
+    });
+    this.initializeList({
+      page: pagination.current,
+      limit: pagination.pageSize
+    });
+  };
   
   render() {
     return (
@@ -365,6 +384,7 @@ class RangeKG extends Component {
                     rowKey="_id"
                     columns={this.tableConfig()}
                     dataSource={this.state.list}
+                    onChange={this.handleTableChange}
                   />
                 </Card>
               </Col>
