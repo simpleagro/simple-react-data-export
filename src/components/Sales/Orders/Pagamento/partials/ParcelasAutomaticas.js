@@ -6,7 +6,7 @@ import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 
 import * as OrderPaymentService from "services/orders.payment";
-import { dadosPedido } from "actions/pedidoActions";
+import { dadosPedidoParcelaAutomatica } from "actions/pedidoActions";
 import SimpleTable from "common/SimpleTable";
 import { getNumber, currency } from "common/utils";
 import parseErrors from "lib/parseErrors";
@@ -17,7 +17,7 @@ class ParcelasAutomaticas extends Component {
   };
 
   async componentDidUpdate(prevProps, prevState) {
-    if(this.state.gerarParcelas)
+    if (this.state.gerarParcelas)
       await this.gerarParcelasAutomaticasVencimento();
   }
 
@@ -46,6 +46,8 @@ class ParcelasAutomaticas extends Component {
           order.itens
             .map(t => t[`preco_total_${chave.replace("pgto_", "")}`])
             .reduce((a, b) => Number(a) + Number(b), 0);
+        if (chave === "pgto_frete")
+          valor = order.pagamento.total_pedido_frete || 0;
         if (
           parcelas.find(
             parcela =>
@@ -85,15 +87,14 @@ class ParcelasAutomaticas extends Component {
     }
 
     this.setState({
-      gerarParcelas: false,
-    })
-
-    this.props.dadosPedido({
-      ...this.props.pedido,
-      pagamento: {
-        parcelas
-      }
+      gerarParcelas: false
     });
+
+    this.props.dadosPedidoParcelaAutomatica(
+      parcelas.sort(
+        (a, b) => new Date(a.data_vencimento) - new Date(b.data_vencimento)
+      )
+    );
   }
 
   render() {
@@ -127,7 +128,7 @@ const mapStateToProps = ({ pedidoState }) => {
 const mapDispatchToProps = dispatch =>
   bindActionCreators(
     {
-      dadosPedido
+      dadosPedidoParcelaAutomatica
     },
     dispatch
   );

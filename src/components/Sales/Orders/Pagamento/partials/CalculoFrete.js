@@ -6,10 +6,16 @@ import debounce from "lodash/debounce";
 
 import { fatorConversaoUM, currency, getNumber } from "common/utils";
 import { list as ListShipTableOrderItemsService } from "services/shiptable";
+import * as OrderPaymentService from "services/orders.payment";
 import * as IBGEService from "services/ibge";
 import { flashWithError } from "common/FlashMessages";
 import { list as ListUnitMeasureService } from "services/units-measures";
-import { dadosPedidoFrete } from "actions/pedidoActions";
+import {
+  dadosPedidoFrete,
+  dadosPedidoParcelaAutomatica
+} from "actions/pedidoActions";
+import { configAPP } from "config/app";
+import parseErrors from "lib/parseErrors";
 
 class CalculoFrete extends Component {
   constructor(props) {
@@ -89,6 +95,10 @@ class CalculoFrete extends Component {
       total_pedido_frete: preco_frete
     });
 
+    if (configAPP.usarConfiguracaoFPCaracteristica()) {
+      this.gerarParcelasAutomaticasVencimento();
+    }
+
     setTimeout(() => {
       this.setState({
         calculandoFrete: false
@@ -130,6 +140,68 @@ class CalculoFrete extends Component {
     await this.setState(prev => ({ ...prev, formData: form }));
     this.calcularFrete();
   };
+
+  async gerarParcelasAutomaticasVencimento() {
+    const order = this.props.pedido;
+    let chaves = Object.keys(order).filter(chave => chave.includes("pgto_"));
+    let parcelas = [];
+    chaves.forEach(chave => {
+      if (order[chave] == "REAIS") {
+        let valor =
+          order &&
+          order.itens
+            .map(t => t[`preco_total_${chave.replace("pgto_", "")}`])
+            .reduce((a, b) => Number(a) + Number(b), 0);
+        if (chave === "pgto_frete")
+          valor = order.pagamento.total_pedido_frete || 0;
+        if (
+          parcelas.find(
+            parcela =>
+              parcela.data_vencimento ==
+              order[`venc_${chave.replace("pgto_", "")}`]
+          )
+        ) {
+          parcelas.forEach(parcela => {
+            if (
+              parcela.data_vencimento ==
+              order[`venc_${chave.replace("pgto_", "")}`]
+            ) {
+              let nova_parcela = 0;
+              nova_parcela =
+                getNumber(parcela.valor_parcela || "0,00") +
+                getNumber(valor || "0,00");
+              parcela.valor_parcela = currency()(nova_parcela);
+            }
+          });
+        } else {
+          parcelas.push({
+            data_vencimento: order[`venc_${chave.replace("pgto_", "")}`],
+            valor_parcela: currency()(valor)
+          });
+        }
+      }
+    });
+
+    try {
+      await OrderPaymentService.update(this.props.pedido._id)({ parcelas });
+    } catch (err) {
+      if (err && err.response && err.response.data) parseErrors(err);
+      console.log(
+        "Erro interno ao adicionar parcelas automáticas no pagamento",
+        err
+      );
+    }
+
+    this.setState({
+      gerarParcelas: false
+    });
+
+    this.props.dadosPedidoParcelaAutomatica(
+      parcelas.sort(
+        (a, b) => new Date(a.data_vencimento) - new Date(b.data_vencimento)
+      )
+    );
+  }
 
   render() {
     return (
@@ -225,7 +297,8 @@ const mapStateToProps = ({ pedidoState }) => {
 const mapDispatchToProps = dispatch =>
   bindActionCreators(
     {
-      dadosPedidoFrete
+      dadosPedidoFrete,
+      dadosPedidoParcelaAutomatica
     },
     dispatch
   );
