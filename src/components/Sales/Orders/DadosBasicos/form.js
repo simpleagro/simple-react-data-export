@@ -35,7 +35,9 @@ class OrderForm extends Component {
       editMode: false,
       loadingForm: true,
       savingForm: false,
-      formData: {},
+      formData: {
+        itens: []
+      },
       fetchingClients: false,
       fetchingAgents: false,
       fetchingConsultants: false,
@@ -646,6 +648,7 @@ class OrderForm extends Component {
                 name="forma_pagamento"
                 showAction={["focus", "click"]}
                 showSearch
+
                 placeholder="Selecione..."
                 filterOption={(input, option) =>
                   option.props.children
@@ -675,6 +678,7 @@ class OrderForm extends Component {
                 name="tipo_pagamento"
                 showAction={["focus", "click"]}
                 showSearch
+
                 placeholder="Selecione..."
                 filterOption={(input, option) =>
                   option.props.children
@@ -791,6 +795,7 @@ class OrderForm extends Component {
       </div>
     );
   }
+
   async onSelectPropriedade(e) {
     const { estado, cidade, ...propriedade } = JSON.parse(e);
     this.setState(prev => ({

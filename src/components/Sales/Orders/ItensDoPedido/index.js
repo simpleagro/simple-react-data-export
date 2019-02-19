@@ -11,6 +11,7 @@ import parseErrors from "lib/parseErrors";
 import { simpleTableSearch } from "lib/simpleTableSearch";
 import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
 import { dadosPedido } from "actions/pedidoActions";
+import { addMaskReais } from "common/utils";
 
 class OrderItem extends Component {
   constructor(props) {
@@ -31,18 +32,15 @@ class OrderItem extends Component {
 
   async initializeList(aqp) {
     try {
-      const items = await OrderItemsService.list(this.state.order_id)(aqp);
+      // const items = await OrderItemsService.list(this.state.order_id)(aqp);
       const orderData = await OrderService.get(this.state.order_id, {
-        fields: "tabela_preco_base, numero, cliente, propriedade"
+        fields: "tabela_preco_base, numero, cliente, propriedade, estado, cidade, pgto_royalties, pgto_tratamento, pgto_germoplasma, itens"
       });
       this.setState(prev => ({
         ...prev,
-        list: items.docs,
+        list: orderData.itens,
         loadingData: false,
         order_data: orderData,
-        pagination: {
-          total: items.total
-        }
       }));
       this.props.dadosPedido(orderData);
     } catch (error) {
@@ -136,7 +134,8 @@ class OrderItem extends Component {
       title: "Preço Final",
       dataIndex: "total_preco_item",
       key: "total_preco_item",
-      align: "right"
+      align: "right",
+      render: text => addMaskReais(text)
     },
     {
       title: "Ações",
