@@ -131,6 +131,7 @@ export const currency = (locale = "pt-BR") => (
 };
 
 export const getNumber = n => {
+  if(!n) return n;
   return isNaN(n)
     ? Number(
         n
