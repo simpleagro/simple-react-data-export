@@ -127,7 +127,7 @@ export const currency = (locale = "pt-BR") => (
 ) => {
   const formatter = new Intl.NumberFormat(locale, options);
 
-  return formatter.format(value);
+  return formatter.format(getNumber(value));
 };
 
 export const getNumber = n => {
