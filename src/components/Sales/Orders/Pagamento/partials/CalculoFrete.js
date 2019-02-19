@@ -9,7 +9,7 @@ import { list as ListShipTableOrderItemsService } from "services/shiptable";
 import * as IBGEService from "services/ibge";
 import { flashWithError } from "common/FlashMessages";
 import { list as ListUnitMeasureService } from "services/units-measures";
-import { dadosPedido } from "actions/pedidoActions";
+import { dadosPedidoFrete } from "actions/pedidoActions";
 
 class CalculoFrete extends Component {
   constructor(props) {
@@ -84,13 +84,9 @@ class CalculoFrete extends Component {
       parseFloat(preco_frete).toFixed(2)
     );
 
-    this.props.dadosPedido({
-      ...this.props.pedido,
-      pagamento: {
-        ...this.props.pedido.pagamento,
-        ...this.state.formData,
-        total_pedido_frete: preco_frete
-      }
+    this.props.dadosPedidoFrete({
+      ...this.state.formData,
+      total_pedido_frete: preco_frete
     });
 
     setTimeout(() => {
@@ -107,10 +103,10 @@ class CalculoFrete extends Component {
       this.props.pedido.itens.forEach(item => {
         fator = fatorConversaoUM(
           this.state.unidadesMedidas,
-          item.embalagem,
+          item.embalagem ? item.embalagem.value : "",
           "kg"
         );
-        peso += fator * item.quantidade;
+        if (fator !== "erro") peso += fator * item.quantidade;
       });
 
     this.setState(prev => ({
@@ -188,12 +184,28 @@ class CalculoFrete extends Component {
               </Col>
               <Col span={8}>
                 <Form.Item label="Distância">
-                  <Input name="distancia" type="number" step={0.01} />
+                  <Input
+                    name="distancia"
+                    type="number"
+                    value={
+                      this.state.formData.distancia ||
+                      (this.props.pedido &&
+                        this.props.pedido.pagamento &&
+                        this.props.pedido.pagamento.distancia)
+                    }
+                    step={0.01}
+                  />
                 </Form.Item>
               </Col>
               <Col span={8}>
                 <Form.Item label="Peso">
-                  <Input name="peso" value={this.state.formData.peso} />
+                  <Input
+                    name="peso"
+                    value={
+                      this.state.formData.peso ||
+                      (this.props.pedido && this.props.pedido.peso)
+                    }
+                  />
                 </Form.Item>
               </Col>
             </Row>
@@ -213,7 +225,7 @@ const mapStateToProps = ({ pedidoState }) => {
 const mapDispatchToProps = dispatch =>
   bindActionCreators(
     {
-      dadosPedido
+      dadosPedidoFrete
     },
     dispatch
   );

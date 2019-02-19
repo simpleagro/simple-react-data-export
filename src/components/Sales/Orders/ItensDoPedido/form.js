@@ -212,7 +212,9 @@ class OrderItemForm extends Component {
     const produto = JSON.parse(this.props.form.getFieldValue("produto"));
 
     let variacoes = grupo.caracteristicas.map((c, index, arr) => {
-      if (this.state.formData[c.chave])
+
+      if (this.state.formData[c.chave]){
+//        debugger;
         this.setState(prev => ({
           ...prev,
           variacoesSelecionadas: {
@@ -220,6 +222,7 @@ class OrderItemForm extends Component {
             [c.chave]: this.state.formData[c.chave]
           }
         }));
+      }
 
       let resultOpcoes = [];
       produto.variacoes
@@ -243,6 +246,7 @@ class OrderItemForm extends Component {
         opcoes: resultOpcoes
       };
     });
+
     this.setState({ variacoes });
     this.calcularResumo();
   }
@@ -269,18 +273,28 @@ class OrderItemForm extends Component {
   }
 
   getVals(chave) {
-    function search(user) {
-      return Object.keys(this).every(key => user[key] === this[key]);
+
+    function search(sChave) {
+      return Object.keys(this).every(
+        key => sChave[key].value === this[key]
+      );
     }
 
     let opcoes = JSON.parse(this.props.form.getFieldValue("produto"));
     let filtro = this.state.variacoesSelecionadas || {};
 
-    opcoes = new Set(
-      opcoes.variacoes.filter(search, filtro).map(c => c[chave])
-    );
+    opcoes = opcoes.variacoes.filter(search, filtro).map(c => c[chave]);
 
-    opcoes.delete(undefined);
+    // removendo duplicados
+    let resultOpcoes = [];
+    opcoes
+      .forEach(function(item) {
+        if (item && !resultOpcoes.find(r => r.value === item.value)) {
+          resultOpcoes.push(item);
+        }
+      });
+
+    opcoes = resultOpcoes;
 
     let variacoes = this.state.variacoes;
     variacoes.map(v => {
@@ -469,7 +483,7 @@ class OrderItemForm extends Component {
                 {this.state.variacoes
                   .sort((a, b) => (b.obrigatorio ? 1 : -1))
                   .map((v, index, arr) => {
-                    return v.opcoes.size ? (
+                    return v.opcoes.length ? (
                       <React.Fragment key={`variacao_fragm_${index}`}>
                         <Spin
                           tip={"Carregando variações para " + v.label}
@@ -503,15 +517,20 @@ class OrderItemForm extends Component {
                                 // onFocus={() => this.getVals(v.chave)}
                                 style={{ width: 200 }}
                                 onChange={async e => {
+
+                                  e = JSON.parse(e);
                                   this.setState(prev => ({
                                     ...prev,
                                     variacoesSelecionadas: {
                                       ...prev.variacoesSelecionadas,
-                                      ...{ [v.chave]: e }
+                                      ...{ [v.chave]: e.value }
                                     }
                                   }));
                                   await this.handleFormState({
-                                    target: { name: v.chave, value: JSON.parse(e) }
+                                    target: {
+                                      name: v.chave,
+                                      value: e
+                                    }
                                   });
                                   arr
                                     .map(v => v.chave)
@@ -526,11 +545,16 @@ class OrderItemForm extends Component {
                                       }));
                                       this.getVals(v2);
                                     });
-                                  this.atualizaValorVariacao(v, e);
+                                  this.atualizaValorVariacao(
+                                    v,
+                                    e.value
+                                  );
                                 }}
                                 placeholder="Selecione...">
                                 {v.opcoes.map((o, index) => (
-                                  <Option key={`${v.chave}_${index}`} value={JSON.stringify(o)}>
+                                  <Option
+                                    key={`${v.chave}_${index}`}
+                                    value={JSON.stringify(o)}>
                                     {o.label}
                                   </Option>
                                 ))}
@@ -667,7 +691,6 @@ class OrderItemForm extends Component {
   }
 
   geraVariacoesInputsDinamicos(variacao) {
-
     const { getFieldDecorator } = this.props.form;
     const compInput = obj => (
       <Row
@@ -824,7 +847,7 @@ class OrderItemForm extends Component {
               p => p.opcao_chave === valor
             );
 
-            let preco = valorVariacao;
+            let preco = valorVariacao || 0;
             const periodo = configAPP.usarCalculoDataBaseMes()
               ? moment().diff(tabelaCaract[0].data_base, "month")
               : Math.round(
@@ -956,7 +979,7 @@ class OrderItemForm extends Component {
     let fatorConversao = 1;
 
     // Se a unid. medida que veio da tabela de preço base for diferente, fazer conversão *******
-    if (unid_med_preco !== embalagem) {
+    if (unid_med_preco !== embalagem.value) {
       const unidadesDeMedida = await ListUnitsMeasures({
         limit: -1,
         status: true
@@ -964,19 +987,19 @@ class OrderItemForm extends Component {
 
       if (!unidadesDeMedida) {
         flashWithError(
-          `Não existem unidades de medidas disponíveis para realizar a conversão de ${embalagem} para ${unid_med_preco}`
+          `Não existem unidades de medidas disponíveis para realizar a conversão de ${embalagem.label} para ${unid_med_preco}`
         );
       } else {
         fatorConversao = fatorConversaoUM(
           unidadesDeMedida,
-          embalagem,
+          embalagem.value,
           unid_med_preco
         );
 
         if (fatorConversao === "erro") {
           fatorConversao = 1;
           flashWithError(
-            `[fatorConversaoUM TBLPC] - Não conseguir realizar a conversão de ${embalagem} para ${unid_med_preco}`
+            `[fatorConversaoUM TBLPC] - Não consegui realizar a conversão de ${embalagem.label} para ${unid_med_preco}`
           );
         }
       }
@@ -1001,7 +1024,7 @@ class OrderItemForm extends Component {
       )(grupoProdutoID)(produtoID);
 
       // Se a unid. medida que veio da tabela de preço base for diferente, fazer conversão *******
-      if (produtoTabelaPreco && produtoTabelaPreco.u_m_preco !== embalagem) {
+      if (produtoTabelaPreco && produtoTabelaPreco.u_m_preco !== embalagem.value) {
         const unidadesDeMedida = await ListUnitsMeasures({
           limit: -1,
           status: true
@@ -1009,21 +1032,21 @@ class OrderItemForm extends Component {
 
         if (!unidadesDeMedida) {
           flashWithError(
-            `Não existem unidades de medidas disponíveis para realizar a conversão de ${embalagem} para ${
+            `Não existem unidades de medidas disponíveis para realizar a conversão de ${embalagem.label} para ${
               produtoTabelaPreco.u_m_preco
             }`
           );
         } else {
           fatorConversao = fatorConversaoUM(
             unidadesDeMedida,
-            embalagem,
+            embalagem.value,
             produtoTabelaPreco.u_m_preco
           );
 
           if (fatorConversao === "erro") {
             fatorConversao = 1;
             flashWithError(
-              `[fatorConversaoUM TPB] - Não conseguir realizar a conversão de ${embalagem} para ${
+              `[fatorConversaoUM TPB] - Não consegui realizar a conversão de ${embalagem.label} para ${
                 produtoTabelaPreco.u_m_preco
               }`
             );
@@ -1036,7 +1059,6 @@ class OrderItemForm extends Component {
   }
 
   async calcularResumo() {
-    // debugger;
     let fatorConversaoChaves = {};
     let calculaTotalCaract = (chave, fatorConversao) => {
       return (
@@ -1072,7 +1094,7 @@ class OrderItemForm extends Component {
 
             fatorConversaoChaves[`fator_conversao_${vs}`] = this.state.formData
               .embalagem
-              ? this.state.formData.embalagem
+              ? this.state.formData.embalagem.value
               : "";
             totais[`preco_total_${vs}`] = calculaTotalCaract(vs, fatorCaract);
             totais["total_preco_item"] += totais[`preco_total_${vs}`];

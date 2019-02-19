@@ -1,10 +1,20 @@
 export const dadosPedido = pedidoData => ({
-  type: 'DADOS_PEDIDO',
+  type: "DADOS_PEDIDO",
   payload: {
     pedidoData
-  },
-  type: 'DADOS_PEDIDO_FRETE',
+  }
+});
+
+export const dadosPedidoFrete = freteData => ({
+  type: "DADOS_PEDIDO_FRETE",
   payload: {
-    pedidoData
+    freteData
+  }
+});
+
+export const dadosPedidoParcelaAutomatica = parcelasData => ({
+  type: "DADOS_PEDIDO_PARCELAS_AUTOMATICAS",
+  payload: {
+    parcelasData
   }
 });

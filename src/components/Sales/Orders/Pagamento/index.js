@@ -254,10 +254,15 @@ class OrderPaymentForm extends Component {
     );
   }
 
-  totalPedidoReais () {
-    return this.props.pedido.itens
-      .map(t => t.total_preco_item_reais)
-      .reduce((a, b) => Number(a) + Number(b), this.state.formData.total_pedido_frete || 0) || 0;
+  totalPedidoReais() {
+    return (
+      this.props.pedido.itens
+        .map(t => t.total_preco_item_reais)
+        .reduce(
+          (a, b) => Number(a) + Number(b),
+          this.state.formData.total_pedido_frete || 0
+        ) || 0
+    );
   }
 
   valorTotalParcelas() {

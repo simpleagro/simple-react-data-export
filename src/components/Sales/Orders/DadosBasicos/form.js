@@ -39,15 +39,17 @@ class OrderForm extends Component {
       fetchingClients: false,
       fetchingAgents: false,
       fetchingConsultants: false,
+      clients: [],
       tiposDeFrete: ["SEM FRETE", "FOB", "CIF"]
     };
   }
 
   async componentDidMount() {
     const { id } = this.props.match.params;
+    let formData = null;
 
     if (id) {
-      const formData = await OrderService.get(id);
+      formData = await OrderService.get(id);
 
       if (formData)
         this.setState(prev => ({
@@ -61,6 +63,14 @@ class OrderForm extends Component {
     const clients = await this.fetchClients({
       fields: "nome,cpf_cnpj,propriedades,-propriedades.talhoes"
     }).then(response => response.docs);
+
+    if (formData && !clients.some(c => c._id === formData.cliente.id))
+      await this.fetchClients({ _id: formData.cliente.id }).then(response => {
+        this.setState(prev => ({
+          ...prev,
+          clients: [...prev.clients, ...response.docs]
+        }));
+      });
 
     const safras = await SeasonServiceList({
       limit: -1,
@@ -176,7 +186,7 @@ class OrderForm extends Component {
   async fetchClients(aqp = {}) {
     return await ClientsServiceList({
       limit: 25,
-      fields: "nome",
+      fields: "nome, cpf_cnpj",
       status: true,
       ...aqp
     });
@@ -352,7 +362,6 @@ class OrderForm extends Component {
                 name="safra"
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione..."
                 filterOption={(input, option) =>
                   option.props.children
@@ -398,7 +407,6 @@ class OrderForm extends Component {
                   fetchingConsultants ? <Spin size="small" /> : null
                 }
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione..."
                 onChange={e => this.onChangeConsultant(e)}>
                 {this.state.consultants &&
@@ -427,13 +435,12 @@ class OrderForm extends Component {
                 showAction={["focus", "click"]}
                 notFoundContent={fetchingClients ? <Spin size="small" /> : null}
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione..."
                 onChange={e => this.onChangeCliente(e)}>
                 {this.state.clients &&
                   this.state.clients.map(c => (
                     <Option key={c._id} value={JSON.stringify(c)}>
-                      {c.nome}
+                      {c.nome} - {c.cpf_cnpj}
                     </Option>
                   ))}
               </Select>
@@ -494,19 +501,11 @@ class OrderForm extends Component {
           {this.state.formData.propriedade && (
             <React.Fragment>
               <Form.Item label="Cidade" {...formItemLayout}>
-                <Input
-                  value={this.state.formData.cidade}
-                  style={{ width: 200 }}
-                  readOnly
-                />
+                <Input value={this.state.formData.cidade} readOnly />
               </Form.Item>
 
               <Form.Item label="Estado" {...formItemLayout}>
-                <Input
-                  value={this.state.formData.estado}
-                  style={{ width: 200 }}
-                  readOnly
-                />
+                <Input value={this.state.formData.estado} readOnly />
               </Form.Item>
             </React.Fragment>
           )}
@@ -520,7 +519,6 @@ class OrderForm extends Component {
                 name="tipo_frete"
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione..."
                 filterOption={(input, option) =>
                   option.props.children
@@ -561,7 +559,6 @@ class OrderForm extends Component {
                 name="garantia"
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione..."
                 filterOption={(input, option) =>
                   option.props.children
@@ -591,7 +588,6 @@ class OrderForm extends Component {
                 name="tipo_venda"
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione..."
                 filterOption={(input, option) =>
                   option.props.children
@@ -621,7 +617,6 @@ class OrderForm extends Component {
                 name="uso_semente"
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione..."
                 filterOption={(input, option) =>
                   option.props.children
@@ -651,7 +646,7 @@ class OrderForm extends Component {
                 name="forma_pagamento"
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
+
                 placeholder="Selecione..."
                 filterOption={(input, option) =>
                   option.props.children
@@ -681,7 +676,7 @@ class OrderForm extends Component {
                 name="tipo_pagamento"
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
+
                 placeholder="Selecione..."
                 filterOption={(input, option) =>
                   option.props.children
@@ -713,7 +708,6 @@ class OrderForm extends Component {
                 name="tabela_preco_base"
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione..."
                 filterOption={(input, option) =>
                   option.props.children
@@ -764,7 +758,6 @@ class OrderForm extends Component {
                         fetchingAgents ? <Spin size="small" /> : null
                       }
                       showSearch
-                      style={{ width: 200 }}
                       placeholder="Selecione..."
                       onChange={e => this.onChangeAgente(e)}>
                       {this.state.agents &&
