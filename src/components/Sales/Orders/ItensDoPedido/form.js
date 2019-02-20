@@ -10,15 +10,23 @@ import {
   Row,
   Col,
   Spin,
-  Layout
+  Layout,
+  Collapse
 } from "antd";
 import { connect } from "react-redux";
 import * as Promise from "bluebird";
+import debounce from "lodash/debounce";
+import moment from "moment";
 
 import {
   flashWithSuccess,
   flashWithError
 } from "../../../common/FlashMessages";
+import {
+  valorFinalJurosCompostos,
+  currency,
+  normalizeString
+} from "common/utils";
 import parseErrors from "../../../../lib/parseErrors";
 import { PainelHeader } from "../../../common/PainelHeader";
 import * as ProductGroupService from "services/productgroups";
@@ -32,7 +40,7 @@ import { fatorConversaoUM } from "common/utils";
 import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
 import { SimpleLazyLoader } from "../../../common/SimpleLazyLoader";
 import { SFFPorcentagem } from "../../../common/formFields/SFFPorcentagem";
-import debounce from "lodash/debounce";
+import { configAPP } from "config/app";
 
 const Option = Select.Option;
 
@@ -80,7 +88,7 @@ class OrderItemForm extends Component {
     }).then(response => response.docs);
 
     const tabelaPrecos = await PriceTableService.list({
-      fields: "nome",
+      fields: "nome, moeda",
       status: true,
       limit: -1
     }).then(response => response.docs);
@@ -204,7 +212,9 @@ class OrderItemForm extends Component {
     const produto = JSON.parse(this.props.form.getFieldValue("produto"));
 
     let variacoes = grupo.caracteristicas.map((c, index, arr) => {
-      if (this.state.formData[c.chave])
+
+      if (this.state.formData[c.chave]){
+//        debugger;
         this.setState(prev => ({
           ...prev,
           variacoesSelecionadas: {
@@ -212,6 +222,17 @@ class OrderItemForm extends Component {
             [c.chave]: this.state.formData[c.chave]
           }
         }));
+      }
+
+      let resultOpcoes = [];
+      produto.variacoes
+        .filter(v => v[c.chave])
+        .map(v => v[c.chave])
+        .forEach(function(item) {
+          if (!resultOpcoes.find(r => r.value === item.value)) {
+            resultOpcoes.push(item);
+          }
+        });
       return {
         chave: c.chave,
         label: c.label,
@@ -222,9 +243,7 @@ class OrderItemForm extends Component {
         variacaoPreco: c.variacao_preco,
         prevField: index > 0 ? arr[index - 1].chave : null,
         nextField: index + 1 < arr.length ? arr[index + 1].chave : null,
-        opcoes: new Set(
-          produto.variacoes.filter(v => v[c.chave]).map(v => v[c.chave])
-        )
+        opcoes: resultOpcoes
       };
     });
 
@@ -233,7 +252,7 @@ class OrderItemForm extends Component {
   }
 
   resetVariacoes() {
-    // debugger;
+    // ;
     const campos = [
       ...Object.keys(this.state.formData).filter(
         f => f.match(/^preco_/i) || f.match(/^desconto_/i)
@@ -254,18 +273,28 @@ class OrderItemForm extends Component {
   }
 
   getVals(chave) {
-    function search(user) {
-      return Object.keys(this).every(key => user[key] === this[key]);
+
+    function search(sChave) {
+      return Object.keys(this).every(
+        key => sChave[key].value === this[key]
+      );
     }
 
     let opcoes = JSON.parse(this.props.form.getFieldValue("produto"));
     let filtro = this.state.variacoesSelecionadas || {};
 
-    opcoes = new Set(
-      opcoes.variacoes.filter(search, filtro).map(c => c[chave])
-    );
+    opcoes = opcoes.variacoes.filter(search, filtro).map(c => c[chave]);
 
-    opcoes.delete(undefined);
+    // removendo duplicados
+    let resultOpcoes = [];
+    opcoes
+      .forEach(function(item) {
+        if (item && !resultOpcoes.find(r => r.value === item.value)) {
+          resultOpcoes.push(item);
+        }
+      });
+
+    opcoes = resultOpcoes;
 
     let variacoes = this.state.variacoes;
     variacoes.map(v => {
@@ -454,7 +483,7 @@ class OrderItemForm extends Component {
                 {this.state.variacoes
                   .sort((a, b) => (b.obrigatorio ? 1 : -1))
                   .map((v, index, arr) => {
-                    return v.opcoes.size ? (
+                    return v.opcoes.length ? (
                       <React.Fragment key={`variacao_fragm_${index}`}>
                         <Spin
                           tip={"Carregando variações para " + v.label}
@@ -488,15 +517,20 @@ class OrderItemForm extends Component {
                                 // onFocus={() => this.getVals(v.chave)}
                                 style={{ width: 200 }}
                                 onChange={async e => {
+
+                                  e = JSON.parse(e);
                                   this.setState(prev => ({
                                     ...prev,
                                     variacoesSelecionadas: {
                                       ...prev.variacoesSelecionadas,
-                                      ...{ [v.chave]: e }
+                                      ...{ [v.chave]: e.value }
                                     }
                                   }));
                                   await this.handleFormState({
-                                    target: { name: v.chave, value: e }
+                                    target: {
+                                      name: v.chave,
+                                      value: e
+                                    }
                                   });
                                   arr
                                     .map(v => v.chave)
@@ -511,12 +545,17 @@ class OrderItemForm extends Component {
                                       }));
                                       this.getVals(v2);
                                     });
-                                  this.atualizaValorVariacao(v, e);
+                                  this.atualizaValorVariacao(
+                                    v,
+                                    e.value
+                                  );
                                 }}
                                 placeholder="Selecione...">
-                                {Array.from(v.opcoes).map((o, index) => (
-                                  <Option key={`${v.chave}_${index}`} value={o}>
-                                    {o}
+                                {v.opcoes.map((o, index) => (
+                                  <Option
+                                    key={`${v.chave}_${index}`}
+                                    value={JSON.stringify(o)}>
+                                    {o.label}
                                   </Option>
                                 ))}
                               </Select>
@@ -603,29 +642,46 @@ class OrderItemForm extends Component {
             <Layout.Footer style={{ borderTop: "2px solid gray" }}>
               <h3>Resumo:</h3>
 
-              {this.state.variacoes &&
-                this.state.variacoes.map(v => {
-                  if (v.tipoTabela === "TABELA_CARACTERISTICA")
-                    return (
-                      <div key={`resumoItem_${v.chave}`}>
-                        <b>
-                          Total Preço {v.label}:{" "}
-                          {this.state.formData[`preco_total_${v.chave}`] || 0}
-                        </b>
-                      </div>
-                    );
-                  if (v.tipoTabela === "TABELA_BASE" && v.regraPrecoBase)
-                    return v.regraPrecoBase.map(rpb => (
-                      <div key={`resumoItem_${rpb.chave}`}>
-                        <b>
-                          Total Preço {rpb.label}:{" "}
-                          {this.state.formData[`preco_total_${rpb.chave}`] || 0}
-                        </b>
-                      </div>
-                    ));
-                })}
+              <Collapse bordered={false} style={{ marginBottom: 10 }}>
+                <Collapse.Panel
+                  header="Ver outros totais"
+                  key="resumo_outros_totais">
+                  {this.state.variacoes &&
+                    this.state.variacoes.map(v => {
+                      if (v.tipoTabela === "TABELA_CARACTERISTICA")
+                        return (
+                          <div key={`resumoItem_${v.chave}`}>
+                            <b>
+                              Total Preço {v.label}:{" "}
+                              {currency()(
+                                this.state.formData[`preco_total_${v.chave}`] ||
+                                  0
+                              )}
+                            </b>
+                          </div>
+                        );
+                      if (v.tipoTabela === "TABELA_BASE" && v.regraPrecoBase)
+                        return v.regraPrecoBase.map(rpb => (
+                          <div key={`resumoItem_${rpb.chave}`}>
+                            <b>
+                              Total Preço {rpb.label}:{" "}
+                              {currency()(
+                                this.state.formData[
+                                  `preco_total_${rpb.chave}`
+                                ] || 0
+                              )}
+                            </b>
+                          </div>
+                        ));
+                    })}
+                </Collapse.Panel>
+              </Collapse>
+
               <div key={`resumoItem_total`}>
-                <b>Total Geral: {this.state.formData.total_preco_item || 0}</b>
+                <b>
+                  Total Geral:{" "}
+                  {currency()(this.state.formData.total_preco_item || 0)}
+                </b>
               </div>
             </Layout.Footer>
           </Affix>
@@ -642,18 +698,6 @@ class OrderItemForm extends Component {
         id={`rowVariacaoDinamico_${obj.chave}`}>
         <Col span={12}>
           <Form.Item
-            help={
-              !this.state.variacoesSelecionadas ||
-              !this.state.variacoesSelecionadas.hasOwnProperty(variacao.chave)
-                ? "Selecione um(a) " + variacao.label + " primeiro"
-                : ""
-            }
-            validateStatus={
-              !this.state.variacoesSelecionadas ||
-              !this.state.variacoesSelecionadas.hasOwnProperty(variacao.chave)
-                ? "warning"
-                : ""
-            }
             label={`Preço - ${obj.label}`}
             {...{
               labelCol: { span: 12 },
@@ -750,6 +794,30 @@ class OrderItemForm extends Component {
     });
   };
 
+  /**
+   * totalPrecoItemFormaPagamento
+   * @param  {String} forma
+   * @param  {String} valor
+   * @return {void}@memberof OrderItemForm
+   */
+  async totalPrecoItemFormaPagamento(forma, valor) {
+    forma = normalizeString(forma);
+    console.log(forma, valor);
+
+    return this.setState(prev => {
+      return {
+        ...prev,
+        formData: {
+          ...prev.formData,
+          [`total_preco_item_${forma}`]:
+            window.simpleagroapp.getNumber(
+              prev.formData[`total_preco_item_${forma}`] || 0
+            ) + window.simpleagroapp.getNumber(valor)
+        }
+      };
+    });
+  }
+
   async atualizaValorVariacao(variacao, valor) {
     try {
       this.setState({ [`loadingVariacoes_${variacao.chave}`]: true });
@@ -759,9 +827,12 @@ class OrderItemForm extends Component {
           status: true,
           "grupo_produto.id": this.state.formData.grupo_produto.id,
           "caracteristica.chave": variacao.chave,
-          fields: "u_m_preco, grupo_produto,caracteristica,precos.$",
+          fields:
+            "u_m_preco, data_base, taxa_adicao, taxa_supressao, grupo_produto,caracteristica,precos.$, moeda",
           "precos.deleted": false,
-          limit: 1
+          ...(configAPP.usarConfiguracaoFPCaracteristica() && {
+            moeda: this.props.pedido[`pgto_${variacao.chave}`]
+          })
         }).then(response => response.docs);
 
         if (tabelaCaract && tabelaCaract.length) {
@@ -776,18 +847,33 @@ class OrderItemForm extends Component {
               p => p.opcao_chave === valor
             );
 
+            let preco = valorVariacao || 0;
+            const periodo = configAPP.usarCalculoDataBaseMes()
+              ? moment().diff(tabelaCaract[0].data_base, "month")
+              : Math.round(
+                  moment().diff(tabelaCaract[0].data_base, "days") /
+                    (configAPP.quantidadeDeDiasCalculoDataBase() || 30)
+                );
+            const taxa =
+              periodo && periodo > 0
+                ? window.simpleagroapp.getNumber(tabelaCaract[0].taxa_adicao)
+                : window.simpleagroapp.getNumber(
+                    tabelaCaract[0].taxa_supressao
+                  );
+
+            if (periodo) preco = valorFinalJurosCompostos(preco, taxa, periodo);
+
+            await this.totalPrecoItemFormaPagamento(
+              this.props.pedido[`pgto_${variacao.chave}`],
+              preco
+            );
+
             this.setState(prev => ({
               ...prev,
               formData: {
                 ...prev.formData,
-                [`preco_${variacao.chave}_tabela`]:
-                  (valorVariacao &&
-                    valorVariacao.toString().replace(",", ".")) ||
-                  undefined,
-                [`preco_${variacao.chave}`]:
-                  (valorVariacao &&
-                    valorVariacao.toString().replace(",", ".")) ||
-                  undefined,
+                [`preco_${variacao.chave}_tabela`]: preco || undefined,
+                [`preco_${variacao.chave}`]: preco || undefined,
                 [`desconto_${variacao.chave}`]: 0,
                 [`fator_conversao_${variacao.chave}`]: tabelaCaract[0].u_m_preco
               }
@@ -812,8 +898,10 @@ class OrderItemForm extends Component {
           }));
         });
 
-        const tabelaPreco = await GetVariation({
+        let tabelaPrecoOrig = await GetVariation({
+          usarConfiguracaoFPCaracteristica: configAPP.usarConfiguracaoFPCaracteristica(),
           priceTable: this.state.formData.tabela_preco_base.id,
+          priceTableName: this.state.formData.tabela_preco_base.nome,
           productGroup: this.state.formData.grupo_produto.id,
           productID: this.state.formData.produto.id,
           variacao: variacao.chave,
@@ -821,23 +909,61 @@ class OrderItemForm extends Component {
           orderID: this.state.order_id
         });
 
-        if (tabelaPreco !== false) {
-          this.setState(prev => ({
-            ...prev,
-            formData: { ...prev.formData, ...tabelaPreco }
-          }));
-
-          variacao.regraPrecoBase.map(rpb => {
+        if (tabelaPrecoOrig !== false) {
+          if (!configAPP.usarConfiguracaoFPCaracteristica())
             this.setState(prev => ({
               ...prev,
-              formData: {
-                ...prev.formData,
-                [`preco_${rpb.chave}_tabela`]: tabelaPreco[`preco_${rpb.chave}`]
-              }
+              formData: { ...prev.formData, ...tabelaPrecoOrig }
             }));
-          });
+
+          await Promise.all(
+            variacao.regraPrecoBase.map(async rpb => {
+              let tabelaPreco = tabelaPrecoOrig;
+              if (configAPP.usarConfiguracaoFPCaracteristica())
+                tabelaPreco =
+                  tabelaPrecoOrig[this.props.pedido[`pgto_${rpb.chave}`]];
+
+              let preco = tabelaPreco[`preco_${rpb.chave}`];
+
+              // A data base pode ser padrão ou marcado por data royalties, germoplasma ... etc
+              let dataBaseCalculo =
+                tabelaPreco.data_base_por_regra === true
+                  ? tabelaPreco[`data_base_${rpb.chave}`]
+                  : tabelaPreco.data_base;
+              let periodo = configAPP.usarCalculoDataBaseMes()
+                ? moment().diff(dataBaseCalculo, "month")
+                : Math.round(
+                    moment().diff(dataBaseCalculo, "days") /
+                      (configAPP.quantidadeDeDiasCalculoDataBase() || 30)
+                  );
+
+              const taxa =
+                periodo && periodo > 0
+                  ? window.simpleagroapp.getNumber(tabelaPreco.taxa_adicao)
+                  : window.simpleagroapp.getNumber(tabelaPreco.taxa_supressao);
+
+              if (periodo)
+                preco = valorFinalJurosCompostos(preco, taxa, periodo);
+
+              await this.totalPrecoItemFormaPagamento(
+                this.props.pedido[`pgto_${rpb.chave}`],
+                preco
+              );
+
+              if (tabelaPreco)
+                this.setState(prev => ({
+                  ...prev,
+                  formData: {
+                    ...prev.formData,
+                    [`preco_${rpb.chave}_tabela`]: preco,
+                    [`preco_${rpb.chave}`]: preco
+                  }
+                }));
+            })
+          );
         }
       }
+
       this.calcularResumo();
     } catch (error) {
       if (error && error.response && error.response.data) parseErrors(error);
@@ -847,13 +973,13 @@ class OrderItemForm extends Component {
   }
 
   async getFatorConversaoTabelaPrecoCaract(chave) {
-    // debugger
+    //
     const unid_med_preco = this.state.formData[`fator_conversao_${chave}`];
     const { embalagem } = this.state.formData;
     let fatorConversao = 1;
 
     // Se a unid. medida que veio da tabela de preço base for diferente, fazer conversão *******
-    if (unid_med_preco !== embalagem) {
+    if (unid_med_preco !== embalagem.value) {
       const unidadesDeMedida = await ListUnitsMeasures({
         limit: -1,
         status: true
@@ -861,19 +987,19 @@ class OrderItemForm extends Component {
 
       if (!unidadesDeMedida) {
         flashWithError(
-          `Não existem unidades de medidas disponíveis para realizar a conversão de ${embalagem} para ${unid_med_preco}`
+          `Não existem unidades de medidas disponíveis para realizar a conversão de ${embalagem.label} para ${unid_med_preco}`
         );
       } else {
         fatorConversao = fatorConversaoUM(
           unidadesDeMedida,
-          embalagem,
+          embalagem.value,
           unid_med_preco
         );
 
         if (fatorConversao === "erro") {
           fatorConversao = 1;
           flashWithError(
-            `[fatorConversaoUM TBLPC] - Não conseguir realizar a conversão de ${embalagem} para ${unid_med_preco}`
+            `[fatorConversaoUM TBLPC] - Não consegui realizar a conversão de ${embalagem.label} para ${unid_med_preco}`
           );
         }
       }
@@ -898,7 +1024,7 @@ class OrderItemForm extends Component {
       )(grupoProdutoID)(produtoID);
 
       // Se a unid. medida que veio da tabela de preço base for diferente, fazer conversão *******
-      if (produtoTabelaPreco && produtoTabelaPreco.u_m_preco !== embalagem) {
+      if (produtoTabelaPreco && produtoTabelaPreco.u_m_preco !== embalagem.value) {
         const unidadesDeMedida = await ListUnitsMeasures({
           limit: -1,
           status: true
@@ -906,21 +1032,21 @@ class OrderItemForm extends Component {
 
         if (!unidadesDeMedida) {
           flashWithError(
-            `Não existem unidades de medidas disponíveis para realizar a conversão de ${embalagem} para ${
+            `Não existem unidades de medidas disponíveis para realizar a conversão de ${embalagem.label} para ${
               produtoTabelaPreco.u_m_preco
             }`
           );
         } else {
           fatorConversao = fatorConversaoUM(
             unidadesDeMedida,
-            embalagem,
+            embalagem.value,
             produtoTabelaPreco.u_m_preco
           );
 
           if (fatorConversao === "erro") {
             fatorConversao = 1;
             flashWithError(
-              `[fatorConversaoUM TPB] - Não conseguir realizar a conversão de ${embalagem} para ${
+              `[fatorConversaoUM TPB] - Não consegui realizar a conversão de ${embalagem.label} para ${
                 produtoTabelaPreco.u_m_preco
               }`
             );
@@ -950,7 +1076,7 @@ class OrderItemForm extends Component {
       (this.state.variacoesSelecionadas &&
         Object.keys(this.state.variacoesSelecionadas).length)
     ) {
-      // debugger;
+      // ;
       let totais = {
         total_preco_item: 0
       };
@@ -968,7 +1094,7 @@ class OrderItemForm extends Component {
 
             fatorConversaoChaves[`fator_conversao_${vs}`] = this.state.formData
               .embalagem
-              ? this.state.formData.embalagem
+              ? this.state.formData.embalagem.value
               : "";
             totais[`preco_total_${vs}`] = calculaTotalCaract(vs, fatorCaract);
             totais["total_preco_item"] += totais[`preco_total_${vs}`];

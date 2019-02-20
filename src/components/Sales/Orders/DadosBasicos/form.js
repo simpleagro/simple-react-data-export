@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Button, Form, Select, Affix, Spin, Icon, Checkbox } from "antd";
+import { Button, Form, Select, Affix, Spin, Icon, Input } from "antd";
 import debounce from "lodash/debounce";
 
 import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
@@ -13,11 +13,11 @@ import { list as ClientsServiceList } from "../../../../services/clients";
 import { list as TypesOfWarrantyServiceList } from "../../../../services/types-of-warranty";
 import { list as TypesOfSaleServiceList } from "../../../../services/types-of-sale";
 import { list as SeedUseServiceList } from "../../../../services/seed-use";
-import { list as FormOfPaymentServiceList } from "../../../../services/form-of-payment";
-import { list as TypeOfPaymentServiceList } from "../../../../services/type-of-payment";
 import { list as PriceTableServiceList } from "../../../../services/pricetable";
 import { list as AgentSalesServiceList } from "../../../../services/sales-agents";
 import { list as ConsultantServiceList } from "../../../../services/consultants";
+import ConfigurarFPCaracteristica from "./ConfigurarFPCaracteristica";
+import { configAPP } from "config/app";
 
 const Option = Select.Option;
 const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
@@ -39,15 +39,17 @@ class OrderForm extends Component {
       fetchingClients: false,
       fetchingAgents: false,
       fetchingConsultants: false,
+      clients: [],
       tiposDeFrete: ["SEM FRETE", "FOB", "CIF"]
     };
   }
 
   async componentDidMount() {
     const { id } = this.props.match.params;
+    let formData = null;
 
     if (id) {
-      const formData = await OrderService.get(id);
+      formData = await OrderService.get(id);
 
       if (formData)
         this.setState(prev => ({
@@ -61,6 +63,14 @@ class OrderForm extends Component {
     const clients = await this.fetchClients({
       fields: "nome,cpf_cnpj,propriedades,-propriedades.talhoes"
     }).then(response => response.docs);
+
+    if (formData && !clients.some(c => c._id === formData.cliente.id))
+      await this.fetchClients({ _id: formData.cliente.id }).then(response => {
+        this.setState(prev => ({
+          ...prev,
+          clients: [...prev.clients, ...response.docs]
+        }));
+      });
 
     const safras = await SeasonServiceList({
       limit: -1,
@@ -122,7 +132,7 @@ class OrderForm extends Component {
     }));
   }
 
-  handleFormState = event => {
+  handleFormState = async event => {
     if (!event.target.name) return;
     let form = Object.assign({}, this.state.formData, {
       [event.target.name]: event.target.value
@@ -176,7 +186,7 @@ class OrderForm extends Component {
   async fetchClients(aqp = {}) {
     return await ClientsServiceList({
       limit: 25,
-      fields: "nome",
+      fields: "nome, cpf_cnpj",
       status: true,
       ...aqp
     });
@@ -352,7 +362,6 @@ class OrderForm extends Component {
                 name="safra"
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione..."
                 filterOption={(input, option) =>
                   option.props.children
@@ -398,7 +407,6 @@ class OrderForm extends Component {
                   fetchingConsultants ? <Spin size="small" /> : null
                 }
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione..."
                 onChange={e => this.onChangeConsultant(e)}>
                 {this.state.consultants &&
@@ -427,13 +435,12 @@ class OrderForm extends Component {
                 showAction={["focus", "click"]}
                 notFoundContent={fetchingClients ? <Spin size="small" /> : null}
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione..."
                 onChange={e => this.onChangeCliente(e)}>
                 {this.state.clients &&
                   this.state.clients.map(c => (
                     <Option key={c._id} value={JSON.stringify(c)}>
-                      {c.nome}
+                      {c.nome} - {c.cpf_cnpj}
                     </Option>
                   ))}
               </Select>
@@ -469,12 +476,7 @@ class OrderForm extends Component {
                     .indexOf(input.toLowerCase()) >= 0
                 }
                 onSelect={e => {
-                  this.handleFormState({
-                    target: {
-                      name: "propriedade",
-                      value: JSON.parse(e)
-                    }
-                  });
+                  this.onSelectPropriedade(e);
                 }}>
                 {this.state.propriedades && this.state.propriedades.length > 0
                   ? this.state.propriedades.map(p => (
@@ -484,7 +486,9 @@ class OrderForm extends Component {
                         value={JSON.stringify({
                           nome: p.nome,
                           ie: p.ie,
-                          id: p._id
+                          id: p._id,
+                          estado: p.estado,
+                          cidade: p.cidade
                         })}>
                         {p.nome} / {p.ie}
                       </Option>
@@ -493,6 +497,19 @@ class OrderForm extends Component {
               </Select>
             )}
           </Form.Item>
+
+          {this.state.formData.propriedade && (
+            <React.Fragment>
+              <Form.Item label="Cidade" {...formItemLayout}>
+                <Input value={this.state.formData.cidade} readOnly />
+              </Form.Item>
+
+              <Form.Item label="Estado" {...formItemLayout}>
+                <Input value={this.state.formData.estado} readOnly />
+              </Form.Item>
+            </React.Fragment>
+          )}
+
           <Form.Item label="Tipo de Frete" {...formItemLayout}>
             {getFieldDecorator("tipo_frete", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
@@ -502,7 +519,6 @@ class OrderForm extends Component {
                 name="tipo_frete"
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione..."
                 filterOption={(input, option) =>
                   option.props.children
@@ -510,6 +526,18 @@ class OrderForm extends Component {
                     .indexOf(input.toLowerCase()) >= 0
                 }
                 onChange={e => {
+                  if (e !== "CIF")
+                    setTimeout(() => {
+                      this.setState(prev => ({
+                        ...prev,
+                        formData: {
+                          ...prev.formData,
+                          pgto_frete: "",
+                          venc_frete: ""
+                        }
+                      }));
+                    }, 0);
+
                   this.handleFormState({
                     target: { name: "tipo_frete", value: e }
                   });
@@ -531,7 +559,6 @@ class OrderForm extends Component {
                 name="garantia"
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione..."
                 filterOption={(input, option) =>
                   option.props.children
@@ -561,7 +588,6 @@ class OrderForm extends Component {
                 name="tipo_venda"
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione..."
                 filterOption={(input, option) =>
                   option.props.children
@@ -591,7 +617,6 @@ class OrderForm extends Component {
                 name="uso_semente"
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione..."
                 filterOption={(input, option) =>
                   option.props.children
@@ -621,7 +646,6 @@ class OrderForm extends Component {
                 name="forma_pagamento"
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione..."
                 filterOption={(input, option) =>
                   option.props.children
@@ -651,7 +675,6 @@ class OrderForm extends Component {
                 name="tipo_pagamento"
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione..."
                 filterOption={(input, option) =>
                   option.props.children
@@ -683,7 +706,6 @@ class OrderForm extends Component {
                 name="tabela_preco_base"
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
                 placeholder="Selecione..."
                 filterOption={(input, option) =>
                   option.props.children
@@ -709,69 +731,81 @@ class OrderForm extends Component {
               </Select>
             )}
           </Form.Item>
-          <Form.Item wrapperCol={{ span: 12, offset: 2 }}>
-            <Checkbox
-              checked={this.state.formData.venda_agenciada}
-              onChange={e => {
-                this.handleFormState({
-                  target: {
-                    name: "venda_agenciada",
-                    value: e.target.checked
-                  }
-                });
-              }}>
-              Venda Agenciada?
-            </Checkbox>
-          </Form.Item>
-          {this.state.formData.venda_agenciada && (
-            <React.Fragment>
-              <Form.Item label="Agente de Venda" {...formItemLayout}>
-                {getFieldDecorator("agente_venda", {
-                  rules: [
-                    { required: true, message: "Este campo é obrigatório!" }
-                  ],
-                  initialValue:
-                    this.state.formData.agente_venda &&
-                    this.state.formData.agente_venda.nome
-                })(
-                  <Select
-                    name="agente_venda"
-                    filterOption={(input, option) =>
-                      option.props.children
-                        .toLowerCase()
-                        .indexOf(input.toLowerCase()) >= 0
-                    }
-                    onSearch={this.searchAgent}
-                    showAction={["focus", "click"]}
-                    notFoundContent={
-                      fetchingAgents ? <Spin size="small" /> : null
-                    }
-                    showSearch
-                    style={{ width: 200 }}
-                    placeholder="Selecione..."
-                    onChange={e => this.onChangeAgente(e)}>
-                    {this.state.agents &&
-                      this.state.agents.map(c => (
-                        <Option key={c._id} value={JSON.stringify(c)}>
-                          {c.nome}
-                        </Option>
-                      ))}
-                  </Select>
-                )}
-              </Form.Item>
-              <SFFPorcentagem
-                initialValue={this.state.formData.comissao_agente}
-                name="comissao_agente"
-                label="Comissão"
-                formItemLayout={formItemLayout}
-                getFieldDecorator={getFieldDecorator}
-                handleFormState={this.handleFormState}
-              />
-            </React.Fragment>
+          {this.state.formData.tipo_venda &&
+            this.ehVendaAgenciada() && (
+              <React.Fragment>
+                <Form.Item label="Agente de Venda" {...formItemLayout}>
+                  {getFieldDecorator("agente_venda", {
+                    rules: [
+                      { required: true, message: "Este campo é obrigatório!" }
+                    ],
+                    initialValue:
+                      this.state.formData.agente_venda &&
+                      this.state.formData.agente_venda.nome
+                  })(
+                    <Select
+                      name="agente_venda"
+                      filterOption={(input, option) =>
+                        option.props.children
+                          .toLowerCase()
+                          .indexOf(input.toLowerCase()) >= 0
+                      }
+                      onSearch={this.searchAgent}
+                      showAction={["focus", "click"]}
+                      notFoundContent={
+                        fetchingAgents ? <Spin size="small" /> : null
+                      }
+                      showSearch
+                      placeholder="Selecione..."
+                      onChange={e => this.onChangeAgente(e)}>
+                      {this.state.agents &&
+                        this.state.agents.map(c => (
+                          <Option key={c._id} value={JSON.stringify(c)}>
+                            {c.nome}
+                          </Option>
+                        ))}
+                    </Select>
+                  )}
+                </Form.Item>
+                <SFFPorcentagem
+                  initialValue={this.state.formData.comissao_agente}
+                  name="comissao_agente"
+                  label="Comissão"
+                  formItemLayout={formItemLayout}
+                  getFieldDecorator={getFieldDecorator}
+                  handleFormState={this.handleFormState}
+                />
+              </React.Fragment>
+            )}
+          {/* São Francisco */}
+          {configAPP.usarConfiguracaoFPCaracteristica() && (
+            <ConfigurarFPCaracteristica
+              showFrete={this.state.formData.tipo_frete === "CIF"}
+              handleFormState={this.handleFormState}
+              form={this.props.form}
+              formData={this.state.formData}
+            />
           )}
+          {/* São Francisco */}
         </Form>
       </div>
     );
+  }
+  async onSelectPropriedade(e) {
+    const { estado, cidade, ...propriedade } = JSON.parse(e);
+    this.setState(prev => ({
+      ...prev,
+      formData: {
+        ...prev.formData,
+        propriedade,
+        cidade,
+        estado
+      }
+    }));
+  }
+
+  ehVendaAgenciada() {
+    return this.state.formData.tipo_venda.toUpperCase().includes("AGENCIADA"); // tratando como um padrão de CONSTANTE
   }
 }
 
