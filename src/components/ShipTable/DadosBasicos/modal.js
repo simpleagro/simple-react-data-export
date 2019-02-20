@@ -86,6 +86,28 @@ const ModalForm = Form.create()(
                   />
                 )}
               </Form.Item>
+              <Form.Item label="Taxa Adição">
+                {getFieldDecorator('taxa_adicao', {
+                  rules: [{ required: true, message: "Este campo é obrigatório!" }],
+                  initialValue: this.state.formData.taxa_adicao
+                })(
+                  <Input
+                    name="taxa_adicao"
+                    ref={input => (this.titleInput = input)}
+                  />
+                )}
+              </Form.Item>
+              <Form.Item label="Taxa Supressão">
+                {getFieldDecorator('taxa_supressao', {
+                  rules: [{ required: true, message: "Este campo é obrigatório!" }],
+                  initialValue: this.state.formData.taxa_supressao
+                })(
+                  <Input
+                    name="taxa_supressao"
+                    ref={input => (this.titleInput = input)}
+                  />
+                )}
+              </Form.Item>
               <Form.Item label="Estado">
                 {getFieldDecorator("estado", {
                   rules: [
