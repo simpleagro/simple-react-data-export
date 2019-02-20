@@ -611,6 +611,7 @@ class CustomerWalletForm extends Component {
                         }
                         showSearch
                         placeholder="Selecione..."
+                        style={{ width: "70%"}}
                         onChange={e => this.selectedClient(e)}>
                         {this.state.clients.map(c => (
                           <Option key={c._id} value={c._id}>
@@ -625,6 +626,7 @@ class CustomerWalletForm extends Component {
                         onClick={() => this.addClient()}>
                         Adicionar Cliente
                       </Button>
+                      <div style={{ clear: "both"}}/>
                     </span>
                   }>
                   {this.state.walletTree.length ? (
