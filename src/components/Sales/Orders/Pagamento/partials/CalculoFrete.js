@@ -263,7 +263,7 @@ class CalculoFrete extends Component {
                       this.state.formData.distancia ||
                       (this.props.pedido &&
                         this.props.pedido.pagamento &&
-                        this.props.pedido.pagamento.distancia)
+                        this.props.pedido.pagamento.distancia) || undefined
                     }
                     step={0.01}
                   />
