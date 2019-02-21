@@ -201,7 +201,7 @@ class Produtos extends Component {
   editarProduct (record) {
     return this.props.match.params.group_id
       ? this.props.history.push({
-          pathname: `/grupos-produtos/${this.state.group_id}/produtos/${record._id}/edit`, 
+          pathname: `/grupos-produtos/${this.state.group_id}/produtos/${record._id}/edit`,
           state: { group_data: this.state.group_data }
         })
       : this.props.history.push(`/produtos/${record._id}/edit`);
@@ -220,7 +220,7 @@ class Produtos extends Component {
       ...this.state.tableSearch
     });
   };
-  
+
   render() {
     return (
       <div>
@@ -258,7 +258,7 @@ class Produtos extends Component {
                       icon="plus"
                       onClick={() =>
                         this.props.history.push({
-                          pathname: `/grupos-produtos/${this.state.group_id}/produtos/new`, 
+                          pathname: `/grupos-produtos/${this.state.group_id}/produtos/new`,
                           state: { group_data: this.state.group_data }
                         })
                       }>

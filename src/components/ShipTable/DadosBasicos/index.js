@@ -144,6 +144,24 @@ class ShipTable extends Component {
       render: (text) => text ? formatDate(text) : ''
     },
     {
+      title: "Taxa Adição",
+      dataIndex: "taxa_adicao",
+      key: "taxa_adicao",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      }
+    },
+    {
+      title: "Taxa Supressão",
+      dataIndex: "taxa_supressao",
+      key: "taxa_supressao",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      }
+    },
+    {
       title: "Estado",
       dataIndex: "estado",
       key: "estado",

@@ -156,7 +156,6 @@ select,
 .ant-table-thead > tr > th {
   white-space: nowrap;
 }
-
 .ant-table-tbody > tr > td {
   white-space: normal;
 }
