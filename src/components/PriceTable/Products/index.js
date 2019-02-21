@@ -19,9 +19,9 @@ import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
-import ModalForm from "./modal"
-import ModalPriceTable from '../DadosBasicos/modal'
-import { simpleTableSearch } from "../../../lib/simpleTableSearch"
+import ModalForm from "./modal";
+import ModalPriceTable from "../DadosBasicos/modal";
+import { simpleTableSearch } from "../../../lib/simpleTableSearch";
 
 class ProductsPriceTable extends Component {
   constructor(props) {
@@ -47,8 +47,9 @@ class ProductsPriceTable extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await ProductsService.list(this.state.pricetable_id)(this.state.productgroup_id)();
-    const priceTableData = await PriceTableService.get(this.state.pricetable_id)(aqp);
+    const data = await ProductsService.list(this.state.pricetable_id)(
+      this.state.productgroup_id
+    )(aqp);
 
     this.setState(prev => ({
       ...prev,
@@ -56,21 +57,26 @@ class ProductsPriceTable extends Component {
       pagination: {
         total: data.total
       },
-      loadingData: false,
-      price_table_data: priceTableData
+      loadingData: false
     }));
   }
 
   async componentDidMount() {
+    const priceTableData = await PriceTableService.get(
+      this.state.pricetable_id
+    )();
+    this.setState(prev => ({
+      ...prev,
+      price_table_data: priceTableData
+    }));
     await this.initializeList();
   }
 
   changeStatus = async (id, newStatus) => {
     try {
-      await ProductsService.changeStatus(this.state.pricetable_id)(this.state.productgroup_id)(
-        id,
-        newStatus
-      );
+      await ProductsService.changeStatus(this.state.pricetable_id)(
+        this.state.productgroup_id
+      )(id, newStatus);
 
       let recordName = "";
 
@@ -102,7 +108,9 @@ class ProductsPriceTable extends Component {
   removeRecord = async ({ id, nome }) => {
     const _id = id;
     try {
-      await ProductsService.remove(this.state.pricetable_id)(this.state.productgroup_id)(_id);
+      await ProductsService.remove(this.state.pricetable_id)(
+        this.state.productgroup_id
+      )(_id);
       let _list = this.state.list.filter(record => record.id !== _id);
 
       this.setState({
@@ -176,9 +184,7 @@ class ProductsPriceTable extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button
-              size="small"
-              onClick={() => this.showModal(record) }>
+            <Button size="small" onClick={() => this.showModal(record)}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
             <Divider
@@ -195,16 +201,19 @@ class ProductsPriceTable extends Component {
               </Button>
             </Popconfirm>
             <Divider
-                style={{ fontSize: "10px", padding: 0, margin: 2 }}
-                type="vertical"
-              />
+              style={{ fontSize: "10px", padding: 0, margin: 2 }}
+              type="vertical"
+            />
             <Tooltip title="Veja as características do produto">
               <Button
                 size="small"
                 onClick={() =>
-                  this.props.history.push(`/tabela-preco/${this.state.pricetable_id}/grupo-produto/${this.state.productgroup_id}/produtos/${record.id}/caracteristicas`)
-                }
-              >
+                  this.props.history.push(
+                    `/tabela-preco/${this.state.pricetable_id}/grupo-produto/${
+                      this.state.productgroup_id
+                    }/produtos/${record.id}/caracteristicas`
+                  )
+                }>
                 <FontAwesomeIcon icon="dollar-sign" size="lg" />
               </Button>
             </Tooltip>
@@ -214,13 +223,13 @@ class ProductsPriceTable extends Component {
     }
   ];
 
-  showModal = (record) => {
+  showModal = record => {
     this.setState({
       visible: true,
       record,
       editMode: !!record
     });
-  }
+  };
 
   getDatabase = () => {
     const link = window.location.href;
@@ -246,37 +255,39 @@ class ProductsPriceTable extends Component {
     }));
   };
 
-  handleOk = async (item) => {
+  handleOk = async item => {
     await this.getDatabase();
     await this.setStatus();
 
     this.setState({ savingForm: true });
 
-    const obj = {...item, ...item.produto}
-    delete obj.produto
+    const obj = { ...item, ...item.produto };
+    delete obj.produto;
 
     if (!this.state.editMode) {
       /* if (Object.keys(this.state.formData).length === 0)
         flashWithSuccess("Sem alterações para salvar", " "); */
 
       try {
-        const created = await ProductsService.create(this.state.pricetable_id)(this.state.productgroup_id)(obj);
+        const created = await ProductsService.create(this.state.pricetable_id)(
+          this.state.productgroup_id
+        )(obj);
 
         this.setState(prev => {
-          if(prev.list.length > 0){
-            return({
+          if (prev.list.length > 0) {
+            return {
               openForm: false,
               editMode: false,
               visible: false,
-              list: [...prev.list,created]
-            })
+              list: [...prev.list, created]
+            };
           }
-          return({
+          return {
             openForm: false,
             editMode: false,
             visible: false,
             list: [created]
-          })
+          };
         });
         flashWithSuccess();
       } catch (err) {
@@ -287,8 +298,12 @@ class ProductsPriceTable extends Component {
       }
     } else {
       try {
-        const updated = await ProductsService.update(this.state.pricetable_id)(this.state.productgroup_id)(obj);
-        const data = await ProductsService.list(this.state.pricetable_id)(this.state.productgroup_id)();
+        const updated = await ProductsService.update(this.state.pricetable_id)(
+          this.state.productgroup_id
+        )(obj);
+        const data = await ProductsService.list(this.state.pricetable_id)(
+          this.state.productgroup_id
+        )();
 
         this.setState({
           openForm: false,
@@ -305,17 +320,17 @@ class ProductsPriceTable extends Component {
         this.setState({ savingForm: false });
       }
     }
-  }
+  };
 
-  showModalPriceTable = (record) => {
+  showModalPriceTable = record => {
     this.setState({
       visiblePriceTable: true,
       record,
       editMode: !!record
     });
-  }
+  };
 
-  handleOkPriceTable = async (item) => {
+  handleOkPriceTable = async item => {
     await this.getDatabase();
     await this.setStatus();
 
@@ -342,18 +357,18 @@ class ProductsPriceTable extends Component {
         this.setState({ savingForm: false });
       }
     }
-  }
+  };
 
-  handleCancel = (e) => {
+  handleCancel = e => {
     this.setState({
       visible: false,
       visiblePriceTable: false
     });
-  }
+  };
 
-  saveFormRef = (formRef) => {
+  saveFormRef = formRef => {
     this.formRef = formRef;
-  }
+  };
 
   handleTableChange = (pagination, filters, sorter) => {
     const pager = { ...this.state.pagination };
@@ -374,7 +389,10 @@ class ProductsPriceTable extends Component {
       <div>
         {this.props.match.params.pricetable_id ? (
           <div>
-            <SimpleBreadCrumb to={"/tabela-preco"} history={this.props.history} />
+            <SimpleBreadCrumb
+              to={"/tabela-preco"}
+              history={this.props.history}
+            />
             <Row gutter={24}>
               <Col span={5}>
                 <Card
@@ -383,10 +401,13 @@ class ProductsPriceTable extends Component {
                     boxShadow: "0px 8px 0px 0px #009d55 inset",
                     color: "#009d55"
                   }}>
-                  <p>{`Tabela de Preço: ${this.state.price_table_data.nome || ''}`}</p>
+                  <p>{`Tabela de Preço: ${this.state.price_table_data.nome ||
+                    ""}`}</p>
                   <Button
                     style={{ width: "100%" }}
-                    onClick={() => { this.showModalPriceTable(this.state.price_table_data)}}>
+                    onClick={() => {
+                      this.showModalPriceTable(this.state.price_table_data);
+                    }}>
                     <Icon type="edit" /> Editar
                   </Button>
                 </Card>
@@ -399,7 +420,7 @@ class ProductsPriceTable extends Component {
                     <Button
                       type="primary"
                       icon="plus"
-                      onClick={() => this.showModal() }>
+                      onClick={() => this.showModal()}>
                       Adicionar
                     </Button>
                   }>
@@ -421,7 +442,7 @@ class ProductsPriceTable extends Component {
               <Button
                 type="primary"
                 icon="plus"
-                onClick={() => this.showModal() }>
+                onClick={() => this.showModal()}>
                 Adicionar
               </Button>
             </PainelHeader>
