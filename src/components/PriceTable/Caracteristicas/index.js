@@ -124,6 +124,15 @@ class CaracteristicasPriceTable extends Component {
     }
   };
 
+  ordenaTabela = (a, b, chave) => {
+    if(a[chave] && b[chave]) {
+      if(a[chave].toLowerCase() < b[chave].toLowerCase()) 
+        return -1
+      return 1
+    }
+    return 1
+  }
+
   tableConfig = () => {
     const caracteristicas = this.state.group_caracteristicas //[{chave:'peneira', label:'Peneira'}, {chave:'tratamento', label:'Tratamento'}]
     const colunasCaracteristicas = caracteristicas.map(item => {
@@ -155,7 +164,8 @@ class CaracteristicasPriceTable extends Component {
     const regraTotalPreco = dado => {
       let preco = 0
       regra_preco.forEach(item => {
-        preco = preco + parseFloat(dado[`preco_${item.chave}`].replace(',', '.'))
+        if(dado[`preco_${item.chave}`])
+          preco = preco + parseFloat(dado[`preco_${item.chave}`].replace(',', '.'))
       });
       
       return preco.toFixed(2).toString().replace('.',',')
