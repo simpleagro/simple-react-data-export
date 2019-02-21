@@ -224,6 +224,17 @@ class OrderItem extends Component {
                 }}>
                 <Icon type="edit" /> Editar
               </Button>
+              <Button
+              type="primary"
+                style={{ width: "100%", marginTop: "5px" }}
+                onClick={() => {
+                  this.props.history.push(
+                    `/pedidos/${this.state.order_id}/finalizar-pedido`,
+                    { returnTo: this.props.history.location }
+                  );
+                }}>
+                <Icon type="shopping" /> Finalizar Pedido
+              </Button>
             </Card>
           </Col>
           <Col span={19}>

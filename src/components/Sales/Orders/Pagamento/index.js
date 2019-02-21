@@ -135,7 +135,12 @@ class OrderPaymentForm extends Component {
     return (
       <SimpleLazyLoader isLoading={this.state.loadingForm}>
         <div>
-          <SimpleBreadCrumb to={`/pedidos`} history={this.props.history} />
+
+          <SimpleBreadCrumb to={
+            this.props.location.state && this.props.location.state.returnTo
+              ? this.props.location.state.returnTo.pathname
+              : "/pedidos"
+          } history={this.props.history} />
 
           <Row gutter={24}>
             <Col span={5}>
