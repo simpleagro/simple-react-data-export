@@ -48,7 +48,7 @@ class ProductsPriceTable extends Component {
     });
 
     const data = await ProductsService.list(this.state.pricetable_id)(this.state.productgroup_id)(aqp);
-    const priceTableData = await PriceTableService.get(this.state.pricetable_id);
+    const priceTableData = await PriceTableService.get(this.state.pricetable_id)(aqp);
 
     this.setState(prev => ({
       ...prev,
