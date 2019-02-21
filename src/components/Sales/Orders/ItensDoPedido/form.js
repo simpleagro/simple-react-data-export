@@ -571,7 +571,7 @@ class OrderItemForm extends Component {
                   })}
               </Card>
             )}
-            <Form.Item label="Área" {...formItemLayout}>
+            {/* <Form.Item label="Área" {...formItemLayout}>
               {getFieldDecorator("area", {
                 rules: [
                   { required: true, message: "Este campo é obrigatório!" }
@@ -588,7 +588,7 @@ class OrderItemForm extends Component {
                   name="area"
                 />
               )}
-            </Form.Item>
+            </Form.Item> */}
             <SFFPorcentagem
               name={`desconto`}
               label={`Desconto`}
