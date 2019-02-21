@@ -243,46 +243,46 @@ class ConsultantForm extends Component {
             </PainelHeader>
           </Affix>
           <Form onChange={this.handleFormState}>
-            {!this.state.editMode && (
-              <Form.Item label="Usuário" {...formItemLayout}>
-                {getFieldDecorator("usuario_id", {
-                  rules: [
-                    { required: false, message: "Este campo é obrigatório!" }
-                  ],
-                  initialValue: this.state.formData.usuario_id
-                })(
-                  <Select
-                    name="usuario_id"
-                    allowClear
-                    optionFilterProp="data-filter"
-                    showAction={["focus", "click"]}
-                    showSearch
-                    style={{ width: 200 }}
-                    placeholder="Selecione um usuário..."
-                    onChange={e => {
-                      if (e == "")
-                        this.props.form.resetFields(["senha", "tipoLogin"]);
-                      this.handleFormState({
-                        target: { name: "usuario_id", value: e }
-                      });
-                      this.setUser(e);
-                    }}>
-                    <Option key="sem_opcao" value="">
-                      Sem opção
-                    </Option>
-                    {this.state.listUser &&
-                      this.state.listUser.map((user, index) => (
-                        <Option
-                          data-filter={user.nome}
-                          key={user._id}
-                          value={user._id}>
-                          {user.nome}
-                        </Option>
-                      ))}
-                  </Select>
-                )}
-              </Form.Item>
-            )}
+            <Form.Item label="Usuário" {...formItemLayout}>
+              {getFieldDecorator("usuario_id", {
+                rules: [
+                  { required: false, message: "Este campo é obrigatório!" }
+                ],
+                initialValue: this.state.formData.usuario_id
+              })(
+                <Select
+                  disabled={this.state.editMode}
+                  name="usuario_id"
+                  allowClear
+                  optionFilterProp="data-filter"
+                  showAction={["focus", "click"]}
+                  showSearch
+                  style={{ width: 200 }}
+                  placeholder="Selecione um usuário..."
+                  onChange={e => {
+                    if (e == "")
+                      this.props.form.resetFields(["senha", "tipoLogin"]);
+                    this.handleFormState({
+                      target: { name: "usuario_id", value: e }
+                    });
+                    this.setUser(e);
+                  }}>
+                  <Option key="sem_opcao" value="">
+                    Sem opção
+                  </Option>
+                  {this.state.listUser &&
+                    this.state.listUser.map((user, index) => (
+                      <Option
+                        data-filter={user.nome}
+                        key={user._id}
+                        value={user._id}>
+                        {user.nome}
+                      </Option>
+                    ))}
+                </Select>
+              )}
+            </Form.Item>
+
             <Form.Item label="Nome" {...formItemLayout}>
               {getFieldDecorator("nome", {
                 rules: [
@@ -290,7 +290,11 @@ class ConsultantForm extends Component {
                 ],
                 initialValue: this.state.formData.nome
               })(
-                <Input name="nome" ref={input => (this.titleInput = input)} />
+                <Input
+                  disabled={this.state.editMode}
+                  name="nome"
+                  ref={input => (this.titleInput = input)}
+                />
               )}
             </Form.Item>
 
@@ -300,59 +304,55 @@ class ConsultantForm extends Component {
                   { required: true, message: "Este campo é obrigatório!" }
                 ],
                 initialValue: this.state.formData.email
-              })(<Input name="email" />)}
+              })(<Input disabled={this.state.editMode} name="email" />)}
             </Form.Item>
 
-            {!this.state.editMode && (
-              <Form.Item label="Login" {...formItemLayout}>
-                {getFieldDecorator("login", {
-                  rules: [
-                    { required: true, message: "Este campo é obrigatório!" }
-                  ],
-                  initialValue: this.state.formData.login
-                })(
-                  <Input
-                    disabled={this.state.userHasSelected}
-                    name="login"
-                    onFocus={() => this.setLogin(this.state.formData.email)}
-                  />
-                )}
-              </Form.Item>
-            )}
+            <Form.Item label="Login" {...formItemLayout}>
+              {getFieldDecorator("login", {
+                rules: [
+                  { required: true, message: "Este campo é obrigatório!" }
+                ],
+                initialValue: this.state.formData.login
+              })(
+                <Input
+                  disabled={this.state.editMode || this.state.userHasSelected}
+                  name="login"
+                  onFocus={() => this.setLogin(this.state.formData.email)}
+                />
+              )}
+            </Form.Item>
 
-            {!this.state.editMode && (
-              <Form.Item
-                label="Tipo de Login"
-                {...formItemLayout}
-                style={{
-                  display: this.state.userHasSelected ? "none" : "block"
-                }}>
-                {getFieldDecorator("tipoLogin", {
-                  rules: [
-                    { required: true, message: "Este campo é obrigatório!" }
-                  ],
-                  initialValue: this.state.formData.tipoLogin,
-                  defaultValue: "API"
-                })(
-                  <Select
-                    disabled={this.state.userHasSelected}
-                    name="tipoLogin"
-                    showAction={["focus", "click"]}
-                    showSearch
-                    style={{ width: 200 }}
-                    placeholder="Selecione um tipo de Login..."
-                    onChange={e => {
-                      this.props.form.resetFields(["senha"]);
-                      this.handleFormState({
-                        target: { name: "tipoLogin", value: e }
-                      });
-                    }}>
-                    <Option value="API">API</Option>
-                    <Option value="AD">AD</Option>
-                  </Select>
-                )}
-              </Form.Item>
-            )}
+            <Form.Item
+              label="Tipo de Login"
+              {...formItemLayout}
+              style={{
+                display: this.state.userHasSelected ? "none" : "block"
+              }}>
+              {getFieldDecorator("tipoLogin", {
+                rules: [
+                  { required: true, message: "Este campo é obrigatório!" }
+                ],
+                initialValue: this.state.formData.tipoLogin,
+                defaultValue: "API"
+              })(
+                <Select
+                  disabled={this.state.editMode || this.state.userHasSelected}
+                  name="tipoLogin"
+                  showAction={["focus", "click"]}
+                  showSearch
+                  style={{ width: 200 }}
+                  placeholder="Selecione um tipo de Login..."
+                  onChange={e => {
+                    this.props.form.resetFields(["senha"]);
+                    this.handleFormState({
+                      target: { name: "tipoLogin", value: e }
+                    });
+                  }}>
+                  <Option value="API">API</Option>
+                  <Option value="AD">AD</Option>
+                </Select>
+              )}
+            </Form.Item>
 
             <Form.Item
               label="Senha"
@@ -377,7 +377,7 @@ class ConsultantForm extends Component {
                   }
                 ],
                 initialValue: this.state.formData.senha
-              })(<Input type="password" name="senha" />)}
+              })(<Input disabled={this.state.editMode} type="password" name="senha" />)}
             </Form.Item>
 
             {!this.state.editMode && (
