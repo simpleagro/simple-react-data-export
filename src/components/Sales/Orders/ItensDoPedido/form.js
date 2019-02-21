@@ -863,6 +863,11 @@ class OrderItemForm extends Component {
 
             if (periodo) preco = valorFinalJurosCompostos(preco, taxa, periodo);
 
+            await this.totalPrecoItemFormaPagamento(
+              this.props.pedido[`pgto_${variacao.chave}`],
+              preco
+            );
+
             this.setState(prev => ({
               ...prev,
               formData: {
@@ -939,6 +944,11 @@ class OrderItemForm extends Component {
 
               if (periodo)
                 preco = valorFinalJurosCompostos(preco, taxa, periodo);
+
+              await this.totalPrecoItemFormaPagamento(
+                this.props.pedido[`pgto_${rpb.chave}`],
+                preco
+              );
 
               if (tabelaPreco)
                 this.setState(prev => ({

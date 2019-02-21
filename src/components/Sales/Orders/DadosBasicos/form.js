@@ -35,9 +35,7 @@ class OrderForm extends Component {
       editMode: false,
       loadingForm: true,
       savingForm: false,
-      formData: {
-        itens: []
-      },
+      formData: {},
       fetchingClients: false,
       fetchingAgents: false,
       fetchingConsultants: false,
