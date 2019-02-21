@@ -59,7 +59,7 @@ class FieldRegistrationForm extends Component {
       listProductGroup: dataProductGroup.docs,
       listSeason: dataSeason.docs,
       listConsultant: dataConsultant.docs
-    }))
+    }));
 
     if (id) {
       const formData = await FieldRegistrationService.get(id);
