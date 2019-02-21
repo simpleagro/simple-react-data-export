@@ -41,6 +41,7 @@ import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
 import { SimpleLazyLoader } from "../../../common/SimpleLazyLoader";
 import { SFFPorcentagem } from "../../../common/formFields/SFFPorcentagem";
 import { configAPP } from "config/app";
+import GerarVariacoes from "./GerarVariacoes";
 
 const Option = Select.Option;
 
@@ -474,107 +475,13 @@ class OrderItemForm extends Component {
               )}
             </Form.Item>
 
-            {this.state.variacoes && (
-              <Card
-                title="Variações do Produto"
-                extra={
-                  <Button onClick={() => this.resetVariacoes()}>
-                    Limpar Variações
-                  </Button>
-                }
-                bordered
-                style={{ marginBottom: 20 }}>
-                {this.state.variacoes
-                  .sort((a, b) => (b.obrigatorio ? 1 : -1))
-                  .map((v, index, arr) => {
-                    return v.opcoes.length ? (
-                      <React.Fragment key={`variacao_fragm_${index}`}>
-                        <Spin
-                          tip={"Carregando variações para " + v.label}
-                          key="spin_loading_inputs_variacoes"
-                          spinning={
-                            this.state[`loadingVariacoes_${v.chave}`] === true
-                          }>
-                          <Form.Item
-                            label={v.label}
-                            key={v.chave}
-                            {...formItemLayout}>
-                            {getFieldDecorator(v.chave, {
-                              valuePropName: "value",
-                              rules: [
-                                {
-                                  required: v.obrigatorio,
-                                  message: "Este campo é obrigatório!"
-                                }
-                              ],
-                              initialValue: this.state.formData[v.chave]
-                            })(
-                              <Select
-                                // disabled={
-                                //   index === 0
-                                //     ? false
-                                //     : this.state.formData[v.prevField] === undefined
-                                // }
-                                name={v.chave}
-                                showAction={["focus", "click"]}
-                                showSearch
-                                // onFocus={() => this.getVals(v.chave)}
-                                style={{ width: 200 }}
-                                onChange={async e => {
+            <GerarVariacoes
+              variacoes={this.state.variacoes}
+              form={this.props.form}
+              handleFormState={this.handleFormState}
+              formData={this.state.formData}
+            />
 
-                                  e = JSON.parse(e);
-                                  this.setState(prev => ({
-                                    ...prev,
-                                    variacoesSelecionadas: {
-                                      ...prev.variacoesSelecionadas,
-                                      ...{ [v.chave]: e.value }
-                                    }
-                                  }));
-                                  await this.handleFormState({
-                                    target: {
-                                      name: v.chave,
-                                      value: e
-                                    }
-                                  });
-                                  arr
-                                    .map(v => v.chave)
-                                    .splice(index + 1)
-                                    .map(v2 => {
-                                      this.setState(prev => ({
-                                        ...prev,
-                                        formData: {
-                                          ...prev.formData,
-                                          [v2]: undefined
-                                        }
-                                      }));
-                                      this.getVals(v2);
-                                    });
-                                  this.atualizaValorVariacao(
-                                    v,
-                                    e.value
-                                  );
-                                }}
-                                placeholder="Selecione...">
-                                {v.opcoes.map((o, index) => (
-                                  <Option
-                                    key={`${v.chave}_${index}`}
-                                    value={JSON.stringify(o)}>
-                                    {o.label}
-                                  </Option>
-                                ))}
-                              </Select>
-                            )}
-                          </Form.Item>
-
-                          {this.geraVariacoesInputsDinamicos(v)}
-                        </Spin>
-                      </React.Fragment>
-                    ) : (
-                      ""
-                    );
-                  })}
-              </Card>
-            )}
             {/* <Form.Item label="Área" {...formItemLayout}>
               {getFieldDecorator("area", {
                 rules: [
