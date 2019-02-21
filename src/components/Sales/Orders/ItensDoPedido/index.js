@@ -32,15 +32,18 @@ class OrderItem extends Component {
 
   async initializeList(aqp) {
     try {
-      // const items = await OrderItemsService.list(this.state.order_id)(aqp);
+      const items = await OrderItemsService.list(this.state.order_id)(aqp);
       const orderData = await OrderService.get(this.state.order_id, {
-        fields: "tabela_preco_base, numero, cliente, propriedade, estado, cidade, pgto_royalties, pgto_tratamento, pgto_germoplasma, itens"
+        fields: "tabela_preco_base, numero, cliente, propriedade, estado, cidade, pgto_royalties, pgto_tratamento, pgto_germoplasma"
       });
       this.setState(prev => ({
         ...prev,
-        list: orderData.itens,
+        list: items.docs,
         loadingData: false,
         order_data: orderData,
+        pagination: {
+          total: items.total
+        }
       }));
       this.props.dadosPedido(orderData);
     } catch (error) {

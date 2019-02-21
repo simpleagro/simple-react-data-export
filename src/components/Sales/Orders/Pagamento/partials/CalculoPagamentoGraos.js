@@ -56,7 +56,7 @@ class CalculoPagamentoGraos extends Component {
         peso_graos: currency()(
           this.props.pedido.itens
             .map(t => t[`total_preco_item_graos`])
-            .reduce((a, b) => Number(a) + Number(b), 0) || 0
+            .reduce((a, b) => Number(a) + Number(b), 0)
         )
       }
     }));
