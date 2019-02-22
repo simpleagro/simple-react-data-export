@@ -53,13 +53,15 @@ class OrderForm extends Component {
     if (id) {
       formData = await OrderService.get(id);
 
-      if (formData)
+      if (formData){
+        formData.itens = formData.itens.filter( i => i.deleted === false);
         this.setState(prev => ({
           ...prev,
           formData,
           editMode: id ? true : false,
           loadingForm: false
         }));
+      }
     }
 
     const clients = await this.fetchClients({
