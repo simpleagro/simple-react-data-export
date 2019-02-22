@@ -458,16 +458,18 @@ class OrderItemForm extends Component {
                   showAction={["focus", "click"]}
                   showSearch
                   placeholder="Selecione..."
-                  // labelInValue
-                  filterOption={(input, option) =>
-                    option.props.children
-                      .toLowerCase()
-                      .indexOf(input.toLowerCase()) >= 0
-                  }
+                  optionFilterProp="data-filter"
                   onSelect={e => this.onSelectProduto(e)}>
                   {this.state.produtos.length > 0
                     ? this.state.produtos.map(prod => (
-                        <Option key={prod._id} value={JSON.stringify(prod)}>
+                        <Option
+                          data-filter={`${prod.nome}${
+                            prod.nome_comercial
+                              ? " - " + prod.nome_comercial
+                              : ""
+                          }`}
+                          key={prod._id}
+                          value={JSON.stringify(prod)}>
                           {prod.nome}
                           {prod.nome_comercial
                             ? " - " + prod.nome_comercial
@@ -512,7 +514,9 @@ class OrderItemForm extends Component {
                                   message: "Este campo é obrigatório!"
                                 }
                               ],
-                              initialValue: this.state.formData[v.chave] && this.state.formData[v.chave].label
+                              initialValue:
+                                this.state.formData[v.chave] &&
+                                this.state.formData[v.chave].label
                             })(
                               <Select
                                 // disabled={
@@ -738,10 +742,10 @@ class OrderItemForm extends Component {
                 }
               ],
               initialValue: this.state.formData[`preco_${obj.chave}`]
-                ? this.state.formData[`preco_${obj.chave}`]
-                    .toString()
-                    .replace(",", ".")
-                : undefined
+              //   ? this.state.formData[`preco_${obj.chave}`]
+              //       .toString()
+              //       .replace(",", ".")
+              //   : undefined
             })(
               <Input
                 disabled={
@@ -946,7 +950,8 @@ class OrderItemForm extends Component {
                   formData: {
                     ...prev.formData,
                     [`preco_${rpb.chave}_tabela`]: preco,
-                    [`preco_${rpb.chave}`]: preco
+                    [`preco_${rpb.chave}`]: preco,
+                    [`fator_conversao_${rpb.chave}`]: tabelaPreco.u_m_preco
                   }
                 }));
             })
@@ -964,12 +969,13 @@ class OrderItemForm extends Component {
 
   async getFatorConversaoTabelaPrecoCaract(chave) {
     //
+    // const unid_med_preco = this.state.formData[`fator_conversao_${chave}`] || null;
     const unid_med_preco = this.state.formData[`fator_conversao_${chave}`];
     const { embalagem } = this.state.formData;
     let fatorConversao = 1;
 
     // Se a unid. medida que veio da tabela de preço base for diferente, fazer conversão *******
-    if (unid_med_preco !== embalagem.value) {
+    if (embalagem && unid_med_preco !== embalagem.value) {
       const unidadesDeMedida = await ListUnitsMeasures({
         limit: -1,
         status: true
@@ -1060,10 +1066,10 @@ class OrderItemForm extends Component {
     let calculaTotalCaract = (chave, fatorConversao) => {
       return (
         fatorConversao *
-          (this.state.formData[`preco_${chave}`] -
-            this.state.formData[`preco_${chave}`] *
-              this.state.formData[`desconto_${chave}`]) *
-          this.state.formData.quantidade || 0
+          (getNumber(this.state.formData[`preco_${chave}`]) -
+          getNumber(this.state.formData[`preco_${chave}`]) *
+          getNumber(this.state.formData[`desconto_${chave}`])) *
+          getNumber(this.state.formData.quantidade) || 0
       );
     };
     calculaTotalCaract = calculaTotalCaract.bind(this);
@@ -1089,10 +1095,7 @@ class OrderItemForm extends Component {
               vs
             );
 
-            fatorConversaoChaves[`fator_conversao_${vs}`] = this.state.formData
-              .embalagem
-              ? this.state.formData.embalagem.value
-              : "";
+            // fatorConversaoChaves[`fator_conversao_${vs}`] = fatorCaract;
             totais[`preco_total_${vs}`] = calculaTotalCaract(vs, fatorCaract);
             totais["total_preco_item"] += totais[`preco_total_${vs}`];
             if (configAPP.usarConfiguracaoFPCaracteristica()) {
@@ -1108,10 +1111,7 @@ class OrderItemForm extends Component {
             const fatorCaract = await this.getFatorConversaoTabelaBase();
 
             return regraPrecoBase.forEach(rpb => {
-              fatorConversaoChaves[`fator_conversao_${rpb.chave}`] = this.state
-                .formData.embalagem
-                ? this.state.formData.embalagem
-                : "";
+              // fatorConversaoChaves[`fator_conversao_${rpb.chave}`] = fatorCaract;
               totais[`preco_total_${rpb.chave}`] = calculaTotalCaract(
                 rpb.chave,
                 fatorCaract
@@ -1129,6 +1129,8 @@ class OrderItemForm extends Component {
               }
             });
           }
+
+
           return true;
         })
       );
@@ -1136,6 +1138,7 @@ class OrderItemForm extends Component {
       // Desconto no item
       totais["total_preco_item"] -=
         totais["total_preco_item"] * this.state.formData.desconto || 0;
+
 
       this.setState(prev => ({
         ...prev,
