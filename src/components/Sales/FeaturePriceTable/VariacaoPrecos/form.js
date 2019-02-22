@@ -186,7 +186,7 @@ class PriceVariations extends Component {
                 allowClear
                 showAction={["focus", "click"]}
                 showSearch
-                style={{ width: 200 }}
+                //style={{ width: 200 }}
                 placeholder="Selecione uma opção...."
                 onChange={e => {
                   this.handleFormState({
@@ -213,7 +213,7 @@ class PriceVariations extends Component {
                 name="valor"
                 prefix="R$"
                 ref={input => (this.titleInput = input)}
-                style={{ width: 200 }}
+                //style={{ width: 200 }}
               />
             )}
           </Form.Item>

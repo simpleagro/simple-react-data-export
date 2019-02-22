@@ -8,8 +8,10 @@ import * as TargetService from "services/targets";
 import * as VisitService from "services/visits";
 
 import moment from "moment";
+import debounce from "lodash/debounce";
+
 import { Select, Card, Row, Col, Spin } from "antd";
-import { Legend, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Bar, BarChart, LabelList } from 'recharts';
+import { XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Bar, BarChart, Legend } from 'recharts';
 
 const Option = Select.Option;
 const colors = ["#4286f4", "#41f4d9", "#41f462", "#a9f441", "#41c4f4", "#4af441"];
@@ -17,11 +19,14 @@ const colors = ["#4286f4", "#41f4d9", "#41f462", "#a9f441", "#41c4f4", "#4af441"
 class Dashboard extends Component {
   constructor(props) {
     super(props);
+    this.lastFetchClientId = 0;
+    this.searchClient = debounce(this.searchClient, 400);
     this.state = {
       arrClientArea: [],
       arrClientCreditLimit: [],
       arrClientProps: [],
       arrCustomerWallet: [],
+      arrCliente: [],
       arrProps: [],
       arrQuota: [],
       arrTarget: [],
@@ -32,7 +37,8 @@ class Dashboard extends Component {
       listTarget: [],
       listVisit: [],
       listYears: [],
-      loadingData: true
+      loadingData: true,
+      fetchingClients: false
     };
   }
 
@@ -46,18 +52,19 @@ class Dashboard extends Component {
       loadingData: false
     });
 
-    this.showAllClientCredit();
-    this.showAllClientArea();
+    //this.showAllClientCredit();
+    //this.showAllClientArea();
     this.showAllQuotaChart();
     this.showAllTargetChart();
     this.showAllCustomerWallet();
     this.showAllVisitsMonth();
-    this.showAllProps();
+    //this.showAllProps();
 
   }
 
   async componentDidMount() {
-    const dataClient = await ClientService.list({ limit: 999999 });
+    //const dataClient = await ClientService.list({ limit: 999999 });
+    const dataClient = await this.fetchClients();
     const dataCustomerWallet = await CustomerWalletService.list({ limit: 999999 });
     const dataQuota = await QuotaService.list({ limit: 999999 });
     const dataTarget = await TargetService.list({ limit: 999999 });
@@ -75,16 +82,16 @@ class Dashboard extends Component {
 
   }
 
-  showAllProps(){
-    let obj = [];
-    Object.assign(obj, this.state.listClient.map(client =>
-      ({
-        name: client.nome,
-        qtdProps: client.propriedades.length
-      })
-    ))
-    this.setState({ arrProps: obj });
-  }
+  // showAllProps(){
+  //   let obj = [];
+  //   Object.assign(obj, this.state.listClient.map(client =>
+  //     ({
+  //       name: client.nome,
+  //       qtdProps: client.propriedades.length
+  //     })
+  //   ))
+  //   this.setState({ arrProps: obj });
+  // }
 
   showAllVisitsMonth(paramYear){
     let sumMonths = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
@@ -128,31 +135,31 @@ class Dashboard extends Component {
     return num + total;
   }
 
-  showAllClientArea() {
-    let arrClientArea = [];
-    Object.assign(
-      arrClientArea, this.state.listClient && this.state.listClient.map(client =>
-        ({
-          name: client.nome,
-          areaTotal: client.propriedades.length > 0 && client.propriedades.map(p => p.area).reduce(this.sum)
-        })
-      )
-    );
-    this.setState({ arrClientArea: arrClientArea });
-  }
+  // showAllClientArea() {
+  //   let arrClientArea = [];
+  //   Object.assign(
+  //     arrClientArea, this.state.listClient && this.state.listClient.map(client =>
+  //       ({
+  //         name: client.nome,
+  //         areaTotal: client.propriedades.length > 0 && client.propriedades.map(p => p.area).reduce(this.sum)
+  //       })
+  //     )
+  //   );
+  //   this.setState({ arrClientArea: arrClientArea });
+  // }
 
-  showAllClientCredit() {
-    let arrClient = [];
-    Object.assign(
-      arrClient, this.state.listClient && this.state.listClient.map(client =>
-        ({
-          name: client.nome,
-          value: Number(client.credito)
-        })
-      )
-    );
-    this.setState({ arrClientCreditLimit: arrClient });
-  }
+  // showAllClientCredit() {
+  //   let arrClient = [];
+  //   Object.assign(
+  //     arrClient, this.state.listClient && this.state.listClient.map(client =>
+  //       ({
+  //         name: client.nome,
+  //         value: Number(client.credito)
+  //       })
+  //     )
+  //   );
+  //   this.setState({ arrClientCreditLimit: arrClient });
+  // }
 
   showAllCustomerWallet() {
     let arrCustomerWallet = [];
@@ -192,7 +199,6 @@ class Dashboard extends Component {
       let obj = []
       Object.assign(obj, this.state.listClient.map(c => c.nome === client ? { name: c.nome, qtdProps: c.propriedades.length } : null))
       this.setState({ arrProps: obj })
-      console.log(obj)
     } else {
       this.showAllProps()
     }
@@ -216,7 +222,6 @@ class Dashboard extends Component {
           c.nome === client && c.propriedades.map(p =>
             obj.push(Object.assign({ name: p.nome, areaTotal: Number(p.area) }))))
         this.setState({ arrClientArea: obj })
-        console.log(obj)
       } else {
         this.showAllClientArea()
       }
@@ -243,11 +248,92 @@ class Dashboard extends Component {
     )
   }
 
+  mostrarGraficoCliente(client){
+    let obj = []
+    client.propriedades.map((prop, index) => (obj.push(Object.assign({ name: prop.nome, area: prop.area, qtdTalhoes: prop.talhoes.length }))))
+    this.setState({ arrCliente: obj})
+  }
+
+  async fetchClients(aqp = {}) {
+    return await ClientService.list({
+      limit: 5,
+      fields: "nome,_id,propriedades",
+      status: true,
+      ...aqp
+    });
+  }
+
+  searchClient = async value => {
+    this.lastFetchClientId += 1;
+    const fetchId = this.lastFetchClientId;
+    this.setState({ listClient: [], fetchingClients: true });
+
+    const data = await this.fetchClients({ nome: `/${value}/i` });
+
+    if (fetchId !== this.lastFetchClientId) return;
+
+    const listClient = data.docs;
+
+    this.setState({
+      listClient,
+      fetchingClients: false
+    });
+  };
+
   render() {
     return (
       <div>
         <PainelHeader title="Dashboard" />
+
         <Row gutter={16}>
+          <Card
+            title="Informções sobre o cliente"
+            type="inner"
+            extra={
+                <div>
+                  <span>Selecione</span>
+                  <Select
+                    showSearch
+                    showArrow
+                    allowClear
+                    autoClearSearchValue
+                    placeholder="Selecione um cliente..."
+                    style={{ paddingLeft: 10, width: 250 }}
+                    onSearch={ this.searchClient }
+                    onSelect={e => this.mostrarGraficoCliente(JSON.parse(e))} >
+                      { this.state.listClient.map((cliente) =>
+                        <Option key={cliente._id} value={JSON.stringify(cliente)}> {cliente.nome} </Option>) }
+                  </Select>
+                </div>}>
+            <Col span={12}>
+              <Card title="Área" style={{ marginRight: 15 }}>
+                <Spin spinning={this.state.loadingData} size="large" style={{ marginLeft: "50%", marginTop: "40%" }} />
+                <PieChart width={400} height={400} margin={{ top: 0, right: 5, left: 5, bottom: 1 }}>
+                  <Pie isAnimationActive data={this.state.arrCliente} dataKey="area" outerRadius={100} >
+                    { this.state.arrCliente.map((entry, index) => <Cell key={index} fill={colors[index % colors.length]} />) }
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </Card>
+            </Col>
+
+            <Col span={12}>
+              <Card title="Talhões">
+                <Spin spinning={this.state.loadingData} size="large" style={{  marginLeft: "50%", marginTop: "40%" }} />
+                <PieChart width={400} height={400} margin={{ top: 0, right: 5, left: 5, bottom: 1 }}>
+                  <Pie isAnimationActive data={this.state.arrCliente} dataKey="qtdTalhoes" outerRadius={100} >
+                  { this.state.arrCliente.map((entry, index) => <Cell key={index} fill={colors[index % colors.length]} />) }
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </Card>
+            </Col>
+          </Card>
+        </Row>
+
+        {/* <Row gutter={16}>
           <Col span={12}>
             <Card
               title="Crédito por Cliente"
@@ -257,13 +343,13 @@ class Dashboard extends Component {
                 <div>
                   <span>Selecione</span>
                   <Select
-                    allowClear
+
                     showSearch
                     placeholder="Selecione um cliente"
                     style={{ paddingLeft: 10, width: 250 }}
                     onSelect={(e) => this.showCreditLimitClient(e)}>
                       <Option key="all" value="all"> Exibir Todos </Option>
-                      { this.state.listClient.map((cliente) => <Option key={cliente.nome} value={cliente.nome}>{cliente.nome}</Option>) }
+                      { this.state.listClient.map((cliente) => <Option key={cliente._id} value={cliente.nome}>{cliente.nome}</Option>) }
                   </Select>
                 </div>
               }>
@@ -296,14 +382,14 @@ class Dashboard extends Component {
                 <div>
                   <span>Selecione</span>
                   <Select
-                    allowClear
+
                     showSearch
                     placeholder="Selecione um cliente..."
                     style={{ paddingLeft: 10, width: 250 }}
                     onSelect={e => this.showClientArea(e)} >
                       <Option key="all" value="all"> Exibir Todos </Option>
                       { this.state.listClient.map((cliente) =>
-                        <Option key={cliente.nome} value={cliente.nome}> {cliente.nome} </Option>)}
+                        <Option key={cliente._id} value={cliente.nome}> {cliente.nome} </Option>)}
                   </Select>
                 </div>}
               >
@@ -326,7 +412,7 @@ class Dashboard extends Component {
                 </PieChart>
             </Card>
           </Col>
-        </Row>
+        </Row> */}
 
         <Row gutter={16}>
           <Col span={12}>
@@ -338,11 +424,9 @@ class Dashboard extends Component {
                 <div>
                   <span>Selecione</span>
                   <Select
-                    allowClear
                     showSearch
                     placeholder="Selecione uma cota"
-                    style={{ paddingLeft: 10, width: 250 }}
-                    onSelect={e => console.log(e)}>
+                    style={{ paddingLeft: 10, width: 250 }}>
                       <Option key="all" value="all"> Exibir Todos </Option>
                       { this.state.listQuota.map(quota =>
                         <Option key={quota._id} value={quota.nome}> {quota.nome} </Option>) }
@@ -362,7 +446,7 @@ class Dashboard extends Component {
                 <div>
                   <span>Selecione</span>
                   <Select
-                    allowClear
+
                     showSearch
                     placeholder="Selecione uma meta"
                     style={{ paddingLeft: 10, width: 250 }}
@@ -384,20 +468,21 @@ class Dashboard extends Component {
               title="Clientes por Carteira"
               type="inner"
               style={{ marginBottom: 15 }}
-              extra={
-                <div>
-                  <span>Selecione</span>
-                  <Select
-                    allowClear
-                    showSearch
-                    placeholder="Selecione uma carteira..."
-                    style={{ paddingLeft: 10, width: 250 }}
-                    onSelect={e => this.showCustomerWallet(e)} >
-                      <Option key="all" value="all"> Exibir Todos </Option>
-                      { this.state.listCustomerWallet.map((cw) =>
-                        <Option key={cw.nome} value={cw.nome}> {cw.nome} </Option>) }
-                  </Select>
-                </div>}>
+              // extra={
+              //   <div>
+              //     <span>Selecione</span>
+              //     <Select
+
+              //       showSearch
+              //       placeholder="Selecione uma carteira..."
+              //       style={{ paddingLeft: 10, width: 250 }}
+              //       onSelect={e => this.showCustomerWallet(e)} >
+              //         <Option key="all" value="all"> Exibir Todos </Option>
+              //         { this.state.listCustomerWallet.map((cw) =>
+              //           <Option key={cw._id} value={cw.nome}> {cw.nome} </Option>) }
+              //     </Select>
+              //   </div>}
+                >
                 <Spin spinning={this.state.loadingData} size="large" style={{ marginLeft: "50%", marginTop: "40%" }} />
                 <PieChart
                   width={400}
@@ -427,7 +512,7 @@ class Dashboard extends Component {
                 <div>
                   <span>Selecione</span>
                   <Select
-                    allowClear
+
                     showSearch
                     placeholder="Selecione um mês"
                     style={{ paddingLeft: 10, width: 250 }}
@@ -459,7 +544,7 @@ class Dashboard extends Component {
           </Col>
         </Row>
 
-        <Row gutter={16}>
+        {/* <Row gutter={16}>
           <Col span={12}>
             <Card
               title="Propriedades"
@@ -469,14 +554,13 @@ class Dashboard extends Component {
                 <div>
                   <span>Selecione</span>
                   <Select
-                    allowClear
                     showSearch
                     placeholder="Selecione um cliente..."
                     style={{ paddingLeft: 10, width: 250 }}
                     onSelect={e => this.showClientProps(e)} >
                       <Option key="all" value="all"> Exibir Todos </Option>
                       { this.state.listClient.map((cliente) =>
-                        <Option key={cliente.nome} value={cliente.nome}> {cliente.nome} </Option>) }
+                        <Option key={cliente._id} value={cliente.nome}> {cliente.nome} </Option>) }
                   </Select>
                 </div>} >
                   <Spin spinning={this.state.loadingData} size="large" style={{ marginLeft: "50%", marginTop: "40%" }} />
@@ -489,7 +573,7 @@ class Dashboard extends Component {
                       data={this.state.arrProps}
                       dataKey="qtdProps"
                       outerRadius={100}
-                      //onClick={e => this.showClientProps(e.name)}
+                      //onClick={ e => this.showClientProps(e.name) }
                       >
                       { this.state.arrProps.map((entry, index) =>
                         <Cell key={index} fill={colors[index % colors.length]} />) }
@@ -498,7 +582,8 @@ class Dashboard extends Component {
                   </PieChart>
               </Card>
           </Col>
-        </Row>
+        </Row> */}
+
       </div>
     );
   }
