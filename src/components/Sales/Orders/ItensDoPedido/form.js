@@ -25,7 +25,8 @@ import {
 import {
   valorFinalJurosCompostos,
   currency,
-  normalizeString
+  normalizeString,
+  getNumber
 } from "common/utils";
 import parseErrors from "../../../../lib/parseErrors";
 import { PainelHeader } from "../../../common/PainelHeader";
@@ -186,7 +187,11 @@ class OrderItemForm extends Component {
         value: { id: e._id, nome: e.nome }
       }
     });
-    await this.setState(prev => ({ ...prev, produtos: e.produtos, variacoes: [] }));
+    await this.setState(prev => ({
+      ...prev,
+      produtos: e.produtos,
+      variacoes: []
+    }));
     this.props.form.resetFields(["produto"]);
   }
 
@@ -199,9 +204,7 @@ class OrderItemForm extends Component {
           id: e._id,
           nome: e.nome,
           ...{
-            ...(e.nome_comercial
-              ? { nome_comercial: e.nome_comercial }
-              : {})
+            ...(e.nome_comercial ? { nome_comercial: e.nome_comercial } : {})
           }
         }
       }
@@ -282,7 +285,9 @@ class OrderItemForm extends Component {
 
   getVals(chave) {
     function search(sChave) {
-      return Object.keys(this).every(key => sChave[key].value === this[key]);
+      return Object.keys(this).every(
+        key => sChave[key] && sChave[key].value === this[key]
+      );
     }
 
     let opcoes = JSON.parse(this.props.form.getFieldValue("produto"));
@@ -485,7 +490,7 @@ class OrderItemForm extends Component {
                 bordered
                 style={{ marginBottom: 20 }}>
                 {this.state.variacoes
-                  .sort((a, b) => (b.obrigatorio ? 1 : -1))
+                  // .sort((a, b) => (b.obrigatorio ? 1 : -1))
                   .map((v, index, arr) => {
                     return v.opcoes.length ? (
                       <React.Fragment key={`variacao_fragm_${index}`}>
@@ -507,7 +512,7 @@ class OrderItemForm extends Component {
                                   message: "Este campo é obrigatório!"
                                 }
                               ],
-                              initialValue: this.state.formData[v.chave]
+                              initialValue: this.state.formData[v.chave] && this.state.formData[v.chave].label
                             })(
                               <Select
                                 // disabled={
@@ -518,10 +523,10 @@ class OrderItemForm extends Component {
                                 name={v.chave}
                                 showAction={["focus", "click"]}
                                 showSearch
+                                allowClear
                                 // onFocus={() => this.getVals(v.chave)}
                                 style={{ width: 200 }}
                                 onChange={async e => {
-
                                   e = JSON.parse(e);
                                   this.setState(prev => ({
                                     ...prev,
@@ -549,10 +554,7 @@ class OrderItemForm extends Component {
                                       }));
                                       this.getVals(v2);
                                     });
-                                  this.atualizaValorVariacao(
-                                    v,
-                                    e.value
-                                  );
+                                  this.atualizaValorVariacao(v, e.value);
                                 }}
                                 placeholder="Selecione...">
                                 {v.opcoes.map((o, index) => (
@@ -593,14 +595,17 @@ class OrderItemForm extends Component {
                 />
               )}
             </Form.Item> */}
-            <SFFPorcentagem
-              name={`desconto`}
-              label={`Desconto`}
-              formItemLayout={formItemLayout}
-              getFieldDecorator={getFieldDecorator}
-              handleFormState={this.handleFormState}
-              trigger={() => this.calcularResumo()}
-            />
+            {configAPP.usarDescontoGeralItem() && (
+              <SFFPorcentagem
+                name={`desconto`}
+                label={`Desconto`}
+                formItemLayout={formItemLayout}
+                getFieldDecorator={getFieldDecorator}
+                handleFormState={this.handleFormState}
+                trigger={() => this.calcularResumo()}
+              />
+            )}
+
             <Form.Item label="Quantidade" {...formItemLayout}>
               {getFieldDecorator("quantidade", {
                 rules: [
@@ -681,12 +686,29 @@ class OrderItemForm extends Component {
                 </Collapse.Panel>
               </Collapse>
 
-              <div key={`resumoItem_total`}>
-                <b>
-                  Total Geral:{" "}
-                  {currency()(this.state.formData.total_preco_item || 0)}
-                </b>
-              </div>
+              {configAPP.usarConfiguracaoFPCaracteristica() ? (
+                ["REAIS", "GRÃOS"].map(t => {
+                  return (
+                    <div key={`resumoItem_totais_${normalizeString(t)}`}>
+                      <b>
+                        Total Preço em {t}:{" "}
+                        {currency()(
+                          this.state.formData[
+                            `total_preco_item_${normalizeString(t)}`
+                          ] || 0
+                        )}
+                      </b>
+                    </div>
+                  );
+                })
+              ) : (
+                <div key={`resumoItem_total`}>
+                  <b>
+                    Total Item:{" "}
+                    {currency()(this.state.formData.total_preco_item || 0)}
+                  </b>
+                </div>
+              )}
             </Layout.Footer>
           </Affix>
         </div>
@@ -798,30 +820,6 @@ class OrderItemForm extends Component {
     });
   };
 
-  /**
-   * totalPrecoItemFormaPagamento
-   * @param  {String} forma
-   * @param  {String} valor
-   * @return {void}@memberof OrderItemForm
-   */
-  async totalPrecoItemFormaPagamento(forma, valor) {
-    forma = normalizeString(forma);
-    console.log(forma, valor);
-
-    return this.setState(prev => {
-      return {
-        ...prev,
-        formData: {
-          ...prev.formData,
-          [`total_preco_item_${forma}`]:
-            window.simpleagroapp.getNumber(
-              prev.formData[`total_preco_item_${forma}`] || 0
-            ) + window.simpleagroapp.getNumber(valor)
-        }
-      };
-    });
-  }
-
   async atualizaValorVariacao(variacao, valor) {
     try {
       this.setState({ [`loadingVariacoes_${variacao.chave}`]: true });
@@ -860,10 +858,8 @@ class OrderItemForm extends Component {
                 );
             const taxa =
               periodo && periodo > 0
-                ? window.simpleagroapp.getNumber(tabelaCaract[0].taxa_adicao)
-                : window.simpleagroapp.getNumber(
-                    tabelaCaract[0].taxa_supressao
-                  );
+                ? getNumber(tabelaCaract[0].taxa_adicao)
+                : getNumber(tabelaCaract[0].taxa_supressao);
 
             if (periodo) preco = valorFinalJurosCompostos(preco, taxa, periodo);
 
@@ -938,8 +934,8 @@ class OrderItemForm extends Component {
 
               const taxa =
                 periodo && periodo > 0
-                  ? window.simpleagroapp.getNumber(tabelaPreco.taxa_adicao)
-                  : window.simpleagroapp.getNumber(tabelaPreco.taxa_supressao);
+                  ? getNumber(tabelaPreco.taxa_adicao)
+                  : getNumber(tabelaPreco.taxa_supressao);
 
               if (periodo)
                 preco = valorFinalJurosCompostos(preco, taxa, periodo);
@@ -1099,9 +1095,18 @@ class OrderItemForm extends Component {
               : "";
             totais[`preco_total_${vs}`] = calculaTotalCaract(vs, fatorCaract);
             totais["total_preco_item"] += totais[`preco_total_${vs}`];
+            if (configAPP.usarConfiguracaoFPCaracteristica()) {
+              let forma = normalizeString(this.props.pedido[`pgto_${vs}`]);
+              if (totais[`total_preco_item_${forma}`] == undefined)
+                totais[`total_preco_item_${forma}`] = 0;
+
+              totais[`total_preco_item_${forma}`] +=
+                totais[`preco_total_${vs}`];
+            }
           }
           if (tipoTabela === "TABELA_BASE" && regraPrecoBase) {
             const fatorCaract = await this.getFatorConversaoTabelaBase();
+
             return regraPrecoBase.forEach(rpb => {
               fatorConversaoChaves[`fator_conversao_${rpb.chave}`] = this.state
                 .formData.embalagem
@@ -1112,6 +1117,16 @@ class OrderItemForm extends Component {
                 fatorCaract
               );
               totais["total_preco_item"] += totais[`preco_total_${rpb.chave}`];
+              if (configAPP.usarConfiguracaoFPCaracteristica()) {
+                let forma = normalizeString(
+                  this.props.pedido[`pgto_${rpb.chave}`]
+                );
+                if (totais[`total_preco_item_${forma}`] == undefined)
+                  totais[`total_preco_item_${forma}`] = 0;
+
+                totais[`total_preco_item_${forma}`] +=
+                  totais[`preco_total_${rpb.chave}`];
+              }
             });
           }
           return true;
@@ -1126,6 +1141,7 @@ class OrderItemForm extends Component {
         ...prev,
         formData: { ...prev.formData, ...totais, ...fatorConversaoChaves }
       }));
+      console.log(totais);
     }
   }
 }
