@@ -4,19 +4,13 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
-
     {
-      "type": "node",
+      "type": "chrome",
       "request": "launch",
-      "name": "Launch Program",
-      "program": "${workspaceFolder}/simpleagro-api-adonisjs\\server.js",
-      "cwd": "${workspaceFolder}/simpleagro-api-adonisjs"
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "teste mongo",
-      "program": "${workspaceFolder}/teste-mongoose/src\\index.js"
+      "name": "Launch Chrome against localhost",
+      "url": "http://localhost:3001",
+      "webRoot": "${workspaceFolder}",
+      "userDataDir": false
     }
   ]
 }

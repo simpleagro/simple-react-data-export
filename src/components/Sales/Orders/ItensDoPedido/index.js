@@ -11,6 +11,8 @@ import parseErrors from "lib/parseErrors";
 import { simpleTableSearch } from "lib/simpleTableSearch";
 import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
 import { dadosPedido } from "actions/pedidoActions";
+import { addMaskReais } from "common/utils";
+import { configAPP } from "config/app";
 
 class OrderItem extends Component {
   constructor(props) {
@@ -31,18 +33,16 @@ class OrderItem extends Component {
 
   async initializeList(aqp) {
     try {
-      const items = await OrderItemsService.list(this.state.order_id)(aqp);
+      // const items = await OrderItemsService.list(this.state.order_id)(aqp);
       const orderData = await OrderService.get(this.state.order_id, {
-        fields: "tabela_preco_base, numero, cliente, propriedade"
+        fields:
+          "tabela_preco_base, numero, cliente, propriedade, estado, cidade, pgto_royalties, pgto_tratamento, pgto_germoplasma, itens"
       });
       this.setState(prev => ({
         ...prev,
-        list: items.docs,
+        list: orderData.itens,
         loadingData: false,
-        order_data: orderData,
-        pagination: {
-          total: items.total
-        }
+        order_data: orderData
       }));
       this.props.dadosPedido(orderData);
     } catch (error) {
@@ -109,76 +109,85 @@ class OrderItem extends Component {
     }
   };
 
-  tableConfig = () => [
-    {
-      title: "Produto",
-      dataIndex: "produto.nome",
-      key: "produto.nome",
-      sorter: (a, b, sorter) => {
-        if (sorter === "ascendent") return -1;
-        else return 1;
+  tableConfig = () => {
+    const colunaDesconto =
+      (!configAPP.usarConfiguracaoFPCaracteristica() && ({
+        title: "Desconto",
+        dataIndex: "desconto",
+        key: "desconto",
+        align: "center"
+      })) ||
+      null;
+
+    return [
+      {
+        title: "Produto",
+        dataIndex: "produto.nome",
+        key: "produto.nome",
+        sorter: (a, b, sorter) => {
+          if (sorter === "ascendent") return -1;
+          else return 1;
+        },
+        ...simpleTableSearch(this)("produto.nome")
       },
-      ...simpleTableSearch(this)("produto.nome")
-    },
-    {
-      title: "Quantidade",
-      dataIndex: "quantidade",
-      key: "quantidade",
-      align: "center"
-    },
-    {
-      title: "Desconto",
-      dataIndex: "desconto",
-      key: "desconto",
-      align: "center"
-    },
-    {
-      title: "Preço Final",
-      dataIndex: "total_preco_item",
-      key: "total_preco_item",
-      align: "right"
-    },
-    {
-      title: "Ações",
-      dataIndex: "action",
-      render: (text, record) => {
-        return (
-          <span>
-            <Button
-              size="small"
-              onClick={() =>
-                this.props.history.push(
-                  `/pedidos/${this.state.order_id}/itens-do-pedido/${
-                    record._id
-                  }/edit`
-                )
-              }>
-              <Icon type="edit" style={{ fontSize: "16px" }} />
-            </Button>
+      {
+        title: "Quantidade",
+        dataIndex: "quantidade",
+        key: "quantidade",
+        align: "center"
+      },
 
-            <Divider
-              style={{ fontSize: "10px", padding: 0, margin: 2 }}
-              type="vertical"
-            />
+      {...colunaDesconto},
 
-            <Popconfirm
-              title={`Tem certeza em excluir este item?`}
-              onConfirm={() => this.removeRecord(record)}
-              okText="Sim"
-              cancelText="Não">
-              <Button size="small">
-                <Icon type="delete" style={{ fontSize: "16px" }} />
+      {
+        title: "Preço Final",
+        dataIndex: "total_preco_item",
+        key: "total_preco_item",
+        align: "right",
+        render: text => addMaskReais(text)
+      },
+      {
+        title: "Ações",
+        dataIndex: "action",
+        render: (text, record) => {
+          return (
+            <span>
+              <Button
+                size="small"
+                onClick={() =>
+                  this.props.history.push(
+                    `/pedidos/${this.state.order_id}/itens-do-pedido/${
+                      record._id
+                    }/edit`
+                  )
+                }>
+                <Icon type="edit" style={{ fontSize: "16px" }} />
               </Button>
-            </Popconfirm>
-            <Divider
-              style={{ fontSize: "10px", padding: 0, margin: 2 }}
-              type="vertical"
-            />
-          </span>
-        );
+
+              <Divider
+                style={{ fontSize: "10px", padding: 0, margin: 2 }}
+                type="vertical"
+              />
+
+              <Popconfirm
+                title={`Tem certeza em excluir este item?`}
+                onConfirm={() => this.removeRecord(record)}
+                okText="Sim"
+                cancelText="Não">
+                <Button size="small">
+                  <Icon type="delete" style={{ fontSize: "16px" }} />
+                </Button>
+              </Popconfirm>
+              <Divider
+                style={{ fontSize: "10px", padding: 0, margin: 2 }}
+                type="vertical"
+              />
+            </span>
+          );
+        }
       }
-    }
-  ];
+    ];
+  };
 
   handleTableChange = (pagination, filter, sorter) => {
     const pager = { ...this.state.pagination };
@@ -224,6 +233,17 @@ class OrderItem extends Component {
                   );
                 }}>
                 <Icon type="edit" /> Editar
+              </Button>
+              <Button
+                type="primary"
+                style={{ width: "100%", marginTop: "5px" }}
+                onClick={() => {
+                  this.props.history.push(
+                    `/pedidos/${this.state.order_id}/finalizar-pedido`,
+                    { returnTo: this.props.history.location }
+                  );
+                }}>
+                <Icon type="shopping" /> Finalizar Pedido
               </Button>
             </Card>
           </Col>

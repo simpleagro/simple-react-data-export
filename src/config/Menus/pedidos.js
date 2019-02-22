@@ -34,6 +34,11 @@ const menus = {
     path: "/pedidos/:order_id/itens-do-pedido/:id/edit",
     showMenu: false
   },
+  "/pedidos/:order_id/finalizar-pedido": {
+    component: SimpleLoadable(() => import("../../components/Sales/Orders/Pagamento")),
+    path: "/pedidos/:order_id/finalizar-pedido",
+    showMenu: false
+  },
 };
 
 export default menus;

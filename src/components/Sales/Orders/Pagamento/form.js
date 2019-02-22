@@ -10,24 +10,15 @@ import {
   Row,
   Col,
   Spin,
-  Layout,
-  Collapse
+  Layout
 } from "antd";
 import { connect } from "react-redux";
 import * as Promise from "bluebird";
-import debounce from "lodash/debounce";
-import moment from "moment";
 
 import {
   flashWithSuccess,
   flashWithError
 } from "../../../common/FlashMessages";
-import {
-  valorFinalJurosCompostos,
-  currency,
-  normalizeString,
-  getNumber
-} from "common/utils";
 import parseErrors from "../../../../lib/parseErrors";
 import { PainelHeader } from "../../../common/PainelHeader";
 import * as ProductGroupService from "services/productgroups";
@@ -41,7 +32,7 @@ import { fatorConversaoUM } from "common/utils";
 import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
 import { SimpleLazyLoader } from "../../../common/SimpleLazyLoader";
 import { SFFPorcentagem } from "../../../common/formFields/SFFPorcentagem";
-import { configAPP } from "config/app";
+import debounce from "lodash/debounce";
 
 const Option = Select.Option;
 
@@ -89,7 +80,7 @@ class OrderItemForm extends Component {
     }).then(response => response.docs);
 
     const tabelaPrecos = await PriceTableService.list({
-      fields: "nome, moeda",
+      fields: "nome",
       status: true,
       limit: -1
     }).then(response => response.docs);
@@ -187,12 +178,7 @@ class OrderItemForm extends Component {
         value: { id: e._id, nome: e.nome }
       }
     });
-    await this.setState(prev => ({
-      ...prev,
-      produtos: e.produtos,
-      variacoes: []
-    }));
-    this.props.form.resetFields(["produto"]);
+    await this.setState(prev => ({ ...prev, produtos: e.produtos }));
   }
 
   async onSelectProduto(e) {
@@ -200,13 +186,7 @@ class OrderItemForm extends Component {
     await this.handleFormState({
       target: {
         name: "produto",
-        value: {
-          id: e._id,
-          nome: e.nome,
-          ...{
-            ...(e.nome_comercial ? { nome_comercial: e.nome_comercial } : {})
-          }
-        }
+        value: { id: e._id, nome: e.nome }
       }
     });
 
@@ -224,8 +204,7 @@ class OrderItemForm extends Component {
     const produto = JSON.parse(this.props.form.getFieldValue("produto"));
 
     let variacoes = grupo.caracteristicas.map((c, index, arr) => {
-      if (this.state.formData[c.chave]) {
-        //        debugger;
+      if (this.state.formData[c.chave])
         this.setState(prev => ({
           ...prev,
           variacoesSelecionadas: {
@@ -233,17 +212,6 @@ class OrderItemForm extends Component {
             [c.chave]: this.state.formData[c.chave]
           }
         }));
-      }
-
-      let resultOpcoes = [];
-      produto.variacoes
-        .filter(v => v[c.chave])
-        .map(v => v[c.chave])
-        .forEach(function(item) {
-          if (!resultOpcoes.find(r => r.value === item.value)) {
-            resultOpcoes.push(item);
-          }
-        });
       return {
         chave: c.chave,
         label: c.label,
@@ -254,7 +222,9 @@ class OrderItemForm extends Component {
         variacaoPreco: c.variacao_preco,
         prevField: index > 0 ? arr[index - 1].chave : null,
         nextField: index + 1 < arr.length ? arr[index + 1].chave : null,
-        opcoes: resultOpcoes
+        opcoes: new Set(
+          produto.variacoes.filter(v => v[c.chave]).map(v => v[c.chave])
+        )
       };
     });
 
@@ -263,7 +233,7 @@ class OrderItemForm extends Component {
   }
 
   resetVariacoes() {
-    // ;
+    // debugger;
     const campos = [
       ...Object.keys(this.state.formData).filter(
         f => f.match(/^preco_/i) || f.match(/^desconto_/i)
@@ -284,26 +254,18 @@ class OrderItemForm extends Component {
   }
 
   getVals(chave) {
-    function search(sChave) {
-      return Object.keys(this).every(
-        key => sChave[key] && sChave[key].value === this[key]
-      );
+    function search(user) {
+      return Object.keys(this).every(key => user[key] === this[key]);
     }
 
     let opcoes = JSON.parse(this.props.form.getFieldValue("produto"));
     let filtro = this.state.variacoesSelecionadas || {};
 
-    opcoes = opcoes.variacoes.filter(search, filtro).map(c => c[chave]);
+    opcoes = new Set(
+      opcoes.variacoes.filter(search, filtro).map(c => c[chave])
+    );
 
-    // removendo duplicados
-    let resultOpcoes = [];
-    opcoes.forEach(function(item) {
-      if (item && !resultOpcoes.find(r => r.value === item.value)) {
-        resultOpcoes.push(item);
-      }
-    });
-
-    opcoes = resultOpcoes;
+    opcoes.delete(undefined);
 
     let variacoes = this.state.variacoes;
     variacoes.map(v => {
@@ -369,6 +331,7 @@ class OrderItemForm extends Component {
                   name="tabela_preco_base"
                   showAction={["focus", "click"]}
                   showSearch
+                  style={{ width: 200 }}
                   placeholder="Selecione..."
                   filterOption={(input, option) =>
                     option.props.children
@@ -412,6 +375,7 @@ class OrderItemForm extends Component {
                   name="grupo_produto"
                   showAction={["focus", "click"]}
                   showSearch
+                  style={{ width: 200 }}
                   placeholder="Selecione..."
                   filterOption={(input, option) =>
                     option.props.children
@@ -457,23 +421,19 @@ class OrderItemForm extends Component {
                   name="produto"
                   showAction={["focus", "click"]}
                   showSearch
+                  style={{ width: 200 }}
                   placeholder="Selecione..."
-                  optionFilterProp="data-filter"
+                  // labelInValue
+                  filterOption={(input, option) =>
+                    option.props.children
+                      .toLowerCase()
+                      .indexOf(input.toLowerCase()) >= 0
+                  }
                   onSelect={e => this.onSelectProduto(e)}>
                   {this.state.produtos.length > 0
-                    ? this.state.produtos.map(prod => (
-                        <Option
-                          data-filter={`${prod.nome}${
-                            prod.nome_comercial
-                              ? " - " + prod.nome_comercial
-                              : ""
-                          }`}
-                          key={prod._id}
-                          value={JSON.stringify(prod)}>
-                          {prod.nome}
-                          {prod.nome_comercial
-                            ? " - " + prod.nome_comercial
-                            : ""}
+                    ? this.state.produtos.map(t => (
+                        <Option key={t._id} value={JSON.stringify(t)}>
+                          {t.nome}
                         </Option>
                       ))
                     : ""}
@@ -492,9 +452,9 @@ class OrderItemForm extends Component {
                 bordered
                 style={{ marginBottom: 20 }}>
                 {this.state.variacoes
-                  // .sort((a, b) => (b.obrigatorio ? 1 : -1))
+                  .sort((a, b) => (b.obrigatorio ? 1 : -1))
                   .map((v, index, arr) => {
-                    return v.opcoes.length ? (
+                    return v.opcoes.size ? (
                       <React.Fragment key={`variacao_fragm_${index}`}>
                         <Spin
                           tip={"Carregando variações para " + v.label}
@@ -514,9 +474,7 @@ class OrderItemForm extends Component {
                                   message: "Este campo é obrigatório!"
                                 }
                               ],
-                              initialValue:
-                                this.state.formData[v.chave] &&
-                                this.state.formData[v.chave].label
+                              initialValue: this.state.formData[v.chave]
                             })(
                               <Select
                                 // disabled={
@@ -527,23 +485,18 @@ class OrderItemForm extends Component {
                                 name={v.chave}
                                 showAction={["focus", "click"]}
                                 showSearch
-                                allowClear
                                 // onFocus={() => this.getVals(v.chave)}
                                 style={{ width: 200 }}
                                 onChange={async e => {
-                                  e = JSON.parse(e);
                                   this.setState(prev => ({
                                     ...prev,
                                     variacoesSelecionadas: {
                                       ...prev.variacoesSelecionadas,
-                                      ...{ [v.chave]: e.value }
+                                      ...{ [v.chave]: e }
                                     }
                                   }));
                                   await this.handleFormState({
-                                    target: {
-                                      name: v.chave,
-                                      value: e
-                                    }
+                                    target: { name: v.chave, value: e }
                                   });
                                   arr
                                     .map(v => v.chave)
@@ -558,14 +511,12 @@ class OrderItemForm extends Component {
                                       }));
                                       this.getVals(v2);
                                     });
-                                  this.atualizaValorVariacao(v, e.value);
+                                  this.atualizaValorVariacao(v, e);
                                 }}
                                 placeholder="Selecione...">
-                                {v.opcoes.map((o, index) => (
-                                  <Option
-                                    key={`${v.chave}_${index}`}
-                                    value={JSON.stringify(o)}>
-                                    {o.label}
+                                {Array.from(v.opcoes).map((o, index) => (
+                                  <Option key={`${v.chave}_${index}`} value={o}>
+                                    {o}
                                   </Option>
                                 ))}
                               </Select>
@@ -581,7 +532,7 @@ class OrderItemForm extends Component {
                   })}
               </Card>
             )}
-            {/* <Form.Item label="Área" {...formItemLayout}>
+            <Form.Item label="Área" {...formItemLayout}>
               {getFieldDecorator("area", {
                 rules: [
                   { required: true, message: "Este campo é obrigatório!" }
@@ -598,18 +549,15 @@ class OrderItemForm extends Component {
                   name="area"
                 />
               )}
-            </Form.Item> */}
-            {configAPP.usarDescontoGeralItem() && (
-              <SFFPorcentagem
-                name={`desconto`}
-                label={`Desconto`}
-                formItemLayout={formItemLayout}
-                getFieldDecorator={getFieldDecorator}
-                handleFormState={this.handleFormState}
-                trigger={() => this.calcularResumo()}
-              />
-            )}
-
+            </Form.Item>
+            <SFFPorcentagem
+              name={`desconto`}
+              label={`Desconto`}
+              formItemLayout={formItemLayout}
+              getFieldDecorator={getFieldDecorator}
+              handleFormState={this.handleFormState}
+              trigger={() => this.calcularResumo()}
+            />
             <Form.Item label="Quantidade" {...formItemLayout}>
               {getFieldDecorator("quantidade", {
                 rules: [
@@ -655,64 +603,30 @@ class OrderItemForm extends Component {
             <Layout.Footer style={{ borderTop: "2px solid gray" }}>
               <h3>Resumo:</h3>
 
-              <Collapse bordered={false} style={{ marginBottom: 10 }}>
-                <Collapse.Panel
-                  header="Ver outros totais"
-                  key="resumo_outros_totais">
-                  {this.state.variacoes &&
-                    this.state.variacoes.map(v => {
-                      if (v.tipoTabela === "TABELA_CARACTERISTICA")
-                        return (
-                          <div key={`resumoItem_${v.chave}`}>
-                            <b>
-                              Total Preço {v.label}:{" "}
-                              {currency()(
-                                this.state.formData[`preco_total_${v.chave}`] ||
-                                  0
-                              )}
-                            </b>
-                          </div>
-                        );
-                      if (v.tipoTabela === "TABELA_BASE" && v.regraPrecoBase)
-                        return v.regraPrecoBase.map(rpb => (
-                          <div key={`resumoItem_${rpb.chave}`}>
-                            <b>
-                              Total Preço {rpb.label}:{" "}
-                              {currency()(
-                                this.state.formData[
-                                  `preco_total_${rpb.chave}`
-                                ] || 0
-                              )}
-                            </b>
-                          </div>
-                        ));
-                    })}
-                </Collapse.Panel>
-              </Collapse>
-
-              {configAPP.usarConfiguracaoFPCaracteristica() ? (
-                ["REAIS", "GRÃOS"].map(t => {
-                  return (
-                    <div key={`resumoItem_totais_${normalizeString(t)}`}>
-                      <b>
-                        Total Preço em {t}:{" "}
-                        {currency()(
-                          this.state.formData[
-                            `total_preco_item_${normalizeString(t)}`
-                          ] || 0
-                        )}
-                      </b>
-                    </div>
-                  );
-                })
-              ) : (
-                <div key={`resumoItem_total`}>
-                  <b>
-                    Total Item:{" "}
-                    {currency()(this.state.formData.total_preco_item || 0)}
-                  </b>
-                </div>
-              )}
+              {this.state.variacoes &&
+                this.state.variacoes.map(v => {
+                  if (v.tipoTabela === "TABELA_CARACTERISTICA")
+                    return (
+                      <div key={`resumoItem_${v.chave}`}>
+                        <b>
+                          Total Preço {v.label}:{" "}
+                          {this.state.formData[`preco_total_${v.chave}`] || 0}
+                        </b>
+                      </div>
+                    );
+                  if (v.tipoTabela === "TABELA_BASE" && v.regraPrecoBase)
+                    return v.regraPrecoBase.map(rpb => (
+                      <div key={`resumoItem_${rpb.chave}`}>
+                        <b>
+                          Total Preço {rpb.label}:{" "}
+                          {this.state.formData[`preco_total_${rpb.chave}`] || 0}
+                        </b>
+                      </div>
+                    ));
+                })}
+              <div key={`resumoItem_total`}>
+                <b>Total Geral: {this.state.formData.total_preco_item || 0}</b>
+              </div>
             </Layout.Footer>
           </Affix>
         </div>
@@ -728,6 +642,18 @@ class OrderItemForm extends Component {
         id={`rowVariacaoDinamico_${obj.chave}`}>
         <Col span={12}>
           <Form.Item
+            help={
+              !this.state.variacoesSelecionadas ||
+              !this.state.variacoesSelecionadas.hasOwnProperty(variacao.chave)
+                ? "Selecione um(a) " + variacao.label + " primeiro"
+                : ""
+            }
+            validateStatus={
+              !this.state.variacoesSelecionadas ||
+              !this.state.variacoesSelecionadas.hasOwnProperty(variacao.chave)
+                ? "warning"
+                : ""
+            }
             label={`Preço - ${obj.label}`}
             {...{
               labelCol: { span: 12 },
@@ -742,10 +668,10 @@ class OrderItemForm extends Component {
                 }
               ],
               initialValue: this.state.formData[`preco_${obj.chave}`]
-              //   ? this.state.formData[`preco_${obj.chave}`]
-              //       .toString()
-              //       .replace(",", ".")
-              //   : undefined
+                ? this.state.formData[`preco_${obj.chave}`]
+                    .toString()
+                    .replace(",", ".")
+                : undefined
             })(
               <Input
                 disabled={
@@ -754,10 +680,7 @@ class OrderItemForm extends Component {
                     variacao.chave
                   )
                 }
-                onKeyUp={e => {
-                  this.calcularDescontoPeloPreco(obj.chave, e.target.value);
-                  this.calcularResumo();
-                }}
+                onKeyUp={() => this.calcularResumo()}
                 name={`preco_${obj.chave}`}
               />
             )}
@@ -765,7 +688,6 @@ class OrderItemForm extends Component {
         </Col>
         <Col span={12}>
           <SFFPorcentagem
-            initialValue={this.state.formData[`desconto_${obj.chave}`]}
             disabled={
               !this.state.variacoesSelecionadas ||
               !this.state.variacoesSelecionadas.hasOwnProperty(variacao.chave)
@@ -778,10 +700,7 @@ class OrderItemForm extends Component {
             }}
             getFieldDecorator={getFieldDecorator}
             handleFormState={this.handleFormState}
-            trigger={e => {
-              this.calcularPrecoPeloDesconto(obj.chave, e);
-              this.calcularResumo();
-            }}
+            trigger={() => this.calcularResumo()}
           />
         </Col>
       </Row>
@@ -795,35 +714,6 @@ class OrderItemForm extends Component {
     }
   }
 
-  calcularDescontoPeloPreco = (chave, value) => {
-    this.setState(prev => ({
-      ...prev,
-      formData: {
-        ...prev.formData,
-        [`desconto_${chave}`]:
-          Number(this.state.formData[`preco_${chave}_tabela`]) < Number(value)
-            ? 0
-            : (value * 100) / prev.formData[`preco_${chave}_tabela`] / 100
-      }
-    }));
-  };
-
-  calcularPrecoPeloDesconto = (chave, value) => {
-    const novoValor =
-      this.state.formData[`preco_${chave}_tabela`] -
-      this.state.formData[`preco_${chave}_tabela`] * value;
-    this.setState(prev => ({
-      ...prev,
-      formData: {
-        ...prev.formData,
-        [`preco_${chave}`]: novoValor
-      }
-    }));
-    this.props.form.setFieldsValue({
-      [`preco_${chave}`]: novoValor
-    });
-  };
-
   async atualizaValorVariacao(variacao, valor) {
     try {
       this.setState({ [`loadingVariacoes_${variacao.chave}`]: true });
@@ -833,12 +723,9 @@ class OrderItemForm extends Component {
           status: true,
           "grupo_produto.id": this.state.formData.grupo_produto.id,
           "caracteristica.chave": variacao.chave,
-          fields:
-            "u_m_preco, data_base, taxa_adicao, taxa_supressao, grupo_produto,caracteristica,precos.$, moeda",
+          fields: "u_m_preco, grupo_produto,caracteristica,precos.$",
           "precos.deleted": false,
-          ...(configAPP.usarConfiguracaoFPCaracteristica() && {
-            moeda: this.props.pedido[`pgto_${variacao.chave}`]
-          })
+          limit: 1
         }).then(response => response.docs);
 
         if (tabelaCaract && tabelaCaract.length) {
@@ -853,26 +740,14 @@ class OrderItemForm extends Component {
               p => p.opcao_chave === valor
             );
 
-            let preco = valorVariacao || 0;
-            const periodo = configAPP.usarCalculoDataBaseMes()
-              ? moment().diff(tabelaCaract[0].data_base, "month")
-              : Math.round(
-                  moment().diff(tabelaCaract[0].data_base, "days") /
-                    (configAPP.quantidadeDeDiasCalculoDataBase() || 30)
-                );
-            const taxa =
-              periodo && periodo > 0
-                ? getNumber(tabelaCaract[0].taxa_adicao)
-                : getNumber(tabelaCaract[0].taxa_supressao);
-
-            if (periodo) preco = valorFinalJurosCompostos(preco, taxa, periodo);
-
             this.setState(prev => ({
               ...prev,
               formData: {
                 ...prev.formData,
-                [`preco_${variacao.chave}_tabela`]: preco || undefined,
-                [`preco_${variacao.chave}`]: preco || undefined,
+                [`preco_${variacao.chave}`]:
+                  (valorVariacao &&
+                    valorVariacao.toString().replace(",", ".")) ||
+                  undefined,
                 [`desconto_${variacao.chave}`]: 0,
                 [`fator_conversao_${variacao.chave}`]: tabelaCaract[0].u_m_preco
               }
@@ -891,16 +766,13 @@ class OrderItemForm extends Component {
             formData: {
               ...prev.formData,
               [`preco_${rpb.chave}`]: 0,
-              [`preco_${rpb.chave}_tabela`]: 0,
               [`desconto_${rpb.chave}`]: 0
             }
           }));
         });
 
-        let tabelaPrecoOrig = await GetVariation({
-          usarConfiguracaoFPCaracteristica: configAPP.usarConfiguracaoFPCaracteristica(),
+        const tabelaPreco = await GetVariation({
           priceTable: this.state.formData.tabela_preco_base.id,
-          priceTableName: this.state.formData.tabela_preco_base.nome,
           productGroup: this.state.formData.grupo_produto.id,
           productID: this.state.formData.produto.id,
           variacao: variacao.chave,
@@ -908,57 +780,12 @@ class OrderItemForm extends Component {
           orderID: this.state.order_id
         });
 
-        if (tabelaPrecoOrig !== false) {
-          if (!configAPP.usarConfiguracaoFPCaracteristica())
-            this.setState(prev => ({
-              ...prev,
-              formData: { ...prev.formData, ...tabelaPrecoOrig }
-            }));
-
-          await Promise.all(
-            variacao.regraPrecoBase.map(async rpb => {
-              let tabelaPreco = tabelaPrecoOrig;
-              if (configAPP.usarConfiguracaoFPCaracteristica())
-                tabelaPreco =
-                  tabelaPrecoOrig[this.props.pedido[`pgto_${rpb.chave}`]];
-
-              let preco = tabelaPreco[`preco_${rpb.chave}`];
-
-              // A data base pode ser padrão ou marcado por data royalties, germoplasma ... etc
-              let dataBaseCalculo =
-                tabelaPreco.data_base_por_regra === true
-                  ? tabelaPreco[`data_base_${rpb.chave}`]
-                  : tabelaPreco.data_base;
-              let periodo = configAPP.usarCalculoDataBaseMes()
-                ? moment().diff(dataBaseCalculo, "month")
-                : Math.round(
-                    moment().diff(dataBaseCalculo, "days") /
-                      (configAPP.quantidadeDeDiasCalculoDataBase() || 30)
-                  );
-
-              const taxa =
-                periodo && periodo > 0
-                  ? getNumber(tabelaPreco.taxa_adicao)
-                  : getNumber(tabelaPreco.taxa_supressao);
-
-              if (periodo)
-                preco = valorFinalJurosCompostos(preco, taxa, periodo);
-
-              if (tabelaPreco)
-                this.setState(prev => ({
-                  ...prev,
-                  formData: {
-                    ...prev.formData,
-                    [`preco_${rpb.chave}_tabela`]: preco,
-                    [`preco_${rpb.chave}`]: preco,
-                    [`fator_conversao_${rpb.chave}`]: tabelaPreco.u_m_preco
-                  }
-                }));
-            })
-          );
-        }
+        if (tabelaPreco !== false)
+          this.setState(prev => ({
+            ...prev,
+            formData: { ...prev.formData, ...tabelaPreco }
+          }));
       }
-
       this.calcularResumo();
     } catch (error) {
       if (error && error.response && error.response.data) parseErrors(error);
@@ -968,14 +795,13 @@ class OrderItemForm extends Component {
   }
 
   async getFatorConversaoTabelaPrecoCaract(chave) {
-    //
-    // const unid_med_preco = this.state.formData[`fator_conversao_${chave}`] || null;
+    // debugger
     const unid_med_preco = this.state.formData[`fator_conversao_${chave}`];
     const { embalagem } = this.state.formData;
     let fatorConversao = 1;
 
     // Se a unid. medida que veio da tabela de preço base for diferente, fazer conversão *******
-    if (embalagem && unid_med_preco !== embalagem.value) {
+    if (unid_med_preco !== embalagem) {
       const unidadesDeMedida = await ListUnitsMeasures({
         limit: -1,
         status: true
@@ -983,23 +809,19 @@ class OrderItemForm extends Component {
 
       if (!unidadesDeMedida) {
         flashWithError(
-          `Não existem unidades de medidas disponíveis para realizar a conversão de ${
-            embalagem.label
-          } para ${unid_med_preco}`
+          `Não existem unidades de medidas disponíveis para realizar a conversão de ${embalagem} para ${unid_med_preco}`
         );
       } else {
         fatorConversao = fatorConversaoUM(
           unidadesDeMedida,
-          embalagem.value,
+          embalagem,
           unid_med_preco
         );
 
         if (fatorConversao === "erro") {
           fatorConversao = 1;
           flashWithError(
-            `[fatorConversaoUM TBLPC] - Não consegui realizar a conversão de ${
-              embalagem.label
-            } para ${unid_med_preco}`
+            `[fatorConversaoUM TBLPC] - Não conseguir realizar a conversão de ${embalagem} para ${unid_med_preco}`
           );
         }
       }
@@ -1024,10 +846,7 @@ class OrderItemForm extends Component {
       )(grupoProdutoID)(produtoID);
 
       // Se a unid. medida que veio da tabela de preço base for diferente, fazer conversão *******
-      if (
-        produtoTabelaPreco &&
-        produtoTabelaPreco.u_m_preco !== embalagem.value
-      ) {
+      if (produtoTabelaPreco && produtoTabelaPreco.u_m_preco !== embalagem) {
         const unidadesDeMedida = await ListUnitsMeasures({
           limit: -1,
           status: true
@@ -1035,23 +854,23 @@ class OrderItemForm extends Component {
 
         if (!unidadesDeMedida) {
           flashWithError(
-            `Não existem unidades de medidas disponíveis para realizar a conversão de ${
-              embalagem.label
-            } para ${produtoTabelaPreco.u_m_preco}`
+            `Não existem unidades de medidas disponíveis para realizar a conversão de ${embalagem} para ${
+              produtoTabelaPreco.u_m_preco
+            }`
           );
         } else {
           fatorConversao = fatorConversaoUM(
             unidadesDeMedida,
-            embalagem.value,
+            embalagem,
             produtoTabelaPreco.u_m_preco
           );
 
           if (fatorConversao === "erro") {
             fatorConversao = 1;
             flashWithError(
-              `[fatorConversaoUM TPB] - Não consegui realizar a conversão de ${
-                embalagem.label
-              } para ${produtoTabelaPreco.u_m_preco}`
+              `[fatorConversaoUM TPB] - Não conseguir realizar a conversão de ${embalagem} para ${
+                produtoTabelaPreco.u_m_preco
+              }`
             );
           }
         }
@@ -1066,10 +885,10 @@ class OrderItemForm extends Component {
     let calculaTotalCaract = (chave, fatorConversao) => {
       return (
         fatorConversao *
-          (getNumber(this.state.formData[`preco_${chave}`]) -
-          getNumber(this.state.formData[`preco_${chave}`]) *
-          getNumber(this.state.formData[`desconto_${chave}`])) *
-          getNumber(this.state.formData.quantidade) || 0
+          (this.state.formData[`preco_${chave}`] -
+            this.state.formData[`preco_${chave}`] *
+              this.state.formData[`desconto_${chave}`]) *
+          this.state.formData.quantidade || 0
       );
     };
     calculaTotalCaract = calculaTotalCaract.bind(this);
@@ -1079,7 +898,7 @@ class OrderItemForm extends Component {
       (this.state.variacoesSelecionadas &&
         Object.keys(this.state.variacoesSelecionadas).length)
     ) {
-      // ;
+      // debugger;
       let totais = {
         total_preco_item: 0
       };
@@ -1095,42 +914,27 @@ class OrderItemForm extends Component {
               vs
             );
 
-            // fatorConversaoChaves[`fator_conversao_${vs}`] = fatorCaract;
+            fatorConversaoChaves[`fator_conversao_${vs}`] = this.state.formData
+              .embalagem
+              ? this.state.formData.embalagem
+              : "";
             totais[`preco_total_${vs}`] = calculaTotalCaract(vs, fatorCaract);
             totais["total_preco_item"] += totais[`preco_total_${vs}`];
-            if (configAPP.usarConfiguracaoFPCaracteristica()) {
-              let forma = normalizeString(this.props.pedido[`pgto_${vs}`]);
-              if (totais[`total_preco_item_${forma}`] == undefined)
-                totais[`total_preco_item_${forma}`] = 0;
-
-              totais[`total_preco_item_${forma}`] +=
-                totais[`preco_total_${vs}`];
-            }
           }
           if (tipoTabela === "TABELA_BASE" && regraPrecoBase) {
             const fatorCaract = await this.getFatorConversaoTabelaBase();
-
             return regraPrecoBase.forEach(rpb => {
-              // fatorConversaoChaves[`fator_conversao_${rpb.chave}`] = fatorCaract;
+              fatorConversaoChaves[`fator_conversao_${rpb.chave}`] = this.state
+                .formData.embalagem
+                ? this.state.formData.embalagem
+                : "";
               totais[`preco_total_${rpb.chave}`] = calculaTotalCaract(
                 rpb.chave,
                 fatorCaract
               );
               totais["total_preco_item"] += totais[`preco_total_${rpb.chave}`];
-              if (configAPP.usarConfiguracaoFPCaracteristica()) {
-                let forma = normalizeString(
-                  this.props.pedido[`pgto_${rpb.chave}`]
-                );
-                if (totais[`total_preco_item_${forma}`] == undefined)
-                  totais[`total_preco_item_${forma}`] = 0;
-
-                totais[`total_preco_item_${forma}`] +=
-                  totais[`preco_total_${rpb.chave}`];
-              }
             });
           }
-
-
           return true;
         })
       );
@@ -1139,12 +943,10 @@ class OrderItemForm extends Component {
       totais["total_preco_item"] -=
         totais["total_preco_item"] * this.state.formData.desconto || 0;
 
-
       this.setState(prev => ({
         ...prev,
         formData: { ...prev.formData, ...totais, ...fatorConversaoChaves }
       }));
-      console.log(totais);
     }
   }
 }

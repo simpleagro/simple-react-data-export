@@ -53,9 +53,9 @@ const zeroEsquerda = data => {
 // by: Jéssika *************************************************************************************
 export const fatorConversaoUM = (um_array, um_pai, um_primaria) => {
   let flag = true;
-  let um_verificar_obj = um_array.find(item => item.sigla == um_pai);
+  let um_verificar_obj = um_array.find(item => item.sigla.toLowerCase() == um_pai.toLowerCase());
   let um_verificar = um_verificar_obj ? um_verificar_obj._id : "";
-  let um_primaria_obj = um_array.find(item => item.sigla == um_primaria);
+  let um_primaria_obj = um_array.find(item => item.sigla.toLowerCase() == um_primaria.toLowerCase());
   let resultado = {};
   let aux_fc = 1;
 
@@ -127,10 +127,11 @@ export const currency = (locale = "pt-BR") => (
 ) => {
   const formatter = new Intl.NumberFormat(locale, options);
 
-  return formatter.format(value);
+  return formatter.format(getNumber(value));
 };
 
 export const getNumber = n => {
+  if(!n) return n;
   return isNaN(n)
     ? Number(
         n
@@ -142,6 +143,7 @@ export const getNumber = n => {
 };
 
 export const normalizeString = str => {
+  if(!str) return;
   return str
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
