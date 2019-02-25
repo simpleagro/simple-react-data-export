@@ -53,8 +53,8 @@ class OrderForm extends Component {
     if (id) {
       formData = await OrderService.get(id);
 
-      if (formData){
-        formData.itens = formData.itens.filter( i => i.deleted === false);
+      if (formData) {
+        formData.itens = formData.itens.filter(i => i.deleted === false);
         this.setState(prev => ({
           ...prev,
           formData,
@@ -216,14 +216,15 @@ class OrderForm extends Component {
   }
 
   searchClient = async value => {
-    console.log("fetching client", value);
+
     this.lastFetchClientId += 1;
     const fetchId = this.lastFetchClientId;
     this.setState({ clients: [], fetchingClients: true });
 
-    const clients = await this.fetchClients({ nome: `/${value}/i` }).then(
-      response => response.docs
-    );
+    const clients = await this.fetchClients({
+      filter:
+        `{"$or":[ {"nome": { "$regex": "${value}", "$options" : "i"  } }, {"cpf_cnpj": { "$regex": "${value}"  } } ]}`
+    }).then(response => response.docs);
 
     if (fetchId !== this.lastFetchClientId) return;
 
@@ -430,11 +431,6 @@ class OrderForm extends Component {
             })(
               <Select
                 name="cliente"
-                filterOption={(input, option) =>
-                  option.props.children
-                    .toLowerCase()
-                    .indexOf(input.toLowerCase()) >= 0
-                }
                 onSearch={this.searchClient}
                 showAction={["focus", "click"]}
                 notFoundContent={fetchingClients ? <Spin size="small" /> : null}

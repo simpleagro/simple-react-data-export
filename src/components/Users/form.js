@@ -176,7 +176,7 @@ class UserForm extends Component {
             {getFieldDecorator("login", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.login
-            })(<Input name="login" />)}
+            })(<Input name="login" autoComplete="false" />)}
           </Form.Item>
 
           <Form.Item label="Filial" {...formItemLayout}>

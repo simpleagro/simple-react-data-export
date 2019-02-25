@@ -317,6 +317,7 @@ class ConsultantForm extends Component {
                 <Input
                   disabled={this.state.editMode || this.state.userHasSelected}
                   name="login"
+                  autoComplete="false"
                   onFocus={() => this.setLogin(this.state.formData.email)}
                 />
               )}
