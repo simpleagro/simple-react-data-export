@@ -40,7 +40,8 @@ class ConsultantForm extends Component {
         if (formData)
           this.setState(prev => ({
             ...prev,
-            formData
+            formData,
+            permitirEditarUsuario: formData.usuario_id ? true : false
           }));
       }
 
@@ -152,7 +153,7 @@ class ConsultantForm extends Component {
       }
     });
 
-    if (!this.state.editMode) {
+
       user &&
         this.setState(prev => ({
           ...prev,
@@ -182,7 +183,7 @@ class ConsultantForm extends Component {
           },
           userHasSelected: false
         }));
-    }
+
   };
 
   setLogin = email => {
@@ -251,13 +252,12 @@ class ConsultantForm extends Component {
                 initialValue: this.state.formData.usuario_id && this.state.formData.usuario_id._id
               })(
                 <Select
-                  disabled={this.state.editMode}
+                  disabled={this.state.permitirEditarUsuario}
                   name="usuario_id"
                   allowClear
                   optionFilterProp="data-filter"
                   showAction={["focus", "click"]}
                   showSearch
-                  style={{ width: 200 }}
                   placeholder="Selecione um usuário..."
                   onChange={e => {
                     if (e == "")
@@ -340,7 +340,6 @@ class ConsultantForm extends Component {
                   name="tipoLogin"
                   showAction={["focus", "click"]}
                   showSearch
-                  style={{ width: 200 }}
                   placeholder="Selecione um tipo de Login..."
                   onChange={e => {
                     this.props.form.resetFields(["senha"]);
@@ -395,7 +394,6 @@ class ConsultantForm extends Component {
                     name="filiais"
                     showAction={["focus", "click"]}
                     showSearch
-                    style={{ width: 200 }}
                     mode="multiple"
                     placeholder="Selecione uma filial..."
                     onChange={e =>
@@ -433,7 +431,6 @@ class ConsultantForm extends Component {
                     name="grupo_id"
                     showAction={["focus", "click"]}
                     showSearch
-                    style={{ width: 200 }}
                     placeholder="Selecione um grupo de permissão..."
                     onChange={e =>
                       this.handleFormState({
@@ -473,7 +470,6 @@ class ConsultantForm extends Component {
                   name="cargo"
                   showAction={["focus", "click"]}
                   showSearch
-                  style={{ width: 330 }}
                   placeholder="Selecione um cargo..."
                   //mode="multiple"
                   onChange={e => {
@@ -518,7 +514,6 @@ class ConsultantForm extends Component {
                   allowClear
                   showAction={["focus", "click"]}
                   showSearch
-                  style={{ width: 200 }}
                   placeholder="Selecione um gerente..."
                   onChange={e =>
                     this.handleFormState({
@@ -553,7 +548,6 @@ class ConsultantForm extends Component {
                   name="tipo"
                   showAction={["focus", "click"]}
                   showSearch
-                  style={{ width: 200 }}
                   placeholder="Selecione um tipo..."
                   onChange={e =>
                     this.handleFormState({
@@ -594,7 +588,6 @@ class ConsultantForm extends Component {
                     allowClear
                     showAction={["focus", "click"]}
                     showSearch
-                    style={{ width: 200 }}
                     placeholder="Selecione um tipo de vendedor..."
                     onChange={e => {
                       this.handleFormState({
