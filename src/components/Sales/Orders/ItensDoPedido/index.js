@@ -11,7 +11,7 @@ import parseErrors from "lib/parseErrors";
 import { simpleTableSearch } from "lib/simpleTableSearch";
 import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
 import { dadosPedido } from "actions/pedidoActions";
-import { addMaskReais } from "common/utils";
+import { addMaskReais, currency } from "common/utils";
 import { configAPP } from "config/app";
 
 class OrderItem extends Component {
@@ -111,13 +111,36 @@ class OrderItem extends Component {
 
   tableConfig = () => {
     const colunaDesconto =
-      (!configAPP.usarConfiguracaoFPCaracteristica() && ({
+      (!configAPP.usarConfiguracaoFPCaracteristica() && {
         title: "Desconto",
         dataIndex: "desconto",
         key: "desconto",
         align: "center"
-      })) ||
+      }) ||
       null;
+
+    const colunaTotalItem = configAPP.usarConfiguracaoFPCaracteristica()
+      ? {
+          title: "Totais",
+          align: "center",
+          render: (text, record, index) => (
+            <React.Fragment>
+              <pre key={`${record.total_preco_item_reais}_${index}`}>
+                Em Reais: {currency()(record.total_preco_item_reais)}
+              </pre>
+              <pre key={`${record.total_preco_item_graos}_${index}`}>
+                Em Grãos: {currency()(record.total_preco_item_graos)}
+              </pre>
+            </React.Fragment>
+          )
+        }
+      : {
+          title: "Total Item",
+          dataIndex: "total_preco_item",
+          key: "total_preco_item",
+          align: "right",
+          render: text => currency()(text)
+        };
 
     return [
       {
@@ -136,16 +159,8 @@ class OrderItem extends Component {
         key: "quantidade",
         align: "center"
       },
-
-      {...colunaDesconto},
-
-      {
-        title: "Preço Final",
-        dataIndex: "total_preco_item",
-        key: "total_preco_item",
-        align: "right",
-        render: text => addMaskReais(text)
-      },
+      { ...colunaDesconto },
+      { ...colunaTotalItem },
       {
         title: "Ações",
         dataIndex: "action",

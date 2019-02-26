@@ -6,7 +6,7 @@ import { connect } from "react-redux";
 import * as OrderService from "services/orders";
 import * as OrderItemsService from "services/orders.items";
 import { dadosPedido } from "actions/pedidoActions";
-import { currency, getNumber } from "common/utils";
+import { currency, normalizeString } from "common/utils";
 import { flashWithSuccess } from "common/FlashMessages";
 import parseErrors from "lib/parseErrors";
 import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
@@ -135,12 +135,14 @@ class OrderPaymentForm extends Component {
     return (
       <SimpleLazyLoader isLoading={this.state.loadingForm}>
         <div>
-
-          <SimpleBreadCrumb to={
-            this.props.location.state && this.props.location.state.returnTo
-              ? this.props.location.state.returnTo.pathname
-              : "/pedidos"
-          } history={this.props.history} />
+          <SimpleBreadCrumb
+            to={
+              this.props.location.state && this.props.location.state.returnTo
+                ? this.props.location.state.returnTo.pathname
+                : "/pedidos"
+            }
+            history={this.props.history}
+          />
 
           <Row gutter={24}>
             <Col span={5}>
@@ -181,37 +183,59 @@ class OrderPaymentForm extends Component {
                 }}>
                 {this.state.orderData && (
                   <div>
-                    <p>{`Preço Total Frete: ${(this.props.pedido &&
-                      this.props.pedido.pagamento &&
-                      this.props.pedido.pagamento.total_pedido_frete) ||
-                      "0,00"}`}</p>
+                    <p>
+                      Preço Total Frete:
+                      <br />
+                      {currency()(
+                        this.props.pedido &&
+                          this.props.pedido.pagamento &&
+                          this.props.pedido.pagamento.total_pedido_frete
+                      ) || 0}
+                    </p>
 
                     {configAPP.detalharPrecoPorCaracteristica() && (
                       <React.Fragment>
-                        <p>{`Preço Total Royalties: ${currency()(
-                          this.state.formData.total_pedido_royalties || 0
-                        )}`}</p>
-                        <p>{`Preço Total Germoplasma: ${currency()(
-                          this.state.formData.total_pedido_germoplasma || 0
-                        )}`}</p>
-                        <p>{`Preço Total Tratamento: ${currency()(
-                          this.state.formData.total_pedido_tratamento || 0
-                        )}`}</p>
+                        <p>
+                          Total Preço Royalties:
+                          <br />
+                          {currency()(
+                            this.state.formData.total_pedido_royalties || 0
+                          )}
+                        </p>
+                        <p>
+                          Total Preço Germoplasma:
+                          <br />
+                          {currency()(
+                            this.state.formData.total_pedido_germoplasma || 0
+                          )}
+                        </p>
+                        <p>
+                          Total Preço Tratamento:
+                          <br />
+                          {currency()(
+                            this.state.formData.total_pedido_tratamento || 0
+                          )}
+                        </p>
                       </React.Fragment>
                     )}
 
                     {configAPP.usarConfiguracaoFPCaracteristica() && (
                       <React.Fragment>
-                        <p>{`Total Pedido REAIS: ${currency()(
-                          this.totalPedidoReais()
-                        )}`}</p>
-                        {/* <p>{`Saldo a parcelar REAIS: ${currency()(0)}`}</p>
-                        <p>{`Total Pedido GRÃOS: ${currency()(
-                          this.state.list
-                            .map(t => t.total_preco_item_graos)
-                            .reduce((a, b) => Number(a) + Number(b), 0) || 0
-                        )}`}</p>
-                        <p>{`Saldo a parcelar GRÃOS: ${currency()(0)}`}</p> */}
+                        {["REAIS", "GRÃOS"].map(t => {
+                          return (
+                            <React.Fragment>
+                              <p
+                                key={`resumoItem_totais_${normalizeString(t)}`}>
+                                Total Preço em {t}:<br />
+                                {currency()(0)}
+                              </p>
+                              <p key={`resumoItem_saldo_${normalizeString(t)}`}>
+                                Saldo a Parcelar {t}:<br />
+                                {currency()(0)}
+                              </p>
+                            </React.Fragment>
+                          );
+                        })}
                       </React.Fragment>
                     )}
 

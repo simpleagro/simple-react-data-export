@@ -206,7 +206,7 @@ class CustomerWalletForm extends Component {
   async fetchClients(aqp = {}) {
     return await ClientsServiceList({
       limit: 25,
-      fields: "nome,_id,propriedades,gerenciarCarteiraPorPropriedade",
+      fields: "nome,cpf_cnpj,propriedades,gerenciarCarteiraPorPropriedade",
       status: true,
       validarClientesNaCarteira: true,
       flags: "validarClientesNaCarteira",
@@ -240,6 +240,8 @@ class CustomerWalletForm extends Component {
 
   async addClient() {
     const selectedClient = Object.assign({}, this.state.selectedClient);
+
+    if(!Object.keys(selectedClient).length) return;
 
     if (this.state.walletTree.find(wt => wt.cliente_id === selectedClient._id))
       return;
@@ -457,7 +459,9 @@ class CustomerWalletForm extends Component {
     const fetchId = this.lastFetchClientId;
     this.setState({ clients: [], fetchingClients: true });
 
-    const data = await this.fetchClients({ nome: `/${value}/i` });
+    const data = await this.fetchClients({
+      filter: `{"$or":[ {"nome": { "$regex": "${value}", "$options" : "i"  } }, {"cpf_cnpj": { "$regex": "${value}"  } } ]}`
+    });
 
     if (fetchId !== this.lastFetchClientId) return;
 
@@ -599,9 +603,8 @@ class CustomerWalletForm extends Component {
                         value={this.state.selectedClient._id}
                         name="cliente"
                         filterOption={(input, option) =>
-                          option.props.children
-                            .toLowerCase()
-                            .indexOf(input.toLowerCase()) >= 0
+                          option.props.children.includes(input.toLowerCase()) >=
+                          0
                         }
                         // filterOption={false}
                         onSearch={this.searchClient}
@@ -611,11 +614,11 @@ class CustomerWalletForm extends Component {
                         }
                         showSearch
                         placeholder="Selecione..."
-                        style={{ width: "70%"}}
+                        style={{ width: "70%" }}
                         onChange={e => this.selectedClient(e)}>
                         {this.state.clients.map(c => (
                           <Option key={c._id} value={c._id}>
-                            {c.nome}
+                            {c.nome} - {c.cpf_cnpj}
                           </Option>
                         ))}
                       </Select>
@@ -626,7 +629,7 @@ class CustomerWalletForm extends Component {
                         onClick={() => this.addClient()}>
                         Adicionar Cliente
                       </Button>
-                      <div style={{ clear: "both"}}/>
+                      <div style={{ clear: "both" }} />
                     </span>
                   }>
                   {this.state.walletTree.length ? (
@@ -699,7 +702,7 @@ class CustomerWalletForm extends Component {
                                               }`
                                             : ""
                                         }>
-                                        {prop.nome} - {prop.ie} - {prop.estado}
+                                        {prop.nome} - {prop.ie} - {prop.cidade}
                                       </Tooltip>
                                     }
                                     key={`${cliente.cliente_id ||
