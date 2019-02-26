@@ -187,10 +187,11 @@ class OrderPaymentForm extends Component {
                       Preço Total Frete:
                       <br />
                       {currency()(
-                        this.props.pedido &&
+                        (this.props.pedido &&
                           this.props.pedido.pagamento &&
-                          this.props.pedido.pagamento.total_pedido_frete
-                      ) || 0}
+                          this.props.pedido.pagamento.total_pedido_frete) ||
+                          0
+                      )}
                     </p>
 
                     {configAPP.detalharPrecoPorCaracteristica() && (
