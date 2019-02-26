@@ -809,9 +809,9 @@ class OrderItemForm extends Component {
   };
 
   calcularPrecoPeloDesconto = (chave, value) => {
-    const novoValor =
-      this.state.formData[`preco_${chave}_tabela`] -
-      this.state.formData[`preco_${chave}_tabela`] * value;
+    const novoValor = currency()(
+      getNumber(this.state.formData[`preco_${chave}_tabela`]) -
+      getNumber(this.state.formData[`preco_${chave}_tabela`]) * getNumber(value)/100);
     this.setState(prev => ({
       ...prev,
       formData: {
@@ -1144,7 +1144,7 @@ class OrderItemForm extends Component {
         ...prev,
         formData: { ...prev.formData, ...totais, ...fatorConversaoChaves }
       }));
-      console.log(totais);
+
     }
   }
 }
