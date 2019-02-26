@@ -13,6 +13,13 @@ export const list = aqp => {
 export const get = _id =>
   api.get(`${baseURL}/${_id}`).then(response => response.data);
 
+export const getConsultant = client_id => aqp =>
+  api
+    .get(`${baseURL}/get-consultant/${client_id}`, {
+      params: aqp
+    })
+    .then(response => response.data);
+
 export const create = obj =>
   api.post(baseURL, obj).then(response => response.data);
 

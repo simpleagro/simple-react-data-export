@@ -15,7 +15,7 @@ import { list as TypesOfSaleServiceList } from "../../../../services/types-of-sa
 import { list as SeedUseServiceList } from "../../../../services/seed-use";
 import { list as PriceTableServiceList } from "../../../../services/pricetable";
 import { list as AgentSalesServiceList } from "../../../../services/sales-agents";
-import { list as ConsultantServiceList } from "../../../../services/consultants";
+import { getConsultant as getConsultantFromWallet } from "../../../../services/customerswallet";
 import ConfigurarFPCaracteristica from "./ConfigurarFPCaracteristica";
 import { configAPP } from "config/app";
 
@@ -27,10 +27,10 @@ class OrderForm extends Component {
     super(props);
     this.lastFetchClientId = 0;
     this.lastFetchAgentId = 0;
-    this.lastFetchConsultantId = 0;
+
     this.searchClient = debounce(this.searchClient, 400);
     this.searchAgent = debounce(this.searchAgent, 400);
-    this.searchConsultant = debounce(this.searchConsultant, 400);
+
     this.state = {
       editMode: false,
       loadingForm: true,
@@ -40,7 +40,7 @@ class OrderForm extends Component {
       },
       fetchingClients: false,
       fetchingAgents: false,
-      fetchingConsultants: false,
+
       clients: [],
       tiposDeFrete: ["SEM FRETE", "FOB", "CIF"]
     };
@@ -116,10 +116,6 @@ class OrderForm extends Component {
       fields: "nome,cpf_cnpj,-endereco,-cidade,-estado,-agente_pai"
     }).then(response => response.docs);
 
-    const consultants = await this.fetchConsultants().then(
-      response => response.docs
-    );
-
     this.setState(prev => ({
       ...prev,
       listSeasons: safras,
@@ -131,7 +127,6 @@ class OrderForm extends Component {
       // tiposDePagamento,
       tabelasDePreco,
       agents,
-      consultants,
       loadingForm: false
     }));
   }
@@ -205,25 +200,13 @@ class OrderForm extends Component {
     });
   }
 
-  async fetchConsultants(aqp = {}) {
-    return await ConsultantServiceList({
-      limit: 25,
-      fields: "nome",
-      status: true,
-      vendedor: true,
-      ...aqp
-    });
-  }
-
   searchClient = async value => {
-
     this.lastFetchClientId += 1;
     const fetchId = this.lastFetchClientId;
     this.setState({ clients: [], fetchingClients: true });
 
     const clients = await this.fetchClients({
-      filter:
-        `{"$or":[ {"nome": { "$regex": "${value}", "$options" : "i"  } }, {"cpf_cnpj": { "$regex": "${value}"  } } ]}`
+      filter: `{"$or":[ {"nome": { "$regex": "${value}", "$options" : "i"  } }, {"cpf_cnpj": { "$regex": "${value}"  } } ]}`
     }).then(response => response.docs);
 
     if (fetchId !== this.lastFetchClientId) return;
@@ -251,24 +234,7 @@ class OrderForm extends Component {
     });
   };
 
-  searchConsultant = async value => {
-    this.lastFetchConsultantId += 1;
-    const fetchId = this.lastFetchConsultantId;
-    this.setState({ consultants: [], fetchConsultants: true });
-
-    const consultants = await this.fetchConsultants({
-      nome: `/${value}/i`
-    }).then(response => response.docs);
-
-    if (fetchId !== this.lastFetchConsultantId) return;
-
-    this.setState({
-      consultants,
-      fetchConsultants: false
-    });
-  };
-
-  onChangeCliente(e) {
+  async onChangeCliente(e) {
     const { _id: id, nome, cpf_cnpj, propriedades } = JSON.parse(e);
 
     this.props.form.setFields({
@@ -288,8 +254,22 @@ class OrderForm extends Component {
 
     this.setState(prev => ({
       ...prev,
-      propriedades: propriedades.filter(t => t.status === true)
+      propriedades: propriedades.filter(t => t.status === true),
+      formData: {
+        ...prev.formData
+      }
     }));
+  }
+
+  async pegaVendedorPelaCarteiraDoCliente(id, propID) {
+    const vendedor = await getConsultantFromWallet(id)({ propID });
+
+    return vendedor !== ""
+      ? {
+          id: vendedor.id,
+          nome: vendedor.nome
+        }
+      : undefined;
   }
 
   onChangeAgente(e) {
@@ -307,22 +287,8 @@ class OrderForm extends Component {
     });
   }
 
-  onChangeConsultant(e) {
-    const { _id: id, nome } = JSON.parse(e);
-
-    this.handleFormState({
-      target: {
-        name: "vendedor",
-        value: {
-          nome,
-          id
-        }
-      }
-    });
-  }
-
   render() {
-    const { fetchingClients, fetchingAgents, fetchingConsultants } = this.state;
+    const { fetchingClients, fetchingAgents } = this.state;
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
       labelCol: { span: 4 },
@@ -392,37 +358,6 @@ class OrderForm extends Component {
               </Select>
             )}
           </Form.Item>
-          <Form.Item label="Vendedor" {...formItemLayout}>
-            {getFieldDecorator("vendedor", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue:
-                this.state.formData.vendedor &&
-                this.state.formData.vendedor.nome
-            })(
-              <Select
-                name="vendedor"
-                filterOption={(input, option) =>
-                  option.props.children
-                    .toLowerCase()
-                    .indexOf(input.toLowerCase()) >= 0
-                }
-                onSearch={this.searchConsultant}
-                showAction={["focus", "click"]}
-                notFoundContent={
-                  fetchingConsultants ? <Spin size="small" /> : null
-                }
-                showSearch
-                placeholder="Selecione..."
-                onChange={e => this.onChangeConsultant(e)}>
-                {this.state.consultants &&
-                  this.state.consultants.map(c => (
-                    <Option key={c._id} value={JSON.stringify(c)}>
-                      {c.nome}
-                    </Option>
-                  ))}
-              </Select>
-            )}
-          </Form.Item>
           <Form.Item label="Cliente" {...formItemLayout}>
             {getFieldDecorator("cliente", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
@@ -475,9 +410,7 @@ class OrderForm extends Component {
                     .toLowerCase()
                     .indexOf(input.toLowerCase()) >= 0
                 }
-                onSelect={e => {
-                  this.onSelectPropriedade(e);
-                }}>
+                onChange={e => this.onChangePropriedade(e)}>
                 {this.state.propriedades && this.state.propriedades.length > 0
                   ? this.state.propriedades.map(p => (
                       <Option
@@ -497,7 +430,6 @@ class OrderForm extends Component {
               </Select>
             )}
           </Form.Item>
-
           {this.state.formData.propriedade && (
             <React.Fragment>
               <Form.Item label="Cidade" {...formItemLayout}>
@@ -509,6 +441,14 @@ class OrderForm extends Component {
               </Form.Item>
             </React.Fragment>
           )}
+          <Form.Item label="Vendedor" {...formItemLayout}>
+            {getFieldDecorator("vendedor", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue:
+                this.state.formData.vendedor &&
+                this.state.formData.vendedor.nome
+            })(<Input name="vendedor" readOnly />)}
+          </Form.Item>
 
           <Form.Item label="Tipo de Frete" {...formItemLayout}>
             {getFieldDecorator("tipo_frete", {
@@ -794,7 +734,7 @@ class OrderForm extends Component {
     );
   }
 
-  async onSelectPropriedade(e) {
+  async onChangePropriedade(e) {
     const { estado, cidade, ...propriedade } = JSON.parse(e);
     this.setState(prev => ({
       ...prev,
@@ -803,6 +743,19 @@ class OrderForm extends Component {
         propriedade,
         cidade,
         estado
+      }
+    }));
+
+    const vendedor = await this.pegaVendedorPelaCarteiraDoCliente(
+      this.state.formData.cliente.id,
+      propriedade.id
+    );
+
+    this.setState(prev => ({
+      ...prev,
+      formData: {
+        ...prev.formData,
+        vendedor
       }
     }));
   }
