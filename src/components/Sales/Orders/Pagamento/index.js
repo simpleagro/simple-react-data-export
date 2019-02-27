@@ -5,9 +5,10 @@ import { connect } from "react-redux";
 
 import * as OrderService from "services/orders";
 import * as OrderItemsService from "services/orders.items";
+import * as OrderPaymentService from "services/orders.payment";
 import { dadosPedido } from "actions/pedidoActions";
-import { currency, normalizeString } from "common/utils";
-import { flashWithSuccess } from "common/FlashMessages";
+import { currency, normalizeString, getNumber } from "common/utils";
+import { flashWithSuccess, flashModalWithError } from "common/FlashMessages";
 import parseErrors from "lib/parseErrors";
 import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
 import { configAPP } from "config/app";
@@ -23,14 +24,15 @@ class OrderPaymentForm extends Component {
     this.state = {
       order_id: this.props.match.params.order_id,
       orderData: null,
-      loadingForm: false
+      loadingForm: false,
+      savingForm: false
     };
   }
 
   async componentDidMount() {
     const orderData = await OrderService.get(this.state.order_id, {
       fields:
-        "tabela_preco_base, numero, cliente, propriedade, pagamento, cidade, estado, pgto_germoplasma, pgto_royalties, pgto_tratamento, pgto_frete, venc_germoplasma, venc_royalties, venc_tratamento, venc_frete, itens"
+        "tabela_preco_base, numero, cliente, propriedade, pagamento, cidade, estado, pgto_germoplasma, pgto_royalties, pgto_tratamento, pgto_frete, venc_germoplasma, venc_royalties, venc_tratamento, venc_frete, itens, tipo_frete"
     });
 
     const parcelas = orderData.pagamento && orderData.pagamento.parcelas;
@@ -45,18 +47,31 @@ class OrderPaymentForm extends Component {
         .reduce((a, b) => Number(a) + Number(b), 0),
       formData: {
         ...prev.formData,
-        total_pedido_royalties: parcelas
-          .map(t => t[`preco_total_royalties`])
-          .reduce((a, b) => Number(a) + Number(b), 0),
-        total_pedido_germoplasma: parcelas
-          .map(t => t[`preco_total_germoplasma`])
-          .reduce((a, b) => Number(a) + Number(b), 0),
-        total_pedido_tratamento: parcelas
-          .map(t => t[`preco_total_tratamento`])
-          .reduce((a, b) => Number(a) + Number(b), 0),
-        peso_graos: parcelas
-          .map(t => t[`total_preco_item_graos`])
-          .reduce((a, b) => Number(a) + Number(b), 0)
+        total_pedido_royalties: currency()(
+          orderData.itens
+            .map(t => t[`preco_total_royalties`])
+            .reduce((a, b) => Number(a) + Number(b), 0)
+        ),
+        total_pedido_germoplasma: currency()(
+          orderData.itens
+            .map(t => t[`preco_total_germoplasma`])
+            .reduce((a, b) => Number(a) + Number(b), 0)
+        ),
+        total_pedido_tratamento: currency()(
+          orderData.itens
+            .map(t => t[`preco_total_tratamento`])
+            .reduce((a, b) => Number(a) + Number(b), 0)
+        ),
+        total_pedido_reais: currency()(
+          orderData.itens
+            .map(t => t[`total_preco_item_reais`])
+            .reduce((a, b) => Number(a) + Number(b), 0)
+        ),
+        total_pedido_graos: currency()(
+          orderData.itens
+            .map(t => t[`total_preco_item_graos`])
+            .reduce((a, b) => Number(a) + Number(b), 0)
+        )
       },
       loadingForm: false
     }));
@@ -115,11 +130,53 @@ class OrderPaymentForm extends Component {
   };
 
   saveForm = async e => {
-    this.props.form.validateFields(async err => {
-      if (err) return;
-      else {
+    try {
+      this.setState({ savingForm: true });
+
+      if (
+        this.props.pedido.tipo_frete === "CIF" &&
+        !this.props.pedido.pagamento.total_pedido_frete
+      )
+        throw new Error(
+          "Ainda não foi calculado o frete, por favor verifique."
+        );
+
+      if (this.existePagamentoEmGraos()) {
+        if (!this.props.pedido.pagamento.data_pgto_graos)
+          throw new Error(
+            "Ainda não foi confirmado o campo DATA PAGAMENTO para grãos, por favor verifique."
+          );
+        if (
+          !this.props.pedido.pagamento.peso_graos ||
+          getNumber(this.props.pedido.pagamento.peso_graos) === 0
+        )
+          throw new Error(
+            "Ainda não foi calculado o valor em kg para grãos, por favor verifique."
+          );
+        if (!this.props.pedido.pagamento.entrega_graos)
+          throw new Error(
+            "Ainda não foi definido o local de entrega para grãos, por favor verifique."
+          );
       }
-    });
+
+      try {
+        await OrderPaymentService.update(this.props.pedido._id)({
+          ...this.state.formData,
+          ...this.props.pedido.pagamento
+        });
+        flashWithSuccess(
+          `Pedido #${this.props.pedido.numero} finalizado com sucesso!`
+        );
+        this.props.history.push(`/pedidos`);
+      } catch (err) {
+        if (err && err.response && err.response.data) parseErrors(err);
+        console.log("Erro interno ao finalizar pedido ", err);
+        this.setState({ savingForm: false });
+      }
+    } catch (err) {
+      flashModalWithError(err.message);
+      this.setState({ savingForm: false });
+    }
   };
 
   existePagamentoEmGraos() {
@@ -183,15 +240,18 @@ class OrderPaymentForm extends Component {
                 }}>
                 {this.state.orderData && (
                   <div>
-                    <p>
-                      Preço Total Frete:
-                      <br />
-                      {currency()(
-                        this.props.pedido &&
-                          this.props.pedido.pagamento &&
-                          this.props.pedido.pagamento.total_pedido_frete
-                      ) || 0}
-                    </p>
+                    {this.props.pedido.tipo_frete === "CIF" && (
+                      <p>
+                        Preço Total Frete:
+                        <br />
+                        {currency()(
+                          (this.props.pedido &&
+                            this.props.pedido.pagamento &&
+                            this.props.pedido.pagamento.total_pedido_frete) ||
+                            0
+                        )}
+                      </p>
+                    )}
 
                     {configAPP.detalharPrecoPorCaracteristica() && (
                       <React.Fragment>
@@ -221,17 +281,25 @@ class OrderPaymentForm extends Component {
 
                     {configAPP.usarConfiguracaoFPCaracteristica() && (
                       <React.Fragment>
-                        {["REAIS", "GRÃOS"].map(t => {
+                        {["REAIS", "GRÃOS"].map((t,index) => {
                           return (
                             <React.Fragment>
                               <p
-                                key={`resumoItem_totais_${normalizeString(t)}`}>
-                                Total Preço em {t}:<br />
-                                {currency()(0)}
+                                key={`resumoItem_totais_${normalizeString(t)}_${index}`}>
+                                Total Pedido {t}:<br />
+                                {currency()(
+                                  this.state.formData[
+                                    `total_pedido_${normalizeString(t)}`
+                                  ] || 0
+                                )}
                               </p>
                               <p key={`resumoItem_saldo_${normalizeString(t)}`}>
                                 Saldo a Parcelar {t}:<br />
-                                {currency()(0)}
+                                {currency()(
+                                  this.state[
+                                    `saldo_parcelar_${normalizeString(t)}`
+                                  ] || 0
+                                )}
                               </p>
                             </React.Fragment>
                           );
@@ -262,7 +330,11 @@ class OrderPaymentForm extends Component {
                 title="Finalizar Pedido"
                 size="small"
                 extra={
-                  <Button type="primary" icon="save">
+                  <Button
+                    type="primary"
+                    icon="save"
+                    onClick={() => this.saveForm()}
+                    loading={this.state.savingForm}>
                     Concluir Pedido
                   </Button>
                 }>

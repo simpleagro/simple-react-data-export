@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Divider, Button, Icon, Popconfirm, Tooltip } from "antd";
+import { Divider, Button, Badge, Icon, Popconfirm, Tooltip } from "antd";
 import moment from "moment";
 
 import { simpleTableSearch } from "../../../../lib/simpleTableSearch";
@@ -146,6 +146,29 @@ class Orders extends Component {
         tooltip: { title: "Utilize dd/mm/yyyy" },
         useRegex: false
       })
+    },
+    {
+      title: "Status do Pedido",
+      dataIndex: "status_pedido",
+      key: "status_pedido",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      },
+      // render: text => {
+      //   switch (text) {
+      //     case "Aguardando Aprovação":
+      //       return (
+      //         <span>
+      //           <Badge status="success"> {text} </Badge>
+      //         </span>
+      //       );
+
+      //     default:
+      //       return text;
+      //   }
+      // },
+      ...simpleTableSearch(this)("status_pedido")
     },
     {
       title: "Ações",

@@ -19,6 +19,8 @@ import SimpleTable from "../common/SimpleTable";
 import { flashWithSuccess } from "../common/FlashMessages";
 import parseErrors from "../../lib/parseErrors";
 import { PainelHeader } from "../common/PainelHeader";
+import { simpleTableSearch } from "lib/simpleTableSearch";
+
 
 const pStyle = {
   fontSize: 16,
@@ -192,7 +194,8 @@ class CustomersWallet extends Component {
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
+      },
+      ...simpleTableSearch(this)("nome")
     },
     {
       title: "Consultor",
@@ -201,7 +204,8 @@ class CustomersWallet extends Component {
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
+      },
+      ...simpleTableSearch(this)("consultor_id.nome")
     },
     {
       title: "Status",
@@ -274,7 +278,7 @@ class CustomersWallet extends Component {
     }
   ];
 
-  handleTableChange = (pagination, filter, sorter) => {
+  handleTableChange = (pagination, filters, sorter) => {
     const pager = { ...this.state.pagination };
     pager.current = pagination.current;
     this.setState({
@@ -282,7 +286,9 @@ class CustomersWallet extends Component {
     });
     this.initializeList({
       page: pagination.current,
-      limit: pagination.pageSize
+      limit: pagination.pageSize,
+      ...filters,
+      ...this.state.tableSearch
     });
   };
 
