@@ -3,8 +3,14 @@ import { Spin, Icon, Row, Col, Card, Form, Select, Input } from "antd";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import debounce from "lodash/debounce";
+import moment from "moment";
 
-import { fatorConversaoUM, currency, getNumber } from "common/utils";
+import {
+  fatorConversaoUM,
+  currency,
+  getNumber,
+  valorFinalJurosCompostos
+} from "common/utils";
 import { list as ListShipTableOrderItemsService } from "services/shiptable";
 import * as OrderPaymentService from "services/orders.payment";
 import * as IBGEService from "services/ibge";
@@ -81,14 +87,26 @@ class CalculoFrete extends Component {
             parseInt(volume.pesokg_de) <= peso &&
             parseInt(volume.pesokg_ate) >= peso
           ) {
-            preco_frete = volume.preco;
+            preco_frete = getNumber(volume.preco);
           }
         });
       }
     });
-    preco_frete = window.simpleagroapp.currency()(
-      parseFloat(preco_frete).toFixed(2)
-    );
+
+    const periodo = configAPP.usarCalculoDataBaseMes()
+      ? moment().diff(tab.data_base, "month")
+      : Math.round(
+          moment().diff(tab.data_base, "days") /
+            (configAPP.quantidadeDeDiasCalculoDataBase() || 30)
+        );
+    const taxa =
+      periodo && periodo > 0
+        ? getNumber(tab.taxa_adicao)
+        : getNumber(tab.taxa_supressao);
+
+    if (periodo) preco_frete = valorFinalJurosCompostos(preco_frete, taxa, periodo);
+
+    preco_frete = currency()(preco_frete);
 
     this.props.dadosPedidoFrete({
       ...this.state.formData,
@@ -263,7 +281,8 @@ class CalculoFrete extends Component {
                       this.state.formData.distancia ||
                       (this.props.pedido &&
                         this.props.pedido.pagamento &&
-                        this.props.pedido.pagamento.distancia) || undefined
+                        this.props.pedido.pagamento.distancia) ||
+                      undefined
                     }
                     step={0.01}
                   />
