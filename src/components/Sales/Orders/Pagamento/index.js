@@ -50,27 +50,27 @@ class OrderPaymentForm extends Component {
         total_pedido_royalties: currency()(
           orderData.itens
             .map(t => t[`preco_total_royalties`])
-            .reduce((a, b) => Number(a) + Number(b), 0)
+            .reduce((a, b) => Number(a) + Number(b), 0) || 0
         ),
         total_pedido_germoplasma: currency()(
           orderData.itens
             .map(t => t[`preco_total_germoplasma`])
-            .reduce((a, b) => Number(a) + Number(b), 0)
+            .reduce((a, b) => Number(a) + Number(b), 0) || 0
         ),
         total_pedido_tratamento: currency()(
           orderData.itens
             .map(t => t[`preco_total_tratamento`])
-            .reduce((a, b) => Number(a) + Number(b), 0)
+            .reduce((a, b) => Number(a) + Number(b), 0) || 0
         ),
         total_pedido_reais: currency()(
           orderData.itens
             .map(t => t[`total_preco_item_reais`])
-            .reduce((a, b) => Number(a) + Number(b), 0)
+            .reduce((a, b) => Number(a) + Number(b), 0) || 0
         ),
         total_pedido_graos: currency()(
           orderData.itens
             .map(t => t[`total_preco_item_graos`])
-            .reduce((a, b) => Number(a) + Number(b), 0)
+            .reduce((a, b) => Number(a) + Number(b), 0) || 0
         )
       },
       loadingForm: false
@@ -281,11 +281,13 @@ class OrderPaymentForm extends Component {
 
                     {configAPP.usarConfiguracaoFPCaracteristica() && (
                       <React.Fragment>
-                        {["REAIS", "GRÃOS"].map((t,index) => {
+                        {["REAIS", "GRÃOS"].map((t, index) => {
                           return (
                             <React.Fragment>
                               <p
-                                key={`resumoItem_totais_${normalizeString(t)}_${index}`}>
+                                key={`resumoItem_totais_${normalizeString(
+                                  t
+                                )}_${index}`}>
                                 Total Pedido {t}:<br />
                                 {currency()(
                                   this.state.formData[

@@ -25,3 +25,7 @@ export const remove = _id =>
 export const changeStatus = (_id, status) => {
   api.put(`${baseURL}/${_id}`, { status }).then(response => response.data);
 };
+
+export const clone = _id =>
+  api.get(`${baseURL}/${_id}/clone`).then(response => response.data);
+

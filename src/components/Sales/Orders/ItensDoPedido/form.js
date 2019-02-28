@@ -651,7 +651,7 @@ class OrderItemForm extends Component {
           </Form>
           <br />
           <br />
-          <Affix offsetBottom={0}>
+
             <Layout.Footer style={{ borderTop: "2px solid gray" }}>
               <h3>Resumo:</h3>
 
@@ -714,7 +714,7 @@ class OrderItemForm extends Component {
                 </div>
               )}
             </Layout.Footer>
-          </Affix>
+
         </div>
       </SimpleLazyLoader>
     );
