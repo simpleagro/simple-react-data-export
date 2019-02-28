@@ -240,6 +240,11 @@ class Clients extends Component {
       pagination: pager
     });
     this.initializeList({
+      ...(this.props.carteira
+        ? {
+            carteira: this.props.carteira
+          }
+        : {}),
       page: pagination.current,
       limit: pagination.pageSize,
       ...filters,
