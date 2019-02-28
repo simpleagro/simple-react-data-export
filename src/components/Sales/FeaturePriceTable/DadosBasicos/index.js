@@ -71,7 +71,10 @@ class PaymentForm extends Component {
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao mudar status da tabela de preço de característica", err);
+      console.log(
+        "Erro interno ao mudar status da tabela de preço de característica",
+        err
+      );
     }
   };
 
@@ -84,10 +87,33 @@ class PaymentForm extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `A tabela de preço de característica, ${nome}, foi removido com sucesso!`);
+      flashWithSuccess(
+        "",
+        `A tabela de preço de característica, ${nome}, foi removido com sucesso!`
+      );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover uma tabela de preço de característica", err);
+      console.log(
+        "Erro interno ao remover uma tabela de preço de característica",
+        err
+      );
+    }
+  };
+
+  cloneRecord = async ({ _id, nome }) => {
+    try {
+      await FeaturePriceTableService.clone(_id);
+      this.initializeList();
+      flashWithSuccess(
+        "",
+        `A tabela de preço de característica, ${nome}, foi clonada com sucesso!`
+      );
+    } catch (err) {
+      if (err && err.response && err.response.data) parseErrors(err);
+      console.log(
+        "Erro interno ao clonar uma tabela de preço de característica",
+        err
+      );
     }
   };
 
@@ -135,7 +161,7 @@ class PaymentForm extends Component {
       dataIndex: "data_base",
       key: "data_base",
       render: text => {
-        return moment(text).format("DD/MM/YYYY")
+        return moment(text).format("DD/MM/YYYY");
       }
     },
     {
@@ -162,7 +188,11 @@ class PaymentForm extends Component {
           <span>
             <Button
               size="small"
-              onClick={() => this.props.history.push(`/tabela-preco-caracteristica/${record._id}/edit`)}>
+              onClick={() =>
+                this.props.history.push(
+                  `/tabela-preco-caracteristica/${record._id}/edit`
+                )
+              }>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
 
@@ -174,8 +204,14 @@ class PaymentForm extends Component {
             <Tooltip title="Veja as variações de preços">
               <Button
                 size="small"
-                onClick={() => this.props.history.push(`/tabela-preco-caracteristica/${record._id}/variacao-de-preco`)}>
-                <Icon type="dollar" style={{ fontSize: "16px"}} />
+                onClick={() =>
+                  this.props.history.push(
+                    `/tabela-preco-caracteristica/${
+                      record._id
+                    }/variacao-de-preco`
+                  )
+                }>
+                <Icon type="dollar" style={{ fontSize: "16px" }} />
               </Button>
             </Tooltip>
 
@@ -188,8 +224,7 @@ class PaymentForm extends Component {
               title={`Tem certeza em excluir a tabela de preço de característica?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
-              cancelText="Não"
-            >
+              cancelText="Não">
               <Button size="small">
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
@@ -199,6 +234,19 @@ class PaymentForm extends Component {
               style={{ fontSize: "10px", padding: 0, margin: 2 }}
               type="vertical"
             />
+            <Popconfirm
+              title={`Tem certeza em criar uma cópia da tabela de característica preço ${
+                record.nome
+              }?`}
+              onConfirm={() => this.cloneRecord(record)}
+              okText="Sim"
+              cancelText="Não">
+              <Tooltip title="Cria uma nova cópia da tabela">
+                <Button size="small">
+                  <FontAwesomeIcon icon="clone" size="lg" />
+                </Button>
+              </Tooltip>
+            </Popconfirm>
           </span>
         );
       }
@@ -224,7 +272,9 @@ class PaymentForm extends Component {
           <Button
             type="primary"
             icon="plus"
-            onClick={() => this.props.history.push("/tabela-preco-caracteristica/new")}>
+            onClick={() =>
+              this.props.history.push("/tabela-preco-caracteristica/new")
+            }>
             Adicionar
           </Button>
         </PainelHeader>
