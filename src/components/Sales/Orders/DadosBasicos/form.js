@@ -64,9 +64,7 @@ class OrderForm extends Component {
       }
     }
 
-    const clients = await this.fetchClients({
-      fields: "nome,cpf_cnpj,propriedades,-propriedades.talhoes"
-    }).then(response => response.docs);
+    const clients = await this.fetchClients().then(response => response.docs);
 
     if (formData && !clients.some(c => c._id === formData.cliente.id))
       await this.fetchClients({ _id: formData.cliente.id }).then(response => {
@@ -185,7 +183,7 @@ class OrderForm extends Component {
   async fetchClients(aqp = {}) {
     return await ClientsServiceList({
       limit: 25,
-      fields: "nome, cpf_cnpj",
+      fields: "nome,cpf_cnpj,propriedades,-propriedades.talhoes",
       status: true,
       ...aqp
     });
