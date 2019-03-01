@@ -241,16 +241,30 @@ class CustomerWalletForm extends Component {
   async addClient() {
     const selectedClient = Object.assign({}, this.state.selectedClient);
 
-    if(!Object.keys(selectedClient).length) return;
+    if (!Object.keys(selectedClient).length) return;
 
-    if (this.state.walletTree.find(wt => wt.cliente_id === selectedClient._id))
+    if (
+      this.state.walletTree.find(
+        wt =>
+          wt.cliente_id === selectedClient._id || wt._id === selectedClient._id
+      )
+    ) {
+      flashWithError("O cliente já foi adicionado a carteira.")
+      this.setState(prev => ({
+        ...prev,
+        selectedClient: {}
+      }));
       return;
+    }
+
+    this.props.form.resetFields(["cliente"]);
 
     this.setState(prev => ({
       ...prev,
       // ...{
       // formData: { ...prev.formData, clientesChecados },
-      walletTree: [...prev.walletTree, selectedClient]
+      walletTree: [...prev.walletTree, selectedClient],
+      selectedClient: {}
       // }
     }));
   }
@@ -469,6 +483,7 @@ class CustomerWalletForm extends Component {
 
     this.setState({
       clients,
+      savedClients: this.state.clients,
       fetchingClients: false
     });
   };
