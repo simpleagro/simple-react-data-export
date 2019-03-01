@@ -254,7 +254,8 @@ class OrderForm extends Component {
       ...prev,
       propriedades: propriedades.filter(t => t.status === true),
       formData: {
-        ...prev.formData
+        ...prev.formData,
+        vendedor: {}
       }
     }));
   }
