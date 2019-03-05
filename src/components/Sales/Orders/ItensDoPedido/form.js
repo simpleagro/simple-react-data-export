@@ -37,7 +37,7 @@ import * as PriceTableService from "services/pricetable";
 import * as PriceTableProductService from "services/pricetable.products";
 import * as FeaturePriceTableService from "services/feature-table-prices";
 import { list as ListUnitsMeasures } from "services/units-measures";
-import { fatorConversaoUM } from "common/utils";
+import { fatorConversaoUM, addMaskReais } from "common/utils";
 import { SimpleBreadCrumb } from "../../../common/SimpleBreadCrumb";
 import { SimpleLazyLoader } from "../../../common/SimpleLazyLoader";
 import { SFFPorcentagem } from "../../../common/formFields/SFFPorcentagem";
@@ -760,6 +760,37 @@ class OrderItemForm extends Component {
           </Form.Item>
         </Col>
         <Col span={12}>
+          {/* <Form.Item
+            label={`Desconto - ${obj.label}`}
+            {...{
+              labelCol: { span: 12 },
+              wrapperCol: { span: 12 }
+            }}>
+            {getFieldDecorator(`desconto_${obj.chave}`, {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              initialValue: addMaskReais(this.state.formData.preco),
+              getValueFromEvent: e => addMaskReais(e.target.value),
+              onChange: e =>
+                e.target
+                  ? this.handleFormState({
+                      target: {
+                        name: e.target.name,
+                        value: addMaskReais(e.target.value)
+                      }
+                    })
+                  : false
+            })(
+              <Input
+                disabled={
+                  !this.state.variacoesSelecionadas ||
+                  !this.state.variacoesSelecionadas.hasOwnProperty(
+                    variacao.chave
+                  )
+                }
+                name={`desconto_${obj.chave}`}
+              />
+            )}
+          </Form.Item> */}
           <SFFPorcentagem
             initialValue={this.state.formData[`desconto_${obj.chave}`]}
             disabled={
@@ -805,18 +836,24 @@ class OrderItemForm extends Component {
   };
 
   calcularPrecoPeloDesconto = (chave, value) => {
-    const novoValor = currency()(
-      getNumber(this.state.formData[`preco_${chave}_tabela`]) -
-        (getNumber(this.state.formData[`preco_${chave}_tabela`]) *
-          getNumber(value)) /
-          100
-    );
+    value = getNumber(value) > 100 ? 100 : getNumber(value);
+    const novoValor =
+      value > 0
+        ? currency()(
+            getNumber(this.state[`preco_${chave}_original`] || 0) -
+              getNumber(this.state[`preco_${chave}_original`] || 0) * (value/100)
+          )
+        : this.state[`preco_${chave}_original`];
     this.setState(prev => ({
       ...prev,
       formData: {
         ...prev.formData,
         [`preco_${chave}`]: novoValor
-      }
+      },
+      [`preco_${chave}_original`]:
+        this.state[`preco_${chave}_original`] ||
+        this.state.formData[`preco_${chave}`] ||
+        0
     }));
     this.props.form.setFieldsValue({
       [`preco_${chave}`]: novoValor
@@ -955,7 +992,9 @@ class OrderItemForm extends Component {
                   ...prev,
                   formData: {
                     ...prev.formData,
-                    [`preco_${rpb.chave}_tabela`]: tabelaPreco[`preco_${rpb.chave}`],
+                    [`preco_${rpb.chave}_tabela`]: tabelaPreco[
+                      `preco_${rpb.chave}`
+                    ],
                     [`preco_${rpb.chave}`]: preco,
                     [`fator_conversao_${rpb.chave}`]: tabelaPreco.u_m_preco
                   }
@@ -1072,9 +1111,7 @@ class OrderItemForm extends Component {
     let calculaTotalCaract = (chave, fatorConversao) => {
       return (
         fatorConversao *
-          (getNumber(this.state.formData[`preco_${chave}`]) -
-            getNumber(this.state.formData[`preco_${chave}`]) *
-              getNumber(this.state.formData[`desconto_${chave}`])) *
+          getNumber(this.state.formData[`preco_${chave}`]) *
           getNumber(this.state.formData.quantidade) || 0
       );
     };
@@ -1118,7 +1155,7 @@ class OrderItemForm extends Component {
 
             return regraPrecoBase.forEach(rpb => {
               // fatorConversaoChaves[`fator_conversao_${rpb.chave}`] = fatorCaract;
-              totais[`preco_total_${rpb.chave}`] =calculaTotalCaract(
+              totais[`preco_total_${rpb.chave}`] = calculaTotalCaract(
                 rpb.chave,
                 fatorCaract
               );
@@ -1144,7 +1181,7 @@ class OrderItemForm extends Component {
       totais["total_preco_item"] -=
         totais["total_preco_item"] * this.state.formData.desconto || 0;
 
-      Object.keys(totais).forEach( k => totais[k] = currency()(totais[k]));
+      Object.keys(totais).forEach(k => (totais[k] = currency()(totais[k])));
 
       this.setState(prev => ({
         ...prev,
