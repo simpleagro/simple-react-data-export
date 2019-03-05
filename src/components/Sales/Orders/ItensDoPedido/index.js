@@ -36,7 +36,7 @@ class OrderItem extends Component {
       // const items = await OrderItemsService.list(this.state.order_id)(aqp);
       const orderData = await OrderService.get(this.state.order_id, {
         fields:
-          "tabela_preco_base, numero, cliente, propriedade, estado, cidade, pgto_royalties, pgto_tratamento, pgto_germoplasma, itens"
+          "tabela_preco_base, numero, cliente, propriedade, estado, cidade, pgto_royalties, pgto_tratamento, pgto_germoplasma, itens, status_pedido"
       });
       this.setState(prev => ({
         ...prev,
@@ -139,8 +139,51 @@ class OrderItem extends Component {
           dataIndex: "total_preco_item",
           key: "total_preco_item",
           align: "right",
-          render: text => currency()(text || 0 )
+          render: text => currency()(text || 0)
         };
+
+    const colunaAcao = this.pedidoPodeSerEditado()
+      ? {
+          title: "Ações",
+          dataIndex: "action",
+          render: (text, record) => {
+            return (
+              <span>
+                <Button
+                  size="small"
+                  onClick={() =>
+                    this.props.history.push(
+                      `/pedidos/${this.state.order_id}/itens-do-pedido/${
+                        record._id
+                      }/edit`
+                    )
+                  }>
+                  <Icon type="edit" style={{ fontSize: "16px" }} />
+                </Button>
+
+                <Divider
+                  style={{ fontSize: "10px", padding: 0, margin: 2 }}
+                  type="vertical"
+                />
+
+                <Popconfirm
+                  title={`Tem certeza em excluir este item?`}
+                  onConfirm={() => this.removeRecord(record)}
+                  okText="Sim"
+                  cancelText="Não">
+                  <Button size="small">
+                    <Icon type="delete" style={{ fontSize: "16px" }} />
+                  </Button>
+                </Popconfirm>
+                <Divider
+                  style={{ fontSize: "10px", padding: 0, margin: 2 }}
+                  type="vertical"
+                />
+              </span>
+            );
+          }
+        }
+      : {};
 
     return [
       {
@@ -161,46 +204,7 @@ class OrderItem extends Component {
       },
       { ...colunaDesconto },
       { ...colunaTotalItem },
-      {
-        title: "Ações",
-        dataIndex: "action",
-        render: (text, record) => {
-          return (
-            <span>
-              <Button
-                size="small"
-                onClick={() =>
-                  this.props.history.push(
-                    `/pedidos/${this.state.order_id}/itens-do-pedido/${
-                      record._id
-                    }/edit`
-                  )
-                }>
-                <Icon type="edit" style={{ fontSize: "16px" }} />
-              </Button>
-
-              <Divider
-                style={{ fontSize: "10px", padding: 0, margin: 2 }}
-                type="vertical"
-              />
-
-              <Popconfirm
-                title={`Tem certeza em excluir este item?`}
-                onConfirm={() => this.removeRecord(record)}
-                okText="Sim"
-                cancelText="Não">
-                <Button size="small">
-                  <Icon type="delete" style={{ fontSize: "16px" }} />
-                </Button>
-              </Popconfirm>
-              <Divider
-                style={{ fontSize: "10px", padding: 0, margin: 2 }}
-                type="vertical"
-              />
-            </span>
-          );
-        }
-      }
+      { ...colunaAcao }
     ];
   };
 
@@ -239,27 +243,31 @@ class OrderItem extends Component {
                   } - ${this.state.order_data.propriedade.ie}`}</p>
                 </div>
               )}
-              <Button
-                style={{ width: "100%" }}
-                onClick={() => {
-                  this.props.history.push(
-                    `/pedidos/${this.state.order_id}/edit`,
-                    { returnTo: this.props.history.location }
-                  );
-                }}>
-                <Icon type="edit" /> Editar
-              </Button>
-              <Button
-                type="primary"
-                style={{ width: "100%", marginTop: "5px" }}
-                onClick={() => {
-                  this.props.history.push(
-                    `/pedidos/${this.state.order_id}/finalizar-pedido`,
-                    { returnTo: this.props.history.location }
-                  );
-                }}>
-                <Icon type="shopping" /> Finalizar Pedido
-              </Button>
+              {this.pedidoPodeSerEditado() && (
+                <React.Fragment>
+                  <Button
+                    style={{ width: "100%" }}
+                    onClick={() => {
+                      this.props.history.push(
+                        `/pedidos/${this.state.order_id}/edit`,
+                        { returnTo: this.props.history.location }
+                      );
+                    }}>
+                    <Icon type="edit" /> Editar
+                  </Button>
+                  <Button
+                    type="primary"
+                    style={{ width: "100%", marginTop: "5px" }}
+                    onClick={() => {
+                      this.props.history.push(
+                        `/pedidos/${this.state.order_id}/finalizar-pedido`,
+                        { returnTo: this.props.history.location }
+                      );
+                    }}>
+                    <Icon type="shopping" /> Finalizar Pedido
+                  </Button>
+                </React.Fragment>
+              )}
             </Card>
           </Col>
           <Col span={19}>
@@ -290,6 +298,14 @@ class OrderItem extends Component {
           </Col>
         </Row>
       </div>
+    );
+  }
+
+  pedidoPodeSerEditado() {
+    if (!this.state.order_data) return false;
+    return (
+      this.state.order_data.status_pedido.includes("Em cotação") ||
+      this.state.order_data.status_pedido.includes("Reprovado")
     );
   }
 }

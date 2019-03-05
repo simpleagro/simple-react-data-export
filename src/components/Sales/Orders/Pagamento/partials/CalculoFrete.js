@@ -293,7 +293,6 @@ class CalculoFrete extends Component {
               <Col span={8}>
                 <Form.Item label="Peso">
                   <Input
-                  disabled
                   readOnly
                     name="peso"
                     value={

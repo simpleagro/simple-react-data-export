@@ -514,9 +514,9 @@ class OrderItemForm extends Component {
                                   message: "Este campo é obrigatório!"
                                 }
                               ],
-                              initialValue:
-                                this.state.formData[v.chave] &&
-                                this.state.formData[v.chave].label
+                              initialValue: JSON.stringify(
+                                this.state.formData[v.chave]
+                              )
                             })(
                               <Select
                                 // disabled={
@@ -823,41 +823,56 @@ class OrderItemForm extends Component {
   }
 
   calcularDescontoPeloPreco = (chave, value) => {
+
     this.setState(prev => ({
       ...prev,
       formData: {
         ...prev.formData,
         [`desconto_${chave}`]:
-          Number(this.state.formData[`preco_${chave}_tabela`]) < Number(value)
+          getNumber(this.state.formData[`preco_${chave}_tabela`]) <=
+          getNumber(value)
             ? 0
-            : (value * 100) / prev.formData[`preco_${chave}_tabela`] / 100
+            : currency()(
+                (1 -
+                  getNumber(value) /
+                    getNumber(this.state.formData[`preco_${chave}_tabela`])) * 100
+              )
       }
     }));
   };
 
   calcularPrecoPeloDesconto = (chave, value) => {
-    value = getNumber(value) > 100 ? 100 : getNumber(value);
+    const valorDesconto = getNumber(value) / 100;
     const novoValor =
-      value > 0
+      valorDesconto > 0
         ? currency()(
-            getNumber(this.state[`preco_${chave}_original`] || 0) -
-              getNumber(this.state[`preco_${chave}_original`] || 0) * (value/100)
+            getNumber(this.state.formData[`preco_${chave}_tabela`] || 0) -
+              getNumber(this.state.formData[`preco_${chave}_tabela`] || 0) *
+                valorDesconto
           )
-        : this.state[`preco_${chave}_original`];
+        : this.state.formData[`preco_${chave}_tabela`];
     this.setState(prev => ({
       ...prev,
       formData: {
         ...prev.formData,
         [`preco_${chave}`]: novoValor
-      },
-      [`preco_${chave}_original`]:
-        this.state[`preco_${chave}_original`] ||
-        this.state.formData[`preco_${chave}`] ||
-        0
+      }
     }));
     this.props.form.setFieldsValue({
       [`preco_${chave}`]: novoValor
     });
+    if (getNumber(value) > 100) {
+      this.props.form.setFieldsValue({
+        [`desconto_${chave}`]: "100,00"
+      });
+      this.setState(prev => ({
+        ...prev,
+        formData: {
+          ...prev.formData,
+          [`desconto_${chave}`]: "100,00"
+        }
+      }));
+    }
   };
 
   async atualizaValorVariacao(variacao, valor) {
@@ -907,7 +922,7 @@ class OrderItemForm extends Component {
               ...prev,
               formData: {
                 ...prev.formData,
-                [`preco_${variacao.chave}_tabela`]: valorVariacao || 0,
+                [`preco_${variacao.chave}_tabela`]: preco || 0,
                 [`preco_${variacao.chave}`]: preco || 0,
                 [`desconto_${variacao.chave}`]: 0,
                 [`fator_conversao_${variacao.chave}`]: tabelaCaract[0].u_m_preco
@@ -974,10 +989,8 @@ class OrderItemForm extends Component {
                   : tabelaPreco.data_base;
               let periodo = configAPP.usarCalculoDataBaseMes()
                 ? moment().diff(dataBaseCalculo, "month")
-                : Math.round(
-                    moment().diff(dataBaseCalculo, "days") /
-                      (configAPP.quantidadeDeDiasCalculoDataBase() || 30)
-                  );
+                : moment().diff(dataBaseCalculo, "days") /
+                  (configAPP.quantidadeDeDiasCalculoDataBase() || 30);
 
               const taxa =
                 periodo && periodo > 0
@@ -987,14 +1000,13 @@ class OrderItemForm extends Component {
               if (periodo)
                 preco = valorFinalJurosCompostos(preco, taxa, periodo);
 
+
               if (tabelaPreco)
                 this.setState(prev => ({
                   ...prev,
                   formData: {
                     ...prev.formData,
-                    [`preco_${rpb.chave}_tabela`]: tabelaPreco[
-                      `preco_${rpb.chave}`
-                    ],
+                    [`preco_${rpb.chave}_tabela`]: preco,
                     [`preco_${rpb.chave}`]: preco,
                     [`fator_conversao_${rpb.chave}`]: tabelaPreco.u_m_preco
                   }

@@ -41,7 +41,7 @@ class Orders extends Component {
   }
 
   async componentDidMount() {
-    await this.initializeList({ fields: "-itens" });
+    await this.initializeList({ fields: "-itens", sort: "-numero" });
   }
 
   changeStatus = async (id, newStatus) => {
@@ -177,33 +177,37 @@ class Orders extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button
-              size="small"
-              onClick={() =>
-                this.props.history.push(`/pedidos/${record._id}/edit`)
-              }>
-              <Icon type="edit" style={{ fontSize: "16px" }} />
-            </Button>
+            {this.pedidoPodeSerEditado(record) && (
+              <React.Fragment>
+                <Button
+                  size="small"
+                  onClick={() =>
+                    this.props.history.push(`/pedidos/${record._id}/edit`)
+                  }>
+                  <Icon type="edit" style={{ fontSize: "16px" }} />
+                </Button>
 
-            <Divider
-              style={{ fontSize: "10px", padding: 0, margin: 2 }}
-              type="vertical"
-            />
+                <Divider
+                  style={{ fontSize: "10px", padding: 0, margin: 2 }}
+                  type="vertical"
+                />
 
-            <Popconfirm
-              title={`Tem certeza em excluir este pedido?`}
-              onConfirm={() => this.removeRecord(record)}
-              okText="Sim"
-              cancelText="Não">
-              <Button size="small">
-                <Icon type="delete" style={{ fontSize: "16px" }} />
-              </Button>
-            </Popconfirm>
+                <Popconfirm
+                  title={`Tem certeza em excluir este pedido?`}
+                  onConfirm={() => this.removeRecord(record)}
+                  okText="Sim"
+                  cancelText="Não">
+                  <Button size="small">
+                    <Icon type="delete" style={{ fontSize: "16px" }} />
+                  </Button>
+                </Popconfirm>
 
-            <Divider
-              style={{ fontSize: "10px", padding: 0, margin: 2 }}
-              type="vertical"
-            />
+                <Divider
+                  style={{ fontSize: "10px", padding: 0, margin: 2 }}
+                  type="vertical"
+                />
+              </React.Fragment>
+            )}
 
             <Tooltip title="Veja os produtos do pedido">
               <Button
@@ -222,17 +226,19 @@ class Orders extends Component {
               type="vertical"
             />
 
-            <Tooltip title="Finalizar Pedido">
-              <Button
-                size="small"
-                onClick={() => {
-                  this.props.history.push(
-                    `/pedidos/${record._id}/finalizar-pedido`
-                  );
-                }}>
-                <Icon type="shopping" style={{ fontSize: "16px" }} />
-              </Button>
-            </Tooltip>
+            {this.pedidoPodeSerEditado() && (
+              <Tooltip title="Finalizar Pedido">
+                <Button
+                  size="small"
+                  onClick={() => {
+                    this.props.history.push(
+                      `/pedidos/${record._id}/finalizar-pedido`
+                    );
+                  }}>
+                  <Icon type="shopping" style={{ fontSize: "16px" }} />
+                </Button>
+              </Tooltip>
+            )}
           </span>
         );
       }
@@ -252,6 +258,14 @@ class Orders extends Component {
       ...this.state.tableSearch
     });
   };
+
+  pedidoPodeSerEditado(record) {
+    if(!record) return false;
+    return (
+      record.status_pedido.includes("Em cotação") ||
+      record.status_pedido.includes("Reprovado")
+    );
+  }
 
   render() {
     return (
