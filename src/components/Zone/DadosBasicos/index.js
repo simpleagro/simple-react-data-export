@@ -2,16 +2,15 @@ import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Divider, Button, Icon, Popconfirm, Tooltip } from "antd";
 
-import * as ZoneService from "../../../services/zone";
-import * as PTGroupService from "../../../services/pricetable.group";
-import SimpleTable from "../../common/SimpleTable";
-import { flashWithSuccess } from "../../common/FlashMessages";
-import parseErrors from "../../../lib/parseErrors";
-import { PainelHeader } from "../../common/PainelHeader";
+import * as ZoneService from "services/zone";
+import * as ZoneCitiesService from "services/zone.cities";
+import SimpleTable from "common/SimpleTable";
+import { flashWithSuccess } from "common/FlashMessages";
+import parseErrors from "lib/parseErrors";
+import { PainelHeader } from "common/PainelHeader";
 import ModalForm from "./modal"
-import ModalFormGroup from "../../common/ModalProductGroup"
-import { formatDate } from '../../common/utils'
-import { simpleTableSearch } from "../../../lib/simpleTableSearch"
+import ModalFormCidade from "./modalCidade"
+import { simpleTableSearch } from "lib/simpleTableSearch"
 
 class Zone extends Component {
   constructor(props) {
@@ -25,7 +24,7 @@ class Zone extends Component {
         pageSizeOptions: ["10", "25", "50", "100"]
       },
       visible: false,
-      visibleGroup: false
+      visibleCidade: false
     };
   }
 
@@ -52,21 +51,6 @@ class Zone extends Component {
   async componentDidMount() {
     await this.initializeList();
   }
-
-  getDatabase = () => {
-    const link = window.location.href;
-    const suffixRegex = /(([http]*[s]*[:][/][/])+)/g;
-    const linkRegex = /((.simpleagro.com.br)+(:[0-9]*)([/a-z0-9]*)*)/g;
-
-    let newLink = link.replace(suffixRegex, "").replace(linkRegex, "");
-
-    this.setState(prevState => ({
-      formData: {
-        ...prevState.formData,
-        database: newLink
-      }
-    }));
-  };
 
   setStatus = () => {
     this.setState(prevState => ({
@@ -98,20 +82,20 @@ class Zone extends Component {
 
       flashWithSuccess(
         "",
-        `A tabela de preço, ${recordName}, foi ${
+        `A região, ${recordName}, foi ${
           newStatus ? "ativada" : "bloqueada"
         } com sucesso!`
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao mudar status da tabela de preço", err);
+      console.log("Erro interno ao mudar status da região", err);
     }
   };
 
   changeStatusGrupo = async (id, newStatus, price_table_id) => {
     console.log(newStatus)
     try {
-      await PTGroupService.changeStatus(price_table_id)(id, newStatus);
+      // await PTGroupService.changeStatus(price_table_id)(id, newStatus);
 
       let recordName = "";
 
@@ -165,7 +149,7 @@ class Zone extends Component {
 
   removeGroup = async ({ id, nome }, price_table_id) => {
     try {
-      await PTGroupService.remove(price_table_id)(id);
+      // await PTGroupService.remove(price_table_id)(id);
       let _list = this.state.list.map(priceTable => {
         if(priceTable._id == price_table_id){
           priceTable.grupo_produto = [ ...priceTable.grupo_produto.filter(gp => gp.id != id)]
@@ -216,13 +200,13 @@ class Zone extends Component {
     },
     {
       title: "Estado",
-      dataIndex: "estado.sigla",
-      key: "estado.sigla",
+      dataIndex: "estado",
+      key: "estado",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      ...simpleTableSearch(this)("estado.sigla"),
+      ...simpleTableSearch(this)("estado"),
     },
     {
       title: "Cidades",
@@ -245,7 +229,7 @@ class Zone extends Component {
         const statusBtn = record.status ? "unlock" : "lock";
         return (
           <Popconfirm
-            title={`Tem certeza em ${statusTxt} a tabela de preço?`}
+            title={`Tem certeza em ${statusTxt} a região ${record.nome}?`}
             onConfirm={e => this.changeStatus(record._id, !record.status)}
             okText="Sim"
             cancelText="Não"
@@ -291,10 +275,10 @@ class Zone extends Component {
               type="vertical"
             />
 
-            <Tooltip title="Adicionar Grupo de Produto">
+            <Tooltip title="Adicionar Cidade">
               <Button
                 size="small"
-                onClick={() => this.showModalGroup(record._id) }
+                onClick={() => this.showModalCidade(record) }
               >
                 <FontAwesomeIcon icon="plus" size="lg" />
               </Button>
@@ -307,9 +291,9 @@ class Zone extends Component {
   ];
 
   expandedRowRender = (tabela) => {
-    console.log(tabela)
+
     const columns = [
-      { title: 'Grupo de Produto', dataIndex: 'nome', key: 'nome' },
+      { title: 'Cidades', dataIndex: 'nome', key: 'nome' },
       {
         title: "Status",
         dataIndex: "status",
@@ -340,7 +324,7 @@ class Zone extends Component {
           return (
             <span>
               <Popconfirm
-                title={`Tem certeza em excluir o grupo de produto da tabela de preço?`}
+                title={`Tem certeza em excluir a cidade ${record.nome} da região ${tabela.nome}?`}
                 onConfirm={() => this.removeGroup(record, tabela._id)}
                 okText="Sim"
                 cancelText="Não"
@@ -374,9 +358,9 @@ class Zone extends Component {
     return (
       <SimpleTable
         columns={columns}
-        rowKey="id"
+        rowKey="_id"
         spinning={this.state.loadingData}
-        dataSource={tabela.grupo_produto}
+        dataSource={tabela.cidades}
         pagination={false}
       />
     );
@@ -404,16 +388,14 @@ class Zone extends Component {
     });
   }
 
-  showModalGroup = (price_table_id) => {
+  showModalCidade = (record) => {
     this.setState({
-      visibleGroup: true,
-      price_table_id
+      visibleCidade: true,
+      record
     });
   }
 
   handleOk = async (item) => {
-    await this.getDatabase();
-    await this.setStatus();
 
     this.setState({ savingForm: true });
     if (!this.state.editMode) {
@@ -441,16 +423,17 @@ class Zone extends Component {
         flashWithSuccess();
       } catch (err) {
         if (err && err.response && err.response.data) parseErrors(err);
-        console.log("Erro interno ao adicionar uma tabela de preço", err);
+        console.log("Erro interno ao adicionar uma região", err);
       } finally {
         this.setState({ savingForm: false });
       }
     } else {
       try {
-        const tabela_updade = Object.assign({}, item);
-        delete tabela_updade.grupo_produto;
+        const regioes_update = Object.assign({}, item);
+        delete regioes_update.cidades;
+        delete regioes_update.estado;
 
-        const updated = await ZoneService.update(tabela_updade);
+        const updated = await ZoneService.update(regioes_update);
         const data = await ZoneService.list();
 
         this.setState({
@@ -470,29 +453,27 @@ class Zone extends Component {
     }
   }
 
-  handleOkGroup = async (item) => {
-    await this.getDatabase();
-    await this.setStatus();
+  handleOkCidade = async (item) => {
 
     this.setState({ savingForm: true });
     if (!this.state.editMode) {
       /* if (Object.keys(this.state.formData).length === 0)
         flashWithSuccess("Sem alterações para salvar", " "); */
       try {
-        const created = await PTGroupService.create(this.state.price_table_id)(item.grupo_produto);
+        const created = await ZoneCitiesService.create(item._id)(item.cidades);
 
         this.setState(prev => {
-          let _list = prev.list.map(priceTable => {
-            if(priceTable._id == this.state.price_table_id){
-              priceTable.grupo_produto = [ ...priceTable.grupo_produto, created]
+          let _list = prev.list.map(zoneTable => {
+            if(zoneTable._id == item._id){
+              zoneTable.cidades = [ ...zoneTable.cidades, created]
             }
-            return priceTable
+            return zoneTable
           })
 
           return({
             openForm: false,
             editMode: false,
-            visibleGroup: false,
+            visibleCidade: false,
             list: _list
           })
         });
@@ -500,7 +481,7 @@ class Zone extends Component {
         flashWithSuccess();
       } catch (err) {
         if (err && err.response && err.response.data) parseErrors(err);
-        console.log("Erro interno ao adicionar um grupo de produto na tabela de preço", err);
+        console.log("Erro interno ao adicionar uma cidade na região", err);
       } finally {
         this.setState({ savingForm: false });
       }
@@ -510,7 +491,7 @@ class Zone extends Component {
   handleCancel = (e) => {
     this.setState({
       visible: false,
-      visibleGroup: false
+      visibleCidade: false
     });
   }
 
@@ -548,10 +529,10 @@ class Zone extends Component {
           record={this.state.record}
         />
 
-        <ModalFormGroup
-          visible={this.state.visibleGroup}
+        <ModalFormCidade
+          visible={this.state.visibleCidade}
           onCancel={this.handleCancel}
-          onCreate={this.handleOkGroup}
+          onCreate={this.handleOkCidade}
           wrappedComponentRef={this.saveFormRef}
           record={this.state.record}
         />
