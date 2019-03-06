@@ -823,7 +823,6 @@ class OrderItemForm extends Component {
   }
 
   calcularDescontoPeloPreco = (chave, value) => {
-
     this.setState(prev => ({
       ...prev,
       formData: {
@@ -835,7 +834,8 @@ class OrderItemForm extends Component {
             : currency()(
                 (1 -
                   getNumber(value) /
-                    getNumber(this.state.formData[`preco_${chave}_tabela`])) * 100
+                    getNumber(this.state.formData[`preco_${chave}_tabela`])) *
+                  100
               )
       }
     }));
@@ -882,11 +882,12 @@ class OrderItemForm extends Component {
       if (variacao.tipoTabela === "TABELA_CARACTERISTICA") {
         const tabelaCaract = await FeaturePriceTableService.list({
           status: true,
+          "precos.deleted": false,
+          deleted: false,
           "grupo_produto.id": this.state.formData.grupo_produto.id,
           "caracteristica.chave": variacao.chave,
           fields:
-            "u_m_preco, data_base, taxa_adicao, taxa_supressao, grupo_produto,caracteristica,precos.$, moeda",
-          "precos.deleted": false,
+            "u_m_preco, data_base, taxa_adicao, taxa_supressao, grupo_produto,caracteristica,precos, moeda",
           ...(configAPP.usarConfiguracaoFPCaracteristica() && {
             moeda: this.props.pedido[`pgto_${variacao.chave}`]
           })
@@ -900,11 +901,13 @@ class OrderItemForm extends Component {
           ]);
 
           if (precos.length) {
-            const { valor: valorVariacao } = precos.find(
-              p => p.opcao_chave === valor
+            const valorVariacao = precos.find(
+              p =>
+                p.opcao_chave === valor &&
+                p.status === true &&
+                p.deleted === false
             );
-
-            let preco = valorVariacao || 0;
+            let preco = valorVariacao.valor || 0;
             const periodo = configAPP.usarCalculoDataBaseMes()
               ? moment().diff(tabelaCaract[0].data_base, "month")
               : Math.round(
@@ -1000,7 +1003,6 @@ class OrderItemForm extends Component {
               if (periodo)
                 preco = valorFinalJurosCompostos(preco, taxa, periodo);
 
-
               if (tabelaPreco)
                 this.setState(prev => ({
                   ...prev,
@@ -1019,6 +1021,7 @@ class OrderItemForm extends Component {
       this.calcularResumo();
     } catch (error) {
       if (error && error.response && error.response.data) parseErrors(error);
+      console.log("Atualiza Valor Variação ", error);
     } finally {
       this.setState({ [`loadingVariacoes_${variacao.chave}`]: false });
     }
