@@ -909,11 +909,14 @@ class OrderItemForm extends Component {
             );
             let preco = valorVariacao.valor || 0;
             const periodo = configAPP.usarCalculoDataBaseMes()
-              ? moment().diff(tabelaCaract[0].data_base, "month")
-              : Math.round(
-                  moment().diff(tabelaCaract[0].data_base, "days") /
-                    (configAPP.quantidadeDeDiasCalculoDataBase() || 30)
-                );
+              ? moment(this.props.pedido[`venc_${variacao.chave}`]).diff(
+                  tabelaCaract[0].data_base,
+                  "month"
+                )
+              : moment(this.props.pedido[`venc_${variacao.chave}`]).diff(
+                  tabelaCaract[0].data_base,
+                  "days"
+                ) / (configAPP.quantidadeDeDiasCalculoDataBase() || 30);
             const taxa =
               periodo && periodo > 0
                 ? getNumber(tabelaCaract[0].taxa_adicao)
@@ -990,15 +993,23 @@ class OrderItemForm extends Component {
                 tabelaPreco.data_base_por_regra === true
                   ? tabelaPreco[`data_base_${rpb.chave}`]
                   : tabelaPreco.data_base;
+
+
               let periodo = configAPP.usarCalculoDataBaseMes()
-                ? moment().diff(dataBaseCalculo, "month")
-                : moment().diff(dataBaseCalculo, "days") /
-                  (configAPP.quantidadeDeDiasCalculoDataBase() || 30);
+                ? moment(this.props.pedido[`venc_${rpb.chave}`]).diff(
+                    dataBaseCalculo,
+                    "month"
+                  )
+                : moment(this.props.pedido[`venc_${rpb.chave}`]).diff(
+                    dataBaseCalculo,
+                    "days"
+                  ) / (configAPP.quantidadeDeDiasCalculoDataBase() || 30);
 
               const taxa =
                 periodo && periodo > 0
                   ? getNumber(tabelaPreco.taxa_adicao)
                   : getNumber(tabelaPreco.taxa_supressao);
+
 
               if (periodo)
                 preco = valorFinalJurosCompostos(preco, taxa, periodo);
