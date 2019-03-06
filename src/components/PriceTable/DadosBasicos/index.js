@@ -163,6 +163,17 @@ class PriceTable extends Component {
     }
   };
 
+  cloneRecord = async ({ _id, nome }) => {
+    try {
+      await PriceTableService.clone(_id);
+      this.initializeList();
+      flashWithSuccess("", `A tabela de preço, ${nome}, foi clonada com sucesso!`);
+    } catch (err) {
+      if (err && err.response && err.response.data) parseErrors(err);
+      console.log("Erro interno ao clonar uma tabela de preço", err);
+    }
+  };
+
   removeGroup = async ({ id, nome }, price_table_id) => {
     try {
       await PTGroupService.remove(price_table_id)(id);
@@ -317,6 +328,22 @@ class PriceTable extends Component {
                 <FontAwesomeIcon icon="plus" size="lg" />
               </Button>
             </Tooltip>
+            <Divider
+              style={{ fontSize: "10px", padding: 0, margin: 2 }}
+              type="vertical"
+            />
+            <Popconfirm
+              title={`Tem certeza em criar uma cópia da tabela de preço ${record.nome}?`}
+              onConfirm={() => this.cloneRecord(record)}
+              okText="Sim"
+              cancelText="Não"
+            >
+            <Tooltip title="Cria uma nova cópia da tabela">
+              <Button size="small">
+                <FontAwesomeIcon icon="clone" size="lg" />
+              </Button>
+              </Tooltip>
+            </Popconfirm>
 
           </span>
         );

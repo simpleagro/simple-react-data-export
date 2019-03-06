@@ -106,6 +106,8 @@ class CalculoFrete extends Component {
 
     if (periodo) preco_frete = valorFinalJurosCompostos(preco_frete, taxa, periodo);
 
+    preco_frete = getNumber(preco_frete) * peso;
+
     preco_frete = currency()(preco_frete);
 
     this.props.dadosPedidoFrete({
@@ -291,6 +293,7 @@ class CalculoFrete extends Component {
               <Col span={8}>
                 <Form.Item label="Peso">
                   <Input
+                  readOnly
                     name="peso"
                     value={
                       this.state.formData.peso ||

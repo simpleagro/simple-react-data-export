@@ -1,7 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Tooltip, Form, InputNumber } from "antd";
+import { Tooltip, Form, Input } from "antd";
 import debounce from "lodash/debounce";
+import { currency, getNumber, addMaskReais } from "common/utils";
 
 export const SFFPorcentagem = props => {
   return (
@@ -11,10 +12,35 @@ export const SFFPorcentagem = props => {
           {props.getFieldDecorator(props.name, {
             rules: [
               { required: props.required, message: "Este campo é obrigatório!" }
+            ],
+            initialValue: addMaskReais(props.initialValue),
+            getValueFromEvent: e => addMaskReais(e.target.value),
+            onChange: e => {
+              if (e.target) {
+                const handleFormState = debounce(props.handleFormState, 300);
+                handleFormState({
+                  target: {
+                    name: e.target.name,
+                    value: addMaskReais(e.target.value)
+                  }
+                });
+
+                if (props.trigger) {
+                  const trigger = debounce(props.trigger, props.delay);
+                  trigger(addMaskReais(e.target.value));
+                }
+              } else return false;
+            }
+          })(<Input suffix="%" disabled={props.disabled} name={props.name} />)}
+        </Form.Item>
+        {/* <Form.Item label={props.label} {...props.formItemLayout}>
+          {props.getFieldDecorator(props.name, {
+            rules: [
+              { required: props.required, message: "Este campo é obrigatório!" }
             ]
           })(
             <span>
-              <InputNumber
+              <Input
               value={props.initialValue || 0}
                 disabled={props.disabled}
                 step={0.01}
@@ -32,12 +58,12 @@ export const SFFPorcentagem = props => {
                     trigger(e);
                   }
                 }}
-                style={{ width: 200 }}
+                style={{ width: "90%" }}
               />{" "}
               %
             </span>
           )}
-        </Form.Item>
+        </Form.Item> */}
       </span>
     </Tooltip>
   );
@@ -54,12 +80,6 @@ SFFPorcentagem.propTypes = {
 SFFPorcentagem.defaultProps = {
   delay: 300,
   disabled: false,
-  helpText: "Informe de 0 a 100",
   label: "Desconto",
-  required: false,
-  step: 0.01,
-  min: 0,
-  max: 1,
-  formatter: value => value * 100,
-  parser: value => value.replace("%", "").replace(",", ".") / 100
+  required: false
 };
