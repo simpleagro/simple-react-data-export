@@ -34,6 +34,7 @@ import preColheitaLab from "./Menus/pre-colheita";
 import moeda from "./Menus/moeda";
 import configuracoes from "./Menus/configuracoes";
 import fornecedores from "./Menus/fornecedores";
+import regioes from "./Menus/regioes";
 
 const loadable = loader =>
   Loadable({
@@ -77,6 +78,7 @@ const menus = {
     ...moeda,
     ...metas,
     ...pedidos,
+    ...regioes,
     ...safras,
     ...tabelaComissao,
     ...tabelaFrete,
