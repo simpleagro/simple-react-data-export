@@ -283,11 +283,11 @@ class OrderPaymentForm extends Component {
                       <React.Fragment>
                         {["REAIS", "GRÃOS"].map((t, index) => {
                           return (
-                            <React.Fragment>
-                              <p
-                                key={`resumoItem_totais_${normalizeString(
-                                  t
-                                )}_${index}`}>
+                            <React.Fragment
+                              key={`resumoItem_totais_${normalizeString(
+                                t
+                              )}_${index}_${new Date().getTime()}`}>
+                              <p>
                                 Total Pedido {t}:<br />
                                 {currency()(
                                   this.state.formData[

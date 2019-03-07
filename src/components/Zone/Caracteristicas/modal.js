@@ -1,13 +1,11 @@
 import React from 'react'
 import { Modal, Form, Input, Button, Select } from 'antd';
-import * as UnidadeMedidaService from '../../../services/units-measures'
 
 const ModalForm = Form.create()(
     class extends React.Component {
       state = {
         formData:{},
-        camposExtras: [],
-        u_ms: []
+        camposExtras: []
       }
 
       onHadleChange = event => {
@@ -19,7 +17,7 @@ const ModalForm = Form.create()(
       };
 
       onSalve = () => {
-        console.log(this.state.formData)
+        //console.log(this.state.formData)
         this.props.form.validateFields(async err => {
             if (err) return;
             else {
@@ -36,23 +34,20 @@ const ModalForm = Form.create()(
          }
       }
 
-      async componentDidMount() {
-        const u_ms = await UnidadeMedidaService.list({
-          limit: 100,
-          status: true,
-          fields: "nome,_id,sigla"
-        });
+      /* async componentDidMount() {
+        console.log('aqqq', this.props.group_caracteristicas)
+        if(this.props.group_caracteristicas){
+          const groupData = this.props.group_caracteristicas
+          console.log('aqqq', this.props.group_caracteristicas)
 
-        this.setState(prev => ({ ...prev, u_ms: u_ms.docs }));
-      }
+          if (groupData)
+            this.setState(prev => ({
+              ...prev,
+              group_caracteristicas: groupData
+            }));
 
-      listarUMs = (u_ms) => {
-        return u_ms.map(u_m => (
-          <Select.Option key={u_m._id} value={u_m.sigla}>
-            {u_m.sigla}
-          </Select.Option>
-        ))
-      }
+        }
+      }   */
 
       gerarFormulario = (caracteristicas, getFieldDecorator) => {
         return caracteristicas.map( caracteristica =>
@@ -62,7 +57,7 @@ const ModalForm = Form.create()(
           >
             {getFieldDecorator(`${caracteristica.chave}`, {
               initialValue: this.state.formData[`${caracteristica.chave}`],
-              // rules: [{ required: caracteristica.obrigatorio, message: 'Selecione!'}],
+              rules: [{ required: caracteristica.obrigatorio, message: 'Selecione!'}],
             })(
               <Select
                 placeholder="Selecione"
@@ -84,6 +79,22 @@ const ModalForm = Form.create()(
         )
       }
 
+      gerarFormularioPreco = (group_regras_preco, getFieldDecorator) => {
+        return group_regras_preco.map( regra_preco =>
+          <Form.Item key={`preco_${regra_preco.chave}`}
+            label={`Preço ${regra_preco.label}`}
+          >
+            {getFieldDecorator(`preco_${regra_preco.chave}`, {
+              initialValue: this.state.formData[`preco_${regra_preco.chave}`],
+              rules: [{ required: regra_preco.obrigatorio, message: 'Selecione!'}],
+            })(
+              <Input
+                name= { `preco_${regra_preco.chave}` } />
+            )}
+          </Form.Item>
+        )
+      }
+
       render() {
         const { visible, onCancel, form } = this.props;
         const { getFieldDecorator } = form;
@@ -91,7 +102,7 @@ const ModalForm = Form.create()(
         return (
           <Modal
             visible={visible}
-            title={`${this.props.record? 'Editar':'Add'} Variação`}
+            title={`${this.props.record? 'Editar':'Add'} Preço`}
             onCancel={onCancel}
             maskClosable={false}
             footer={[
@@ -103,47 +114,7 @@ const ModalForm = Form.create()(
           >
             <Form layout="vertical" onChange={this.onHadleChange}>
               {this.props.group_caracteristicas && this.gerarFormulario(this.props.group_caracteristicas, getFieldDecorator)}
-              {/* <Form.Item label="Unidade de Medida da Cota">
-                  {getFieldDecorator("cota_um", {
-                    rules: [
-                      { required: true, message: "Selecione a unidade de medida!" }
-                    ],
-                    initialValue: this.state.formData.cota_um
-                    ? this.state.formData.cota_um
-                    : undefined
-                  })(
-                    <Select
-                      name="cota_um"
-                      showAction={["focus", "click"]}
-                      showSearch
-                      placeholder="Selecione uma unidade de medida..."
-                      filterOption={(input, option) =>
-                        option.props.children
-                          .toLowerCase()
-                          .indexOf(input.toLowerCase()) >= 0
-                      }
-                      onChange={e =>{
-                        this.onHadleChange({
-                          target: { name: "cota_um", value: e }
-                        })}
-                      }
-                    >
-                      {this.listarUMs(this.state.u_ms)}
-                    </Select>
-                  )}
-              </Form.Item> */}
-              <Form.Item label="Valor da Cota">
-                {getFieldDecorator('cota_valor',{
-                  rules: [
-                    { required: true, message: "Este campo é obrigatório!" }
-                  ],
-                  initialValue: this.state.formData.cota_valor
-                })(
-                  <Input
-                    name="cota_valor"
-                  />
-                )}
-              </Form.Item>
+              {this.props.group_regra_preco && this.gerarFormularioPreco(this.props.group_regra_preco, getFieldDecorator)}
             </Form>
           </Modal>
         );

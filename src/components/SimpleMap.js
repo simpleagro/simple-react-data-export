@@ -54,6 +54,23 @@ export const SimpleMap = compose(
         onSearchBoxMounted: ref => {
           refs.searchBox = ref;
         },
+        setMarkerPosition: ev => {
+          const nextMarker = [
+            {
+              position: {
+                lat: ev.latLng.lat(),
+                lng: ev.latLng.lng()
+              }
+            }
+          ];
+
+          this.setState(prev => ({
+            ...prev,
+            markers: nextMarker
+          }));
+
+          this.props.setGPS(ev.latLng.lat(), ev.latLng.lng());
+        },
         onPlacesChanged: () => {
           const places = refs.searchBox.getPlaces();
           const bounds = new google.maps.LatLngBounds();
@@ -110,6 +127,9 @@ export const SimpleMap = compose(
       }}
       options={{
         fullscreenControl: false
+      }}
+      onRightClick={e => {
+        props.setMarkerPosition(e);
       }}
       defaultZoom={props.defaultZoom || 18}
       center={
@@ -306,6 +326,9 @@ export const SimpleMap = compose(
         props.markers.length &&
         props.markers.map((marker, index) => (
           <Marker
+            ref={marker => {
+              this.markerRef = marker;
+            }}
             draggable
             key={index}
             position={marker.position}
@@ -324,13 +347,15 @@ const BtnZoom = props => {
           <div
             onClick={() => {
               props.setFullScreenMode(true);
-              props.map.getDiv().style.position = "fixed";
-              props.map.getDiv().style.top = 0;
-              props.map.getDiv().style.left = 0;
-              props.map.getDiv().style.right = 0;
-              props.map.getDiv().style.bottom = 0;
-              props.map.getDiv().style.zIndex = 10;
-              props.map.getDiv().style.height = "100%";
+              if (props.map) {
+                props.map.getDiv().style.position = "fixed";
+                props.map.getDiv().style.top = 0;
+                props.map.getDiv().style.left = 0;
+                props.map.getDiv().style.right = 0;
+                props.map.getDiv().style.bottom = 0;
+                props.map.getDiv().style.zIndex = 10;
+                props.map.getDiv().style.height = "100%";
+              }
             }}
             style={{
               backgroundColor: "rgb(255, 255, 255)",
