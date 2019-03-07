@@ -42,10 +42,10 @@ const ModalForm = Form.create()(
           status: true,
           fields: "nome,_id,sigla"
         });
-      
+
         this.setState(prev => ({ ...prev, u_ms: u_ms.docs }));
-      }  
-      
+      }
+
       listarUMs = (u_ms) => {
         return u_ms.map(u_m => (
           <Select.Option key={u_m._id} value={u_m.sigla}>
@@ -55,16 +55,16 @@ const ModalForm = Form.create()(
       }
 
       gerarFormulario = (caracteristicas, getFieldDecorator) => {
-        return caracteristicas.map( caracteristica => 
+        return caracteristicas.map( caracteristica =>
           <Form.Item
             label={`${caracteristica.label}`}
             key= { `${caracteristica.chave}` }
           >
             {getFieldDecorator(`${caracteristica.chave}`, {
               initialValue: this.state.formData[`${caracteristica.chave}`],
-              rules: [{ required: caracteristica.obrigatorio, message: 'Selecione!'}],
+              // rules: [{ required: caracteristica.obrigatorio, message: 'Selecione!'}],
             })(
-              <Select 
+              <Select
                 placeholder="Selecione"
                 name= { `${caracteristica.chave}` }
                 showSearch
@@ -75,7 +75,7 @@ const ModalForm = Form.create()(
                   }
                 }
               >
-                {caracteristica.opcoes.map(opcao => 
+                {caracteristica.opcoes.map(opcao =>
                   <Select.Option value={opcao.value} key={opcao.value} >{opcao.label}</Select.Option>
                 )}
               </Select>
@@ -87,7 +87,7 @@ const ModalForm = Form.create()(
       render() {
         const { visible, onCancel, form } = this.props;
         const { getFieldDecorator } = form;
-        
+
         return (
           <Modal
             visible={visible}
@@ -152,4 +152,3 @@ const ModalForm = Form.create()(
   );
 
   export default ModalForm;
- 
