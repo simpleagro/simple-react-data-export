@@ -8,7 +8,7 @@ const menus = {
     label: "Regiões",
     icon: "map-marked",
     showMenu: true,
-    rule: "SeedUse"
+    rule: "Zone"
   }
   // "/regioes/:id/edit": {
   //   component: SimpleLoadable(() => import("../../components/Sales/Zone/form")),
