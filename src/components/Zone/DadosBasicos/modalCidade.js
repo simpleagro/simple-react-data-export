@@ -51,7 +51,7 @@ const ModalFormCidade = Form.create()(
       return (
         <Modal
           visible={visible}
-          title={`${this.props.record ? "Editar" : "Nova"} Cidade`}
+          title={`Nova Cidade`}
           onCancel={onCancel}
           maskClosable={false}
           footer={[
@@ -59,7 +59,7 @@ const ModalFormCidade = Form.create()(
               Cancelar
             </Button>,
             <Button key="submit" type="primary" onClick={() => this.onSalve()}>
-              {`${this.props.record ? "Editar" : "Adicionar"}`}
+              Adicionar
             </Button>
           ]}>
           <Form layout="vertical" onChange={this.onHadleChange}>

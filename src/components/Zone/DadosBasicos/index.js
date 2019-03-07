@@ -92,26 +92,26 @@ class Zone extends Component {
     }
   };
 
-  changeStatusGrupo = async (id, newStatus, price_table_id) => {
+  changeStatusCidade = async (id, newStatus, zone_id) => {
     console.log(newStatus)
     try {
-      // await PTGroupService.changeStatus(price_table_id)(id, newStatus);
+      await ZoneCitiesService.changeStatus(zone_id)(id, newStatus);
 
       let recordName = "";
 
-      let _list = this.state.list.map(priceTable => {
-        if(priceTable._id == price_table_id){
-          let _priceTableGP = priceTable.grupo_produto.map( gp => {
-              if(gp.id == id){
-                gp.status = newStatus
-                recordName = gp.nome
+      let _list = this.state.list.map(zoneTable => {
+        if(zoneTable._id === zone_id){
+          let _zoneTableGP = zoneTable.cidades.map( cidade => {
+              if(cidade._id === id){
+                cidade.status = newStatus
+                recordName = cidade.nome
               }
-              return gp
+              return cidade
             }
           )
-          priceTable.grupo_produto = _priceTableGP
+          zoneTable.cidades = _zoneTableGP
         }
-        return priceTable
+        return zoneTable
       });
 
       this.setState(prev => ({
@@ -121,13 +121,13 @@ class Zone extends Component {
 
       flashWithSuccess(
         "",
-        `O grupo de produto, ${recordName}, foi ${
-          newStatus ? "ativado" : "bloqueado"
-        } da tabela de preço com sucesso!`
+        `A cidade, ${recordName}, foi ${
+          newStatus ? "ativada" : "bloqueada"
+        } com sucesso!`
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao mudar status do grupo de produto", err);
+      console.log("Erro interno ao mudar status da cidade", err);
     }
   };
 
@@ -140,31 +140,31 @@ class Zone extends Component {
         list: _list
       });
 
-      flashWithSuccess("", `A tabela de preço, ${nome}, foi removida com sucesso!`);
+      flashWithSuccess("", `A região, ${nome}, foi removida com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover uma tabela de preço", err);
+      console.log("Erro interno ao remover uma região", err);
     }
   };
 
-  removeGroup = async ({ id, nome }, price_table_id) => {
+  removeCidade = async ({ _id, nome }, zone_id) => {
     try {
-      // await PTGroupService.remove(price_table_id)(id);
-      let _list = this.state.list.map(priceTable => {
-        if(priceTable._id == price_table_id){
-          priceTable.grupo_produto = [ ...priceTable.grupo_produto.filter(gp => gp.id != id)]
+      await ZoneCitiesService.remove(zone_id)(_id);
+      let _list = this.state.list.map(zoneTable => {
+        if(zoneTable._id == zone_id){
+          zoneTable.cidades = [ ...zoneTable.cidades.filter(cid => cid._id != _id)]
         }
-        return priceTable
+        return zoneTable
       })
 
       this.setState({
         list: _list
       });
 
-      flashWithSuccess("", `O grupo de produto, ${nome}, foi removida com sucesso da tabela de preço!`);
+      flashWithSuccess("", `A cidade, ${nome}, foi removida com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover um grupo de produto da tabela de preço", err);
+      console.log("Erro interno ao remover uma cidade da região", err);
     }
   };
 
@@ -261,7 +261,7 @@ class Zone extends Component {
             />
 
             <Popconfirm
-              title={`Tem certeza em excluir a tabela de preço?`}
+              title={`Tem certeza em excluir a região ${record.nome}?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
               cancelText="Não"
@@ -303,12 +303,12 @@ class Zone extends Component {
           const statusBtn = record.status ? "unlock" : "lock";
           return (
             <Popconfirm
-              title={`Tem certeza em ${statusTxt} o grupo de produto?`}
-              onConfirm={e => this.changeStatusGrupo(record.id, !record.status, tabela._id)}
+              title={`Tem certeza em ${statusTxt} a cidade ${record.nome}?`}
+              onConfirm={e => this.changeStatusCidade(record._id, !record.status, tabela._id)}
               okText="Sim"
               cancelText="Não"
             >
-              <Tooltip title={`${statusTxt.toUpperCase()} o grupo de produto`}>
+              <Tooltip title={`${statusTxt.toUpperCase()} a cidade`}>
                 <Button size="small">
                   <FontAwesomeIcon icon={statusBtn} size="lg" />
                 </Button>
@@ -325,7 +325,7 @@ class Zone extends Component {
             <span>
               <Popconfirm
                 title={`Tem certeza em excluir a cidade ${record.nome} da região ${tabela.nome}?`}
-                onConfirm={() => this.removeGroup(record, tabela._id)}
+                onConfirm={() => this.removeCidade(record, tabela._id)}
                 okText="Sim"
                 cancelText="Não"
               >
@@ -338,16 +338,16 @@ class Zone extends Component {
                 type="vertical"
               />
 
-              <Tooltip title="Veja os produtos da tabela de preço">
+              {/* <Tooltip title={`Veja os locais de entrega da cidade ${tabela.nome}`}>
                 <Button
                   size="small"
                   onClick={() =>
-                    this.props.history.push(`/tabela-preco/${tabela._id}/grupo-produto/${record.id}/produtos`)
+                    this.props.history.push(`/tabela-preco/${tabela._id}/grupo-produto/${record._id}/produtos`)
                   }
                 >
                   <FontAwesomeIcon icon="clipboard-list" size="lg" />
                 </Button>
-              </Tooltip>
+              </Tooltip> */}
 
             </span>
           );

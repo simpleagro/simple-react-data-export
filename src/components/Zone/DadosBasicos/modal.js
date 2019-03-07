@@ -84,9 +84,9 @@ const ModalForm = Form.create()(
 
             <Form.Item label="Ágio">
               {getFieldDecorator("agio", {
-                rules: [
-                  { required: true, message: "Este campo é obrigatório!" }
-                ],
+                // rules: [
+                //   { required: true, message: "Este campo é obrigatório!" }
+                // ],
                 initialValue: addMaskReais(this.state.formData.agio),
                 getValueFromEvent: e => addMaskReais(e.target.value),
                 onChange: e => {
@@ -107,9 +107,9 @@ const ModalForm = Form.create()(
 
             <Form.Item label="Deságio">
               {getFieldDecorator("desagio", {
-                rules: [
-                  { required: true, message: "Este campo é obrigatório!" }
-                ],
+                // rules: [
+                //   { required: true, message: "Este campo é obrigatório!" }
+                // ],
                 initialValue: addMaskReais(this.state.formData.desagio),
                 getValueFromEvent: e => addMaskReais(e.target.value),
                 onChange: e => {
