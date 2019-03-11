@@ -9,17 +9,14 @@ const menus = {
     icon: "map-marked",
     showMenu: true,
     rule: "Zone"
-  }
-  // "/regioes/:id/edit": {
-  //   component: SimpleLoadable(() => import("../../components/Sales/Zone/form")),
-  //   path: "/regioes/:id/edit",
-  //   showMenu: false
-  // },
-  // "/regioes/new": {
-  //   component: SimpleLoadable(() => import("../../components/Sales/Zone/form")),
-  //   path: "/regioes/new",
-  //   showMenu: false
-  // },
+  },
+  "/regioes/:zone_id/cidade/:city_id/locais-de-entrega": {
+    component: SimpleLoadable(() => import("../../components/Zone/LocaisEntrega")),
+    key: "/regioes/cidade/locais-de-entrega",
+    path: "/regioes/:zone_id/cidade/:cidade_id/locais-de-entrega",
+    showMenu: false,
+    rule: "Zone"
+  },
 };
 
 export default menus;

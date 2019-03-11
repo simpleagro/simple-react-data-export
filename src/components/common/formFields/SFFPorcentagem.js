@@ -31,7 +31,7 @@ export const SFFPorcentagem = props => {
                 }
               } else return false;
             }
-          })(<Input suffix="%" disabled={props.disabled} name={props.name} />)}
+          })(<Input suffix="%" disabled={props.disabled} readOnly={props.readOnly} name={props.name} />)}
         </Form.Item>
         {/* <Form.Item label={props.label} {...props.formItemLayout}>
           {props.getFieldDecorator(props.name, {
@@ -80,6 +80,7 @@ SFFPorcentagem.propTypes = {
 SFFPorcentagem.defaultProps = {
   delay: 300,
   disabled: false,
+  readOnly: false,
   label: "Desconto",
   required: false
 };

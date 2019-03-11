@@ -630,6 +630,19 @@ class OrderItemForm extends Component {
                 />
               )}
             </Form.Item>
+
+            <Form.Item
+            label="Observações"
+            {...formItemLayout}>
+            {getFieldDecorator(`obs_item`, {
+              initialValue: this.state.formData.obs_item
+            })(
+              <Input.TextArea
+                name={`obs_item`}
+              />
+            )}
+          </Form.Item>
+
             {/* <Form.Item label="Preço Final Item" {...formItemLayout}>
               {getFieldDecorator("preco_final_item", {
                 rules: [
@@ -791,12 +804,16 @@ class OrderItemForm extends Component {
               />
             )}
           </Form.Item> */}
+
           <SFFPorcentagem
             initialValue={this.state.formData[`desconto_${obj.chave}`]}
             disabled={
               !this.state.variacoesSelecionadas ||
-              !this.state.variacoesSelecionadas.hasOwnProperty(variacao.chave)
+              !this.state.variacoesSelecionadas.hasOwnProperty(
+                variacao.chave
+              )
             }
+            readOnly={obj.chave === "royalties"}
             name={`desconto_${obj.chave}`}
             label={`Desconto - ${obj.label}`}
             formItemLayout={{
@@ -994,7 +1011,6 @@ class OrderItemForm extends Component {
                   ? tabelaPreco[`data_base_${rpb.chave}`]
                   : tabelaPreco.data_base;
 
-
               let periodo = configAPP.usarCalculoDataBaseMes()
                 ? moment(this.props.pedido[`venc_${rpb.chave}`]).diff(
                     dataBaseCalculo,
@@ -1009,7 +1025,6 @@ class OrderItemForm extends Component {
                 periodo && periodo > 0
                   ? getNumber(tabelaPreco.taxa_adicao)
                   : getNumber(tabelaPreco.taxa_supressao);
-
 
               if (periodo)
                 preco = valorFinalJurosCompostos(preco, taxa, periodo);

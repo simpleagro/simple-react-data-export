@@ -12,33 +12,34 @@ import {
 } from "antd";
 import { withRouter } from "react-router-dom";
 
-import * as ProductsService from "../../../services/pricetable.products";
-import * as PriceTableService from "../../../services/pricetable";
+import * as ZoneLocationsService from "services/zone.locations";
+import * as ZoneServices from "services/zone";
 import SimpleTable from "../../common/SimpleTable";
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
-import { PainelHeader } from "../../common/PainelHeader";
 import ModalForm from "./modal";
-import ModalPriceTable from "../DadosBasicos/modal";
+import ModalZone from "../DadosBasicos/modal";
 import { simpleTableSearch } from "../../../lib/simpleTableSearch";
+import { SimpleLazyLoader } from "common/SimpleLazyLoader";
 
-class ProductsPriceTable extends Component {
+class ZoneLocations extends Component {
   constructor(props) {
     super(props);
     this.state = {
       list: [],
       loadingData: true,
+      loadingForm: true,
       pagination: {
         showSizeChanger: true,
         defaultPageSize: 10,
         pageSizeOptions: ["10", "25", "50", "100"]
       },
-      pricetable_id: this.props.match.params.pricetable_id || 0,
-      productgroup_id: this.props.match.params.productgroup_id || 0,
-      price_table_data: {},
+      zone_id: this.props.match.params.zone_id || 0,
+      city_id: this.props.match.params.cidade_id || 0,
+      zoneData: {},
       visible: false,
-      visiblePriceTable: false
+      visibleZone: false
     };
   }
 
@@ -47,8 +48,8 @@ class ProductsPriceTable extends Component {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await ProductsService.list(this.state.pricetable_id)(
-      this.state.productgroup_id
+    const data = await ZoneLocationsService.list(this.state.zone_id)(
+      this.state.city_id
     )(aqp);
 
     this.setState(prev => ({
@@ -62,26 +63,37 @@ class ProductsPriceTable extends Component {
   }
 
   async componentDidMount() {
-    const priceTableData = await PriceTableService.get(
-      this.state.pricetable_id
-    )();
-    this.setState(prev => ({
-      ...prev,
-      price_table_data: priceTableData
-    }));
-    await this.initializeList();
+    try {
+      const zoneData = await ZoneServices.get(
+        this.state.zone_id
+      )();
+      this.setState(prev => ({
+        ...prev,
+        zoneData
+      }));
+      await this.initializeList();
+    } catch (error) {
+      if (error && error.response && error.response.data) parseErrors(error);
+    }
+    finally {
+      this.setState(prev => ({
+        ...prev,
+        loadingForm: false
+      }));
+    }
+
   }
 
   changeStatus = async (id, newStatus) => {
     try {
-      await ProductsService.changeStatus(this.state.pricetable_id)(
-        this.state.productgroup_id
+      await ZoneLocationsService.changeStatus(this.state.zone_id)(
+        this.state.city_id
       )(id, newStatus);
 
       let recordName = "";
 
       let _list = this.state.list.map(item => {
-        if (item.id === id) {
+        if (item._id === id) {
           item.status = newStatus;
           recordName = item.nome;
         }
@@ -95,32 +107,32 @@ class ProductsPriceTable extends Component {
 
       flashWithSuccess(
         "",
-        `O produto, ${recordName}, foi ${
+        `O local de entrega, ${recordName}, foi ${
           newStatus ? "ativado" : "bloqueado"
         } com sucesso!`
       );
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao mudar status do produto", err);
+      console.log("Erro interno ao mudar status do local de entrega", err);
     }
   };
 
-  removeRecord = async ({ id, nome }) => {
-    const _id = id;
+  removeRecord = async ({ _id, nome }) => {
+
     try {
-      await ProductsService.remove(this.state.pricetable_id)(
-        this.state.productgroup_id
+      await ZoneLocationsService.remove(this.state.zone_id)(
+        this.state.city_id
       )(_id);
-      let _list = this.state.list.filter(record => record.id !== _id);
+      let _list = this.state.list.filter(record => record._id !== _id);
 
       this.setState({
         list: _list
       });
 
-      flashWithSuccess("", `O produto, ${nome}, foi removido com sucesso!`);
+      flashWithSuccess("", `O local de entrega, ${nome}, foi removido com sucesso!`);
     } catch (err) {
       if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover um produto", err);
+      console.log("Erro interno ao remover um local de entrega", err);
     }
   };
 
@@ -137,24 +149,15 @@ class ProductsPriceTable extends Component {
       render: text => text
     },
     {
-      title: "Nome Comercial",
-      dataIndex: "nome_comercial",
-      key: "nome_comercial",
+      title: "Transbordo",
+      dataIndex: "transbordo",
+      key: "transbordo",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      ...simpleTableSearch(this)("nome_comercial"),
+      ...simpleTableSearch(this)("transbordo"),
       render: text => text
-    },
-    {
-      title: "UM",
-      dataIndex: "u_m_preco",
-      key: "u_m_preco",
-      sorter: (a, b, sorter) => {
-        if (sorter === "ascendent") return -1;
-        else return 1;
-      }
     },
     {
       title: "Status",
@@ -165,11 +168,11 @@ class ProductsPriceTable extends Component {
         const statusBtn = record.status ? "unlock" : "lock";
         return (
           <Popconfirm
-            title={`Tem certeza em ${statusTxt} o produto?`}
-            onConfirm={e => this.changeStatus(record.id, !record.status)}
+            title={`Tem certeza em ${statusTxt} o local de entrega?`}
+            onConfirm={e => this.changeStatus(record._id, !record.status)}
             okText="Sim"
             cancelText="Não">
-            <Tooltip title={`${statusTxt.toUpperCase()} o produto`}>
+            <Tooltip title={`${statusTxt.toUpperCase()} o local de entrega`}>
               <Button size="small">
                 <FontAwesomeIcon icon={statusBtn} size="lg" />
               </Button>
@@ -179,7 +182,7 @@ class ProductsPriceTable extends Component {
       }
     },
     {
-      title: "",
+      title: "Ações",
       dataIndex: "action",
       render: (text, record) => {
         return (
@@ -192,7 +195,7 @@ class ProductsPriceTable extends Component {
               type="vertical"
             />
             <Popconfirm
-              title={`Tem certeza em excluir o produto?`}
+              title={`Tem certeza em excluir o local de entrega?`}
               onConfirm={() => this.removeRecord(record)}
               okText="Sim"
               cancelText="Não">
@@ -200,23 +203,6 @@ class ProductsPriceTable extends Component {
                 <Icon type="delete" style={{ fontSize: "16px" }} />
               </Button>
             </Popconfirm>
-            <Divider
-              style={{ fontSize: "10px", padding: 0, margin: 2 }}
-              type="vertical"
-            />
-            <Tooltip title="Veja as características do produto">
-              <Button
-                size="small"
-                onClick={() =>
-                  this.props.history.push(
-                    `/tabela-preco/${this.state.pricetable_id}/grupo-produto/${
-                      this.state.productgroup_id
-                    }/produtos/${record.id}/caracteristicas`
-                  )
-                }>
-                <FontAwesomeIcon icon="dollar-sign" size="lg" />
-              </Button>
-            </Tooltip>
           </span>
         );
       }
@@ -231,47 +217,15 @@ class ProductsPriceTable extends Component {
     });
   };
 
-  getDatabase = () => {
-    const link = window.location.href;
-    const suffixRegex = /(([http]*[s]*[:][/][/])+)/g;
-    const linkRegex = /((.simpleagro.com.br)+(:[0-9]*)([/a-z0-9]*)*)/g;
-
-    let newLink = link.replace(suffixRegex, "").replace(linkRegex, "");
-
-    this.setState(prevState => ({
-      formData: {
-        ...prevState.formData,
-        database: newLink
-      }
-    }));
-  };
-
-  setStatus = () => {
-    this.setState(prevState => ({
-      formData: {
-        ...prevState.formData,
-        status: true
-      }
-    }));
-  };
-
   handleOk = async item => {
-    await this.getDatabase();
-    await this.setStatus();
 
     this.setState({ savingForm: true });
 
-    const obj = { ...item, ...item.produto };
-    delete obj.produto;
-
     if (!this.state.editMode) {
-      /* if (Object.keys(this.state.formData).length === 0)
-        flashWithSuccess("Sem alterações para salvar", " "); */
-
       try {
-        const created = await ProductsService.create(this.state.pricetable_id)(
-          this.state.productgroup_id
-        )(obj);
+        const created = await ZoneLocationsService.create(this.state.zone_id)(
+          this.state.city_id
+        )(item);
 
         this.setState(prev => {
           if (prev.list.length > 0) {
@@ -298,11 +252,11 @@ class ProductsPriceTable extends Component {
       }
     } else {
       try {
-        const updated = await ProductsService.update(this.state.pricetable_id)(
-          this.state.productgroup_id
-        )(obj);
-        const data = await ProductsService.list(this.state.pricetable_id)(
-          this.state.productgroup_id
+        const updated = await ZoneLocationsService.update(this.state.zone_id)(
+          this.state.city_id
+        )(item);
+        const data = await ZoneLocationsService.list(this.state.zone_id)(
+          this.state.city_id
         )();
 
         this.setState({
@@ -315,44 +269,42 @@ class ProductsPriceTable extends Component {
         flashWithSuccess();
       } catch (err) {
         if (err && err.response && err.response.data) parseErrors(err);
-        console.log("Erro interno ao atualizar um produto ", err);
+        console.log("Erro interno ao atualizar um local de entrega ", err);
       } finally {
         this.setState({ savingForm: false });
       }
     }
   };
 
-  showModalPriceTable = record => {
+  showModalZone = record => {
     this.setState({
-      visiblePriceTable: true,
+      visibleZone: true,
       record,
       editMode: !!record
     });
   };
 
-  handleOkPriceTable = async item => {
-    await this.getDatabase();
-    await this.setStatus();
+  handleOkZone = async item => {
 
     this.setState({ savingForm: true });
     if (this.state.editMode) {
       try {
-        const updated = await PriceTableService.update(item);
+        const updated = await ZoneServices.update(item);
 
         this.setState({
           openForm: false,
           editMode: false,
-          visiblePriceTable: false,
-          price_table_data: updated
+          visibleZone: false,
+          zoneData: updated
         });
 
         flashWithSuccess(
           "",
-          `O cabeçalho da tabela de preço foi atualizado com sucesso!`
+          `A região ${item.nome} foi atualizado com sucesso!`
         );
       } catch (err) {
         if (err && err.response && err.response.data) parseErrors(err);
-        console.log("Erro interno ao atualizar um cabeçalho de preço ", err);
+        console.log(`Erro interno ao atualizar a região ${item.nome} `, err);
       } finally {
         this.setState({ savingForm: false });
       }
@@ -362,7 +314,7 @@ class ProductsPriceTable extends Component {
   handleCancel = e => {
     this.setState({
       visible: false,
-      visiblePriceTable: false
+      visibleZone: false
     });
   };
 
@@ -386,11 +338,12 @@ class ProductsPriceTable extends Component {
 
   render() {
     return (
+      <SimpleLazyLoader isLoading={this.state.loadingForm}>
       <div>
-        {this.props.match.params.pricetable_id ? (
+
           <div>
             <SimpleBreadCrumb
-              to={"/tabela-preco"}
+              to={"/regioes"}
               history={this.props.history}
             />
             <Row gutter={24}>
@@ -401,12 +354,13 @@ class ProductsPriceTable extends Component {
                     boxShadow: "0px 8px 0px 0px #009d55 inset",
                     color: "#009d55"
                   }}>
-                  <p>{`Tabela de Preço: ${this.state.price_table_data.nome ||
+                  <p>{`Região: ${this.state.zoneData.nome ||
                     ""}`}</p>
                   <Button
+                  loading={this.state.savingForm}
                     style={{ width: "100%" }}
                     onClick={() => {
-                      this.showModalPriceTable(this.state.price_table_data);
+                      this.showModalZone(this.state.zoneData);
                     }}>
                     <Icon type="edit" /> Editar
                   </Button>
@@ -414,7 +368,7 @@ class ProductsPriceTable extends Component {
               </Col>
               <Col span={19}>
                 <Card
-                  title="Produtos"
+                  title="Locais de Entrega"
                   bordered={false}
                   extra={
                     <Button
@@ -427,7 +381,7 @@ class ProductsPriceTable extends Component {
                   <SimpleTable
                     pagination={this.state.pagination}
                     spinning={this.state.loadingData}
-                    rowKey="id"
+                    rowKey="_id"
                     columns={this.tableConfig()}
                     dataSource={this.state.list}
                     onChange={this.handleTableChange}
@@ -436,26 +390,7 @@ class ProductsPriceTable extends Component {
               </Col>
             </Row>
           </div>
-        ) : (
-          <div>
-            <PainelHeader title="Produtos">
-              <Button
-                type="primary"
-                icon="plus"
-                onClick={() => this.showModal()}>
-                Adicionar
-              </Button>
-            </PainelHeader>
-            <SimpleTable
-              pagination={this.state.pagination}
-              spinning={this.state.loadingData}
-              rowKey="id"
-              columns={this.tableConfig()}
-              dataSource={this.state.list}
-              onChange={this.handleTableChange}
-            />
-          </div>
-        )}
+
         <ModalForm
           visible={this.state.visible}
           onCancel={this.handleCancel}
@@ -464,16 +399,17 @@ class ProductsPriceTable extends Component {
           record={this.state.record}
           grupo_produto_id={this.state.productgroup_id}
         />
-        <ModalPriceTable
-          visible={this.state.visiblePriceTable}
+        <ModalZone
+          visible={this.state.visibleZone}
           onCancel={this.handleCancel}
-          onCreate={this.handleOkPriceTable}
+          onCreate={this.handleOkZone}
           wrappedComponentRef={this.saveFormRef}
-          record={this.state.price_table_data}
+          record={this.state.zoneData}
         />
       </div>
+      </SimpleLazyLoader>
     );
   }
 }
 
-export default withRouter(ProductsPriceTable);
+export default withRouter(ZoneLocations);
