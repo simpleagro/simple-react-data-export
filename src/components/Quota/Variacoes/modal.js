@@ -1,6 +1,7 @@
 import React from 'react'
 import { Modal, Form, Input, Button, Select } from 'antd';
 import * as UnidadeMedidaService from '../../../services/units-measures'
+import { flashWithError } from "../../common/FlashMessages";
 
 const ModalForm = Form.create()(
     class extends React.Component {
@@ -19,7 +20,17 @@ const ModalForm = Form.create()(
       };
 
       onSalve = () => {
-        console.log(this.state.formData)
+        let soma_cota = this.props.list.reduce((acc, obj) => acc + parseInt(obj.cota_valor), 0)
+        soma_cota = soma_cota + parseInt(this.state.formData.cota_valor)
+        if(this.props.record){
+          soma_cota = soma_cota - parseInt(this.props.record.cota_valor)
+        }
+        console.log(soma_cota)
+        if(soma_cota > this.props.product_data.cota_valor){
+          flashWithError("O valor da cota adicionado ultrapassa o valor da cota do produto!")
+          return
+        }
+
         this.props.form.validateFields(async err => {
             if (err) return;
             else {
