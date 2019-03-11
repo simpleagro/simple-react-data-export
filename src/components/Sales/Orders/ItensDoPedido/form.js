@@ -924,7 +924,7 @@ class OrderItemForm extends Component {
                 p.status === true &&
                 p.deleted === false
             );
-            let preco = valorVariacao.valor || 0;
+            let preco = (valorVariacao && valorVariacao.valor) || 0;
             const periodo = configAPP.usarCalculoDataBaseMes()
               ? moment(this.props.pedido[`venc_${variacao.chave}`]).diff(
                   tabelaCaract[0].data_base,
@@ -1003,7 +1003,7 @@ class OrderItemForm extends Component {
                   } para o ${rpb.label}`
                 );
 
-              let preco = getNumber(tabelaPreco[`preco_${rpb.chave}`]);
+              let preco = getNumber(tabelaPreco[`preco_${rpb.chave}`]) || 0;
 
               // A data base pode ser padrão ou marcado por data royalties, germoplasma ... etc
               let dataBaseCalculo =
