@@ -338,16 +338,16 @@ class Zone extends Component {
                 type="vertical"
               />
 
-              {/* <Tooltip title={`Veja os locais de entrega da cidade ${tabela.nome}`}>
+              <Tooltip title={`Veja os locais de entrega da cidade ${record.nome}`}>
                 <Button
                   size="small"
                   onClick={() =>
-                    this.props.history.push(`/tabela-preco/${tabela._id}/grupo-produto/${record._id}/produtos`)
+                    this.props.history.push(`/regioes/${tabela._id}/cidade/${record._id}/locais-de-entrega`)
                   }
                 >
                   <FontAwesomeIcon icon="clipboard-list" size="lg" />
                 </Button>
-              </Tooltip> */}
+              </Tooltip>
 
             </span>
           );
