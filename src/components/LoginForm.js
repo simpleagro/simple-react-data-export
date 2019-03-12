@@ -9,7 +9,6 @@ import { userLoggedIn, userSwitchedModule } from "../actions/painelActions";
 
 import { API_URL } from "../config/api";
 import "../styles/login.css";
-import { mapProps } from "recompose";
 
 const FormItem = Form.Item;
 
@@ -37,6 +36,27 @@ class LoginForm extends Component {
     form.validateFields();
 
     if (this.state.token) this.props.history.push("/");
+
+
+      setTimeout(() => {
+        this.props.form.setFieldsValue({
+          login: " "
+        });
+        this.props.form.setFieldsValue({
+          login: ""
+        });
+      }, 500);
+
+      setTimeout(() => {
+        this.props.form.setFieldsValue({
+          senha: " "
+        });
+        this.props.form.setFieldsValue({
+          senha: ""
+        });
+      }, 500);
+
+
   }
 
   handleSubmit = e => {

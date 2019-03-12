@@ -1,6 +1,7 @@
 import React from 'react'
 import { Modal, Form, Input, Button, Select } from 'antd';
 import * as UnidadeMedidaService from '../../../services/units-measures'
+import { flashWithError } from "../../common/FlashMessages";
 
 const ModalForm = Form.create()(
     class extends React.Component {
@@ -19,7 +20,17 @@ const ModalForm = Form.create()(
       };
 
       onSalve = () => {
-        console.log(this.state.formData)
+        let soma_cota = this.props.list.reduce((acc, obj) => acc + parseInt(obj.cota_valor), 0)
+        soma_cota = soma_cota + parseInt(this.state.formData.cota_valor)
+        if(this.props.record){
+          soma_cota = soma_cota - parseInt(this.props.record.cota_valor)
+        }
+        console.log(soma_cota)
+        if(soma_cota > this.props.product_data.cota_valor){
+          flashWithError("O valor da cota adicionado ultrapassa o valor da cota do produto!")
+          return
+        }
+
         this.props.form.validateFields(async err => {
             if (err) return;
             else {
@@ -42,10 +53,10 @@ const ModalForm = Form.create()(
           status: true,
           fields: "nome,_id,sigla"
         });
-      
+
         this.setState(prev => ({ ...prev, u_ms: u_ms.docs }));
-      }  
-      
+      }
+
       listarUMs = (u_ms) => {
         return u_ms.map(u_m => (
           <Select.Option key={u_m._id} value={u_m.sigla}>
@@ -55,16 +66,16 @@ const ModalForm = Form.create()(
       }
 
       gerarFormulario = (caracteristicas, getFieldDecorator) => {
-        return caracteristicas.map( caracteristica => 
+        return caracteristicas.map( caracteristica =>
           <Form.Item
             label={`${caracteristica.label}`}
             key= { `${caracteristica.chave}` }
           >
             {getFieldDecorator(`${caracteristica.chave}`, {
               initialValue: this.state.formData[`${caracteristica.chave}`],
-              rules: [{ required: caracteristica.obrigatorio, message: 'Selecione!'}],
+              // rules: [{ required: caracteristica.obrigatorio, message: 'Selecione!'}],
             })(
-              <Select 
+              <Select
                 placeholder="Selecione"
                 name= { `${caracteristica.chave}` }
                 showSearch
@@ -75,7 +86,7 @@ const ModalForm = Form.create()(
                   }
                 }
               >
-                {caracteristica.opcoes.map(opcao => 
+                {caracteristica.opcoes.map(opcao =>
                   <Select.Option value={opcao.value} key={opcao.value} >{opcao.label}</Select.Option>
                 )}
               </Select>
@@ -87,7 +98,7 @@ const ModalForm = Form.create()(
       render() {
         const { visible, onCancel, form } = this.props;
         const { getFieldDecorator } = form;
-        
+
         return (
           <Modal
             visible={visible}
@@ -152,4 +163,3 @@ const ModalForm = Form.create()(
   );
 
   export default ModalForm;
- 

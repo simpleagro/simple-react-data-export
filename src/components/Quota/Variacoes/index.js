@@ -388,6 +388,8 @@ class VariacaoCota extends Component {
           wrappedComponentRef={this.saveFormRef}
           record={this.state.record}
           group_caracteristicas={this.state.group_caracteristicas}
+          product_data={this.state.product_data}
+          list={this.state.list}
         />
       </div>
     );

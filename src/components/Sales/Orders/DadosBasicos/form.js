@@ -254,7 +254,8 @@ class OrderForm extends Component {
       ...prev,
       propriedades: propriedades.filter(t => t.status === true),
       formData: {
-        ...prev.formData
+        ...prev.formData,
+        vendedor: {}
       }
     }));
   }
@@ -441,7 +442,7 @@ class OrderForm extends Component {
           )}
           <Form.Item label="Vendedor" {...formItemLayout}>
             {getFieldDecorator("vendedor", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue:
                 this.state.formData.vendedor &&
                 this.state.formData.vendedor.nome

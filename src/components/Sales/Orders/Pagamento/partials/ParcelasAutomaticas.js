@@ -45,9 +45,9 @@ class ParcelasAutomaticas extends Component {
           order &&
           order.itens
             .map(t => t[`preco_total_${chave.replace("pgto_", "")}`])
-            .reduce((a, b) => Number(a) + Number(b), 0);
+            .reduce((a, b) => getNumber(a) + getNumber(b), 0);
         if (chave === "pgto_frete")
-          valor = order.pagamento.total_pedido_frete || 0;
+          valor = getNumber(order.pagamento.total_pedido_frete) || 0;
         if (
           parcelas.find(
             parcela =>

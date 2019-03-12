@@ -77,6 +77,17 @@ class ConsultantForm extends Component {
       setTimeout(() => {
         this.titleInput.focus();
       }, 0);
+
+      if (!this.props.match.params.hasOwnProperty("id")) {
+        setTimeout(() => {
+          this.props.form.setFieldsValue({
+            login: " "
+          });
+          this.props.form.setFieldsValue({
+            login: ""
+          });
+        }, 500);
+      }
     } catch (error) {
       // if (error && error.response && error.response.data) parseErrors(error);
     } finally {
@@ -153,37 +164,35 @@ class ConsultantForm extends Component {
       }
     });
 
+    user &&
+      this.setState(prev => ({
+        ...prev,
+        formData: {
+          ...prev.formData,
+          nome: user.nome,
+          email: user.email,
+          login: user.login,
+          tipoLogin: user.tipoLogin,
+          grupo_id: user.grupo_id._id,
+          filiais: user.filiais
+        },
+        userHasSelected: true
+      }));
 
-      user &&
-        this.setState(prev => ({
-          ...prev,
-          formData: {
-            ...prev.formData,
-            nome: user.nome,
-            email: user.email,
-            login: user.login,
-            tipoLogin: user.tipoLogin,
-            grupo_id: user.grupo_id._id,
-            filiais: user.filiais
-          },
-          userHasSelected: true
-        }));
-
-      !user &&
-        this.setState(prev => ({
-          ...prev,
-          formData: {
-            ...prev.formData,
-            nome: "",
-            email: "",
-            login: "",
-            tipoLogin: "",
-            grupo_id: null,
-            filiais: []
-          },
-          userHasSelected: false
-        }));
-
+    !user &&
+      this.setState(prev => ({
+        ...prev,
+        formData: {
+          ...prev.formData,
+          nome: "",
+          email: "",
+          login: "",
+          tipoLogin: "",
+          grupo_id: null,
+          filiais: []
+        },
+        userHasSelected: false
+      }));
   };
 
   setLogin = email => {
@@ -249,7 +258,9 @@ class ConsultantForm extends Component {
                 rules: [
                   { required: false, message: "Este campo é obrigatório!" }
                 ],
-                initialValue: this.state.formData.usuario_id && this.state.formData.usuario_id._id
+                initialValue:
+                  this.state.formData.usuario_id &&
+                  this.state.formData.usuario_id._id
               })(
                 <Select
                   disabled={this.state.permitirEditarUsuario}
@@ -312,7 +323,8 @@ class ConsultantForm extends Component {
                 rules: [
                   { required: true, message: "Este campo é obrigatório!" }
                 ],
-                initialValue: this.state.formData.login || (this.state.formData.usuario_id && this.state.formData.usuario_id.login)
+                initialValue:
+                  undefined
               })(
                 <Input
                   disabled={this.state.editMode || this.state.userHasSelected}
@@ -333,7 +345,10 @@ class ConsultantForm extends Component {
                 rules: [
                   { required: true, message: "Este campo é obrigatório!" }
                 ],
-                initialValue: this.state.formData.tipoLogin  || (this.state.formData.usuario_id && this.state.formData.usuario_id.tipoLogin),
+                initialValue:
+                  this.state.formData.tipoLogin ||
+                  (this.state.formData.usuario_id &&
+                    this.state.formData.usuario_id.tipoLogin),
                 defaultValue: "API"
               })(
                 <Select
@@ -377,7 +392,13 @@ class ConsultantForm extends Component {
                   }
                 ],
                 initialValue: this.state.formData.senha
-              })(<Input disabled={this.state.editMode} type="password" name="senha" />)}
+              })(
+                <Input
+                  disabled={this.state.editMode}
+                  type="password"
+                  name="senha"
+                />
+              )}
             </Form.Item>
 
             {!this.state.editMode && (

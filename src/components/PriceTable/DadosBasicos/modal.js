@@ -2,13 +2,14 @@ import React from 'react'
 import { Modal, Form, Input, Button, Select, DatePicker, Checkbox } from 'antd';
 import * as GroupsServices from "../../../services/productgroups";
 import * as SeasonsServices from "../../../services/seasons";
+import { list as ZoneListService } from "services/zone";
 import locale from "antd/lib/date-picker/locale/pt_BR";
 import moment from "moment";
 import "moment/locale/pt-br";
 
 const ModalForm = Form.create()(
     class extends React.Component {
-      state = {formData:{}, grupos_produtos: [],/*  moedas: [], */ safras: []}
+      state = {formData:{}, grupos_produtos: [],/*  moedas: [], */ safras: [], regioes: []}
 
       onHadleChange = event => {
         if (!event.target.name) return;
@@ -38,7 +39,12 @@ const ModalForm = Form.create()(
           status: true,
           fields: "descricao,_id"
         });
-        this.setState(prev => ({ ...prev, grupos_produtos: grupos_produtos.docs, safras: safras.docs }));
+        const regioes = await ZoneListService({
+          limit: -1,
+          status: true,
+          fields: "nome,_id"
+        });
+        this.setState(prev => ({ ...prev, grupos_produtos: grupos_produtos.docs, safras: safras.docs, regioes: regioes.docs }));
       }
 
       componentDidUpdate(prevProps) {
@@ -68,6 +74,14 @@ const ModalForm = Form.create()(
         return safras.map(safra => (
           <Select.Option key={safra._id} value={JSON.stringify({id: safra._id, descricao: safra.descricao})}>
             {safra.descricao}
+          </Select.Option>
+        ))
+      }
+
+      listarRegioes = (regioes) => {
+        return regioes.map(regiao => (
+          <Select.Option key={regiao._id} value={JSON.stringify({id: regiao._id, nome: regiao.nome})}>
+            {regiao.nome}
           </Select.Option>
         ))
       }
@@ -175,6 +189,33 @@ const ModalForm = Form.create()(
                     }
                   >
                     {this.listarSafras(this.state.safras)}
+                  </Select>
+                )}
+              </Form.Item>
+              <Form.Item label="Região">
+                {getFieldDecorator("regiao", {
+                  initialValue: this.state.formData.regiao
+                    ? `${this.state.formData.regiao.nome}`
+                    : undefined
+                })(
+                  <Select
+                    name="regiao"
+                    showAction={["focus", "click"]}
+                    showSearch
+                    placeholder="Selecione uma região..."
+                    filterOption={(input, option) =>
+                      option.props.children
+                        .toLowerCase()
+                        .indexOf(input.toLowerCase()) >= 0
+                    }
+                    onChange={e => {
+                      e = JSON.parse(e)
+                      this.onHadleChange({
+                        target: { name: "regiao", value: e }
+                      })}
+                    }
+                  >
+                    {this.listarRegioes(this.state.regioes)}
                   </Select>
                 )}
               </Form.Item>
