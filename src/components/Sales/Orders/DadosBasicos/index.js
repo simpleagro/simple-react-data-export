@@ -239,6 +239,12 @@ class Orders extends Component {
                 </Button>
               </Tooltip>
             )}
+
+            <Tooltip title="Visualisar Espelho">
+              <Button size="small" onClick={ () => this.props.history.push(`/pedidos/${record._id}/espelho`) }>
+                <Icon type="shopping" style={{ fontSize: "16px" }} />
+              </Button>
+            </Tooltip>
           </span>
         );
       }

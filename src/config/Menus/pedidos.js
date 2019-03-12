@@ -39,6 +39,12 @@ const menus = {
     path: "/pedidos/:order_id/finalizar-pedido",
     showMenu: false
   },
+
+  "/pedidos/espelho": {
+    component: SimpleLoadable(() => import("../../components/Sales/Orders/Espelho")),
+    path: "/pedidos/:order_id/espelho",
+    showMenu: false
+  },
 };
 
 export default menus;
