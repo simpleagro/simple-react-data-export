@@ -2,12 +2,12 @@ import React, { Component } from "react";
 import { Divider, Button, Badge, Icon, Popconfirm, Tooltip } from "antd";
 import moment from "moment";
 
-import { simpleTableSearch } from "../../../../lib/simpleTableSearch";
-import * as OrderService from "../../../../services/orders";
-import SimpleTable from "../../../common/SimpleTable";
-import { flashWithSuccess } from "../../../common/FlashMessages";
-import parseErrors from "../../../../lib/parseErrors";
-import { PainelHeader } from "../../../common/PainelHeader";
+import { simpleTableSearch } from "lib/simpleTableSearch";
+import * as OrderService from "services/orders";
+import SimpleTable from "common/SimpleTable";
+import { flashWithSuccess } from "common/FlashMessages";
+import parseErrors from "lib/parseErrors";
+import { PainelHeader } from "common/PainelHeader";
 
 class Orders extends Component {
   constructor(props) {

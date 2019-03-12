@@ -140,6 +140,18 @@ export default class Export extends Component {
 
   }
 
+  addPages(pdf){
+    let totalPages = this.state.list.itens && parseInt(Object.keys(this.state.list.itens).length / 12)
+    console.log("total de paginas: ", totalPages)
+    totalPages = 4
+
+    for(let i = 0; i < totalPages; i++){
+      console.log("add new page");
+      pdf.addPage('a4', 'l');
+      pdf.text(20, 20, `Pagina ${i+1} de ${totalPages}`);
+    }
+  }
+
   printDocument() {
     const input = document.getElementById('divToPrint');
     html2canvas(input)
@@ -147,6 +159,9 @@ export default class Export extends Component {
         const imgData = canvas.toDataURL('image/jpeg');
         const pdf = new jsPDF('l');
         pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210);
+
+        //this.addPages(pdf);
+
         pdf.output('dataurlnewwindow');
         //pdf.save("download.pdf");
       })
@@ -283,6 +298,23 @@ export default class Export extends Component {
 
     return obj;
   }
+
+  setFormaPagamento(){
+    let obj = [], count = 0
+
+    this.state.list.pagamento &&
+      this.state.list.pagamento.parcelas.map((e, i) => (obj.push(Object.assign({
+        valor_parcela: e.valor_parcela,
+        data_vencimento: moment(e.data_vencimento).format("DD/MM/YYYY")
+      })), count++))
+
+      while(this.state.list.pagamento && count < 3){
+        obj.push(Object.assign({valor: 0, data: 0}))
+        count++
+      }
+
+      return obj
+  }
   /* #endregion */
 
   render() {
@@ -324,7 +356,7 @@ export default class Export extends Component {
                 <Row style={{ height: 10 }} />
                 <Row style={{ textAlign: "center", borderStyle: "solid", borderLeftStyle: "none", borderRightStyle: "none", borderBottomStyle: "none", paddingBottom: 19 }}>
                   Revenda/Agente
-                  <Row>{this.state.list.tipo_venda && this.state.list.tipo_venda.toLowerCase().includes("agenciada") && this.state.list.agente.nome}</Row>
+                  <Row>{this.state.list.tipo_venda && this.state.list.tipo_venda.toLowerCase().includes("agenciada") && this.state.list.agente ? this.state.list.agente.nome : null}</Row>
                 </Row>
               </Col>
               <Col span={4} style={ headerBoxOrder }>
@@ -487,27 +519,17 @@ export default class Export extends Component {
                 </Col>
               </Row>
               <Row style={footerBoxRow2} type="flex" justify="space-between">
+
+              {this.setFormaPagamento().map((element, index) => (
                 <Col span={7} style={{ borderStyle: "solid" }}>
-                  <Row style={{ textAlign: "center" }}><b>Vencimento 1</b></Row>
-                  <Row>
-                    <Col span={12} style={{paddingLeft: 10}}>R$ {this.state.list.pagamento && this.state.list.pagamento.parcelas[0].valor_parcela}</Col>
-                    <Col span={12} style={{paddingLeft: 10}}>Data: {this.state.list.pagamento && moment(this.state.list.pagamento.parcelas[0].data_vencimento).format("DD/DD/YYYY")}</Col>
-                  </Row>
+                    <Row style={{ textAlign: "center" }}><b>Vencimento {index+1}</b></Row>
+                    <Row>
+                      <Col key={index} span={12} style={{paggindLeft: 10}}>R$: {element.valor_parcela}</Col>
+                      <Col span={12} style={{paddingLeft: 10}}>Data: {element.data_vencimento}</Col>
+                    </Row>
                 </Col>
-                <Col span={7} style={{ borderStyle: "solid", marginLeft: 0, marginRight: 0 }}>
-                  <Row style={{ textAlign: "center" }}><b>Vencimento 2</b></Row>
-                  <Row>
-                    <Col span={12} style={{paddingLeft: 10}}>R$ {this.state.list.pagamento && this.state.list.pagamento.parcelas[1].valor_parcela}</Col>
-                    <Col span={12} style={{paddingLeft: 10}}>Data: {this.state.list.pagamento && moment(this.state.list.pagamento.parcelas[1].data_vencimento).format("DD/MM/YYYY")}</Col>
-                  </Row>
-                </Col>
-                <Col span={7} style={{ borderStyle: "solid" }}>
-                  <Row style={{ textAlign: "center" }}><b>Vencimento 3</b></Row>
-                  <Row>
-                    <Col span={12} style={{paddingLeft: 10}}>R$ {this.state.list.pagamento && this.state.list.pagamento.parcelas[2].valor_parcela}</Col>
-                    <Col span={12} style={{paddingLeft: 10}}>Data: {this.state.list.pagamento && moment(this.state.list.pagamento.parcelas[2].data_vencimento).format("DD/MM/YYYY")}</Col>
-                  </Row>
-                </Col>
+                  ))}
+
               </Row>
               <Row style={footerBoxRow3}>
                 <Col span={2}><b>Observações:</b></Col>
