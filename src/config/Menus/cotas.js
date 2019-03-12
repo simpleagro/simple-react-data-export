@@ -18,6 +18,14 @@ const menus = {
     path: "/cotas/:quota_id/vendedores",
     showMenu: false
   },
+  "/cotas/:quota_id/resumo": {
+    component: SimpleLoadable(() =>
+      import("../../components/Quota/Resumo")
+    ),
+    key: "/cotas/resumo",
+    path: "/cotas/:quota_id/resumo",
+    showMenu: false
+  },
   "/cotas/:quota_id/vendedores/:saleman_id/grupos-produto/:productgroup_id/produtos": {
     component: SimpleLoadable(() =>
       import("../../components/Quota/Products")

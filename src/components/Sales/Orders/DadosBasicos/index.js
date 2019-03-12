@@ -226,19 +226,21 @@ class Orders extends Component {
               type="vertical"
             />
 
-            <Tooltip title="Finalizar Pedido">
-              <Button
-                size="small"
-                onClick={() => {
-                  this.props.history.push(
-                    `/pedidos/${record._id}/finalizar-pedido`
-                  );
-                }}>
-                <Icon type="shopping" style={{ fontSize: "16px" }} />
-              </Button>
-            </Tooltip>
+            {this.pedidoPodeSerEditado() && (
+              <Tooltip title="Finalizar Pedido">
+                <Button
+                  size="small"
+                  onClick={() => {
+                    this.props.history.push(
+                      `/pedidos/${record._id}/finalizar-pedido`
+                    );
+                  }}>
+                  <Icon type="shopping" style={{ fontSize: "16px" }} />
+                </Button>
+              </Tooltip>
+            )}
 
-            <Tooltip title="Vizualisar Espelho">
+            <Tooltip title="Visualisar Espelho">
               <Button size="small" onClick={ () => this.props.history.push(`/pedidos/${record._id}/espelho`) }>
                 <Icon type="shopping" style={{ fontSize: "16px" }} />
               </Button>
