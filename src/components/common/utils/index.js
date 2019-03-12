@@ -134,8 +134,8 @@ export const getNumber = n => {
           .toString()
           .replace(/\./g, "")
           .replace(",", ".")
-      ).toFixed(2)
-    : parseFloat(n).toFixed(2);
+      ).toFixed(2)*1
+    : parseFloat(n).toFixed(2)*1;
 };
 
 export const normalizeString = str => {

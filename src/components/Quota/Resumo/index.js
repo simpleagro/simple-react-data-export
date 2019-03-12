@@ -1,14 +1,13 @@
 import React, { Component } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Divider, Button, Icon, Popconfirm, Tooltip, Badge } from "antd";
+import { Button, Select } from "antd";
 
 import * as QuotaService from "../../../services/quotas";
 import SimpleTable from "../../common/SimpleTable";
+import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
 import { PainelHeader } from "../../common/PainelHeader";
-import ModalForm from "./modal";
-import { formatDate } from "../../common/utils";
+import { currency, getNumber } from "../../common/utils";
 import { simpleTableSearch } from "../../../lib/simpleTableSearch";
 
 class Quota extends Component {
@@ -22,31 +21,54 @@ class Quota extends Component {
         defaultPageSize: 10,
         pageSizeOptions: ["10", "25", "50", "100"]
       },
-      visible: false
+      visible: false,
+      quota_id: this.props.match.params.quota_id,
+      grupoProdutos: []
     };
   }
 
-  async initializeList(aqp) {
+  async initializeList(grupo = {}, aqp) {
+
+     grupo = Object.keys(grupo).length ? JSON.parse(grupo) : {};
+
     this.setState(previousState => {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await QuotaService.list(aqp);
+    const data = await QuotaService.getResume(this.state.quota_id)(grupo.id, { ...aqp });
+
+    data.docs = data.docs.map(doc => {
+      doc.total_cota = doc.cota_valor.reduce(
+        (acc, obj) => acc + getNumber(obj),
+        0
+      );
+      return doc;
+    });
 
     this.setState(prev => ({
       ...prev,
       list: data.docs,
+      grupoProdutos: data.grupoProdutos,
       loadingData: false,
       pagination: {
         total: data.total
       },
       editMode: false,
       formData: {},
-      savingForm: false
+      savingForm: false,
+      selectedGroup: grupo,
     }));
   }
 
   async componentDidMount() {
+
+    const data = await QuotaService.getResume(this.state.quota_id)();
+
+    this.setState(prev => ({
+      ...prev,
+      grupoProdutos: data.grupoProdutos,
+    }));
+
     await this.initializeList();
   }
 
@@ -97,7 +119,7 @@ class Quota extends Component {
     }
   };
 
-  tableConfig = () => [
+  tableConfigProdutos = () => [
     {
       title: "Nome",
       dataIndex: "nome",
@@ -106,141 +128,43 @@ class Quota extends Component {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      ...simpleTableSearch(this)("nome"),
+      ...simpleTableSearch(this)("produtos.nome"),
       render: text => text
     },
     {
-      title: "Safra",
-      dataIndex: "safra",
-      key: "safra",
+      title: "Nome Comercial",
+      dataIndex: "nome_comercial",
+      key: "nome_comercial",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      render: text => text.descricao
+      ...simpleTableSearch(this)("produtos.nome_comercial"),
+      render: text => text
     },
     {
-      title: "Validade de",
-      dataIndex: "data_validade_de",
-      key: "data_validade_de",
+      title: "UM",
+      dataIndex: "cota_um",
+      key: "cota_um",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      render: text => (text ? formatDate(text) : "")
+      render: text => text
     },
     {
-      title: "Validade até",
-      dataIndex: "data_validade_ate",
-      key: "data_validade_ate",
+      title: "Valor Cota",
+      dataIndex: "total_cota",
+      key: "total_cota",
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      render: text => (text ? formatDate(text) : "")
-    },
-    {
-      title: "Versão",
-      dataIndex: "versao",
-      key: "versao",
-      sorter: (a, b, sorter) => {
-        if (sorter === "ascendent") return -1;
-        else return 1;
-      }
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (text, record) => {
-        const statusTxt = record.status ? "desativar" : "ativar";
-        const statusBtn = record.status ? "unlock" : "lock";
-        return (
-          <Popconfirm
-            title={`Tem certeza em ${statusTxt} a cota?`}
-            onConfirm={e => this.changeStatus(record._id, !record.status)}
-            okText="Sim"
-            cancelText="Não">
-            <Tooltip title={`${statusTxt.toUpperCase()} a cota`}>
-              <Button size="small">
-                <FontAwesomeIcon icon={statusBtn} size="lg" />
-              </Button>
-            </Tooltip>
-          </Popconfirm>
-        );
-      }
-    },
-    {
-      title: "Ações",
-      dataIndex: "action",
-      render: (text, record) => {
-        return (
-          <span>
-            <Button size="small" onClick={() => this.showModal(record)}>
-              <Icon type="edit" style={{ fontSize: "16px" }} />
-            </Button>
-            <Divider
-              style={{ fontSize: "10px", padding: 0, margin: 2 }}
-              type="vertical"
-            />
-
-            <Popconfirm
-              title={`Tem certeza em excluir a cota?`}
-              onConfirm={() => this.removeRecord(record)}
-              okText="Sim"
-              cancelText="Não">
-              <Button size="small">
-                <Icon type="delete" style={{ fontSize: "16px" }} />
-              </Button>
-            </Popconfirm>
-            <Divider
-              style={{ fontSize: "10px", padding: 0, margin: 2 }}
-              type="vertical"
-            />
-
-            <Tooltip title="Veja os vendedores">
-              <Button
-                size="small"
-                onClick={() =>
-                  this.props.history.push(`/cotas/${record._id}/vendedores`)
-                }>
-                <FontAwesomeIcon icon="users" size="lg" />
-              </Button>
-            </Tooltip>
-
-            <Divider
-              style={{ fontSize: "10px", padding: 0, margin: 2 }}
-              type="vertical"
-            />
-
-            <Tooltip title="Veja o resumo geral da cota">
-              <Button
-                size="small"
-                onClick={() =>
-                  this.props.history.push(`/cotas/${record._id}/resumo`)
-                }>
-                <Icon type="file-text" />
-              </Button>
-            </Tooltip>
-
-
-          </span>
-        );
-      }
+      render: text => currency()(text || 0)
     }
   ];
 
-  handleTableChange = (pagination, filter, sorter) => {
-    const pager = { ...this.state.pagination };
-    pager.current = pagination.current;
-    this.setState({
-      pagination: pager
-    });
-    this.initializeList({
-      page: pagination.current,
-      limit: pagination.pageSize
-    });
-  };
+
 
   showModal = record => {
     this.setState({
@@ -314,49 +238,68 @@ class Quota extends Component {
     this.formRef = formRef;
   };
 
-  handleTableChange = (pagination, filters, sorter) => {
+  handleTableChangeProdutos = (pagination, sorter) => {
+
     const pager = { ...this.state.pagination };
     pager.current = pagination.current;
     this.setState({
       pagination: pager
     });
-    this.initializeList({
+    this.initializeList(JSON.stringify(this.state.selectedGroup),{
       page: pagination.current,
       limit: pagination.pageSize,
-      ...filters,
       ...this.state.tableSearch
     });
   };
 
   render() {
     return (
-      <div>
-        <PainelHeader title="Cotas">
-          <Button
-            type="primary"
-            icon="plus"
-            onClick={() => this.showModal()} //this.props.history.push("/ship-table/new")}
-          >
-            Adicionar
-          </Button>
-        </PainelHeader>
-        <SimpleTable
-          className="components-table-demo-nested"
-          pagination={this.state.pagination}
-          spinning={this.state.loadingData}
-          rowKey="_id"
-          columns={this.tableConfig()}
-          dataSource={this.state.list}
-          onChange={this.handleTableChange}
-        />
-        <ModalForm
-          visible={this.state.visible}
-          onCancel={this.handleCancel}
-          onCreate={this.handleOk}
-          wrappedComponentRef={this.saveFormRef}
-          record={this.state.record}
-        />
-      </div>
+
+        <div>
+          <SimpleBreadCrumb to={`/cotas`} history={this.props.history} />
+          <PainelHeader title="Cotas - Resumo Geral">
+            <Button
+              type="primary"
+              icon="plus"
+              onClick={() => this.showModal()} //this.props.history.push("/ship-table/new")}
+            >
+              Adicionar
+            </Button>
+          </PainelHeader>
+
+          <h4>Selecione um grupo de produtos para começar:</h4>
+
+          <Select
+            value={this.state.selectedGroup && this.state.selectedGroup.nome}
+            style={{ width: "100%", marginBottom: 20 }}
+            showAction={["focus", "click"]}
+            showSearch
+            placeholder="Selecione um grupo de produto..."
+            onChange={e => this.initializeList(e)}
+            filterOption={(input, option) =>
+              option.props.children
+                .toLowerCase()
+                .indexOf(input.toLowerCase()) >= 0
+            }>
+            {this.state.grupoProdutos.length &&
+              this.state.grupoProdutos.map(gp => (
+                <Select.Option
+                  key={gp._id}
+                  value={JSON.stringify({ id: gp._id, nome: gp.nome })}>
+                  {gp.nome}
+                </Select.Option>
+              ))}
+          </Select>
+
+          <SimpleTable
+            pagination={this.state.pagination}
+            spinning={this.state.loadingData}
+            rowKey="_id"
+            columns={this.tableConfigProdutos()}
+            dataSource={this.state.list}
+            onChange={this.handleTableChangeProdutos}
+          />
+        </div>
     );
   }
 }
