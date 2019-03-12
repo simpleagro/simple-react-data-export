@@ -5,7 +5,7 @@ const menus = {
     component: SimpleLoadable(() => import("../../components/Zone/DadosBasicos")),
     key: "/regioes",
     path: "/regioes",
-    label: "Regiões",
+    label: "Tabela de Regiões",
     icon: "map-marked",
     showMenu: true,
     rule: "Zone"
@@ -14,8 +14,7 @@ const menus = {
     component: SimpleLoadable(() => import("../../components/Zone/LocaisEntrega")),
     key: "/regioes/cidade/locais-de-entrega",
     path: "/regioes/:zone_id/cidade/:cidade_id/locais-de-entrega",
-    showMenu: false,
-    rule: "Zone"
+    showMenu: false
   },
 };
 
