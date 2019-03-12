@@ -28,14 +28,15 @@ class Quota extends Component {
   }
 
   async initializeList(grupo = {}, aqp) {
-
-     grupo = Object.keys(grupo).length ? JSON.parse(grupo) : {};
+    grupo = Object.keys(grupo).length ? JSON.parse(grupo) : {};
 
     this.setState(previousState => {
       return { ...previousState, loadingData: true };
     });
 
-    const data = await QuotaService.getResume(this.state.quota_id)(grupo.id, { ...aqp });
+    const data = await QuotaService.getResume(this.state.quota_id)(grupo.id, {
+      ...aqp
+    });
 
     data.docs = data.docs.map(doc => {
       doc.total_cota = doc.cota_valor.reduce(
@@ -56,17 +57,16 @@ class Quota extends Component {
       editMode: false,
       formData: {},
       savingForm: false,
-      selectedGroup: grupo,
+      selectedGroup: grupo
     }));
   }
 
   async componentDidMount() {
-
     const data = await QuotaService.getResume(this.state.quota_id)();
 
     this.setState(prev => ({
       ...prev,
-      grupoProdutos: data.grupoProdutos,
+      grupoProdutos: data.grupoProdutos
     }));
 
     await this.initializeList();
@@ -164,8 +164,6 @@ class Quota extends Component {
     }
   ];
 
-
-
   showModal = record => {
     this.setState({
       visible: true,
@@ -239,13 +237,12 @@ class Quota extends Component {
   };
 
   handleTableChangeProdutos = (pagination, sorter) => {
-
     const pager = { ...this.state.pagination };
     pager.current = pagination.current;
     this.setState({
       pagination: pager
     });
-    this.initializeList(JSON.stringify(this.state.selectedGroup),{
+    this.initializeList(JSON.stringify(this.state.selectedGroup), {
       page: pagination.current,
       limit: pagination.pageSize,
       ...this.state.tableSearch
@@ -254,52 +251,42 @@ class Quota extends Component {
 
   render() {
     return (
+      <div>
+        <SimpleBreadCrumb to={`/cotas`} history={this.props.history} />
+        <PainelHeader title="Cotas - Resumo Geral" />
 
-        <div>
-          <SimpleBreadCrumb to={`/cotas`} history={this.props.history} />
-          <PainelHeader title="Cotas - Resumo Geral">
-            <Button
-              type="primary"
-              icon="plus"
-              onClick={() => this.showModal()} //this.props.history.push("/ship-table/new")}
-            >
-              Adicionar
-            </Button>
-          </PainelHeader>
+        <h4>Selecione um grupo de produtos para começar:</h4>
 
-          <h4>Selecione um grupo de produtos para começar:</h4>
+        <Select
+          value={this.state.selectedGroup && this.state.selectedGroup.nome}
+          style={{ width: "100%", marginBottom: 20 }}
+          showAction={["focus", "click"]}
+          showSearch
+          placeholder="Selecione um grupo de produto..."
+          onChange={e => this.initializeList(e)}
+          filterOption={(input, option) =>
+            option.props.children.toLowerCase().indexOf(input.toLowerCase()) >=
+            0
+          }>
+          {this.state.grupoProdutos.length &&
+            this.state.grupoProdutos.map(gp => (
+              <Select.Option
+                key={gp._id}
+                value={JSON.stringify({ id: gp._id, nome: gp.nome })}>
+                {gp.nome}
+              </Select.Option>
+            ))}
+        </Select>
 
-          <Select
-            value={this.state.selectedGroup && this.state.selectedGroup.nome}
-            style={{ width: "100%", marginBottom: 20 }}
-            showAction={["focus", "click"]}
-            showSearch
-            placeholder="Selecione um grupo de produto..."
-            onChange={e => this.initializeList(e)}
-            filterOption={(input, option) =>
-              option.props.children
-                .toLowerCase()
-                .indexOf(input.toLowerCase()) >= 0
-            }>
-            {this.state.grupoProdutos.length &&
-              this.state.grupoProdutos.map(gp => (
-                <Select.Option
-                  key={gp._id}
-                  value={JSON.stringify({ id: gp._id, nome: gp.nome })}>
-                  {gp.nome}
-                </Select.Option>
-              ))}
-          </Select>
-
-          <SimpleTable
-            pagination={this.state.pagination}
-            spinning={this.state.loadingData}
-            rowKey="_id"
-            columns={this.tableConfigProdutos()}
-            dataSource={this.state.list}
-            onChange={this.handleTableChangeProdutos}
-          />
-        </div>
+        <SimpleTable
+          pagination={this.state.pagination}
+          spinning={this.state.loadingData}
+          rowKey="_id"
+          columns={this.tableConfigProdutos()}
+          dataSource={this.state.list}
+          onChange={this.handleTableChangeProdutos}
+        />
+      </div>
     );
   }
 }
