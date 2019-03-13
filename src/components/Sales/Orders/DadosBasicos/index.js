@@ -172,7 +172,7 @@ class Orders extends Component {
     },
     {
       title: "Ações",
-      width: 200,
+      width: 250,
       dataIndex: "action",
       render: (text, record) => {
         return (
@@ -206,43 +206,49 @@ class Orders extends Component {
                   style={{ fontSize: "10px", padding: 0, margin: 2 }}
                   type="vertical"
                 />
+
+                <Tooltip title="Veja os produtos do pedido">
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      this.props.history.push(
+                        `/pedidos/${record._id}/itens-do-pedido`
+                      );
+                    }}>
+                    <Icon type="bars" style={{ fontSize: "16px" }} />
+                  </Button>
+                </Tooltip>
+
+                <Divider
+                  style={{ fontSize: "10px", padding: 0, margin: 2 }}
+                  type="vertical"
+                />
+
+                <Tooltip title="Finalizar Pedido">
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      this.props.history.push(
+                        `/pedidos/${record._id}/finalizar-pedido`
+                      );
+                    }}>
+                    <Icon type="shopping" style={{ fontSize: "16px" }} />
+                  </Button>
+                </Tooltip>
+                <Divider
+                  style={{ fontSize: "10px", padding: 0, margin: 2 }}
+                  type="vertical"
+                />
               </React.Fragment>
             )}
 
-            <Tooltip title="Veja os produtos do pedido">
+            <Tooltip title="Visualizar Espelho">
               <Button
                 size="small"
-                onClick={() => {
-                  this.props.history.push(
-                    `/pedidos/${record._id}/itens-do-pedido`
-                  );
-                }}>
-                <Icon type="bars" style={{ fontSize: "16px" }} />
-              </Button>
-            </Tooltip>
-
-            <Divider
-              style={{ fontSize: "10px", padding: 0, margin: 2 }}
-              type="vertical"
-            />
-
-            {this.pedidoPodeSerEditado() && (
-              <Tooltip title="Finalizar Pedido">
-                <Button
-                  size="small"
-                  onClick={() => {
-                    this.props.history.push(
-                      `/pedidos/${record._id}/finalizar-pedido`
-                    );
-                  }}>
-                  <Icon type="shopping" style={{ fontSize: "16px" }} />
-                </Button>
-              </Tooltip>
-            )}
-
-            <Tooltip title="Visualisar Espelho">
-              <Button size="small" onClick={ () => this.props.history.push(`/pedidos/${record._id}/espelho`) }>
-                <Icon type="shopping" style={{ fontSize: "16px" }} />
+                onClick={() =>
+                  this.props.history.push(`/pedidos/${record._id}/espelho`)
+                }>
+                <Icon type="eye" style={{ fontSize: "16px" }} />
               </Button>
             </Tooltip>
           </span>
@@ -266,7 +272,7 @@ class Orders extends Component {
   };
 
   pedidoPodeSerEditado(record) {
-    if(!record) return false;
+    if (!record) return false;
     return (
       record.status_pedido.includes("Em cotação") ||
       record.status_pedido.includes("Reprovado")
