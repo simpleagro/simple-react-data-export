@@ -559,8 +559,8 @@ class CustomerWalletForm extends Component {
           return true;
         });
       }
+      // se veio de um cliente
       else {
-        debugger
         _clientes = _clientes.filter(c => {
           if (c.cliente_id === e.node.props.eventKey) {
             c.propriedades = [];
@@ -574,6 +574,22 @@ class CustomerWalletForm extends Component {
         _clientes = _clientes.filter(c => {
           if (c.cliente_id === e.node.props.clienteID) {
             c.propriedades.push(e.node.props.eventKey);
+          }
+          return true;
+        });
+      }
+      // se veio de um cliente
+      else {
+        _clientes.filter(c => {
+          if (c.cliente_id === e.node.props.eventKey) {
+            const clienteDaLista = this.state.clients.find(
+              cli => cli._id === c.cliente_id
+            );
+            c.propriedades = clienteDaLista
+              ? clienteDaLista.gerenciarCarteiraPorPropriedade
+                ? clienteDaLista.propriedades.map(p => p._id)
+                : []
+              : [];
           }
           return true;
         });
