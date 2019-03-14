@@ -535,6 +535,8 @@ class CustomerWalletForm extends Component {
     )
       checkedKeys = checkedKeys.filter(k => k !== e.node.props.eventKey);
 
+    this.setState({ checkedKeys });
+
     let _clientes = this.state.formData.clientes;
 
     if (e.checked === false) {
@@ -558,8 +560,12 @@ class CustomerWalletForm extends Component {
 
     this.setState(prev => ({
       ...prev,
-      formData: { ...prev.formData, clientes: _clientes, checkedKeys }
+      formData: { ...prev.formData, clientes: _clientes }
     }));
+
+    setTimeout(() => {
+      console.log("STTTATE", this.state.formData);
+    }, 300);
   };
 
   renderTreeNodes = (data, leaf = false, clienteID) =>
@@ -592,6 +598,7 @@ class CustomerWalletForm extends Component {
           if (item.propriedades && item.propriedades.length)
             return (
               <TreeNode
+                ehCliente={true}
                 title={descricao()}
                 key={item._id || item.cliente_id}
                 {...item}>
@@ -602,10 +609,19 @@ class CustomerWalletForm extends Component {
                 )}
               </TreeNode>
             );
-        }
+        } else
+          return (
+            <TreeNode
+              ehCliente={true}
+              {...item}
+              title={descricao()}
+              key={item._id || item.cliente_id}
+            />
+          );
       }
       return (
         <TreeNode
+          ehCliente={false}
           clienteID={clienteID}
           {...item}
           title={descricao()}
