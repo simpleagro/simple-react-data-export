@@ -38,7 +38,7 @@ class OrderPaymentForm extends Component {
     const parcelas = orderData.pagamento && orderData.pagamento.parcelas;
 
     this.props.dadosPedido(orderData);
-    debugger
+
     this.setState(prev => ({
       ...prev,
       orderData,
