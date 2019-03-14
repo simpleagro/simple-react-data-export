@@ -308,14 +308,14 @@ class CustomerWalletForm extends Component {
       ...prev,
       walletTree: _walletTree,
       formData: { ...prev.formData, clientes: _formDataClientes },
-      checkedKeys: this.removeCheckedClientFromTree(
+      checkedKeys: this.clearCheckClientKeys(
         this.state.clients.find(c => c._id === cliente_id),
         prev
       )
     }));
   }
 
-  removeCheckedClientFromTree(selectedClient, prev) {
+  clearCheckClientKeys(selectedClient, prev) {
     if (
       selectedClient.gerenciarCarteiraPorPropriedade &&
       selectedClient.propriedades &&
@@ -529,19 +529,42 @@ class CustomerWalletForm extends Component {
   };
 
   onCheck = async (checkedKeys, e) => {
-    debugger
     if (
       e.node.props.ehCliente &&
       e.node.props.gerenciarCarteiraPorPropriedade === true
     )
       checkedKeys = checkedKeys.filter(k => k !== e.node.props.eventKey);
 
-    this.setState({ checkedKeys });
+    let _clientes = this.state.formData.clientes;
+
+    if (e.checked === false) {
+      _clientes = _clientes.filter(c => {
+        if (c.cliente_id === e.node.props.clienteID) {
+          c.propriedades =
+            c.propriedades &&
+            c.propriedades.filter(p => p !== e.node.props.eventKey);
+        }
+        return true;
+      });
+
+    } else {
+      _clientes = _clientes.filter(c => {
+        if (c.cliente_id === e.node.props.clienteID) {
+          c.propriedades.push(e.node.props.eventKey);
+        }
+        return true;
+      });
+    }
+
+    this.setState(prev => ({
+      ...prev,
+      formData: { ...prev.formData, clientes: _clientes, checkedKeys }
+    }));
   };
 
-  renderTreeNodes = (data, leaf = false) =>
+  renderTreeNodes = (data, leaf = false, clienteID) =>
     data.map(item => {
-      debugger
+      // debugger;
       let descricao = () => (
         <div>
           {item.ie && item.estado
@@ -563,21 +586,27 @@ class CustomerWalletForm extends Component {
         </div>
       );
 
-      if (item.propriedades && item.gerenciarCarteiraPorPropriedade === true) {
-        return (
-          <TreeNode
-            // selectable={leaf}
-            ehCliente={!leaf}
-            title={descricao()}
-            key={item._id || item.cliente_id}
-            {...item}>
-            {this.renderTreeNodes(item.propriedades, true)}
-          </TreeNode>
-        );
+      // se leaf === false então é o cliente
+      if (!leaf) {
+        if (item.gerenciarCarteiraPorPropriedade === true) {
+          if (item.propriedades && item.propriedades.length)
+            return (
+              <TreeNode
+                title={descricao()}
+                key={item._id || item.cliente_id}
+                {...item}>
+                {this.renderTreeNodes(
+                  item.propriedades,
+                  true,
+                  item._id || item.cliente_id
+                )}
+              </TreeNode>
+            );
+        }
       }
       return (
         <TreeNode
-          ehCliente={leaf}
+          clienteID={clienteID}
           {...item}
           title={descricao()}
           key={item._id || item.cliente_id}
