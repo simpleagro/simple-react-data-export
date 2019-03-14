@@ -164,7 +164,10 @@ class OrderPaymentForm extends Component {
       try {
         await OrderPaymentService.update(this.props.pedido._id)({
           ...this.state.formData,
-          ...this.props.pedido.pagamento,
+          ...this.props.pedido.pagamento
+        });
+        await OrderService.update({
+          _id: this.props.pedido._id,
           status_pedido: STATUS_CONCLUIR_PEDIDO
         });
         flashWithSuccess(
