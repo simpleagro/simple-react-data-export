@@ -183,7 +183,7 @@ class OrderPaymentForm extends Component {
     return (
       this.props.pedido &&
       Object.keys(this.props.pedido).some(
-        c => /pgto_/.test(c) && this.props.pedido[c] != "REAIS"
+        c => /pgto_/.test(c) && this.props.pedido[c] && this.props.pedido[c] != "REAIS"
       )
     );
   }
