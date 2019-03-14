@@ -14,7 +14,11 @@ import {
 import { list as ListShipTableOrderItemsService } from "services/shiptable";
 import * as OrderPaymentService from "services/orders.payment";
 import * as IBGEService from "services/ibge";
-import { flashWithError } from "common/FlashMessages";
+import {
+  flashWithError,
+  flashWithSuccess,
+  flashModalWithError
+} from "common/FlashMessages";
 import { list as ListUnitMeasureService } from "services/units-measures";
 import {
   dadosPedidoFrete,
@@ -93,10 +97,24 @@ class CalculoFrete extends Component {
       }
     });
 
+    if (!preco_frete) {
+      flashModalWithError(
+        `Não consegui encontrar preço para frete para o estado: ${
+          this.props.pedido.estado
+        }, peso: ${peso} e distância: ${distancia} `
+      );
+      this.setState({ calculandoFrete: false });
+      return;
+    }
+
+    let data_venc_frete = configAPP.usarConfiguracaoFPCaracteristica()
+      ? this.props.pedido[`venc_frete`]
+      : new Date();
+
     const periodo = configAPP.usarCalculoDataBaseMes()
-      ? moment().diff(tab.data_base, "month")
+      ? moment(data_venc_frete).diff(tab.data_base, "month")
       : Math.round(
-          moment().diff(tab.data_base, "days") /
+          moment(data_venc_frete).diff(tab.data_base, "days") /
             (configAPP.quantidadeDeDiasCalculoDataBase() || 30)
         );
     const taxa =
@@ -104,7 +122,8 @@ class CalculoFrete extends Component {
         ? getNumber(tab.taxa_adicao)
         : getNumber(tab.taxa_supressao);
 
-    if (periodo) preco_frete = valorFinalJurosCompostos(preco_frete, taxa, periodo);
+    if (periodo)
+      preco_frete = valorFinalJurosCompostos(preco_frete, taxa, periodo);
 
     preco_frete = getNumber(preco_frete) * peso;
 
@@ -166,12 +185,12 @@ class CalculoFrete extends Component {
     let chaves = Object.keys(order).filter(chave => chave.includes("pgto_"));
     let parcelas = [];
     chaves.forEach(chave => {
-      if (order[chave] == "REAIS") {
+      if (order[chave].includes("REAIS")) {
         let valor =
           order &&
           order.itens
             .map(t => t[`preco_total_${chave.replace("pgto_", "")}`])
-            .reduce((a, b) => Number(a) + Number(b), 0);
+            .reduce((a, b) => getNumber(a) + getNumber(b), 0);
         if (chave === "pgto_frete")
           valor = order.pagamento.total_pedido_frete || 0;
         if (
@@ -293,7 +312,7 @@ class CalculoFrete extends Component {
               <Col span={8}>
                 <Form.Item label="Peso">
                   <Input
-                  readOnly
+                    readOnly
                     name="peso"
                     value={
                       this.state.formData.peso ||
