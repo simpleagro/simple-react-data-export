@@ -38,39 +38,39 @@ class OrderPaymentForm extends Component {
     const parcelas = orderData.pagamento && orderData.pagamento.parcelas;
 
     this.props.dadosPedido(orderData);
-
+    debugger
     this.setState(prev => ({
       ...prev,
       orderData,
       total_pedido: parcelas
         .map(t => t.total_preco_item)
-        .reduce((a, b) => Number(a) + Number(b), 0),
+        .reduce((a, b) => getNumber(a) + getNumber(b), 0),
       formData: {
         ...prev.formData,
         total_pedido_royalties: currency()(
           orderData.itens
             .map(t => t[`preco_total_royalties`])
-            .reduce((a, b) => Number(a) + Number(b), 0) || 0
+            .reduce((a, b) => getNumber(a) + getNumber(b), 0) || 0
         ),
         total_pedido_germoplasma: currency()(
           orderData.itens
             .map(t => t[`preco_total_germoplasma`])
-            .reduce((a, b) => Number(a) + Number(b), 0) || 0
+            .reduce((a, b) => getNumber(a) + getNumber(b), 0) || 0
         ),
         total_pedido_tratamento: currency()(
           orderData.itens
             .map(t => t[`preco_total_tratamento`])
-            .reduce((a, b) => Number(a) + Number(b), 0) || 0
+            .reduce((a, b) => getNumber(a) + getNumber(b), 0) || 0
         ),
         total_pedido_reais: currency()(
           orderData.itens
             .map(t => t[`total_preco_item_reais`])
-            .reduce((a, b) => Number(a) + Number(b), 0) || 0
+            .reduce((a, b) => getNumber(a) + getNumber(b), 0) || 0
         ),
         total_pedido_graos: currency()(
           orderData.itens
             .map(t => t[`total_preco_item_graos`])
-            .reduce((a, b) => Number(a) + Number(b), 0) || 0
+            .reduce((a, b) => getNumber(a) + getNumber(b), 0) || 0
         )
       },
       loadingForm: false
@@ -183,7 +183,10 @@ class OrderPaymentForm extends Component {
     return (
       this.props.pedido &&
       Object.keys(this.props.pedido).some(
-        c => /pgto_/.test(c) && this.props.pedido[c] && this.props.pedido[c] != "REAIS"
+        c =>
+          /pgto_/.test(c) &&
+          this.props.pedido[c] &&
+          this.props.pedido[c] != "REAIS"
       )
     );
   }
@@ -312,13 +315,13 @@ class OrderPaymentForm extends Component {
                     {!configAPP.usarConfiguracaoFPCaracteristica() && (
                       <React.Fragment>
                         <p>{`Total Pedido: ${currency()(
-                          Number(this.state.total_pedido) +
-                            Number(
+                          getNumber(this.state.total_pedido) +
+                            getNumber(
                               this.state.formData.total_pedido_frete || 0
                             ) || 0
                         )}`}</p>
                         <p>{`Saldo a parcelar: ${currency()(
-                          Number(this.state.total_pedido) -
+                          getNumber(this.state.total_pedido) -
                             this.valorTotalParcelas() || 0
                         )}`}</p>
                       </React.Fragment>
@@ -340,7 +343,8 @@ class OrderPaymentForm extends Component {
                     Concluir Pedido
                   </Button>
                 }>
-                <CalculoFrete />
+                {this.props.pedido.tipo_frete &&
+                  this.props.pedido.tipo_frete === "CIF" && <CalculoFrete />}
                 {configAPP.usarConfiguracaoFPCaracteristica() &&
                   this.existePagamentoEmGraos() && <CalculoPagamentoGraos />}
                 {!configAPP.usarConfiguracaoFPCaracteristica() && (
@@ -362,7 +366,7 @@ class OrderPaymentForm extends Component {
       this.props.pedido.itens
         .map(t => t.total_preco_item_reais)
         .reduce(
-          (a, b) => Number(a) + Number(b),
+          (a, b) => getNumber(a) + getNumber(b),
           this.state.formData.total_pedido_frete || 0
         ) || 0
     );
@@ -373,7 +377,7 @@ class OrderPaymentForm extends Component {
       this.state.formData.pagamento &&
       this.state.formData.pagamento.parcelas &&
       this.state.formData.pagamento.parcelas
-        .map(p => Number(p.valor_parcela))
+        .map(p => getNumber(p.valor_parcela))
         .reduce((a, b) => a + b, 0)
     );
   }
