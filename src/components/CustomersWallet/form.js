@@ -287,6 +287,10 @@ class CustomerWalletForm extends Component {
       selectedClient: {}
       // }
     }));
+
+    setTimeout(() => {
+      console.log("ADD CLIENT", this.state.formData);
+    }, 300);
   }
 
   removeClient(cliente_id) {
@@ -313,6 +317,10 @@ class CustomerWalletForm extends Component {
         prev
       )
     }));
+
+    setTimeout(() => {
+      console.log("REMOVE  CLIENT", this.state.formData);
+    }, 300);
   }
 
   clearCheckClientKeys(selectedClient, prev) {
@@ -540,22 +548,36 @@ class CustomerWalletForm extends Component {
     let _clientes = this.state.formData.clientes;
 
     if (e.checked === false) {
-      _clientes = _clientes.filter(c => {
-        if (c.cliente_id === e.node.props.clienteID) {
-          c.propriedades =
-            c.propriedades &&
-            c.propriedades.filter(p => p !== e.node.props.eventKey);
-        }
-        return true;
-      });
-
+      // se veio de uma propriedade
+      if (!e.node.props.ehCliente) {
+        _clientes = _clientes.filter(c => {
+          if (c.cliente_id === e.node.props.clienteID) {
+            c.propriedades =
+              c.propriedades &&
+              c.propriedades.filter(p => p !== e.node.props.eventKey);
+          }
+          return true;
+        });
+      }
+      else {
+        debugger
+        _clientes = _clientes.filter(c => {
+          if (c.cliente_id === e.node.props.eventKey) {
+            c.propriedades = [];
+          }
+          return true;
+        });
+      }
     } else {
-      _clientes = _clientes.filter(c => {
-        if (c.cliente_id === e.node.props.clienteID) {
-          c.propriedades.push(e.node.props.eventKey);
-        }
-        return true;
-      });
+      // se veio de uma propriedade
+      if (!e.node.props.ehCliente) {
+        _clientes = _clientes.filter(c => {
+          if (c.cliente_id === e.node.props.clienteID) {
+            c.propriedades.push(e.node.props.eventKey);
+          }
+          return true;
+        });
+      }
     }
 
     this.setState(prev => ({
