@@ -6,7 +6,8 @@ import PropTypes from "prop-types";
 const { Option } = Select;
 
 class ConfigurarFPCaracteristica extends Component {
-  render() {
+    render() {
+
     const { getFieldDecorator } = this.props.form;
     return (
       <div style={{ background: "#ECECEC", padding: "30px" }}>
@@ -20,8 +21,9 @@ class ConfigurarFPCaracteristica extends Component {
                       ? moment(this.props.formData.venc_royalties, "YYYY-MM-DD")
                       : undefined
                   })(
+
                     <DatePicker
-                      disabled={this.props.formData.itens.length}
+                      disabled={!!this.props.formData.itens.length}
                       onChange={(data, dataString) =>
                         this.props.handleFormState({
                           target: {
@@ -50,7 +52,7 @@ class ConfigurarFPCaracteristica extends Component {
                       : undefined
                   })(
                     <DatePicker
-                      disabled={this.props.formData.itens.length}
+                    disabled={!!this.props.formData.itens.length}
                       onChange={(data, dataString) =>
                         this.props.handleFormState({
                           target: {
@@ -77,7 +79,7 @@ class ConfigurarFPCaracteristica extends Component {
                       : undefined
                   })(
                     <DatePicker
-                      disabled={this.props.formData.itens.length}
+                    disabled={!!this.props.formData.itens.length}
                       onChange={(data, dataString) =>
                         this.props.handleFormState({
                           target: {
@@ -137,7 +139,7 @@ class ConfigurarFPCaracteristica extends Component {
                     initialValue: this.props.formData.pgto_royalties
                   })(
                     <Select
-                      disabled={this.props.formData.itens.length}
+                      disabled={!!this.props.formData.itens.length}
                       name="pgto_royalties"
                       showAction={["focus", "click"]}
                       showSearch
@@ -174,7 +176,7 @@ class ConfigurarFPCaracteristica extends Component {
                     initialValue: this.props.formData.pgto_germoplasma
                   })(
                     <Select
-                      disabled={this.props.formData.itens.length}
+                      disabled={!!this.props.formData.itens.length}
                       name="pgto_germoplasma"
                       showAction={["focus", "click"]}
                       showSearch
@@ -211,7 +213,7 @@ class ConfigurarFPCaracteristica extends Component {
                     initialValue: this.props.formData.pgto_tratamento
                   })(
                     <Select
-                      disabled={this.props.formData.itens.length}
+                    disabled={!!this.props.formData.itens.length}
                       name="pgto_tratamento"
                       showAction={["focus", "click"]}
                       showSearch
