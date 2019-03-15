@@ -18,6 +18,8 @@ import CalculoPagamentoGraos from "./partials/CalculoPagamentoGraos";
 import ParcelasManual from "./partials/ParcelasManual";
 import ParcelasAutomaticas from "./partials/ParcelasAutomaticas";
 
+const STATUS_CONCLUIR_PEDIDO = "Aguardando Aprovação";
+
 class OrderPaymentForm extends Component {
   constructor(props) {
     super(props);
@@ -163,6 +165,10 @@ class OrderPaymentForm extends Component {
         await OrderPaymentService.update(this.props.pedido._id)({
           ...this.state.formData,
           ...this.props.pedido.pagamento
+        });
+        await OrderService.update({
+          _id: this.props.pedido._id,
+          status_pedido: STATUS_CONCLUIR_PEDIDO
         });
         flashWithSuccess(
           `Pedido #${this.props.pedido.numero} finalizado com sucesso!`
