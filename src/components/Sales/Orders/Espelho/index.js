@@ -22,7 +22,7 @@ const empresa = {
 
 /* #region CSS */
 const pageStyle = {
-  /*backgroundColor: '#f5f5f5',*/
+  /*backgroundColor: 'gray',*/
   height: "210mm",
   width: "295mm",
   marginLeft: 'auto',
@@ -77,7 +77,7 @@ const headerBoxOrder = {
 
 const bodyBox = {
   /*backgroundColor: "#b2ffeb",*/
-  height: 355
+  height: 325
 };
 const bodyRowTop = {
   /*backgroundColor: "#ff6868",*/
@@ -147,6 +147,7 @@ const footerBoxRow3 = {
 /* #region Components */
 const Header = (props) => (
   <Row style={headerBox}>
+
     <Col span={13} style={ headerBoxCompanie }>
       <Col span={15} style={{ paddingTop: 10}}>
         <Row><img alt="logo" src={empresa.logo} style={{ height: 90 }} /></Row>
@@ -154,6 +155,7 @@ const Header = (props) => (
         <Row style={{ fontSize: 9, paddingLeft: 5 }}>{empresa.endereco_esc}</Row>
         <Row style={{ fontSize: 9, paddingLeft: 5 }}>{empresa.complemento} - {empresa.site}</Row>
       </Col>
+
       <Col span={9} style={{ textAlign: "center" }}>
         <Row style={{ paddingTop: 25, fontWeight: "bold" }}>{empresa.nome}</Row>
         <Row style={{ paddingTop: 5 }}>Insc. Est. {empresa.ie}</Row>
@@ -162,6 +164,7 @@ const Header = (props) => (
         <Row>{empresa.site}</Row>
       </Col>
     </Col>
+
     <Col span={7} style={ headerBoxDate }>
       <Row style={{ textAlign: "center", borderStyle: "solid", borderLeftStyle: "none", borderRightStyle: "none", paddingBottom: 5 }}>
         Data de Emissão
@@ -178,10 +181,12 @@ const Header = (props) => (
         <Row>{props.revendaAgente}</Row>
       </Row>
     </Col>
+
     <Col span={4} style={ headerBoxOrder }>
       <Row style={{fontWeight: "bold"}}>Pedido</Row>
       <Row style={{fontSize: 20}}>{props.pedido}</Row>
     </Col>
+
   </Row>
 )
 
@@ -204,14 +209,35 @@ const ClientLine = (props) => (
   </Row>
 )
 
-const TableTitle = (props) => (
+const TableLinesLeft = (props) => (
   <Row>
-    <Col span={5} style={tableTitle}>Quantidade em kg</Col>
-    <Col span={4} style={tableTitle}>Embalagem</Col>
-    <Col span={6} style={tableTitle}>Descrição do Produto</Col>
-    <Col span={3} style={tableTitle}>Peneira</Col>
-    <Col span={6} style={tableTitle}>Tratamento</Col>
+    <Col span={5}>
+      <Row style={drawLines}>{props.data.quantidade}</Row>
+    </Col>
+
+    <Col span={4}>
+      <Row style={drawLines}>{props.data.embalagem}</Row>
+    </Col>
+
+    <Col span={6}>
+      <Row style={drawLines}>{props.data.descricaoProduto}</Row>
+    </Col>
+
+    <Col span={3}>
+      <Row style={drawLines}>{props.data.peneira}</Row>
+    </Col>
+
+    <Col span={6}>
+      <Row style={drawLines}>{props.data.tratamento}</Row>
+    </Col>
   </Row>
+)
+
+const TableLinesRight = (props) => (
+  <div>
+    <Col span={7}><Row style={drawLines} span={6}>{props.data.valorUnit}</Row></Col>
+    <Col span={17}><Row style={drawLines} span={18}>{props.data.valorTotal}</Row></Col>
+  </div>
 )
 
 const Parcel = props => (
@@ -243,11 +269,16 @@ const Footer = (props) => (
       <Col span={22}>{props.observacoes}</Col>
     </Row>
 
+    <Row style={{textAlign: "center", paddingTop: 30, fontWeight: "bold"}}>
+      <Row>_______________________________________________________________________________</Row>
+      <Row>{props.cliente}</Row>
+    </Row>
+
   </Row>
 )
 /* #endregion */
 
-const maxLinesTable = 12
+const maxLinesTable = 10
 
 export default class Export extends Component {
   constructor(props) {
@@ -273,11 +304,11 @@ export default class Export extends Component {
     let totalPages = this.state.list.itens && getNumber(Object.keys(this.state.list.itens).length) / maxLinesTable
     console.log("total de paginas adicionais: ", totalPages)
 
-      for(let i = 1; i < totalPages; i++){
-        console.log("add new page");
-        pdf.addPage('a4', 'l');
-        pdf.text(20, 20, `Pagina ${i+1}`);
-      }
+    for(let i = 1; i < totalPages; i++){
+      console.log("add new page");
+      pdf.addPage('a4', 'l');
+      pdf.text(20, 20, `Pagina ${i+1}`);
+    }
   }
 
   printDocument() {
@@ -296,11 +327,12 @@ export default class Export extends Component {
     ;
   }
 
+  /* #region setTables */
   setTable(){
-    let obj = [], count =0
+    let obj = [], count = 0
 
     this.state.list.itens &&
-      this.state.list.itens.map((element, index) => (obj.push(Object.assign({
+      this.state.list.itens.map((element) => (obj.push(Object.assign({
         quantidade: element.quantidade,
         embalagem: element.embalagem.label,
         descricaoProduto: element.produto.nome,
@@ -308,7 +340,7 @@ export default class Export extends Component {
         tratamento: element.tratamento.label
       })), count++))
 
-      while(this.state.list.itens && count < 12){
+      while(this.state.list.itens && count < maxLinesTable){
         obj.push(Object.assign({
           quantidade: null,
           embalagem: null,
@@ -318,25 +350,27 @@ export default class Export extends Component {
         }))
         count++
       }
+      console.log("setTable", obj)
       return obj;
   }
 
   setTablePermutaSoja(){
-    let obj = [], count =0
+    let obj = [], count = 0
 
     this.state.list.itens &&
-      this.state.list.itens.map((element, index) => (obj.push(Object.assign({
+      this.state.list.itens.map((element) => (obj.push(Object.assign({
         valorUnit: element.quantidade && element.total_preco_item_graos ? currency()(getNumber(element.total_preco_item_graos)/element.quantidade) : null,
         valorTotal: element.total_preco_item_graos
       })), count++))
 
-      while(this.state.list.itens && count < 12){
+      while(this.state.list.itens && count < maxLinesTable){
         obj.push(Object.assign({
           valorUnit: null,
           valorTotal: null
         }))
         count++
       }
+      console.log("setTablePermutaSoja", obj)
       return obj
   }
 
@@ -344,18 +378,19 @@ export default class Export extends Component {
     let obj = [], count = 0
 
     this.state.list.itens &&
-      this.state.list.itens.map((element, index) => (obj.push(Object.assign({
+      this.state.list.itens.map((element) => (obj.push(Object.assign({
         valorUnit: element.quantidade && element.total_preco_item_graos ? currency()(getNumber(element.total_preco_item_reais)/element.quantidade) : null,
         valorTotal: element.total_preco_item_reais
       })), count++))
 
-      while(this.state.list.itens && count < 12){
+      while(this.state.list.itens && count < maxLinesTable){
         obj.push(Object.assign({
           valorUnit: null,
           valorTotal: null
         }))
         count++
       }
+      console.log("setTableReais", obj)
       return obj;
   }
 
@@ -363,15 +398,16 @@ export default class Export extends Component {
     let obj = [], count = 0
 
     this.state.list.pagamento &&
-      this.state.list.pagamento.parcelas.map((e, i) => (obj.push(Object.assign({
-        valor_parcela: e.valor_parcela,
-        data_vencimento: moment(e.data_vencimento).format("DD/MM/YYYY")
+      this.state.list.pagamento.parcelas.map((element) => (obj.push(Object.assign({
+        valor_parcela: element.valor_parcela,
+        data_vencimento: moment(element.data_vencimento).format("DD/MM/YYYY")
       })), count++))
 
       while(this.state.list.pagamento && count < 3){
         obj.push(Object.assign({valor: 0, data: 0}))
         count++
       }
+      console.log("setFormaPagamento", obj)
       return obj
   }
   /* #endregion */
@@ -393,46 +429,6 @@ export default class Export extends Component {
             pedido={this.state.list.numero}
           />
 
-          {/* #region HEADER */}
-          {/* <Row style={headerBox}>
-            <Col span={13} style={ headerBoxCompanie }>
-              <Col span={15} style={{ paddingTop: 10}}>
-                <Row><img alt="logo" src={empresa.logo} style={{ height: 90 }} /></Row>
-                <Row style={{ fontSize: 9, paddingLeft: 5 }}>{empresa.endereco_faz}</Row>
-                <Row style={{ fontSize: 9, paddingLeft: 5 }}>{empresa.endereco_esc}</Row>
-                <Row style={{ fontSize: 9, paddingLeft: 5 }}>{empresa.complemento} - {empresa.site}</Row>
-              </Col>
-              <Col span={9} style={{ textAlign: "center" }}>
-                <Row style={{ paddingTop: 25, fontWeight: "bold" }}>{empresa.nome}</Row>
-                <Row style={{ paddingTop: 5 }}>Insc. Est. {empresa.ie}</Row>
-                <Row style={{ paddingTop: 5 }}>CNPJ: {empresa.cnpj}</Row>
-                <Row style={{ paddingTop: 5, fontWeight: "bold" }}>{empresa.telefone}</Row>
-                <Row>{empresa.site}</Row>
-              </Col>
-            </Col>
-            <Col span={7} style={ headerBoxDate }>
-              <Row style={{ textAlign: "center", borderStyle: "solid", borderLeftStyle: "none", borderRightStyle: "none", paddingBottom: 5 }}>
-                Data de Emissão
-                <Row>{moment(this.state.list.create_at).format("DD/MM/YYYY")}</Row>
-              </Row>
-              <Row style={{ height: 10 }} />
-              <Row style={{ textAlign: "center", borderStyle: "solid", borderLeftStyle: "none", borderRightStyle: "none", paddingBottom: 5 }}>
-                Rep. Comercial
-                <Row>{this.state.list.vendedor && this.state.list.vendedor.nome}</Row>
-              </Row>
-              <Row style={{ height: 10 }} />
-              <Row style={{ textAlign: "center", borderStyle: "solid", borderLeftStyle: "none", borderRightStyle: "none", borderBottomStyle: "none", paddingBottom: 19 }}>
-                Revenda/Agente
-                <Row>{this.state.list.tipo_venda && this.state.list.tipo_venda.toLowerCase().includes("agenciada") && this.state.list.agente ? this.state.list.agente.nome : null}</Row>
-              </Row>
-            </Col>
-            <Col span={4} style={ headerBoxOrder }>
-              <Row style={{fontWeight: "bold"}}>Pedido</Row>
-              <Row style={{fontSize: 20}}>{this.state.list.numero}</Row>
-            </Col>
-          </Row> */}
-          {/* #endregion */ }
-
           <ClientLine
             cliente={this.state.list.cliente && this.state.list.cliente.nome}
             cpf_cnpj={this.state.list.cliente && this.state.list.cliente.cpf_cnpj}
@@ -442,14 +438,11 @@ export default class Export extends Component {
             uf={this.state.list.estado}
           />
 
-
-          {/* #region TABLE */}
           <Row style={bodyBox}>
             <Row style={bodyTable}>
               <Row style={{ borderStyle: "solid", borderTopStyle: "none", textAlign: "center" }}>
 
-                <Col span={13} style={{backgroundColor: "lightgray"}}>
-
+                <Col span={13}>
                   <Row>
                     <Col span={5} style={tableTitle}>Quantidade em kg</Col>
                     <Col span={4} style={tableTitle}>Embalagem</Col>
@@ -457,31 +450,7 @@ export default class Export extends Component {
                     <Col span={3} style={tableTitle}>Peneira</Col>
                     <Col span={6} style={tableTitle}>Tratamento</Col>
                   </Row>
-                  <Row>
-                    {this.setTable().map((element, index) => (
-                      <div key={index}>
-                        <Col span={5}>
-                          <Row style={drawLines}>{element.quantidade}</Row>
-                        </Col>
-
-                        <Col span={4}>
-                          <Row style={drawLines}>{element.embalagem}</Row>
-                        </Col>
-
-                        <Col span={6}>
-                          <Row style={drawLines}>{element.descricaoProduto}</Row>
-                        </Col>
-
-                        <Col span={3}>
-                          <Row style={drawLines}>{element.peneira}</Row>
-                        </Col>
-
-                        <Col span={6}>
-                          <Row style={drawLines}>{element.tratamento}</Row>
-                        </Col>
-                      </div>
-                    ))}
-                  </Row>
+                  {this.setTable().map((element, index) => ( <TableLinesLeft key={index} data={element} /> ))}
                 </Col>
 
                 <Col span={6} style={{ textAlign: "center" }}>
@@ -490,14 +459,7 @@ export default class Export extends Component {
                     <Col span={7} style={{ borderStyle: "solid", borderWidth: 2, borderRightStyle: "none", borderLeftStyle: "none" }}>Val. Unit</Col>
                     <Col span={17} style={{ borderStyle: "solid", borderWidth: 2 }}>Volume total</Col>
                   </Row>
-
-                  {this.setTablePermutaSoja().map((element, index) => (
-                    <div key={index}>
-                      <Col span={7}><Row style={drawLines} span={6}>{element.valorUnit}</Row></Col>
-                      <Col span={17}><Row style={drawLines} span={18}>{element.valorTotal}</Row></Col>
-                    </div>
-                  ))}
-
+                  {this.setTablePermutaSoja().map((element, index) => ( <TableLinesRight key={index} data={element} /> ))}
                 </Col>
 
                 <Col span={5} style={{ textAlign: "center" }}>
@@ -506,22 +468,15 @@ export default class Export extends Component {
                       <Col span={7} style={{ borderStyle: "solid", borderWidth: 2, borderLeftStyle: "none" }}>Val. Unit</Col>
                       <Col span={17} style={{ borderStyle: "solid", borderWidth: 2, borderLeftStyle: "none" }}>Valor Total R$</Col>
                     </Row>
-
-                    {this.setTableReais().map((element, index) => (
-                      <div key={index}>
-                        <Col span={7}> <Row style={drawLines} span={6}>{element.valorUnit}</Row></Col>
-                        <Col span={17}> <Row style={drawLines} span={18}>{element.valorTotal}</Row></Col>
-                      </div>
-                    ))}
-
+                    {this.setTableReais().map((element, index) => ( <TableLinesRight key={index} data={element} /> ))}
                 </Col>
               </Row>
 
               <Row>
-                <Col span={3} style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", borderRightStyle: "none", height: 20 }} />
-                <Col span={10} style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", borderRightStyle: "none", textAlign: "right", paddingRight: 10, fontWeight: "bold" }}>Totais:</Col>
-                <Col span={6} style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", borderRightStyle: "none", height: 20, textAlign: "center" }}> {this.state.list.pagamento && this.state.list.pagamento.total_pedido_graos} </Col>
-                <Col span={5} style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, textAlign: "center" }}> {this.state.list.pagamento && this.state.list.pagamento.total_pedido_reais} </Col>
+                <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, borderRightStyle: "none" }} span={3} />
+                <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, borderRightStyle: "none", textAlign: "right", paddingRight: 10, fontWeight: "bold" }} span={10}>Totais:</Col>
+                <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, borderRightStyle: "none", textAlign: "center" }} span={6}> {this.state.list.pagamento && this.state.list.pagamento.total_pedido_graos} </Col>
+                <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, textAlign: "center" }} span={5}> {this.state.list.pagamento && this.state.list.pagamento.total_pedido_reais} </Col>
               </Row>
 
               <Row style={{ paddingTop: 5 }}>
@@ -553,41 +508,8 @@ export default class Export extends Component {
             </Row>
           </Row>
 
-            {/* #endredion */}
-
-            {/* #region FOOTER */}
-            {/* <Row style={footerBox}>
-              <Row style={footerBoxRow1}>
-                <Col span={3}>Forma Pagamento:</Col>
-                  {this.state.list.pgto_germoplasma && this.state.list.pgto_germoplasma.toLowerCase().includes("grãos")
-                    || this.state.list.pgto_royalties && this.state.list.pgto_royalties.toLowerCase().includes("grãos")
-                    || this.state.list.pgto_tratamento && this.state.list.pgto_tratamento.toLowerCase().includes("grãos")
-                    || this.state.list.pgto_frete && this.state.list.pgto_frete.toLowerCase().includes("grãos")
-                      ? <Col span={3}><Col style={{...checkBoxFormaPagamento.checked, ...checkBoxFormaPagamento.box}} span={1} /> Reais + Grãos </Col>
-                      : <Col span={3}><Col style={{...checkBoxFormaPagamento.checked, ...checkBoxFormaPagamento.box}} span={1} />Reais</Col>
-                  }
-              </Row>
-
-              <Row style={footerBoxRow2} type="flex" justify="space-between">
-                {this.setFormaPagamento().map((element, index) => (
-                  <Col key={index} span={7} style={{ borderStyle: "solid" }}>
-                    <Row style={{ textAlign: "center", fontWeight: "bold" }}>Vencimento {index+1}</Row>
-                    <Row>
-                      <Col span={11} style={{marginLeft: 10}}>R$: {element.valor_parcela}</Col>
-                      <Col span={11} style={{marginLeft: 10}}>Data: {element.data_vencimento}</Col>
-                    </Row>
-                  </Col>
-                ))}
-              </Row>
-
-              <Row style={footerBoxRow3}>
-                <Col span={2} style={{fontWeight: "bold"}}>Observações:</Col>
-                <Col span={22}>{this.state.list.observacao}</Col>
-              </Row>
-            </Row> */}
-            {/* #endregion */}
-
           <Footer
+            cliente={this.state.list.cliente && this.state.list.cliente.nome}
             observacoes={this.state.list.observacao}
             parcelas={this.setFormaPagamento()}
             formaPagamento={ this.state.list.pgto_germoplasma && this.state.list.pgto_germoplasma.toLowerCase().includes("grãos")
