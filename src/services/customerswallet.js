@@ -10,8 +10,8 @@ export const list = aqp => {
     .then(response => response.data);
 };
 
-export const get = _id =>
-  api.get(`${baseURL}/${_id}`).then(response => response.data);
+export const get = (_id, aqp) =>
+  api.get(`${baseURL}/${_id}`, { params: aqp }).then(response => response.data);
 
 export const getConsultant = client_id => aqp =>
   api
