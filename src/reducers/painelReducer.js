@@ -5,7 +5,8 @@ const initialState = {
       nome: ""
     },
     empresa: "",
-    modulosDaEmpresa: []
+    modulosDaEmpresa: [],
+    rules: []
   },
   seletorModulo: {
     nome: "Trocar Módulo",
