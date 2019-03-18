@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import "moment/locale/pt-br";
 import { cloneDeep as _cloneDeep } from "lodash";
 import debounce from "lodash/debounce";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import {
   Button,
@@ -93,10 +94,9 @@ class CustomerWalletForm extends Component {
         });
 
         const _formDataClientes = _cloneDeep(formData.clientes).map(c => {
-          c.propriedades = c.propriedades.filter(
-            p => p.fazParte && p.fazParte === true
-          )
-          .map(p=> p._id);
+          c.propriedades = c.propriedades
+            .filter(p => p.fazParte && p.fazParte === true)
+            .map(p => p._id);
           delete c._id;
           return c;
         });
@@ -235,7 +235,7 @@ class CustomerWalletForm extends Component {
   async addClient() {
     const selectedClient = Object.assign({}, this.state.selectedClient);
 
-    if(!selectedClient) return;
+    if (!selectedClient) return;
 
     if (
       this.state.walletTree.find(
@@ -256,7 +256,13 @@ class CustomerWalletForm extends Component {
     if (!Object.keys(selectedClient).length) return;
 
     let propriedades = selectedClient.gerenciarCarteiraPorPropriedade
-      ? selectedClient.propriedades.map(p => p._id)
+      ? selectedClient.propriedades
+          .filter(
+            p =>
+              p.propriedadeJaExisteEmOutraCarteira &&
+              p.propriedadeJaExisteEmOutraCarteira == ""
+          )
+          .map(p => p._id)
       : [];
 
     _clientes.push({
@@ -557,7 +563,11 @@ class CustomerWalletForm extends Component {
           if (c.cliente_id === e.node.props.clienteID) {
             c.propriedades =
               c.propriedades &&
-              c.propriedades.filter(p => (p !== e.node.props.eventKey) || (p._id != undefined && p._id !== e.node.props.eventKey));
+              c.propriedades.filter(
+                p =>
+                  p !== e.node.props.eventKey ||
+                  (p._id != undefined && p._id !== e.node.props.eventKey)
+              );
           }
           return true;
         });
@@ -614,9 +624,24 @@ class CustomerWalletForm extends Component {
       // debugger;
       let descricao = () => (
         <div>
+          {item.hasOwnProperty("propriedadeJaExisteEmOutraCarteira") &&
+            item.propriedadeJaExisteEmOutraCarteira !== "" && (
+              <Tooltip
+                title={`Já pertence à carteira ${
+                  item.propriedadeJaExisteEmOutraCarteira
+                } `}>
+                <FontAwesomeIcon
+                  icon="exclamation-triangle"
+                  size="1x"
+                  color="red"
+                  style={{ marginRight: 8 }}
+                />
+              </Tooltip>
+            )}
           {item.ie && item.estado
             ? `${item.nome} | ${item.ie} | ${item.estado}`
             : `${item.nome} | ${item.cpf_cnpj}`}
+
           {item.gerenciarCarteiraPorPropriedade
             ? !leaf && <span style={{ fontSize: 10 }}> (Por propriedade)</span>
             : !leaf && <span style={{ fontSize: 10 }}> (Por cliente)</span>}
@@ -664,6 +689,10 @@ class CustomerWalletForm extends Component {
       return (
         <TreeNode
           ehCliente={false}
+          disableCheckbox={
+            item.hasOwnProperty("propriedadeJaExisteEmOutraCarteira") &&
+            item.propriedadeJaExisteEmOutraCarteira !== ""
+          }
           clienteID={clienteID}
           {...item}
           title={descricao()}
@@ -794,7 +823,13 @@ class CustomerWalletForm extends Component {
                           />
                         ))}
                       <Select
-                        value={this.state.selectedClient.nome}
+                        value={
+                          (Object.keys(this.state.selectedClient).length &&
+                            `${this.state.selectedClient.nome} - ${
+                              this.state.selectedClient.cpf_cnpj
+                            }`) ||
+                          undefined
+                        }
                         name="cliente"
                         filterOption={(input, option) =>
                           option.props.children.includes(input.toLowerCase()) >=
