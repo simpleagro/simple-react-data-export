@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Divider, Button, Badge, Icon, Popconfirm, Tooltip } from "antd";
 import moment from "moment";
+import { connect } from "react-redux";
 
 import { simpleTableSearch } from "lib/simpleTableSearch";
 import * as OrderService from "services/orders";
@@ -8,6 +9,7 @@ import SimpleTable from "common/SimpleTable";
 import { flashWithSuccess } from "common/FlashMessages";
 import parseErrors from "lib/parseErrors";
 import { PainelHeader } from "common/PainelHeader";
+import { PEDIDO_EM_APROVACAO, PEDIDO_REPROVADO  } from "config/constants";
 
 class Orders extends Component {
   constructor(props) {
@@ -273,9 +275,14 @@ class Orders extends Component {
 
   pedidoPodeSerEditado(record) {
     if (!record) return false;
+
     return (
-      record.status_pedido.includes("Em cotação") ||
-      record.status_pedido.includes("Reprovado")
+      this.props.userRules.some(
+        p =>
+          p.subject === "Order" && p.actions.includes("editaPedidoForcadamente")
+      ) ||
+      record.status_pedido.includes(PEDIDO_EM_APROVACAO) ||
+      record.status_pedido.includes(PEDIDO_REPROVADO)
     );
   }
 
@@ -303,4 +310,10 @@ class Orders extends Component {
   }
 }
 
-export default Orders;
+const mapStateToProps = ({ painelState }) => {
+  return {
+    userRules: painelState.userData.rules
+  };
+};
+
+export default connect(mapStateToProps)(Orders);
