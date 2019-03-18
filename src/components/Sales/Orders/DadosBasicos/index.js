@@ -277,7 +277,7 @@ class Orders extends Component {
     if (!record) return false;
 
     return (
-      this.props.userRules.some(
+      this.props.userRules && this.props.userRules.some(
         p =>
           p.subject === "Order" && p.actions.includes("editaPedidoForcadamente")
       ) ||
@@ -312,7 +312,7 @@ class Orders extends Component {
 
 const mapStateToProps = ({ painelState }) => {
   return {
-    userRules: painelState.userData.rules
+    userRules: Object.keys(painelState.userData.rules).length > 0 ? painelState.userData.rules : []
   };
 };
 

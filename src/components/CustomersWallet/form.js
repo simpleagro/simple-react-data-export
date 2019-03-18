@@ -52,7 +52,7 @@ class CustomerWalletForm extends Component {
       fetchingClients: false,
       selectedClient: {},
       walletTree: [],
-      walletTreeCheckeds: [],
+      checkedKeys: [],
       errorOnWalletTree: [],
       savingForm: false
     };
@@ -76,17 +76,17 @@ class CustomerWalletForm extends Component {
       const formData = await CustomerWalletService.get(id);
 
       if (formData) {
-        let _clientesChecados = [];
+        let _checkedKeys = [];
 
         const _walletTree = _cloneDeep(formData.clientes).map(c => {
           if (c.gerenciarCarteiraPorPropriedade === true) {
             c.propriedades = c.propriedades.map(p => {
               if (p.fazParte && p.fazParte === true) {
-                _clientesChecados.push(`${c.cliente_id}-${p._id}`);
+                _checkedKeys.push(p._id);
               }
               return p;
             });
-          } else _clientesChecados.push(c.cliente_id);
+          } else _checkedKeys.push(c.cliente_id);
 
           delete c._id;
           return c;
@@ -104,7 +104,7 @@ class CustomerWalletForm extends Component {
           ...prev,
           formData: { ...formData, clientes: [..._formDataClientes] },
           walletTree: _walletTree,
-          clientesChecados: _clientesChecados,
+          checkedKeys: _checkedKeys,
           editMode: id ? true : false,
           loadingForm: false
         }));
@@ -127,10 +127,6 @@ class CustomerWalletForm extends Component {
       ),
       loadingForm: false
     }));
-
-    setTimeout(() => {
-      this.titleInput.focus();
-    }, 100);
   }
 
   handleFormState = event => {
@@ -214,34 +210,29 @@ class CustomerWalletForm extends Component {
     });
   }
 
-  async selectedClient(cliente_id) {
-    const selectedClient = Object.assign(
-      {},
-      this.state.clients.find(c => c._id === cliente_id)
-    );
+  async selectedClient(cliente) {
+    cliente = JSON.parse(cliente);
 
     if (
-      selectedClient.gerenciarCarteiraPorPropriedade === false &&
-      selectedClient.clienteJaExisteEmOutraCarteira !== ""
+      cliente.gerenciarCarteiraPorPropriedade === false &&
+      cliente.clienteJaExisteEmOutraCarteira !== ""
     ) {
       flashModalWithError(
         `O cliente.:
-      ${selectedClient.nome.toUpperCase()}
+      ${cliente.nome.toUpperCase()}
       já faz parte da carteira.:
-      ${selectedClient.clienteJaExisteEmOutraCarteira.toUpperCase()}
+      ${cliente.clienteJaExisteEmOutraCarteira.toUpperCase()}
       `,
         null,
         { centered: true }
       );
       return;
     }
-    await this.setState(prev => ({ ...prev, selectedClient }));
+    await this.setState(prev => ({ ...prev, selectedClient: cliente }));
   }
 
   async addClient() {
     const selectedClient = Object.assign({}, this.state.selectedClient);
-
-    if (!Object.keys(selectedClient).length) return;
 
     if (
       this.state.walletTree.find(
@@ -249,7 +240,7 @@ class CustomerWalletForm extends Component {
           wt.cliente_id === selectedClient._id || wt._id === selectedClient._id
       )
     ) {
-      flashWithError("O cliente já foi adicionado a carteira.")
+      flashWithError("O cliente já foi adicionado a carteira.");
       this.setState(prev => ({
         ...prev,
         selectedClient: {}
@@ -257,20 +248,52 @@ class CustomerWalletForm extends Component {
       return;
     }
 
+    let _clientes = this.state.formData.clientes || [];
+
+    if (!Object.keys(selectedClient).length) return;
+
+    let propriedades = selectedClient.gerenciarCarteiraPorPropriedade
+      ? selectedClient.propriedades.map(p => p._id)
+      : [];
+
+    _clientes.push({
+      cliente_id: selectedClient._id,
+      cpf_cnpj: selectedClient.cpf_cnpj,
+      gerenciarCarteiraPorPropriedade:
+        selectedClient.gerenciarCarteiraPorPropriedade,
+      propriedades
+    });
+
     this.props.form.resetFields(["cliente"]);
+
+    const AddNewClientOnTree = checkedKeys => {
+      if (
+        selectedClient.gerenciarCarteiraPorPropriedade &&
+        selectedClient.propriedades &&
+        selectedClient.propriedades.length
+      )
+        return [...checkedKeys, ...selectedClient.propriedades.map(p => p._id)];
+      else return [...checkedKeys, selectedClient._id];
+    };
+
+    let _checkedKeys = AddNewClientOnTree(this.state.checkedKeys);
 
     this.setState(prev => ({
       ...prev,
       // ...{
-      // formData: { ...prev.formData, clientesChecados },
+      formData: { ...prev.formData, clientes: _clientes },
       walletTree: [...prev.walletTree, selectedClient],
+      checkedKeys: _checkedKeys,
       selectedClient: {}
       // }
     }));
+
+    setTimeout(() => {
+      console.log("ADD CLIENT", this.state.formData);
+    }, 300);
   }
 
   removeClient(cliente_id) {
-    // debugger;
     let _walletTree = this.state.walletTree.filter(
       c =>
         (c.cliente_id !== undefined && c.cliente_id !== cliente_id) ||
@@ -288,8 +311,33 @@ class CustomerWalletForm extends Component {
     this.setState(prev => ({
       ...prev,
       walletTree: _walletTree,
-      formData: { ...prev.formData, clientes: _formDataClientes }
+      formData: { ...prev.formData, clientes: _formDataClientes },
+      checkedKeys: this.clearCheckClientKeys(
+        this.state.clients.find(c => c._id === cliente_id),
+        prev
+      )
     }));
+
+    setTimeout(() => {
+      console.log("REMOVE  CLIENT", this.state.formData);
+    }, 300);
+  }
+
+  clearCheckClientKeys(selectedClient, prev) {
+    if (
+      selectedClient.gerenciarCarteiraPorPropriedade &&
+      selectedClient.propriedades &&
+      selectedClient.propriedades.length
+    )
+      return prev.checkedKeys.filter(k => {
+        if (selectedClient.propriedades.find(p => p._id === k)) return false;
+        return true;
+      });
+
+    return prev.checkedKeys.filter(k => {
+      if (selectedClient._id === k) return false;
+      return true;
+    });
   }
 
   checkTreeNodes(checkeds, e) {
@@ -488,6 +536,138 @@ class CustomerWalletForm extends Component {
     });
   };
 
+  onCheck = async (checkedKeys, e) => {
+    if (
+      e.node.props.ehCliente &&
+      e.node.props.gerenciarCarteiraPorPropriedade === true
+    )
+      checkedKeys = checkedKeys.filter(k => k !== e.node.props.eventKey);
+
+    this.setState({ checkedKeys });
+
+    let _clientes = this.state.formData.clientes;
+
+    if (e.checked === false) {
+      // se veio de uma propriedade
+      if (!e.node.props.ehCliente) {
+        _clientes = _clientes.filter(c => {
+          if (c.cliente_id === e.node.props.clienteID) {
+            c.propriedades =
+              c.propriedades &&
+              c.propriedades.filter(p => p !== e.node.props.eventKey);
+          }
+          return true;
+        });
+      }
+      // se veio de um cliente
+      else {
+        _clientes = _clientes.filter(c => {
+          if (c.cliente_id === e.node.props.eventKey) {
+            c.propriedades = [];
+          }
+          return true;
+        });
+      }
+    } else {
+      // se veio de uma propriedade
+      if (!e.node.props.ehCliente) {
+        _clientes = _clientes.filter(c => {
+          if (c.cliente_id === e.node.props.clienteID) {
+            c.propriedades.push(e.node.props.eventKey);
+          }
+          return true;
+        });
+      }
+      // se veio de um cliente
+      else {
+        _clientes.filter(c => {
+          if (c.cliente_id === e.node.props.eventKey) {
+            const clienteDaLista = this.state.clients.find(
+              cli => cli._id === c.cliente_id
+            );
+            c.propriedades = clienteDaLista
+              ? clienteDaLista.gerenciarCarteiraPorPropriedade
+                ? clienteDaLista.propriedades.map(p => p._id)
+                : []
+              : [];
+          }
+          return true;
+        });
+      }
+    }
+
+    this.setState(prev => ({
+      ...prev,
+      formData: { ...prev.formData, clientes: _clientes }
+    }));
+
+    setTimeout(() => {
+      console.log("STTTATE", this.state.formData);
+    }, 300);
+  };
+
+  renderTreeNodes = (data, leaf = false, clienteID) =>
+    data.map(item => {
+      // debugger;
+      let descricao = () => (
+        <div>
+          {item.ie && item.estado
+            ? `${item.nome} | ${item.ie} | ${item.estado}`
+            : `${item.nome} | ${item.cpf_cnpj}`}
+          {item.gerenciarCarteiraPorPropriedade
+            ? !leaf && <span style={{ fontSize: 10 }}> (Por propriedade)</span>
+            : !leaf && <span style={{ fontSize: 10 }}> (Por cliente)</span>}
+          {!leaf && (
+            <Button
+              style={{ border: "none", marginLeft: 5 }}
+              size="small"
+              type="danger"
+              shape="circle"
+              onClick={e => this.removeClient(item.cliente_id || item._id)}>
+              <Icon type="minus-circle" />
+            </Button>
+          )}
+        </div>
+      );
+
+      // se leaf === false então é o cliente
+      if (!leaf) {
+        if (item.gerenciarCarteiraPorPropriedade === true) {
+          if (item.propriedades && item.propriedades.length)
+            return (
+              <TreeNode
+                ehCliente={true}
+                title={descricao()}
+                key={item._id || item.cliente_id}
+                {...item}>
+                {this.renderTreeNodes(
+                  item.propriedades,
+                  true,
+                  item._id || item.cliente_id
+                )}
+              </TreeNode>
+            );
+        } else
+          return (
+            <TreeNode
+              ehCliente={true}
+              {...item}
+              title={descricao()}
+              key={item._id || item.cliente_id}
+            />
+          );
+      }
+      return (
+        <TreeNode
+          ehCliente={false}
+          clienteID={clienteID}
+          {...item}
+          title={descricao()}
+          key={item._id || item.cliente_id}
+        />
+      );
+    });
+
   render() {
     const { fetchingClients } = this.state;
     const { getFieldDecorator } = this.props.form;
@@ -596,12 +776,7 @@ class CustomerWalletForm extends Component {
                 <Card
                   title={
                     <span>
-                      <p>
-                        {" "}
-                        Selecione um cliente para adicionar a carteira, <br />{" "}
-                        logo após, marque o cliente ou apenas algumas de suas
-                        propriedades que <br /> deseja gerenciar na carteira:{" "}
-                      </p>
+                      <p>Selecione um cliente para adicionar a carteira:</p>
                       {this.state.errorOnWalletTree.length > 0 &&
                         this.state.errorOnWalletTree.map(err => (
                           <Alert
@@ -615,7 +790,7 @@ class CustomerWalletForm extends Component {
                           />
                         ))}
                       <Select
-                        value={this.state.selectedClient._id}
+                        value={this.state.selectedClient.nome}
                         name="cliente"
                         filterOption={(input, option) =>
                           option.props.children.includes(input.toLowerCase()) >=
@@ -632,7 +807,7 @@ class CustomerWalletForm extends Component {
                         style={{ width: "70%" }}
                         onChange={e => this.selectedClient(e)}>
                         {this.state.clients.map(c => (
-                          <Option key={c._id} value={c._id}>
+                          <Option key={c._id} value={JSON.stringify(c)}>
                             {c.nome} - {c.cpf_cnpj}
                           </Option>
                         ))}
@@ -647,91 +822,12 @@ class CustomerWalletForm extends Component {
                       <div style={{ clear: "both" }} />
                     </span>
                   }>
-                  {this.state.walletTree.length ? (
-                    <Tree
-                      checkable
-                      defaultCheckedKeys={this.state.clientesChecados}
-                      onCheck={(checkedNodes, e) => {
-                        this.checkTreeNodes(checkedNodes, e);
-                      }}>
-                      {this.state.walletTree.map(
-                        cliente => (
-                          console.log(cliente),
-                          (
-                            <TreeNode
-                              key={cliente.cliente_id || cliente._id}
-                              dataRef={cliente}
-                              ehCliente={true}
-                              title={
-                                <div>
-                                  {cliente.nome}
-                                  {cliente.gerenciarCarteiraPorPropriedade ? (
-                                    <span style={{ fontSize: 10 }}>
-                                      {" "}
-                                      (Por propriedade)
-                                    </span>
-                                  ) : (
-                                    <span style={{ fontSize: 10 }}>
-                                      {" "}
-                                      (Por cliente)
-                                    </span>
-                                  )}
-                                  <Button
-                                    style={{ border: "none", marginLeft: 5 }}
-                                    size="small"
-                                    type="danger"
-                                    shape="circle"
-                                    onClick={e =>
-                                      this.removeClient(
-                                        cliente.cliente_id || cliente._id
-                                      )
-                                    }>
-                                    <Icon type="minus-circle" />
-                                  </Button>
-                                </div>
-                              }>
-                              {cliente.propriedades &&
-                                cliente.propriedades.map(prop => (
-                                  <TreeNode
-                                    disableCheckbox={
-                                      prop.propriedadeJaExisteEmOutraCarteira &&
-                                      prop.propriedadeJaExisteEmOutraCarteira !==
-                                        ""
-                                        ? true
-                                        : false
-                                    }
-                                    clienteID={
-                                      cliente.cliente_id || cliente._id
-                                    }
-                                    clienteNome={cliente.nome}
-                                    gerenciarCarteiraPorPropriedade={
-                                      cliente.gerenciarCarteiraPorPropriedade
-                                    }
-                                    dataRef={prop}
-                                    title={
-                                      <Tooltip
-                                        title={
-                                          prop.propriedadeJaExisteEmOutraCarteira
-                                            ? `Pertence a carteira.: ${
-                                                prop.propriedadeJaExisteEmOutraCarteira
-                                              }`
-                                            : ""
-                                        }>
-                                        {prop.nome} - {prop.ie} - {prop.cidade}
-                                      </Tooltip>
-                                    }
-                                    key={`${cliente.cliente_id ||
-                                      cliente._id}-${prop._id}`}
-                                  />
-                                ))}
-                            </TreeNode>
-                          )
-                        )
-                      )}
-                    </Tree>
-                  ) : (
-                    ""
-                  )}
+                  <Tree
+                    checkable
+                    onCheck={this.onCheck}
+                    checkedKeys={this.state.checkedKeys}>
+                    {this.renderTreeNodes(this.state.walletTree)}
+                  </Tree>
                 </Card>
               </Col>
             </Row>
