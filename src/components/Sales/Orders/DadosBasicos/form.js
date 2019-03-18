@@ -51,16 +51,21 @@ class OrderForm extends Component {
     let formData = null;
 
     if (id) {
-      formData = await OrderService.get(id);
+      try {
+        formData = await OrderService.get(id);
 
-      if (formData) {
-        formData.itens = formData.itens.filter(i => i.deleted === false);
-        this.setState(prev => ({
-          ...prev,
-          formData,
-          editMode: id ? true : false,
-          loadingForm: false
-        }));
+        if (formData) {
+          formData.itens = formData.itens.filter(i => i.deleted === false);
+          this.setState(prev => ({
+            ...prev,
+            formData,
+            editMode: id ? true : false,
+            loadingForm: false
+          }));
+        }
+      } catch (error) {
+        if (error && error.response && error.response.data) parseErrors(error);
+        this.props.history.replace("/pedidos");
       }
     }
 
