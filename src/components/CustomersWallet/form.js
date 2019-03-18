@@ -95,7 +95,8 @@ class CustomerWalletForm extends Component {
         const _formDataClientes = _cloneDeep(formData.clientes).map(c => {
           c.propriedades = c.propriedades.filter(
             p => p.fazParte && p.fazParte === true
-          );
+          )
+          .map(p=> p._id);
           delete c._id;
           return c;
         });
@@ -233,6 +234,8 @@ class CustomerWalletForm extends Component {
 
   async addClient() {
     const selectedClient = Object.assign({}, this.state.selectedClient);
+
+    if(!selectedClient) return;
 
     if (
       this.state.walletTree.find(
@@ -554,7 +557,7 @@ class CustomerWalletForm extends Component {
           if (c.cliente_id === e.node.props.clienteID) {
             c.propriedades =
               c.propriedades &&
-              c.propriedades.filter(p => p !== e.node.props.eventKey);
+              c.propriedades.filter(p => (p !== e.node.props.eventKey) || (p._id != undefined && p._id !== e.node.props.eventKey));
           }
           return true;
         });
@@ -651,6 +654,7 @@ class CustomerWalletForm extends Component {
           return (
             <TreeNode
               ehCliente={true}
+              disableCheckbox={true}
               {...item}
               title={descricao()}
               key={item._id || item.cliente_id}
