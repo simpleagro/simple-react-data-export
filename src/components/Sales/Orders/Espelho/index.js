@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
-import { Row, Col } from "antd";
+import { Row, Col, Affix, Button } from "antd";
 import html2canvas from "html2canvas";
 import jsPDF from 'jspdf';
 import * as OrderService from "services/orders";
 import moment from "moment";
 import { currency, getNumber } from "common/utils"
+import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
+import { PainelHeader } from "common/PainelHeader";
 
 /* #region company */
 const empresa = {
@@ -368,21 +370,6 @@ export default class Export extends Component {
         valorTotalR: element.total_preco_item_reais
       })), count++))
 
-    while(this.state.list.itens && count < maxLinesTable){
-      obj.push(Object.assign({
-        quantidade: null,
-        embalagem: null,
-        descricaoProduto: null,
-        peneira: null,
-        tratamento: null,
-        valorUnitPS: null,
-        valorTotalPS: null,
-        valorUnitR: null,
-        valorTotalR: null
-      }))
-      count++
-    }
-
     count = 0
 
     while(count < obj.length){
@@ -394,33 +381,25 @@ export default class Export extends Component {
       count++
     }
 
-    return newObj
-  }
-
-  /* #region setTables */
-  setTable(){
-    let obj = [], count = 0
-
-    this.state.list.itens &&
-      this.state.list.itens.map((element) => (obj.push(Object.assign({
-        quantidade: element.quantidade,
-        embalagem: element.embalagem.label,
-        descricaoProduto: element.produto.nome,
-        peneira: element.peneira.label,
-        tratamento: element.tratamento.label
-      })), count++))
-
-      while(this.state.list.itens && count < maxLinesTable){
-        obj.push(Object.assign({
-          quantidade: null,
-          embalagem: null,
-          descricaoProduto: null,
-          peneira: null,
-          tratamento: null
-        }))
-        count++
+    for(let i = 0; i < newObj.length; i++){
+      if(newObj[i].length < maxLinesTable){
+        for(let j = newObj[i].length; j < maxLinesTable; j++){
+          newObj[i].push(Object.assign({
+            quantidade: null,
+            embalagem: null,
+            descricaoProduto: null,
+            peneira: null,
+            tratamento: null,
+            valorUnitPS: null,
+            valorTotalPS: null,
+            valorUnitR: null,
+            valorTotalR: null
+          }))
+        }
       }
-      return obj;
+    }
+
+    return newObj
   }
 
   setFormaPagamento(){
@@ -438,15 +417,32 @@ export default class Export extends Component {
       }
       return obj
   }
-  /* #endregion */
 
   render() {
     return (
       <div>
 
-        <div className="mb5">
-          <button onClick={async () => this.printDocument()}>Print</button>
+        <div>
+          <SimpleBreadCrumb
+            to={
+              this.props.location.state && this.props.location.state.returnTo
+                ? this.props.location.state.returnTo.pathname
+                : "/pedidos"
+            }
+            history={this.props.history}
+          />
         </div>
+
+        <Affix offsetTop={65}>
+          <PainelHeader title="Visualização do Espelho">
+            <Button
+              type="primary"
+              icon="file-text"
+              onClick={async () => this.printDocument()}>
+                Imprimir
+            </Button>
+          </PainelHeader>
+        </Affix>
 
         <div id="divToPrint">
           {this.setTable2().map((page, indexPage) => (
@@ -480,7 +476,6 @@ export default class Export extends Component {
                         <Col span={3} style={tableTitle}>Peneira</Col>
                         <Col span={6} style={tableTitle}>Tratamento</Col>
                       </Row>
-                      {/* {this.setTable().map((element, index) => ( <TableLinesLeft key={index} data={element} /> ))} */}
                       {page.map((pageItem, indexPI) => ( <TableLinesLeft key={indexPI} data={pageItem} /> ))}
                     </Col>
 
@@ -490,7 +485,6 @@ export default class Export extends Component {
                         <Col span={7} style={{ borderStyle: "solid", borderWidth: 2, borderRightStyle: "none", borderLeftStyle: "none" }}>Val. Unit</Col>
                         <Col span={17} style={{ borderStyle: "solid", borderWidth: 2 }}>Volume total</Col>
                       </Row>
-                      {/* {this.setTablePermutaSoja().map((element, index) => ( <TableLinesRight key={index} data={element} /> ))} */}
                       {page.map((pageItem, indexPI) => ( <TableLinesRight key={indexPI} data={pageItem} coluna={"PS"} /> ))}
                     </Col>
 
@@ -500,7 +494,6 @@ export default class Export extends Component {
                           <Col span={7} style={{ borderStyle: "solid", borderWidth: 2, borderLeftStyle: "none" }}>Val. Unit</Col>
                           <Col span={17} style={{ borderStyle: "solid", borderWidth: 2, borderLeftStyle: "none" }}>Valor Total R$</Col>
                         </Row>
-                        {/* {this.setTableReais().map((element, index) => ( <TableLinesRight key={index} data={element} /> ))} */}
                         {page.map((pageItem, indexPI) => ( <TableLinesRight key={indexPI} data={pageItem} coluna={"R"} /> ))}
                     </Col>
                   </Row>
