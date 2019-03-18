@@ -259,7 +259,7 @@ class CustomerWalletForm extends Component {
       ? selectedClient.propriedades
           .filter(
             p =>
-              p.propriedadeJaExisteEmOutraCarteira &&
+              p.hasOwnProperty('propriedadeJaExisteEmOutraCarteira') &&
               p.propriedadeJaExisteEmOutraCarteira == ""
           )
           .map(p => p._id)

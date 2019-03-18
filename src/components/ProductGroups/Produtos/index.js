@@ -132,6 +132,15 @@ class Produtos extends Component {
         else return 1;
       }
     },
+    {
+      title: "Unid. Medida Primária",
+      dataIndex: "u_m_primaria",
+      key: "u_m_primaria",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      }
+    },
     /* {
       title: "Opções",
       dataIndex: "opcoes",
@@ -163,7 +172,7 @@ class Produtos extends Component {
       }
     },
     {
-      title: "",
+      title: "Ações",
       dataIndex: "action",
       render: (text, record) => {
         return (
