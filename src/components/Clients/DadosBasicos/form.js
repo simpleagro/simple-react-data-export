@@ -218,7 +218,7 @@ class ClientForm extends Component {
           </Form.Item>
           <Form.Item label="Perfil de Compra" {...formItemLayout}>
             {getFieldDecorator("perfil_compra", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              rules: [{ required: false, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.perfil_compra
             })(
               <Select
@@ -232,10 +232,10 @@ class ClientForm extends Component {
                     target: { name: "perfil_compra", value: e }
                   })
                 }>
-                <Option value="PRECO">Preço</Option>
-                <Option value="RELACIONAMENTO">Relacionamento</Option>
-                <Option value="TECNICO">Técnico</Option>
-                <Option value="INDEFINIDO">Indefinido</Option>
+                <Option value="Preço">Preço</Option>
+                <Option value="Relacionamento">Relacionamento</Option>
+                <Option value="Técnico">Técnico</Option>
+                <Option value="Indefinido">Indefinido</Option>
               </Select>
             )}
           </Form.Item>

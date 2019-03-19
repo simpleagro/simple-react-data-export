@@ -319,7 +319,7 @@ export default class Export extends Component {
 
   printDocument() {
     const input = document.getElementById('divToPrint');
-    html2canvas(input, { width: 1200, height: 1588, scale: 3, x: 0 })
+    html2canvas(input, { width: 1200, height: 1588, scale: 3 })
       .then((canvas) => {
         const imgData = canvas.toDataURL('image/jpeg');
         //const pdf = new jsPDF('l');
@@ -344,7 +344,8 @@ export default class Export extends Component {
           heightLeft -= pageHeight;
         }
 
-        console.log(">", canvas.width)
+        console.log(document.getElementById("divToPrint").offsetWidth);
+        console.log(document.getElementById("divToPrint").offsetHeight);
         pdf.output('dataurlnewwindow');
         //pdf.save("download.pdf");
       })
@@ -548,9 +549,6 @@ export default class Export extends Component {
           </div>
           { console.log("STATE: ", this.state) }
           { console.log("PROPS: ", this.props) }
-          {/* { this.state.list.itens && this.state.list.itens.map((ele) =>
-            console.log(">",fatorConversaoUM(this.state.listUnit, ele.embalagem.value, 'kg'))
-          )} */}
       </div>
     );
   }
