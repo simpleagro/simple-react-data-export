@@ -216,6 +216,29 @@ class ClientForm extends Component {
               </Checkbox>
             )}
           </Form.Item>
+          <Form.Item label="Perfil de Compra" {...formItemLayout}>
+            {getFieldDecorator("perfil_compra", {
+              rules: [{ required: false, message: "Este campo é obrigatório!" }],
+              initialValue: this.state.formData.perfil_compra
+            })(
+              <Select
+                name="perfil_compra"
+                showAction={["focus", "click"]}
+                showSearch
+                style={{ width: 200 }}
+                placeholder="Selecione um perfil..."
+                onChange={e =>
+                  this.handleFormState({
+                    target: { name: "perfil_compra", value: e }
+                  })
+                }>
+                <Option value="Preço">Preço</Option>
+                <Option value="Relacionamento">Relacionamento</Option>
+                <Option value="Técnico">Técnico</Option>
+                <Option value="Indefinido">Indefinido</Option>
+              </Select>
+            )}
+          </Form.Item>
         </Form>
       </div>
     );
