@@ -44,7 +44,6 @@ class Produtos extends Component {
     });
 
     const data = await ProductsService.list(this.state.group_id)(aqp);
-    const groupData = await GroupsService.get(this.state.group_id);
 
     this.setState(prev => ({
       ...prev,
@@ -52,12 +51,18 @@ class Produtos extends Component {
       loadingData: false,
       pagination: {
         total: data.total
-      },
-      group_data: groupData
+      }
     }));
   }
 
   async componentDidMount() {
+    const groupData = await GroupsService.get(this.state.group_id);
+
+    this.setState(prev => ({
+      ...prev,
+      group_data: groupData
+    }));
+
     await this.initializeList();
   }
 

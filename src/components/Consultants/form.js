@@ -323,7 +323,9 @@ class ConsultantForm extends Component {
                 rules: [
                   { required: true, message: "Este campo é obrigatório!" }
                 ],
-                initialValue:
+                initialValue: this.state.formData.login ||
+                (this.state.formData.usuario_id &&
+                  this.state.formData.usuario_id.login) ||
                   undefined
               })(
                 <Input
