@@ -3,8 +3,9 @@ import { Row, Col, Affix, Button } from "antd";
 import html2canvas from "html2canvas";
 import jsPDF from 'jspdf';
 import * as OrderService from "services/orders";
+import * as UnitService from "services/units-measures";
 import moment from "moment";
-import { currency, getNumber } from "common/utils"
+import { currency, getNumber, fatorConversaoUM } from "common/utils"
 import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
 import { PainelHeader } from "common/PainelHeader";
 
@@ -30,7 +31,7 @@ const pageStyle = {
   marginLeft: 'auto',
   marginRight: 'auto',
   fontSize: 12,
-  paddingLeft: 15,
+  paddingLeft: 5,
   paddingTop: 15,
   paddingRight: 15,
   //marginBottom: 50
@@ -238,17 +239,10 @@ const TableLinesLeft = (props) => (
 
 const TableLinesRight = (props) => (
   <div>
-    {props.coluna === "PS"
-    ? <div>
-        <Col span={7}><Row style={drawLines} span={6}>{props.data.valorUnitPS}</Row></Col>
-        <Col span={17}><Row style={drawLines} span={18}>{props.data.valorTotalPS}</Row></Col>
-      </div>
-    :
-      <div>
-        <Col span={7}><Row style={drawLines} span={6}>{props.data.valorUnitR}</Row></Col>
-        <Col span={17}><Row style={drawLines} span={18}>{props.data.valorTotalR}</Row></Col>
-      </div>
-    }
+    <div>
+      <Col span={7}><Row style={drawLines} span={6}>{props.coluna === "PS" ? props.data.valorUnitPS : props.data.valorUnitR}</Row></Col>
+      <Col span={17}><Row style={drawLines} span={18}>{props.coluna === "PS" ? props.data.valorTotalPS : props.data.valorTotalR}</Row></Col>
+    </div>
   </div>
 )
 
@@ -304,10 +298,12 @@ export default class Export extends Component {
   async componentDidMount() {
     const id = this.props.match.params.order_id;
     const data = await OrderService.get(id);
+    const dataUnit = await UnitService.list();
 
     this.setState(prev => ({
       ...prev,
       list: data,
+      listUnit: dataUnit.docs,
       pagination: []
     }));
   }
@@ -323,7 +319,7 @@ export default class Export extends Component {
 
   printDocument() {
     const input = document.getElementById('divToPrint');
-    html2canvas(input)
+    html2canvas(input, { width: 1200, height: 1588, scale: 3, x: 0 })
       .then((canvas) => {
         const imgData = canvas.toDataURL('image/jpeg');
         //const pdf = new jsPDF('l');
@@ -348,6 +344,7 @@ export default class Export extends Component {
           heightLeft -= pageHeight;
         }
 
+        console.log(">", canvas.width)
         pdf.output('dataurlnewwindow');
         //pdf.save("download.pdf");
       })
@@ -398,7 +395,6 @@ export default class Export extends Component {
         }
       }
     }
-
     return newObj
   }
 
@@ -411,11 +407,11 @@ export default class Export extends Component {
         data_vencimento: moment(element.data_vencimento).format("DD/MM/YYYY")
       })), count++))
 
-      while(this.state.list.pagamento && count < 3){
-        obj.push(Object.assign({valor: 0, data: 0}))
-        count++
-      }
-      return obj
+    while(this.state.list.pagamento && count < 3){
+      obj.push(Object.assign({valor: 0, data: 0}))
+      count++
+    }
+    return obj
   }
 
   render() {
@@ -439,12 +435,16 @@ export default class Export extends Component {
               type="primary"
               icon="file-text"
               onClick={async () => this.printDocument()}>
-                Imprimir
+                Gerar PDF
             </Button>
           </PainelHeader>
         </Affix>
 
+
+        <Row style={{ textAlign: "center", fontWeight: "bold" }}>Total de Paginas: {this.setTable2().length}</Row>
+
         <div id="divToPrint">
+
           {this.setTable2().map((page, indexPage) => (
             <Row key={indexPage} style={pageStyle}>
 
@@ -476,7 +476,7 @@ export default class Export extends Component {
                         <Col span={3} style={tableTitle}>Peneira</Col>
                         <Col span={6} style={tableTitle}>Tratamento</Col>
                       </Row>
-                      {page.map((pageItem, indexPI) => ( <TableLinesLeft key={indexPI} data={pageItem} /> ))}
+                      {page.map((pageItem, indexPI) => ( <TableLinesLeft key={indexPI} data={pageItem} arr_unidades={this.state.listUnit && this.state.listUnit} /> ))}
                     </Col>
 
                     <Col span={6} style={{ textAlign: "center" }}>
@@ -499,7 +499,6 @@ export default class Export extends Component {
                   </Row>
 
                   <Row>
-
                     <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, borderRightStyle: "none", textAlign: "right", paddingRight: 10, fontWeight: "bold" }} span={13}>Totais:</Col>
                     <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, borderRightStyle: "none", textAlign: "center" }} span={6}> {this.state.list.pagamento && this.state.list.pagamento.total_pedido_graos} </Col>
                     <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, textAlign: "center" }} span={5}> {this.state.list.pagamento && this.state.list.pagamento.total_pedido_reais} </Col>
@@ -530,7 +529,6 @@ export default class Export extends Component {
                       </Row>
                     </Col>
                   </Row>
-
                 </Row>
               </Row>
 
@@ -545,12 +543,14 @@ export default class Export extends Component {
                   ? "Reais + Grãos"
                   : "Reais" }
               />
-
-              { console.log("STATE: ", this.state) }
-
             </Row>
             ))}
           </div>
+          { console.log("STATE: ", this.state) }
+          { console.log("PROPS: ", this.props) }
+          {/* { this.state.list.itens && this.state.list.itens.map((ele) =>
+            console.log(">",fatorConversaoUM(this.state.listUnit, ele.embalagem.value, 'kg'))
+          )} */}
       </div>
     );
   }
