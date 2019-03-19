@@ -359,6 +359,7 @@ class ProductForm extends Component {
           </Form.Item>
           <Form.Item label="Unid. Medida Primária" {...formItemLayout}>
             {getFieldDecorator("u_m_primaria", {
+              rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.u_m_primaria
                 ? this.state.formData.u_m_primaria
                 : undefined
