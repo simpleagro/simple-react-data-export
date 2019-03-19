@@ -1,0 +1,246 @@
+import React, { Component } from "react";
+import { Button, Select } from "antd";
+
+import * as QuotaService from "services/quotas";
+import { list as ProductGroupServiceList } from "services/productgroups";
+import SimpleTable from "common/SimpleTable";
+import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
+import { flashWithSuccess } from "common/FlashMessages";
+import parseErrors from "lib/parseErrors";
+import { PainelHeader } from "common/PainelHeader";
+import { getNumber } from "common/utils";
+import { simpleTableSearch } from "lib/simpleTableSearch";
+
+class VendasIndicator extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      list: [],
+      loadingData: true,
+      pagination: {
+        showSizeChanger: true,
+        defaultPageSize: 10,
+        pageSizeOptions: ["10", "25", "50", "100"]
+      },
+      visible: false,
+      grupoProdutos: []
+    };
+  }
+
+  async initializeList(grupo = {}, aqp) {
+    grupo = Object.keys(grupo).length ? JSON.parse(grupo) : {};
+
+    this.setState(previousState => {
+      return { ...previousState, loadingData: true };
+    });
+
+    const data = await QuotaService.getResume(this.state.quota_id)(grupo.id, {
+      ...aqp
+    });
+
+    data.docs = data.docs.map(doc => {
+      doc.total_cota = doc.cota_valor.reduce(
+        (acc, obj) => acc + getNumber(obj),
+        0
+      );
+      return doc;
+    });
+
+    this.setState(prev => ({
+      ...prev,
+      list: data.docs,
+      loadingData: false,
+      pagination: {
+        total: data.total
+      },
+      editMode: false,
+      formData: {},
+      savingForm: false,
+      selectedGroup: grupo
+    }));
+  }
+
+  async componentDidMount() {
+
+    const grupoProdutos = await ProductGroupServiceList({
+      limit: -1,
+      fields: "nome"
+    });
+
+    this.setState(prev => ({
+      ...prev,
+      grupoProdutos: grupoProdutos.docs
+    }));
+
+    await this.initializeList();
+  }
+
+  tableConfig = () => [
+    {
+      title: "Nome",
+      dataIndex: "nome",
+      key: "nome",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      },
+      ...simpleTableSearch(this)("produtos.nome")
+    },
+    {
+      title: "Nome Comercial",
+      dataIndex: "nome_comercial",
+      key: "nome_comercial",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      },
+      ...simpleTableSearch(this)("produtos.nome_comercial")
+    },
+    {
+      title: "UM",
+      dataIndex: "cota_um",
+      key: "cota_um",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      }
+    },
+    {
+      title: "Valor Cota",
+      dataIndex: "total_cota",
+      key: "total_cota",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
+      }
+    }
+  ];
+
+  showModal = record => {
+    this.setState({
+      visible: true,
+      record,
+      editMode: !!record
+    });
+  };
+
+  handleOk = async item => {
+    this.setState({ savingForm: true });
+    if (!this.state.editMode) {
+      /* if (Object.keys(this.state.formData).length === 0)
+        flashWithSuccess("Sem alterações para salvar", " "); */
+
+      try {
+        const created = await QuotaService.create(item);
+
+        this.setState(prev => {
+          if (prev.list.length > 0) {
+            return {
+              openForm: false,
+              editMode: false,
+              visible: false,
+              list: [...prev.list, created]
+            };
+          }
+          return {
+            openForm: false,
+            editMode: false,
+            visible: false,
+            list: [created]
+          };
+        });
+        flashWithSuccess();
+      } catch (err) {
+        if (err && err.response && err.response.data) parseErrors(err);
+        console.log("Erro interno ao adicionar uma cota", err);
+      } finally {
+        this.setState({ savingForm: false });
+      }
+    } else {
+      try {
+        const updated = await QuotaService.update(item);
+        const data = await QuotaService.list();
+
+        this.setState({
+          openForm: false,
+          editMode: false,
+          visible: false,
+          list: data.docs
+        });
+
+        flashWithSuccess();
+      } catch (err) {
+        if (err && err.response && err.response.data) parseErrors(err);
+        console.log("Erro interno ao atualizar uma cota", err);
+      } finally {
+        this.setState({ savingForm: false });
+      }
+    }
+  };
+
+  handleCancel = e => {
+    this.setState({
+      visible: false
+    });
+  };
+
+  saveFormRef = formRef => {
+    this.formRef = formRef;
+  };
+
+  handleTableChange = (pagination, sorter) => {
+    const pager = { ...this.state.pagination };
+    pager.current = pagination.current;
+    this.setState({
+      pagination: pager
+    });
+    this.initializeList(JSON.stringify(this.state.selectedGroup), {
+      page: pagination.current,
+      limit: pagination.pageSize,
+      ...this.state.tableSearch
+    });
+  };
+
+  render() {
+    return (
+      <div>
+        <SimpleBreadCrumb to={`/indicadores`} history={this.props.history} />
+        <PainelHeader title="Vendas" />
+
+        <h4>Selecione um grupo de produtos para começar:</h4>
+
+        <Select
+          value={this.state.selectedGroup && this.state.selectedGroup.nome}
+          style={{ width: "100%", marginBottom: 20 }}
+          showAction={["focus", "click"]}
+          showSearch
+          placeholder="Selecione um grupo de produto..."
+          onChange={e => this.initializeList(e)}
+          filterOption={(input, option) =>
+            option.props.children.toLowerCase().indexOf(input.toLowerCase()) >=
+            0
+          }>
+          {this.state.grupoProdutos.length &&
+            this.state.grupoProdutos.map(gp => (
+              <Select.Option
+                key={gp._id}
+                value={JSON.stringify({ id: gp._id, nome: gp.nome })}>
+                {gp.nome}
+              </Select.Option>
+            ))}
+        </Select>
+
+        <SimpleTable
+          pagination={this.state.pagination}
+          spinning={this.state.loadingData}
+          rowKey="_id"
+          columns={this.tableConfig()}
+          dataSource={this.state.list}
+          onChange={this.handleTableChange}
+        />
+      </div>
+    );
+  }
+}
+
+export default VendasIndicator;

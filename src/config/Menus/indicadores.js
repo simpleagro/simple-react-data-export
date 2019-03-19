@@ -9,6 +9,13 @@ const menus = {
     icon: "tachometer-alt",
     showMenu: true
   },
+  "/indicadores/vendas": {
+    component: SimpleLoadable(() => import("../../components/Indicators/Vendas")),
+    key: "/indicadores/vendas",
+    path: "/indicadores/vendas",
+    label: "Indicadores",
+    showMenu: false
+  },
 };
 
 export default menus;
