@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Button, Select } from "antd";
 
 import * as QuotaService from "../../../services/quotas";
+import { list as ProductGroupServiceList } from "../../../services/productgroups";
 import SimpleTable from "../../common/SimpleTable";
 import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
 import { flashWithSuccess } from "../../common/FlashMessages";
@@ -49,7 +50,6 @@ class Quota extends Component {
     this.setState(prev => ({
       ...prev,
       list: data.docs,
-      grupoProdutos: data.grupoProdutos,
       loadingData: false,
       pagination: {
         total: data.total
@@ -62,62 +62,19 @@ class Quota extends Component {
   }
 
   async componentDidMount() {
-    const data = await QuotaService.getResume(this.state.quota_id)();
+
+    const grupoProdutos = await ProductGroupServiceList({
+      limit: -1,
+      fields: "nome"
+    });
 
     this.setState(prev => ({
       ...prev,
-      grupoProdutos: data.grupoProdutos
+      grupoProdutos: grupoProdutos.docs
     }));
 
     await this.initializeList();
   }
-
-  changeStatus = async (id, newStatus) => {
-    try {
-      await QuotaService.changeStatus(id, newStatus);
-
-      let recordName = "";
-
-      let _list = this.state.list.map(item => {
-        if (item._id === id) {
-          item.status = newStatus;
-          recordName = item.razao_social;
-        }
-        return item;
-      });
-
-      this.setState(prev => ({
-        ...prev,
-        list: _list
-      }));
-
-      flashWithSuccess(
-        "",
-        `A cota, ${recordName}, foi ${
-          newStatus ? "ativada" : "bloqueada"
-        } com sucesso!`
-      );
-    } catch (err) {
-      if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao mudar status da cota", err);
-    }
-  };
-
-  removeRecord = async ({ _id, nome }) => {
-    try {
-      await QuotaService.remove(_id);
-      let _list = this.state.list.filter(record => record._id !== _id);
-
-      this.setState({
-        list: _list
-      });
-
-      flashWithSuccess("", `A cota, ${nome}, foi removida com sucesso!`);
-    } catch (err) {
-      if (err && err.response && err.response.data) parseErrors(err);
-      console.log("Erro interno ao remover uma cota", err);
-    }
-  };
 
   tableConfigProdutos = () => [
     {
@@ -128,8 +85,7 @@ class Quota extends Component {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      ...simpleTableSearch(this)("produtos.nome"),
-      render: text => text
+      ...simpleTableSearch(this)("produtos.nome")
     },
     {
       title: "Nome Comercial",
@@ -139,8 +95,7 @@ class Quota extends Component {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      ...simpleTableSearch(this)("produtos.nome_comercial"),
-      render: text => text
+      ...simpleTableSearch(this)("produtos.nome_comercial")
     },
     {
       title: "UM",
@@ -149,8 +104,7 @@ class Quota extends Component {
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      },
-      render: text => text
+      }
     },
     {
       title: "Valor Cota",
@@ -159,8 +113,7 @@ class Quota extends Component {
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      },
-      render: text => currency()(text || 0)
+      }
     }
   ];
 
