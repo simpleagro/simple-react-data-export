@@ -639,7 +639,7 @@ class CustomerWalletForm extends Component {
               </Tooltip>
             )}
           {item.ie && item.estado
-            ? `${item.nome} | ${item.ie} | ${item.estado}`
+            ? `${item.nome} | ${item.ie} | ${item.cidade}-${item.estado}`
             : `${item.nome} | ${item.cpf_cnpj}`}
 
           {item.gerenciarCarteiraPorPropriedade
