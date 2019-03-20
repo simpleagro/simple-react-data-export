@@ -25,6 +25,7 @@ const empresa = {
 
 /* #region CSS */
 const divToPrintStryle = {
+  /*backgroundColor: "lightblue",*/
   width: "295mm"
 }
 const pageStyle = {
@@ -316,48 +317,6 @@ export default class Export extends Component {
     }));
   }
 
-  addPages(pdf, imgData){
-    let totalPages = this.state.list.itens && getNumber(Object.keys(this.state.list.itens).length) / maxLinesTable
-
-    for(let i = 1; i < totalPages; i++){
-      pdf.addPage('a4', 'l');
-      //pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210);
-    }
-  }
-
-  printDocument() {
-    const input = document.getElementById('divToPrint');
-    html2canvas(input, { width: 1200, height: 1588, scale: 3 })
-      .then((canvas) => {
-        const imgData = canvas.toDataURL('image/jpeg');
-        //const pdf = new jsPDF('l');
-        //pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210);
-
-        var imgWidth = 297;
-        var pageHeight = 210;
-        var imgHeight = canvas.height * imgWidth / canvas.width;
-        var heightLeft = imgHeight;
-        var add = 27
-
-        var pdf = new jsPDF("l");
-        var positionY = 0;
-        var positionX = 12;
-
-        pdf.addImage(imgData, 'JPEG', positionX, positionY, imgWidth, imgHeight + add);
-        heightLeft -= pageHeight;
-
-        while (heightLeft >= 0) {
-          positionY = heightLeft - imgHeight;
-          pdf.addPage();
-          pdf.addImage(imgData, 'JPEG', positionX, positionY, imgWidth, imgHeight + add);
-          heightLeft -= pageHeight;
-        }
-        pdf.output('dataurlnewwindow');
-        //pdf.save("download.pdf");
-      })
-    ;
-  }
-
   setTable2(){
     let obj = [], count = 0, max = maxLinesTable, newObj = [], posInit = 0, posEnd = max
 
@@ -421,6 +380,41 @@ export default class Export extends Component {
     return obj
   }
 
+  printDocument() {
+    const input = document.getElementById('divToPrint');
+    html2canvas(input, { width: 1200, height: 1588, scale: 3, logging: false })
+      .then((canvas) => {
+        const imgData = canvas.toDataURL('image/jpeg');
+        //const pdf = new jsPDF('l');
+        //pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210);
+
+        var imgWidth = 297;
+        var pageHeight = 210;
+        var imgHeight = canvas.height * imgWidth / canvas.width;
+        var heightLeft = imgHeight;
+        var add = 27
+
+        var pdf = new jsPDF("l");
+        var positionY = 0;
+        var positionX = 12;
+
+        pdf.addImage(imgData, 'JPEG', positionX, positionY, imgWidth, imgHeight + add);
+        heightLeft -= pageHeight;
+
+        while (heightLeft >= 0) {
+          positionY = heightLeft - imgHeight;
+          if(input.offsetHeight > 794){
+            pdf.addPage();
+            pdf.addImage(imgData, 'JPEG', positionX, positionY, imgWidth, imgHeight + add);
+          }
+          heightLeft -= pageHeight;
+        }
+        pdf.output('dataurlnewwindow');
+        //pdf.save("download.pdf");
+      })
+    ;
+  }
+
   render() {
     return (
       <div>
@@ -441,7 +435,7 @@ export default class Export extends Component {
             <Button
               type="primary"
               icon="file-text"
-              onClick={async () => this.printDocument()}>
+              onClick={async () => await this.printDocument()}>
                 Gerar PDF
             </Button>
           </PainelHeader>
@@ -553,8 +547,8 @@ export default class Export extends Component {
             </Row>
             ))}
           </div>
-          { console.log("STATE: ", this.state) }
-          { console.log("PROPS: ", this.props) }
+          {/* { console.log("STATE: ", this.state) }
+          { console.log("PROPS: ", this.props) } */}
       </div>
     );
   }
