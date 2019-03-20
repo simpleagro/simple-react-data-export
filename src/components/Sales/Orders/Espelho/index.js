@@ -24,6 +24,9 @@ const empresa = {
 /* #endregion */
 
 /* #region CSS */
+const divToPrintStryle = {
+  width: "295mm"
+}
 const pageStyle = {
   /*backgroundColor: 'lightgray',*/
   height: "210mm",
@@ -34,6 +37,7 @@ const pageStyle = {
   paddingLeft: 5,
   paddingTop: 15,
   paddingRight: 15,
+  fontVariant: "normal"
   //marginBottom: 50
 }
 
@@ -336,20 +340,18 @@ export default class Export extends Component {
         var add = 27
 
         var pdf = new jsPDF("l");
-        var position = 0;
+        var positionY = 0;
+        var positionX = 12;
 
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight + add);
+        pdf.addImage(imgData, 'JPEG', positionX, positionY, imgWidth, imgHeight + add);
         heightLeft -= pageHeight;
 
         while (heightLeft >= 0) {
-          position = heightLeft - imgHeight;
+          positionY = heightLeft - imgHeight;
           pdf.addPage();
-          pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight + add);
+          pdf.addImage(imgData, 'JPEG', positionX, positionY, imgWidth, imgHeight + add);
           heightLeft -= pageHeight;
         }
-
-        console.log("Width: ", document.getElementById("divToPrint").offsetWidth);
-        console.log("Height: ", document.getElementById("divToPrint").offsetHeight);
         pdf.output('dataurlnewwindow');
         //pdf.save("download.pdf");
       })
@@ -448,7 +450,7 @@ export default class Export extends Component {
 
         <Row style={{ textAlign: "center", fontWeight: "bold" }}>Total de Paginas: {this.setTable2().length}</Row>
 
-        <div id="divToPrint">
+        <div id="divToPrint" style={divToPrintStryle}>
 
           {this.setTable2().map((page, indexPage) => (
             <Row key={indexPage} style={pageStyle}>
