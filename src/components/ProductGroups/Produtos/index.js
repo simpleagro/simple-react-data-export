@@ -68,10 +68,7 @@ class Produtos extends Component {
 
   changeStatus = async (id, newStatus) => {
     try {
-      await ProductsService.changeStatus(this.state.group_id)(
-        id,
-        newStatus
-      );
+      await ProductsService.changeStatus(this.state.group_id)(id, newStatus);
 
       let recordName = "";
 
@@ -144,7 +141,8 @@ class Produtos extends Component {
       sorter: (a, b, sorter) => {
         if (sorter === "ascendent") return -1;
         else return 1;
-      }
+      },
+      render: text => (text ? text.label : "")
     },
     /* {
       title: "Opções",
@@ -182,11 +180,7 @@ class Produtos extends Component {
       render: (text, record) => {
         return (
           <span>
-            <Button
-              size="small"
-              onClick={() =>
-                this.editarProduct(record)
-              }>
+            <Button size="small" onClick={() => this.editarProduct(record)}>
               <Icon type="edit" style={{ fontSize: "16px" }} />
             </Button>
             <Divider
@@ -212,10 +206,12 @@ class Produtos extends Component {
     }
   ];
 
-  editarProduct (record) {
+  editarProduct(record) {
     return this.props.match.params.group_id
       ? this.props.history.push({
-          pathname: `/grupos-produtos/${this.state.group_id}/produtos/${record._id}/edit`,
+          pathname: `/grupos-produtos/${this.state.group_id}/produtos/${
+            record._id
+          }/edit`,
           state: { group_data: this.state.group_data }
         })
       : this.props.history.push(`/produtos/${record._id}/edit`);
@@ -240,7 +236,10 @@ class Produtos extends Component {
       <div>
         {this.props.match.params.group_id ? (
           <div>
-            <SimpleBreadCrumb to={"/grupos-produtos"} history={this.props.history} />
+            <SimpleBreadCrumb
+              to={"/grupos-produtos"}
+              history={this.props.history}
+            />
             <Row gutter={24}>
               <Col span={5}>
                 <Card
@@ -249,7 +248,7 @@ class Produtos extends Component {
                     boxShadow: "0px 8px 0px 0px #009d55 inset",
                     color: "#009d55"
                   }}>
-                  <p>{`Grupo: ${this.state.group_data.nome || ''}`}</p>
+                  <p>{`Grupo: ${this.state.group_data.nome || ""}`}</p>
                   <Button
                     style={{ width: "100%" }}
                     onClick={() => {
@@ -272,7 +271,9 @@ class Produtos extends Component {
                       icon="plus"
                       onClick={() =>
                         this.props.history.push({
-                          pathname: `/grupos-produtos/${this.state.group_id}/produtos/new`,
+                          pathname: `/grupos-produtos/${
+                            this.state.group_id
+                          }/produtos/new`,
                           state: { group_data: this.state.group_data }
                         })
                       }>
@@ -297,7 +298,11 @@ class Produtos extends Component {
               <Button
                 type="primary"
                 icon="plus"
-                onClick={() => this.props.history.push(`/grupos-produtos/${this.state.group_id}/produtos/new`)}>
+                onClick={() =>
+                  this.props.history.push(
+                    `/grupos-produtos/${this.state.group_id}/produtos/new`
+                  )
+                }>
                 Adicionar
               </Button>
             </PainelHeader>
