@@ -221,9 +221,11 @@ const ClientLine = (props) => (
 const TableLinesLeft = (props) => (
   <Row>
     <Col span={5}>
-      <Row style={drawLines}>{fatorConversaoUM(props.arr_unidades, props.data.embalagem, 'kg') === "erro"
-        ? props.data.quantidade * 1
-        : props.data.quantidade * fatorConversaoUM(props.arr_unidades, props.data.embalagem, 'kg') }
+      <Row style={drawLines}>{props.data.quantidade === null
+        ? null
+        : fatorConversaoUM(props.arr_unidades, props.data.embalagem, 'kg') === "erro"
+          ? currency()(props.data.quantidade * 1, { minimumFractionDigits: 0 })
+          : currency()(props.data.quantidade * fatorConversaoUM(props.arr_unidades, props.data.embalagem, 'kg'), { minimumFractionDigits: 0 }) }
       </Row>
 
     </Col>
@@ -249,8 +251,8 @@ const TableLinesLeft = (props) => (
 const TableLinesRight = (props) => (
   <div>
     <div>
-      <Col span={7}><Row style={drawLines} span={6}>{props.coluna === "PS" ? props.data.valorUnitPS : props.data.valorUnitR}</Row></Col>
-      <Col span={17}><Row style={drawLines} span={18}>{props.coluna === "PS" ? props.data.valorTotalPS : props.data.valorTotalR}</Row></Col>
+      <Col span={7}><Row style={drawLines} span={6}>{props.coluna === "PS" ? props.data.valorUnitPS === null ? null : props.data.valorUnitPS : props.data.valorUnitR === null ? null : currency()(props.data.valorUnitR)}</Row></Col>
+      <Col span={17}><Row style={drawLines} span={18}>{props.coluna === "PS" ? props.data.valorTotalPS === null ? null : props.data.valorTotalPS : props.data.valorTotalR === null ? null : currency()(props.data.valorTotalR)}</Row></Col>
     </div>
   </div>
 )
@@ -501,8 +503,8 @@ export default class Export extends Component {
 
                   <Row>
                     <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, borderRightStyle: "none", textAlign: "right", paddingRight: 10, fontWeight: "bold" }} span={13}>Totais:</Col>
-                    <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, borderRightStyle: "none", textAlign: "center" }} span={6}> {this.state.list.pagamento && this.state.list.pagamento.total_pedido_graos} </Col>
-                    <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, textAlign: "center" }} span={5}> {this.state.list.pagamento && this.state.list.pagamento.total_pedido_reais} </Col>
+                    <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, borderRightStyle: "none", textAlign: "center" }} span={6}> {this.state.list.pagamento.total_pedido_graos && currency()(this.state.list.pagamento.total_pedido_graos)} </Col>
+                    <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, textAlign: "center" }} span={5}> {this.state.list.pagamento.total_pedido_reais && currency()(this.state.list.pagamento.total_pedido_reais)} </Col>
                   </Row>
 
                   <Row style={{ paddingTop: 5 }}>
@@ -521,7 +523,7 @@ export default class Export extends Component {
                     <Col span={15} style={{ borderStyle: "solid" }}>
                       <Row style={{ textAlign: "center", fontWeight: "bold" }}>Pagamento em Grãos</Row>
                       <Row style={drawLines}>
-                        <Col span={12} style={{paddingLeft: 10}}>Volume kg: {this.state.list.pagamento && this.state.list.pagamento.peso_graos}</Col>
+                        <Col span={12} style={{paddingLeft: 10}}>Volume kg: {this.state.list.pagamento.peso_graos ? currency()(this.state.list.pagamento.peso_graos) : ""}</Col>
                         <Col span={12} style={{paddingLeft: 10}}>Vencimento: {this.state.list.pagamento && moment(this.state.list.pagamento.data_pgto_graos).format("DD/MM/YYYY")}</Col>
                       </Row>
                       <Row>
