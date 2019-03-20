@@ -37,6 +37,7 @@ const pageStyle = {
   paddingLeft: 5,
   paddingTop: 15,
   paddingRight: 15,
+  fontVariant: "normal"
   //marginBottom: 50
 }
 
