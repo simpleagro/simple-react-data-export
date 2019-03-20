@@ -288,7 +288,7 @@ class FieldRegistrationForm extends Component {
             })(
               <Select
                 name="safra"
-                showAction={this.state.editMode ? ["", ""] : ["focus", "click"]}
+                showAction={["focus", "click"]}
                 showSearch
                 placeholder="Selecione a safra..."
                 autoFocus

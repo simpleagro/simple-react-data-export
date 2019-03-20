@@ -155,7 +155,7 @@ class PreHarvestForm extends Component {
             {getFieldDecorator("responsavel", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.responsavel && this.state.formData.responsavel.nome
-            })(<Input name="responsavel" disabled autoFocus />)}
+            })(<Input name="responsavel" disabled  />)}
           </Form.Item>
 
           <Form.Item label="Reamostra" {...formItemLayout}>

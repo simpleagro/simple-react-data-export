@@ -77,7 +77,7 @@ const ModalForm = Form.create()(
                 <Input
                   autoComplete="false"
                   name="nome"
-                  ref={input => (this.titleInput = input)}
+                  autoFocus
                 />
               )}
             </Form.Item>
