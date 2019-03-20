@@ -47,10 +47,6 @@ class TypeForm extends Component {
           listType: dataType
         }));
     }
-
-    setTimeout(() => {
-      this.titleInput.focus();
-    }, 0);
   }
 
   handleFormState = event => {
@@ -134,7 +130,7 @@ class TypeForm extends Component {
             {getFieldDecorator("descricao", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.descricao
-            })(<Input name="descricao" ref={input => (this.titleInput = input)} />)}
+            })(<Input name="descricao" autoFocus />)}
           </Form.Item>
 
         </Form>

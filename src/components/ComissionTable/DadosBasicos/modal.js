@@ -54,7 +54,7 @@ const ModalForm = Form.create()(
       render() {
         const { visible, onCancel, onCreate, form } = this.props;
         const { getFieldDecorator } = form;
-        
+
         return (
           <Modal
             visible={visible}
@@ -76,7 +76,7 @@ const ModalForm = Form.create()(
                 })(
                   <Input
                     name="nome"
-                    ref={input => (this.titleInput = input)}
+                    autoFocus
                   />
                 )}
               </Form.Item>
@@ -87,7 +87,6 @@ const ModalForm = Form.create()(
                 })(
                   <Input
                     name="versao"
-                    ref={input => (this.titleInput = input)}
                   />
                 )}
               </Form.Item>
@@ -221,4 +220,3 @@ const ModalForm = Form.create()(
   );
 
   export default ModalForm;
- 

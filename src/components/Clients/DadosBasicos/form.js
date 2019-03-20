@@ -31,10 +31,6 @@ class ClientForm extends Component {
           editMode: id ? true : false
         }));
     }
-
-    setTimeout(() => {
-      this.titleInput.focus();
-    }, 0);
   }
 
   handleFormState = event => {
@@ -129,7 +125,7 @@ class ClientForm extends Component {
             {getFieldDecorator("nome", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.nome
-            })(<Input name="nome" ref={input => (this.titleInput = input)} />)}
+            })(<Input name="nome" autoFocus />)}
           </Form.Item>
 
           <Form.Item label="Tipo do Cliente" {...formItemLayout}>
@@ -218,7 +214,9 @@ class ClientForm extends Component {
           </Form.Item>
           <Form.Item label="Perfil de Compra" {...formItemLayout}>
             {getFieldDecorator("perfil_compra", {
-              rules: [{ required: false, message: "Este campo é obrigatório!" }],
+              rules: [
+                { required: false, message: "Este campo é obrigatório!" }
+              ],
               initialValue: this.state.formData.perfil_compra
             })(
               <Select

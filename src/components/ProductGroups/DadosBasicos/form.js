@@ -36,9 +36,7 @@ class GroupForm extends Component {
         }));
     }
 
-    setTimeout(() => {
-      this.titleInput.focus();
-    }, 0);
+
   }
 
   handleFormState = event => {
@@ -317,7 +315,7 @@ class GroupForm extends Component {
             })(
               <Input
                 name="nome"
-                ref={input => (this.titleInput = input)}
+                autoFocus
               />
             )}
           </Form.Item>

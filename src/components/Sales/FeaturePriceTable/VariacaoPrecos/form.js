@@ -46,10 +46,6 @@ class PriceVariations extends Component {
           editMode: id ? true : false
         }));
     }
-
-    setTimeout(() => {
-      this.titleInput.focus();
-    }, 0);
   }
 
   handleFormState = event => {
@@ -212,7 +208,7 @@ class PriceVariations extends Component {
               <Input
                 name="valor"
                 prefix="R$"
-                ref={input => (this.titleInput = input)}
+                autoFocus
                 //style={{ width: 200 }}
               />
             )}

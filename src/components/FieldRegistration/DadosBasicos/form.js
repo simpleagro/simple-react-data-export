@@ -80,9 +80,7 @@ class FieldRegistrationForm extends Component {
       }
     }
 
-    setTimeout(() => {
-      this.titleInput.focus();
-    }, 0);
+
 
     const estados = await IBGEService.listaEstados();
     this.setState(prev => ({ ...prev, estados, fetchingCidade: false }));
@@ -290,10 +288,10 @@ class FieldRegistrationForm extends Component {
             })(
               <Select
                 name="safra"
-                showAction={this.state.editMode ? ["", ""] : ["focus", "click"]}
+                showAction={["focus", "click"]}
                 showSearch
                 placeholder="Selecione a safra..."
-                ref={input => (this.titleInput = input)}
+                autoFocus
                 onChange={e => {
                   this.handleFormState({
                     target: { name: "safra", value: JSON.parse(e) }

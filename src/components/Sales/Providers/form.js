@@ -37,10 +37,6 @@ class ProvidersForm extends Component {
           listType: dataType
         }));
     }
-
-    setTimeout(() => {
-      this.titleInput.focus();
-    }, 0);
   }
 
   handleFormState = event => {
@@ -132,7 +128,7 @@ class ProvidersForm extends Component {
             })(
               <Input
                 name="razao_social"
-                ref={input => (this.titleInput = input)}
+                autoFocus
               />
             )}
           </Form.Item>
@@ -144,7 +140,6 @@ class ProvidersForm extends Component {
             })(
               <Input
                 name="nome_fantasia"
-                ref={input => (this.titleInput = input)}
               />
             )}
           </Form.Item>
@@ -156,7 +151,6 @@ class ProvidersForm extends Component {
             })(
               <Input
                 name="cpf_cnpj"
-                ref={input => (this.titleInput = input)}
               />
             )}
           </Form.Item>

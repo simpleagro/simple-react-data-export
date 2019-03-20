@@ -43,9 +43,7 @@ class ConfigurationForm extends Component {
         }));
     }
 
-    setTimeout(() => {
-      this.titleInput.focus();
-    }, 0);
+
     await this.initializeList();
   }
 
@@ -309,7 +307,7 @@ class ConfigurationForm extends Component {
             {getFieldDecorator("screen", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.screen
-            })(<Input name="screen" style={{ width: 400 }} ref={input => (this.titleInput = input)} />)}
+            })(<Input name="screen" style={{ width: 400 }} autoFocus />)}
           </Form.Item>
 
           <Form.Item label="">
