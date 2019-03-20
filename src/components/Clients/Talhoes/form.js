@@ -90,9 +90,6 @@ class ClientPropertySpotForm extends Component {
       }
     }
 
-    setTimeout(() => {
-      this.titleInput.focus();
-    }, 0);
   }
 
   delayedShowMarker = () => {
@@ -267,7 +264,7 @@ class ClientPropertySpotForm extends Component {
             {getFieldDecorator("nome", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.nome
-            })(<Input name="nome" ref={input => (this.titleInput = input)} />)}
+            })(<Input name="nome" autoFocus />)}
           </Form.Item>
           <Form.Item
             label="Área"

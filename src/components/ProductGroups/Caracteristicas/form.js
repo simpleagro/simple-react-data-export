@@ -50,9 +50,7 @@ class GroupFeatureForm extends Component {
         }));
     }
 
-    setTimeout(() => {
-      this.titleInput.focus();
-    }, 0);
+
   }
 
   handleFormState = async event => {
@@ -138,7 +136,7 @@ class GroupFeatureForm extends Component {
           visible: false,
           formData: {...prev.formData, opcoes: [...prev.formData.opcoes, item]}
         })
-      
+
       return( {
         visible: false,
         formData: {...prev.formData, opcoes: [item]}
@@ -159,7 +157,7 @@ class GroupFeatureForm extends Component {
           editarField: false
         })
       }
-      
+
       return( {
         visibleCamposExtra: false,
         formData: {...prev.formData, fields: [item]},
@@ -273,7 +271,7 @@ class GroupFeatureForm extends Component {
             })(
               <Input
                 name="label"
-                ref={input => (this.titleInput = input)}
+                autoFocus
               />
             )}
           </Form.Item>
@@ -291,7 +289,7 @@ class GroupFeatureForm extends Component {
             {getFieldDecorator("obrigatorio", {
                 initialValue: this.state.formData.obrigatorio
             })(
-            <Checkbox 
+            <Checkbox
                 checked={this.state.formData.obrigatorio}
                 onChange={e =>
                 this.handleFormState({
@@ -309,7 +307,7 @@ class GroupFeatureForm extends Component {
             {getFieldDecorator("variacao_preco", {
                 initialValue: this.state.formData.variacao_preco
             })(
-            <Checkbox 
+            <Checkbox
                 checked={this.state.formData.variacao_preco}
                 onChange={e =>
                 this.handleFormState({
@@ -359,10 +357,10 @@ class GroupFeatureForm extends Component {
           />
         </div>
 
-        <CardStyled 
-          type="inner" 
-          title="Opções" 
-          bordered 
+        <CardStyled
+          type="inner"
+          title="Opções"
+          bordered
           extra={
             <Button
               type="primary"
@@ -389,7 +387,7 @@ class GroupFeatureForm extends Component {
           onCreate={this.handleOk}
           wrappedComponentRef={this.saveFormRef}
         />
-        
+
       </div>
     );
   }

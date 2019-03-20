@@ -128,9 +128,7 @@ class CustomerWalletForm extends Component {
       loadingForm: false
     }));
 
-    setTimeout(() => {
-      this.titleInput.focus();
-    }, 100);
+
   }
 
   handleFormState = event => {
@@ -528,7 +526,7 @@ class CustomerWalletForm extends Component {
                 ],
                 initialValue: this.state.formData.nome
               })(
-                <Input name="nome" ref={input => (this.titleInput = input)} />
+                <Input name="nome" autoFocus />
               )}
             </Form.Item>
             <Form.Item label="Consultor" {...formItemLayout}>

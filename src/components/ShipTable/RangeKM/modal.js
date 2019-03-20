@@ -33,7 +33,7 @@ const ModalForm = Form.create()(
       render() {
         const { visible, onCancel, onCreate, form } = this.props;
         const { getFieldDecorator } = form;
-        
+
         return (
           <Modal
             visible={visible}
@@ -55,8 +55,8 @@ const ModalForm = Form.create()(
                 })(
                   <InputNumber
                     name="km_de"
-                    ref={input => (this.titleInput = input)}
                     style={{width:'100%'}}
+                    autoFocus
                     parser={value => value.replace(/[^\d]+/g,'')}
                   />
                 )}
@@ -81,4 +81,3 @@ const ModalForm = Form.create()(
   );
 
   export default ModalForm;
- 

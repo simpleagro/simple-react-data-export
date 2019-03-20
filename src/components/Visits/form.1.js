@@ -105,13 +105,7 @@ class CustomerWalletForm extends Component {
       clients: clients.docs
     }));
 
-    setTimeout(() => {
-      this.titleInput.focus();
-    }, 0);
 
-    setTimeout(() => {
-      console.log("on EDIT", this.state);
-    }, 1000);
   }
 
   handleFormState = event => {
@@ -468,7 +462,7 @@ class CustomerWalletForm extends Component {
             {getFieldDecorator("nome", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.nome
-            })(<Input name="nome" ref={input => (this.titleInput = input)} />)}
+            })(<Input name="nome" autoFocus />)}
           </Form.Item>
           <Form.Item label="Consultor" {...formItemLayout}>
             {getFieldDecorator("consultor_id", {

@@ -55,7 +55,7 @@ const ModalForm = Form.create()(
                 {getFieldDecorator('label', {
                   rules: [{ required: true, message: "Este campo é obrigatório!" }],
                   initialValue:  this.state.formData.label
-                })(<Input name="label" ref={input => (this.titleInput = input)} />)}
+                })(<Input name="label" autoFocus />)}
               </Form.Item>
 
               <Form.Item label="Key">

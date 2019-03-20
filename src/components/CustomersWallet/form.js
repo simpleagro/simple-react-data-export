@@ -297,9 +297,6 @@ class CustomerWalletForm extends Component {
       // }
     }));
 
-    setTimeout(() => {
-      console.log("ADD CLIENT", this.state.formData);
-    }, 300);
   }
 
   removeClient(cliente_id) {
@@ -327,9 +324,6 @@ class CustomerWalletForm extends Component {
       )
     }));
 
-    setTimeout(() => {
-      console.log("REMOVE  CLIENT", this.state.formData);
-    }, 300);
   }
 
   clearCheckClientKeys(selectedClient, prev) {
@@ -614,9 +608,6 @@ class CustomerWalletForm extends Component {
       formData: { ...prev.formData, clientes: _clientes }
     }));
 
-    setTimeout(() => {
-      console.log("STTTATE", this.state.formData);
-    }, 300);
   };
 
   renderTreeNodes = (data, leaf = false, clienteID) =>
@@ -741,7 +732,7 @@ class CustomerWalletForm extends Component {
                 ],
                 initialValue: this.state.formData.nome
               })(
-                <Input name="nome" ref={input => (this.titleInput = input)} />
+                <Input name="nome" autoFocus />
               )}
             </Form.Item>
             <Form.Item label="Consultor" {...formItemLayout}>

@@ -158,7 +158,7 @@ const ModalForm = Form.create()(
                 })(
                   <Input
                     name="nome"
-                    ref={input => (this.titleInput = input)}
+                    autoFocus
                   />
                 )}
               </Form.Item>
@@ -314,7 +314,6 @@ const ModalForm = Form.create()(
                 })(
                   <Input
                     name="taxa_adicao"
-                    ref={input => (this.titleInput = input)}
                   />
                 )}
               </Form.Item>
@@ -325,7 +324,6 @@ const ModalForm = Form.create()(
                 })(
                   <Input
                     name="taxa_supressao"
-                    ref={input => (this.titleInput = input)}
                   />
                 )}
               </Form.Item>

@@ -31,9 +31,6 @@ class CompanyForm extends Component {
         }));
     }
 
-    setTimeout(() => {
-      this.titleInput.focus();
-    }, 0);
   }
 
   handleFormState = event => {
@@ -157,7 +154,7 @@ class CompanyForm extends Component {
             })(
               <Input
                 name="razao_social"
-                ref={input => (this.titleInput = input)}
+                autoFocus
               />
             )}
           </Form.Item>
