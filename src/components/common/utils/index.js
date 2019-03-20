@@ -57,7 +57,7 @@ export const fatorConversaoUM = (um_array, um_pai, um_primaria) => {
    let _um_pai = um_pai ? um_pai.toLowerCase() : um_pai
    let _um_primaria = um_primaria ? um_primaria.toLowerCase() : um_primaria
    let um_verificar_obj = um_array.find(item => item.sigla.toLowerCase() == _um_pai);
-   let um_verificar = um_verificar_obj._id;
+   let um_verificar = um_verificar_obj ? um_verificar_obj._id : '';
    let um_primaria_obj = um_array.find(item => item.sigla.toLowerCase() == _um_primaria)
 
   //let um_verificar_obj = um_array.find(item => item.sigla.toLowerCase() == um_pai.toLowerCase());

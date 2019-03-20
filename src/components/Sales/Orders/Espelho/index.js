@@ -216,7 +216,11 @@ const ClientLine = (props) => (
 const TableLinesLeft = (props) => (
   <Row>
     <Col span={5}>
-      <Row style={drawLines}>{props.data.quantidade}</Row>
+      <Row style={drawLines}>{fatorConversaoUM(props.arr_unidades, props.data.embalagem, 'kg') === "erro"
+        ? props.data.quantidade * 1
+        : props.data.quantidade * fatorConversaoUM(props.arr_unidades, props.data.embalagem, 'kg') }
+      </Row>
+
     </Col>
 
     <Col span={4}>
@@ -344,8 +348,8 @@ export default class Export extends Component {
           heightLeft -= pageHeight;
         }
 
-        console.log(document.getElementById("divToPrint").offsetWidth);
-        console.log(document.getElementById("divToPrint").offsetHeight);
+        console.log("Width: ", document.getElementById("divToPrint").offsetWidth);
+        console.log("Height: ", document.getElementById("divToPrint").offsetHeight);
         pdf.output('dataurlnewwindow');
         //pdf.save("download.pdf");
       })
