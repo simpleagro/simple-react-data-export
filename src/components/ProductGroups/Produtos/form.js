@@ -44,7 +44,7 @@ class ProductForm extends Component {
       visible: false,
       group_fields: [],
       group_caracteristicas: [],
-      u_ms: [],
+      u_ms: []
     };
   }
 
@@ -359,9 +359,9 @@ class ProductForm extends Component {
           </Form.Item>
           <Form.Item label="Unid. Medida Primária" {...formItemLayout}>
             {getFieldDecorator("u_m_primaria", {
-              rules: [{ required: true, message: "Este campo é obrigatório!" }],
+              // rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.u_m_primaria
-                ? this.state.formData.u_m_primaria
+                ? JSON.stringify(this.state.formData.u_m_primaria)
                 : undefined
             })(
               <Select
@@ -376,11 +376,16 @@ class ProductForm extends Component {
                 }
                 onChange={e => {
                   this.handleFormState({
-                    target: { name: "u_m_primaria", value: e }
+                    target: { name: "u_m_primaria", value: JSON.parse(e) }
                   });
                 }}>
                 {this.state.u_ms.map(u_m => (
-                  <Select.Option key={u_m._id} value={u_m.sigla}>
+                  <Select.Option
+                    key={u_m._id}
+                    value={JSON.stringify({
+                      value: u_m.sigla,
+                      label: u_m.sigla
+                    })}>
                     {u_m.sigla}
                   </Select.Option>
                 ))}
