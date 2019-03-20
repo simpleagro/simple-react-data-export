@@ -39,9 +39,6 @@ class TypeForm extends Component {
         }));
     }
 
-    setTimeout(() => {
-      this.titleInput.focus();
-    }, 0);
   }
 
   handleFormState = event => {
@@ -139,7 +136,7 @@ class TypeForm extends Component {
             })(
               <Input
                 name="descricao"
-                ref={input => (this.titleInput = input)}
+                autoFocus
               />
             )}
           </Form.Item>

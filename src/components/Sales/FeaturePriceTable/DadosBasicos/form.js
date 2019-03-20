@@ -74,9 +74,6 @@ class FeaturePriceTable extends Component {
       }
     }
 
-    setTimeout(() => {
-      this.titleInput.focus();
-    }, 0);
   }
 
   async fetchProductGroup(aqp = {}) {
@@ -196,7 +193,7 @@ class FeaturePriceTable extends Component {
             })(
               <Input
                 name="centro_custo"
-                ref={input => (this.titleInput = input)}
+                autoFocus
               />
             )}
           </Form.Item>
