@@ -58,9 +58,7 @@ class AuthorizationForm extends Component {
       }
     }
 
-    setTimeout(() => {
-      this.titleInput.focus();
-    }, 0);
+
   };
 
   handleFormState = async event => {
@@ -155,7 +153,7 @@ class AuthorizationForm extends Component {
             {getFieldDecorator("numero_autorizacao", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.numero_autorizacao
-            })(<Input name="numero_autorizacao" ref={input => (this.titleInput = input)} />)}
+            })(<Input name="numero_autorizacao" autoFocus />)}
           </Form.Item>
 
           <Form.Item label="Data" {...formItemLayout}>

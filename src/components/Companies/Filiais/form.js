@@ -36,9 +36,6 @@ class CompanyBranchForm extends Component {
         }));
     }
 
-    setTimeout(() => {
-      this.titleInput.focus();
-    }, 0);
   }
 
   handleFormState = async event => {
@@ -139,7 +136,7 @@ class CompanyBranchForm extends Component {
             })(
               <Input
                 name="razao_social"
-                ref={input => (this.titleInput = input)}
+                autoFocus
               />
             )}
           </Form.Item>

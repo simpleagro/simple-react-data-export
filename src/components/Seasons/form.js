@@ -35,9 +35,7 @@ class SeasonForm extends Component {
         }));
     }
 
-    setTimeout(() => {
-      this.titleInput.focus();
-    }, 0);
+
   }
 
   handleFormState = event => {
@@ -135,7 +133,7 @@ class SeasonForm extends Component {
               <Input
                 name="descricao"
                 disabled={ this.state.editMode && true }
-                ref={input => (this.titleInput = input)}
+                autoFocus
               />
             )}
           </Form.Item>

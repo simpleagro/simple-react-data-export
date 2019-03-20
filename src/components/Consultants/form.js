@@ -74,10 +74,6 @@ class ConsultantForm extends Component {
         filiais: filiais.docs
       }));
 
-      setTimeout(() => {
-        this.titleInput.focus();
-      }, 0);
-
       if (!this.props.match.params.hasOwnProperty("id")) {
         setTimeout(() => {
           this.props.form.setFieldsValue({
@@ -304,7 +300,7 @@ class ConsultantForm extends Component {
                 <Input
                   disabled={this.state.editMode}
                   name="nome"
-                  ref={input => (this.titleInput = input)}
+                  autoFocus
                 />
               )}
             </Form.Item>

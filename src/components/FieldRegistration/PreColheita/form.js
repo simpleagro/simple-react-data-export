@@ -60,10 +60,6 @@ class PreHarvestForm extends Component {
       }
     }
 
-    setTimeout(() => {
-      this.titleInput.focus();
-    }, 0);
-
     this.setState(prev => ({ ...prev }));
   }
 
@@ -159,7 +155,7 @@ class PreHarvestForm extends Component {
             {getFieldDecorator("responsavel", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.responsavel && this.state.formData.responsavel.nome
-            })(<Input name="responsavel" disabled ref={input => (this.titleInput = input)} />)}
+            })(<Input name="responsavel" disabled autoFocus />)}
           </Form.Item>
 
           <Form.Item label="Reamostra" {...formItemLayout}>
