@@ -359,11 +359,10 @@ class ProductForm extends Component {
             {getFieldDecorator("u_m_primaria", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.u_m_primaria
-                ? JSON.stringify(this.state.formData.u_m_primaria)
+                ? this.state.formData.u_m_primaria.value.toLowerCase()
                 : undefined
             })(
               <Select
-                optionLabelProp="data-label"
                 name="u_m_primaria"
                 showAction={["focus", "click"]}
                 showSearch
@@ -373,19 +372,16 @@ class ProductForm extends Component {
                     .toLowerCase()
                     .indexOf(input.toLowerCase()) >= 0
                 }
-                onChange={e => {
+                onChange={(e, {props}) => {
                   this.handleFormState({
-                    target: { name: "u_m_primaria", value: JSON.parse(e) }
+                    target: { name: "u_m_primaria", value: props['data-obj']}
                   });
                 }}>
                 {this.state.u_ms.map(u_m => (
                   <Select.Option
-                    data-label={u_m.sigla}
+                    data-obj={{ value: u_m.sigla, label: u_m.nome }}
                     key={u_m._id}
-                    value={JSON.stringify({
-                      value: u_m.sigla,
-                      label: u_m.nome
-                    })}>
+                    value={u_m.sigla.toLowerCase()}>
                     {u_m.sigla}
                   </Select.Option>
                 ))}
