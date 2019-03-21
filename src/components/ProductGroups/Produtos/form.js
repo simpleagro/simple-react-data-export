@@ -363,6 +363,7 @@ class ProductForm extends Component {
                 : undefined
             })(
               <Select
+                optionLabelProp="data-label"
                 name="u_m_primaria"
                 showAction={["focus", "click"]}
                 showSearch
@@ -379,6 +380,7 @@ class ProductForm extends Component {
                 }}>
                 {this.state.u_ms.map(u_m => (
                   <Select.Option
+                    data-label={u_m.sigla}
                     key={u_m._id}
                     value={JSON.stringify({
                       value: u_m.sigla,
