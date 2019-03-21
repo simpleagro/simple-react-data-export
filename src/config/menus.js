@@ -35,6 +35,7 @@ import moeda from "./Menus/moeda";
 import configuracoes from "./Menus/configuracoes";
 import fornecedores from "./Menus/fornecedores";
 import regioes from "./Menus/regioes";
+import indicadores from "./Menus/indicadores";
 
 const loadable = loader =>
   Loadable({
@@ -90,7 +91,8 @@ const menus = {
     ...tipoVendedores,
     ...unidadesMedida,
     ...usoSemente,
-    ...usuarios
+    ...usuarios,
+    ...indicadores
     // ...alcadasDeAprovacao,
     // ...fluxoCaixaComissoes,
     // ...programacaoDeEntrega,
