@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { Button, Select } from "antd";
+import { Button, Select, Tooltip } from "antd";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { vendas as IndicatorVendasService } from "services/indicators";
 import { list as ProductGroupServiceList } from "services/productgroups";
@@ -60,7 +61,7 @@ class VendasIndicator extends Component {
       grupoProdutos: grupoProdutos.docs
     }));
 
-    await this.initializeList();
+    this.initializeList();
   }
 
   tableConfig = () => [
@@ -101,6 +102,22 @@ class VendasIndicator extends Component {
         if (sorter === "ascendent") return -1;
         else return 1;
       }
+    },
+    {
+      title: "Ações",
+      render: () => {
+        return (
+          <span>
+            <Tooltip title="Veja por variação">
+              <Button
+                size="small"
+                >
+                <FontAwesomeIcon icon="plus" size="lg" />
+              </Button>
+            </Tooltip>
+          </span>
+        );
+      }
     }
   ];
 
@@ -124,9 +141,10 @@ class VendasIndicator extends Component {
         <PainelHeader title="Vendas" />
 
         <h4>Selecione um grupo de produtos para começar:</h4>
-
         <Select
-          value={this.state.selectedGroup && JSON.stringify(this.state.selectedGroup)}
+          value={
+            this.state.selectedGroup && JSON.stringify(this.state.selectedGroup)
+          }
           style={{ width: "100%", marginBottom: 20 }}
           showAction={["focus", "click"]}
           showSearch
@@ -157,6 +175,34 @@ class VendasIndicator extends Component {
       </div>
     );
   }
+
+  filtrarPorVariacao = () => (
+    <React.Fragment>
+      <h4>Filtrar também por variação:</h4>
+      <Select
+        value={
+          this.state.selectedVariation &&
+          JSON.stringify(this.state.selectedVariation)
+        }
+        style={{ width: "100%", marginBottom: 20 }}
+        showAction={["focus", "click"]}
+        showSearch
+        placeholder="Selecione uma variação..."
+        onChange={e => this.initializeList(e)}
+        filterOption={(input, option) =>
+          option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+        }>
+        {this.state.grupoProdutos.length &&
+          this.state.grupoProdutos.map(gp => (
+            <Select.Option
+              key={gp._id}
+              value={JSON.stringify({ id: gp._id, nome: gp.nome })}>
+              {gp.nome}
+            </Select.Option>
+          ))}
+      </Select>
+    </React.Fragment>
+  );
 }
 
 export default VendasIndicator;
