@@ -384,7 +384,7 @@ class ProductForm extends Component {
                     key={u_m._id}
                     value={JSON.stringify({
                       value: u_m.sigla,
-                      label: u_m.sigla
+                      label: u_m.nome
                     })}>
                     {u_m.sigla}
                   </Select.Option>
