@@ -251,8 +251,19 @@ const TableLinesLeft = (props) => (
 const TableLinesRight = (props) => (
   <div>
     <div>
-      <Col span={7}><Row style={drawLines} span={6}>{props.coluna === "PS" ? props.data.valorUnitPS === null ? null : props.data.valorUnitPS : props.data.valorUnitR === null ? null : currency()(props.data.valorUnitR)}</Row></Col>
-      <Col span={17}><Row style={drawLines} span={18}>{props.coluna === "PS" ? props.data.valorTotalPS === null ? null : props.data.valorTotalPS : props.data.valorTotalR === null ? null : currency()(props.data.valorTotalR)}</Row></Col>
+      <Col span={7}>
+        <Row style={drawLines} span={6}>{props.coluna === "PS"
+          ? (props.data.valorUnitPS === null || props.data.valorUnitPS === "0,00") ? null : currency()(props.data.valorUnitPS)
+          : (props.data.valorUnitR === null || props.data.valorUnitR === "0,00") ? null : currency()(props.data.valorUnitR)}
+        </Row>
+      </Col>
+
+      <Col span={17}>
+        <Row style={drawLines} span={18}>{props.coluna === "PS"
+          ? (props.data.valorTotalPS === null || props.data.valorTotalPS === "0,00") ? null : currency()(props.data.valorTotalPS)
+          : (props.data.valorTotalR === null || props.data.valorTotalR === "0,00") ? null : currency()(props.data.valorTotalR)}
+        </Row>
+      </Col>
     </div>
   </div>
 )
@@ -329,9 +340,9 @@ export default class Export extends Component {
         descricaoProduto: element.produto.nome,
         peneira: element.peneira.label,
         tratamento: element.tratamento.label,
-        valorUnitPS: element.quantidade && element.total_preco_item_graos ? currency()(getNumber(element.total_preco_item_graos)/element.quantidade) : null,
+        valorUnitPS: element.quantidade && element.total_preco_item_graos ? currency()(getNumber(element.total_preco_item_graos) / element.quantidade) : null,
         valorTotalPS: element.total_preco_item_graos,
-        valorUnitR: element.quantidade && element.total_preco_item_graos ? currency()(getNumber(element.total_preco_item_reais)/element.quantidade) : null,
+        valorUnitR: element.quantidade && element.total_preco_item_reais ? currency()(getNumber(element.total_preco_item_reais) / element.quantidade) : null,
         valorTotalR: element.total_preco_item_reais
       })), count++))
 
@@ -503,8 +514,8 @@ export default class Export extends Component {
 
                   <Row>
                     <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, borderRightStyle: "none", textAlign: "right", paddingRight: 10, fontWeight: "bold" }} span={13}>Totais:</Col>
-                    <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, borderRightStyle: "none", textAlign: "center" }} span={6}> {this.state.list.pagamento.total_pedido_graos && currency()(this.state.list.pagamento.total_pedido_graos)} </Col>
-                    <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, textAlign: "center" }} span={5}> {this.state.list.pagamento.total_pedido_reais && currency()(this.state.list.pagamento.total_pedido_reais)} </Col>
+                    <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, borderRightStyle: "none", textAlign: "center" }} span={6}> {(this.state.list.pagamento.total_pedido_graos === null || this.state.list.pagamento.total_pedido_graos === "0,00") ? null : currency()(this.state.list.pagamento.total_pedido_graos)} </Col>
+                    <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, textAlign: "center" }} span={5}> {(this.state.list.pagamento.total_pedido_reais === null || this.state.list.pagamento.total_pedido_reais === "0,00") ? null : currency()(this.state.list.pagamento.total_pedido_reais)} </Col>
                   </Row>
 
                   <Row style={{ paddingTop: 5 }}>
@@ -523,7 +534,7 @@ export default class Export extends Component {
                     <Col span={15} style={{ borderStyle: "solid" }}>
                       <Row style={{ textAlign: "center", fontWeight: "bold" }}>Pagamento em Grãos</Row>
                       <Row style={drawLines}>
-                        <Col span={12} style={{paddingLeft: 10}}>Volume kg: {this.state.list.pagamento.peso_graos ? currency()(this.state.list.pagamento.peso_graos) : ""}</Col>
+                        <Col span={12} style={{paddingLeft: 10}}>Volume kg: {(!this.state.list.pagamento.peso_graos || this.state.list.pagamento.peso_graos === "0,00") ? null : currency()(getNumber(this.state.list.pagamento.peso_graos))}</Col>
                         <Col span={12} style={{paddingLeft: 10}}>Vencimento: {this.state.list.pagamento && moment(this.state.list.pagamento.data_pgto_graos).format("DD/MM/YYYY")}</Col>
                       </Row>
                       <Row>
