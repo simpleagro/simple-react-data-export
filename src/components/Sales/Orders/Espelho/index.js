@@ -343,7 +343,7 @@ export default class Export extends Component {
         valorUnitPS: (element.quantidade && element.total_preco_item_graos) ? currency()(getNumber(element.total_preco_item_graos) / element.quantidade) : null,
         valorTotalPS: element.total_preco_item_graos ? element.total_preco_item_graos : null,
         valorUnitR: element.quantidade && element.total_preco_item_reais ? currency()(getNumber(element.total_preco_item_reais) / element.quantidade) : null,
-        valorTotalR: element.total_preco_item_reais ? element.total_pedido_reais : null
+        valorTotalR: element.total_preco_item_reais ? element.total_preco_item_reais : null
       })), count++))
 
     count = 0
