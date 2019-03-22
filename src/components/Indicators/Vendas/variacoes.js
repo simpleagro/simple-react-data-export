@@ -5,7 +5,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { vendas as IndicatorVendasService } from "services/indicators";
 import { list as ProductGroupServiceList } from "services/productgroups";
 import SimpleTable from "common/SimpleTable";
-import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
 import { PainelHeader } from "common/PainelHeader";
 import { simpleTableSearch } from "lib/simpleTableSearch";
 
@@ -21,14 +20,16 @@ class VendasVariacoesIndicator extends Component {
         showSizeChanger: true,
         defaultPageSize: 10,
         pageSizeOptions: ["10", "25", "50", "100"]
-      },
-      showDrawer: true,
-      showDrawer2: false
+      }
     };
   }
 
-  async initializeList(grupo = null, aqp) {
-    let data = [];
+  async initializeList(p) {
+    const list = await IndicatorVendasService({
+      grupo_produto: this.props.grupoProduto._id,
+      "itens.peneira.value": `/^${p}$/`
+    }).then(result => result.docs);
+    this.setState({ list: list });
   }
 
   async componentDidMount() {
@@ -123,7 +124,17 @@ class VendasVariacoesIndicator extends Component {
   };
 
   render() {
-    console.log("REND2");
+    let { caracteristicas } = this.props.grupoProduto;
+    caracteristicas = caracteristicas.filter(c => {
+      if (c.deleted !== true && c.chave === "peneira" && c.status === true) {
+        c.opcoes =
+          c.opcoes &&
+          c.opcoes.filter(op => op.deleted !== true && c.status === true);
+        return true;
+      }
+      return false;
+    });
+
     return (
       <div>
         <PainelHeader
@@ -132,7 +143,7 @@ class VendasVariacoesIndicator extends Component {
             this.props.grupoProduto.nome} -> ${this.props.produto &&
             this.props.produto.nome}${
             this.props.produto && this.props.produto.nome_comercial
-              ? " "+this.props.produto.nome_comercial
+              ? " " + this.props.produto.nome_comercial
               : ""
           }`}
           children={
@@ -147,26 +158,29 @@ class VendasVariacoesIndicator extends Component {
         />
 
         <h4>Selecione uma peneira para começar:</h4>
-        <Select defaultValue="lucy">
-          <Select.Option value="jack">Jack</Select.Option>
-          <Select.Option value="lucy">Lucy</Select.Option>
-          <Select.Option value="disabled" disabled>
-            Disabled
-          </Select.Option>
-          <Select.Option value="Yiminghe">yiminghe</Select.Option>
+        <Select style={{ width: "100%", marginBottom: 20 }} onChange={e => this.initializeList(e)}>
+          {caracteristicas &&
+            caracteristicas.map(
+              caract =>
+                caract.opcoes &&
+                caract.opcoes.map(op => (
+                  <Select.Option value={op.value}>{op.label}</Select.Option>
+                ))
+            )}
         </Select>
 
-        {/* <SimpleTable
+        <SimpleTable
           pagination={this.state.pagination}
           spinning={this.state.loadingData}
           rowKey="idProduto"
           columns={this.tableConfig()}
           dataSource={this.state.list}
           onChange={this.handleTableChange}
-        /> */}
+        />
       </div>
     );
   }
+
 }
 
 export default VendasVariacoesIndicator;
