@@ -20,20 +20,23 @@ class VendasVariacoesIndicator extends Component {
         showSizeChanger: true,
         defaultPageSize: 10,
         pageSizeOptions: ["10", "25", "50", "100"]
-      }
+      },
+      agruparPor: "peneira"
     };
   }
 
-  async initializeList(p) {
+  async initializeList(variacao = null, aqp) {
     const list = await IndicatorVendasService({
+      agruparPor: this.state.agruparPor,
       grupo_produto: this.props.grupoProduto._id,
-      "itens.peneira.value": `/^${p}$/`
+      ...(variacao && { "itens.peneira.value": `/^${variacao}$/` }),
+      ...aqp,
+      ...{"itens.produto.id" : this.props.produto.idProduto}
     }).then(result => result.docs);
-    this.setState({ list: list });
+    this.setState({ list: list, selectPeneira: variacao });
   }
 
   async componentDidMount() {
-    console.log("this prosp variaco", this.props);
     const grupoProdutos = await ProductGroupServiceList({
       limit: -1,
       fields: "nome"
@@ -44,7 +47,7 @@ class VendasVariacoesIndicator extends Component {
       grupoProdutos: grupoProdutos.docs
     }));
 
-    // this.initializeList();
+    this.initializeList();
   }
 
   tableConfig = () => [
@@ -56,7 +59,6 @@ class VendasVariacoesIndicator extends Component {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      ...simpleTableSearch(this)("itens.produto.nome")
     },
     {
       title: "Nome Comercial",
@@ -66,7 +68,6 @@ class VendasVariacoesIndicator extends Component {
         if (sorter === "ascendent") return -1;
         else return 1;
       },
-      ...simpleTableSearch(this)("nome_comercial")
     },
     {
       title: "UM",
@@ -87,41 +88,15 @@ class VendasVariacoesIndicator extends Component {
       }
     },
     {
-      title: "Ações",
-      render: (text, record) => {
-        console.log("REND", record);
-        return (
-          <span>
-            <Tooltip title="Veja por variação">
-              <Button
-                size="small"
-                onClick={() => {
-                  this.setState({
-                    mostrarVariacoes: true,
-                    selectedProduct: record
-                  });
-                }}>
-                <FontAwesomeIcon icon="plus" size="lg" />
-              </Button>
-            </Tooltip>
-          </span>
-        );
+      title: "Peneira",
+      dataIndex: "peneira",
+      key: "peneira",
+      sorter: (a, b, sorter) => {
+        if (sorter === "ascendent") return -1;
+        else return 1;
       }
     }
   ];
-
-  handleTableChange = (pagination, sorter) => {
-    const pager = { ...this.state.pagination };
-    pager.current = pagination.current;
-    this.setState({
-      pagination: pager
-    });
-    this.initializeList(JSON.stringify(this.state.selectedGroup), {
-      page: pagination.current,
-      limit: pagination.pageSize,
-      ...this.state.tableSearch
-    });
-  };
 
   render() {
     let { caracteristicas } = this.props.grupoProduto;
@@ -158,7 +133,10 @@ class VendasVariacoesIndicator extends Component {
         />
 
         <h4>Selecione uma peneira para começar:</h4>
-        <Select style={{ width: "100%", marginBottom: 20 }} onChange={e => this.initializeList(e)}>
+        <Select
+          style={{ width: "100%", marginBottom: 20 }}
+          onChange={e => this.initializeList(e)} defaultValue="">
+          <Select.Option value="">Todas peneiras</Select.Option>
           {caracteristicas &&
             caracteristicas.map(
               caract =>
@@ -172,15 +150,14 @@ class VendasVariacoesIndicator extends Component {
         <SimpleTable
           pagination={this.state.pagination}
           spinning={this.state.loadingData}
-          rowKey="idProduto"
+          rowKey={record => `${record.idProduto}_${new Date().getTime()}`}
           columns={this.tableConfig()}
           dataSource={this.state.list}
-          onChange={this.handleTableChange}
+          pagination={false}
         />
       </div>
     );
   }
-
 }
 
 export default VendasVariacoesIndicator;
