@@ -38,8 +38,10 @@ const pageStyle = {
   paddingLeft: 5,
   paddingTop: 15,
   paddingRight: 15,
-  fontVariant: "normal"
-  //marginBottom: 50
+  fontVariant: "normal",
+  color: "black",
+  fontWeight: 600
+  //marginBottom: 50,
 }
 
 const headerBox = {
@@ -54,13 +56,14 @@ const headerBoxCompanie = {
 };
 const tableTitle = {
   /*backgroundColog: "ffaa00",*/
-  fontWeight: "bold",
+  fontWeight: 600,
   borderStyle: "solid",
   borderWidth: 1.5,
   borderTopStyle: "none",
   borderLeftStyle: "none",
   height: 40,
-  paddingTop: 10
+  paddingTop: 10,
+
 };
 const tableTitle2 = {
   /*backgroundColor: "ff00aa",*/
@@ -70,7 +73,9 @@ const tableTitle2 = {
   borderTopStyle: "none",
   borderLeftStyle: "none",
   borderBottomStyle: "none",
-  height: 18.5 }
+  height: 18.5,
+
+}
 const headerBoxDate = {
   /*backgroundColor: "#ffc77f",*/
   height: "100%"
@@ -98,7 +103,8 @@ const bodyTable = {
 };
 const bodyTopLabel = {
   fontWeight: "bold",
-  paddingRight: 10
+  paddingRight: 10,
+
 }
 
 const checkBoxFrete = {
@@ -129,7 +135,9 @@ const drawLines = {
   borderLeftStyle: "none",
   borderTopStyle: "none",
   borderRightStyle: "solid",
-  height: 18.5
+  height: 18.5,
+  fontWeight: 600,
+
 };
 
 const footerBox = {
@@ -160,9 +168,9 @@ const Header = (props) => (
     <Col span={13} style={ headerBoxCompanie }>
       <Col span={15} style={{ paddingTop: 10}}>
         <Row><img alt="logo" src={empresa.logo} style={{ height: 90 }} /></Row>
-        <Row style={{ fontSize: 9, paddingLeft: 5 }}>{empresa.endereco_faz}</Row>
-        <Row style={{ fontSize: 9, paddingLeft: 5 }}>{empresa.endereco_esc}</Row>
-        <Row style={{ fontSize: 9, paddingLeft: 5 }}>{empresa.complemento} - {empresa.site}</Row>
+        <Row style={{ fontSize: 9, paddingLeft: 5,  }}>{empresa.endereco_faz}</Row>
+        <Row style={{ fontSize: 9, paddingLeft: 5,  }}>{empresa.endereco_esc}</Row>
+        <Row style={{ fontSize: 9, paddingLeft: 5,  }}>{empresa.complemento} - {empresa.site}</Row>
       </Col>
 
       <Col span={9} style={{ textAlign: "center" }}>
@@ -192,8 +200,8 @@ const Header = (props) => (
     </Col>
 
     <Col span={4} style={ headerBoxOrder }>
-      <Row style={{fontWeight: "bold"}}>Pedido</Row>
-      <Row style={{fontSize: 20}}>{props.pedido}</Row>
+      <Row style={{ fontWeight: "bold",  }}>Pedido</Row>
+      <Row style={{ fontSize: 20,  }}>{props.pedido}</Row>
     </Col>
 
   </Row>
@@ -202,18 +210,18 @@ const Header = (props) => (
 const ClientLine = (props) => (
   <Row style={bodyRowTop}>
     <Col span={8}>
-      <Row><span style={bodyTopLabel}>Cliente:</span>{props.cliente}</Row>
-      <Row><span style={bodyTopLabel}>Fazenda:</span>{props.fazenda}</Row>
+      <Row><span style={bodyTopLabel}>Cliente:</span><span style={{ fontWeight: 600,  }}>{props.cliente}</span></Row>
+      <Row><span style={bodyTopLabel}>Fazenda:</span><span style={{ fontWeight: 600,  }}>{props.fazenda}</span></Row>
     </Col>
 
     <Col span={8}>
-      <Row><span style={bodyTopLabel}>CPF/CNPJ:</span>{props.cpf_cnpj}</Row>
-      <Row><span style={bodyTopLabel}>Município:</span>{props.municipio}</Row>
+      <Row><span style={bodyTopLabel}>CPF/CNPJ:</span><span style={{ fontWeight: 600,  }}>{props.cpf_cnpj}</span></Row>
+      <Row><span style={bodyTopLabel}>Município:</span><span style={{ fontWeight: 600,  }}>{props.municipio}</span></Row>
     </Col>
 
     <Col span={8}>
-      <Row><span style={bodyTopLabel}>Inscr. Estadual:</span>{props.inscrEstadual}</Row>
-      <Row><span style={bodyTopLabel}>UF:</span>{props.uf}</Row>
+      <Row><span style={bodyTopLabel}>Inscr. Estadual:</span><span style={{ fontWeight: 600, }}>{props.inscrEstadual}</span></Row>
+      <Row><span style={bodyTopLabel}>UF:</span><span style={{ fontWeight: "black",  }}>{props.uf}</span></Row>
     </Col>
   </Row>
 )
@@ -431,7 +439,7 @@ export default class Export extends Component {
   render() {
     return (
       <div>
-
+{console.log(this.state)}
         <div>
           <SimpleBreadCrumb
             to={
@@ -496,17 +504,17 @@ export default class Export extends Component {
                     <Col span={6} style={{ textAlign: "center" }}>
                       <Row style={tableTitle2}>Permuta Soja</Row>
                       <Row>
-                        <Col span={7} style={{ borderStyle: "solid", borderWidth: 2, borderRightStyle: "none", borderLeftStyle: "none" }}>Val. Unit</Col>
-                        <Col span={17} style={{ borderStyle: "solid", borderWidth: 2 }}>Volume total</Col>
+                        <Col span={7} style={{ borderStyle: "solid", borderWidth: 1.5, borderRightStyle: "none", borderLeftStyle: "none", marginBottom: 1 }}>Val. Unit</Col>
+                        <Col span={17} style={{ borderStyle: "solid", borderWidth: 1.5, marginBottom: 1 }}>Volume total</Col>
                       </Row>
                       {page.map((pageItem, indexPI) => ( <TableLinesRight key={indexPI} data={pageItem} coluna={"PS"} /> ))}
                     </Col>
 
                     <Col span={5} style={{ textAlign: "center" }}>
-                      <Row style={tableTitle2}>Reais</Row>
+                      <Row style={{...tableTitle2, borderRightStyle: "none"}}>Reais</Row>
                         <Row>
-                          <Col span={7} style={{ borderStyle: "solid", borderWidth: 2, borderLeftStyle: "none" }}>Val. Unit</Col>
-                          <Col span={17} style={{ borderStyle: "solid", borderWidth: 2, borderLeftStyle: "none" }}>Valor Total R$</Col>
+                          <Col span={7} style={{ borderStyle: "solid", borderWidth: 1.5, borderLeftStyle: "none", marginBottom: 1 }}>Val. Unit</Col>
+                          <Col span={17} style={{ borderStyle: "solid", borderWidth: 1.5, borderLeftStyle: "none", borderRightStyle: "none", marginBottom: 1 }}>Valor Total R$</Col>
                         </Row>
                         {page.map((pageItem, indexPI) => ( <TableLinesRight key={indexPI} data={pageItem} coluna={"R"} /> ))}
                     </Col>
@@ -534,12 +542,12 @@ export default class Export extends Component {
                     <Col span={15} style={{ borderStyle: "solid" }}>
                       <Row style={{ textAlign: "center", fontWeight: "bold" }}>Pagamento em Grãos</Row>
                       <Row style={drawLines}>
-                        <Col span={12} style={{paddingLeft: 10}}>Volume kg: {(!this.state.list.pagamento.peso_graos || this.state.list.pagamento.peso_graos === "0,00") ? null : currency()(getNumber(this.state.list.pagamento.peso_graos))}</Col>
-                        <Col span={12} style={{paddingLeft: 10}}>Vencimento: {this.state.list.pagamento && moment(this.state.list.pagamento.data_pgto_graos).format("DD/MM/YYYY")}</Col>
+                        <Col span={12} style={{ paddingLeft: 10,  }}>Volume kg: {(!this.state.list.pagamento.peso_graos || this.state.list.pagamento.peso_graos === "0,00") ? null : currency()(getNumber(this.state.list.pagamento.peso_graos))}</Col>
+                        <Col span={12} style={{ paddingLeft: 10,  }}>Vencimento: {this.state.list.pagamento.data_pgto_graos && moment(this.state.list.pagamento.data_pgto_graos).format("DD/MM/YYYY")}</Col>
                       </Row>
                       <Row>
-                        <Col span={12} style={{paddingLeft: 10}}>Armazém: {this.state.list.pagamento && this.state.list.pagamento.entrega_graos}</Col>
-                        <Col span={12} style={{paddingLeft: 10}}>Município:</Col>
+                        <Col span={12} style={{ paddingLeft: 10,  }}>Armazém: {this.state.list.pagamento && this.state.list.pagamento.entrega_graos}</Col>
+                        <Col span={12} style={{ paddingLeft: 10,  }}>Município:</Col>
                       </Row>
                     </Col>
                   </Row>
