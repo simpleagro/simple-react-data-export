@@ -208,18 +208,18 @@ class Zone extends Component {
       },
       ...simpleTableSearch(this)("estado"),
     },
-    {
-      title: "Cidades",
-      dataIndex: "cidades",
-      key: "cidades",
-      sorter: (a, b, sorter) => {
-        if (sorter === "ascendent") return -1;
-        else return 1;
-      },
-      render: (cidades) => {
-        return cidades.map( cidade => <pre key={cidade.nome}>{cidade.nome}</pre>)
-      },
-    },
+    // {
+    //   title: "Cidades",
+    //   dataIndex: "cidades",
+    //   key: "cidades",
+    //   sorter: (a, b, sorter) => {
+    //     if (sorter === "ascendent") return -1;
+    //     else return 1;
+    //   },
+    //   render: (cidades) => {
+    //     return cidades.map( cidade => <pre key={cidade.nome}>{cidade.nome}</pre>)
+    //   },
+    // },
     {
       title: "Status",
       dataIndex: "status",
