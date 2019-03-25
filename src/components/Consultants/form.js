@@ -248,7 +248,11 @@ class ConsultantForm extends Component {
               </Button>
             </PainelHeader>
           </Affix>
+
           <Form onChange={this.handleFormState}>
+          <Form.Item label="CodRef" {...formItemLayout}>
+          {this.state.formData.codref}
+          </Form.Item>
             <Form.Item label="Usuário" {...formItemLayout}>
               {getFieldDecorator("usuario_id", {
                 rules: [
