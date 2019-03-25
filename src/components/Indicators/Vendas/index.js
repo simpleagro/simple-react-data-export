@@ -8,52 +8,62 @@ import SimpleTable from "common/SimpleTable";
 import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
 import { PainelHeader } from "common/PainelHeader";
 import { simpleTableSearch } from "lib/simpleTableSearch";
+import VendasVariacoesIndicator from "./variacoes";
 
 class VendasIndicator extends Component {
   constructor(props) {
     super(props);
     this.state = {
       list: [],
-      loadingData: true,
+      loadingData: false,
       grupoProdutos: [],
+      selectedProduct: null,
+      selectedGroup: null,
       pagination: {
         showSizeChanger: true,
         defaultPageSize: 10,
         pageSizeOptions: ["10", "25", "50", "100"]
-      }
+      },
+      mostrarVariacoes: false
     };
   }
 
   async initializeList(grupo = null, aqp) {
     let data = [];
 
-    grupo = grupo ? JSON.parse(grupo) : null;
+    this.setState(previousState => {
+      return { ...previousState, loadingData: true };
+    });
 
     if (grupo) {
       this.setState(previousState => {
         return { ...previousState, loadingData: true };
       });
       data = await IndicatorVendasService({
-        grupo_produto: grupo.id,
+        grupo_produto: grupo._id,
         ...aqp
       });
+      this.setState(prev => ({
+        ...prev,
+        list: data.docs,
+        loadingData: false,
+        selectedGroup: grupo,
+        pagination: {
+          total: data.total
+        }
+      }));
     }
 
     this.setState(prev => ({
       ...prev,
-      list: data.docs,
-      loadingData: false,
-      selectedGroup: grupo,
-      pagination: {
-        total: data.total
-      }
+      loadingData: false
     }));
   }
 
   async componentDidMount() {
     const grupoProdutos = await ProductGroupServiceList({
       limit: -1,
-      fields: "nome"
+      fields: "nome, caracteristicas"
     });
 
     this.setState(prev => ({
@@ -61,7 +71,7 @@ class VendasIndicator extends Component {
       grupoProdutos: grupoProdutos.docs
     }));
 
-    this.initializeList();
+    // this.initializeList();
   }
 
   tableConfig = () => [
@@ -105,13 +115,19 @@ class VendasIndicator extends Component {
     },
     {
       title: "Ações",
-      render: () => {
+      render: (text, record) => {
+        console.log("REND", record);
         return (
           <span>
             <Tooltip title="Veja por variação">
               <Button
                 size="small"
-                >
+                onClick={() => {
+                  this.setState({
+                    mostrarVariacoes: true,
+                    selectedProduct: record
+                  });
+                }}>
                 <FontAwesomeIcon icon="plus" size="lg" />
               </Button>
             </Tooltip>
@@ -127,7 +143,7 @@ class VendasIndicator extends Component {
     this.setState({
       pagination: pager
     });
-    this.initializeList(JSON.stringify(this.state.selectedGroup), {
+    this.initializeList(this.state.selectedGroup, {
       page: pagination.current,
       limit: pagination.pageSize,
       ...this.state.tableSearch
@@ -135,74 +151,57 @@ class VendasIndicator extends Component {
   };
 
   render() {
+    console.log("REND2");
     return (
       <div>
-        <SimpleBreadCrumb to={`/indicadores`} history={this.props.history} />
-        <PainelHeader title="Vendas" />
+        {!this.state.mostrarVariacoes && (
+          <React.Fragment>
+          <SimpleBreadCrumb to={`/indicadores`} history={this.props.history} />
+          <PainelHeader title="Vendas" />
+            <h4>Selecione um grupo de produtos para começar:</h4>
+            <Select
+              value={this.state.selectedGroup && this.state.selectedGroup.nome}
+              style={{ width: "100%", marginBottom: 20 }}
+              showAction={["focus", "click"]}
+              showSearch
+              placeholder="Selecione um grupo de produto..."
+              onChange={(e, { props }) => {
+                this.initializeList(props["data-obj"]);
+              }}
+              filterOption={(input, option) =>
+                option.props.children
+                  .toLowerCase()
+                  .indexOf(input.toLowerCase()) >= 0
+              }>
+              {this.state.grupoProdutos.length &&
+                this.state.grupoProdutos.map(gp => (
+                  <Select.Option data-obj={gp} key={gp._id} value={gp.nome}>
+                    {gp.nome}
+                  </Select.Option>
+                ))}
+            </Select>
 
-        <h4>Selecione um grupo de produtos para começar:</h4>
-        <Select
-          value={
-            this.state.selectedGroup && JSON.stringify(this.state.selectedGroup)
-          }
-          style={{ width: "100%", marginBottom: 20 }}
-          showAction={["focus", "click"]}
-          showSearch
-          placeholder="Selecione um grupo de produto..."
-          onChange={e => this.initializeList(e)}
-          filterOption={(input, option) =>
-            option.props.children.toLowerCase().indexOf(input.toLowerCase()) >=
-            0
-          }>
-          {this.state.grupoProdutos.length &&
-            this.state.grupoProdutos.map(gp => (
-              <Select.Option
-                key={gp._id}
-                value={JSON.stringify({ id: gp._id, nome: gp.nome })}>
-                {gp.nome}
-              </Select.Option>
-            ))}
-        </Select>
+            <SimpleTable
+              pagination={this.state.pagination}
+              spinning={this.state.loadingData}
+              rowKey="idProduto"
+              columns={this.tableConfig()}
+              dataSource={this.state.list}
+              onChange={this.handleTableChange}
+            />
+          </React.Fragment>
+        )}
 
-        <SimpleTable
-          pagination={this.state.pagination}
-          spinning={this.state.loadingData}
-          rowKey="idProduto"
-          columns={this.tableConfig()}
-          dataSource={this.state.list}
-          onChange={this.handleTableChange}
-        />
+        {this.state.mostrarVariacoes && (
+          <VendasVariacoesIndicator
+            grupoProduto={this.state.selectedGroup}
+            produto={this.state.selectedProduct}
+            fechar={() => this.setState({ mostrarVariacoes: false })}
+          />
+        )}
       </div>
     );
   }
-
-  filtrarPorVariacao = () => (
-    <React.Fragment>
-      <h4>Filtrar também por variação:</h4>
-      <Select
-        value={
-          this.state.selectedVariation &&
-          JSON.stringify(this.state.selectedVariation)
-        }
-        style={{ width: "100%", marginBottom: 20 }}
-        showAction={["focus", "click"]}
-        showSearch
-        placeholder="Selecione uma variação..."
-        onChange={e => this.initializeList(e)}
-        filterOption={(input, option) =>
-          option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-        }>
-        {this.state.grupoProdutos.length &&
-          this.state.grupoProdutos.map(gp => (
-            <Select.Option
-              key={gp._id}
-              value={JSON.stringify({ id: gp._id, nome: gp.nome })}>
-              {gp.nome}
-            </Select.Option>
-          ))}
-      </Select>
-    </React.Fragment>
-  );
 }
 
 export default VendasIndicator;

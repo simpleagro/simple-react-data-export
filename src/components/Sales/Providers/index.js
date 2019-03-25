@@ -147,13 +147,14 @@ class Providers extends Component {
     }
   ];
 
-  handleTableChange = (pagination, filter, sorter) => {
+  handleTableChange = (pagination) => {
     const pager = { ...this.state.pagination };
     pager.current = pagination.current;
     this.setState({
       pagination: pager
     });
     this.initializeList({
+      ...this.state.tableSearch,
       page: pagination.current,
       limit: pagination.pageSize
     });

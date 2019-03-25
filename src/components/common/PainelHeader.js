@@ -20,6 +20,7 @@ export const PainelHeader = props => (
     <Row type="flex" justify="space-between">
       <Col>
         <h2>{props.title}</h2>
+        {props.subTitle}
       </Col>
       <Col>{props.extra}</Col>
       <Col>{props.children}</Col>

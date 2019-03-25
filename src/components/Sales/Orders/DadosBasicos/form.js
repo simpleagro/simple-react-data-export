@@ -270,8 +270,9 @@ class OrderForm extends Component {
 
     return vendedor !== ""
       ? {
-          id: vendedor.id,
-          nome: vendedor.nome
+          id: vendedor._id,
+          nome: vendedor.nome,
+          codref: vendedor.codref
         }
       : undefined;
   }
