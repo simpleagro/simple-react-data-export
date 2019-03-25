@@ -305,10 +305,19 @@ const Footer = (props) => (
       <Col span={22}>{props.observacoes}</Col>
     </Row>
 
-    <Row style={{textAlign: "center", paddingTop: 30, fontWeight: "bold"}}>
-      <Row>_______________________________________________________________________________</Row>
-      <Row>{props.cliente}</Row>
-    </Row>
+    <Col span={12}>
+      <Row style={{textAlign: "center", paddingTop: 30, fontWeight: "bold"}}>
+        <Row>_______________________________________________________________________________</Row>
+        <Row>{props.cliente}</Row>
+      </Row>
+    </Col>
+
+    <Col span={12}>
+      <Row style={{textAlign: "center", paddingTop: 30, fontWeight: "bold"}}>
+        <Row>_______________________________________________________________________________</Row>
+        <Row>{props.vendedor}</Row>
+      </Row>
+    </Col>
 
   </Row>
 )
@@ -344,7 +353,7 @@ export default class Export extends Component {
     this.state.list.itens &&
       this.state.list.itens.map((element) => (obj.push(Object.assign({
         quantidade: element.quantidade,
-        embalagem: element.embalagem.label,
+        embalagem: element.embalagem.value,
         descricaoProduto: element.produto.nome,
         peneira: element.peneira.label,
         tratamento: element.tratamento.label,
@@ -556,6 +565,7 @@ export default class Export extends Component {
 
               <Footer
                 cliente={this.state.list.cliente && this.state.list.cliente.nome}
+                vendedor={this.state.list.vendedor && this.state.list.vendedor.nome}
                 observacoes={this.state.list.observacao}
                 parcelas={this.setFormaPagamento()}
                 formaPagamento={ this.state.list.pgto_germoplasma && this.state.list.pgto_germoplasma.toLowerCase().includes("grãos")
