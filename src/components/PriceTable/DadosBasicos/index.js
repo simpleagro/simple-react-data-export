@@ -632,7 +632,7 @@ class PriceTable extends Component {
     return (
       <div>
         <PainelHeader title="Tabela de Preço">
-          <Button
+          {/* <Button
             type="secundary"
             icon="file-text"
             style={{ marginRight: 10 }}
@@ -647,7 +647,7 @@ class PriceTable extends Component {
             onClick={ () => this.toPDF() }
           >
             Exportar para PDF
-          </Button>
+          </Button> */}
           <Button
             type="primary"
             icon="plus"
