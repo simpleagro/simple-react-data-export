@@ -7,7 +7,8 @@ const menus = {
     path: "/indicadores",
     label: "Indicadores",
     icon: "tachometer-alt",
-    showMenu: true
+    showMenu: true,
+    rule: "Indicator"
   },
   "/indicadores/vendas": {
     component: SimpleLoadable(() => import("../../components/Indicators/Vendas")),

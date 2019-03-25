@@ -116,7 +116,7 @@ class TypeForm extends Component {
         <Affix offsetTop={65}>
           <PainelHeader
             title={[
-              this.state.editMode ? "Editando" : "Novo",
+              this.state.editMode ? "Editando" : "Nova",
               " Moeda"
             ]}>
             <Button
