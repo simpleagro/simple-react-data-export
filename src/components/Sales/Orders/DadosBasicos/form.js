@@ -42,7 +42,7 @@ class OrderForm extends Component {
       fetchingAgents: false,
 
       clients: [],
-      tiposDeFrete: ["SEM FRETE", "FOB", "CIF"]
+      tiposDeFrete: ["FOB", "CIF"]
     };
   }
 
