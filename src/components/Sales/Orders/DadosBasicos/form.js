@@ -18,7 +18,7 @@ import { list as AgentSalesServiceList } from "../../../../services/sales-agents
 import { getConsultant as getConsultantFromWallet } from "../../../../services/customerswallet";
 import ConfigurarFPCaracteristica from "./ConfigurarFPCaracteristica";
 import { configAPP } from "config/app";
-import { normalizeString } from "~/components/common/utils";
+import { normalizeString } from "common/utils";
 
 const Option = Select.Option;
 const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
@@ -779,7 +779,7 @@ class OrderForm extends Component {
       <React.Fragment>
         <Form.Item label="Cliente 2" {...formItemLayout}>
           {getFieldDecorator("cliente2", {
-            rules: [{ required: true, message: "Este campo é obrigatório!" }],
+            // rules: [{ required: true, message: "Este campo é obrigatório!" }],
             initialValue:
               this.state.formData.cliente2 && this.state.formData.cliente2.nome
           })(
@@ -812,7 +812,7 @@ class OrderForm extends Component {
             this.state.formData.cliente2 === undefined ? "warning" : ""
           }>
           {getFieldDecorator("propriedade2", {
-            rules: [{ required: true, message: "Este campo é obrigatório!" }],
+            // rules: [{ required: true, message: "Este campo é obrigatório!" }],
             initialValue:
               this.state.formData.propriedade2 &&
               this.state.formData.propriedade2.nome
