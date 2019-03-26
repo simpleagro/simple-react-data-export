@@ -4,6 +4,7 @@ import html2canvas from "html2canvas";
 import jsPDF from 'jspdf';
 import * as OrderService from "services/orders";
 import * as UnitService from "services/units-measures";
+import * as ClientService from "services/clients";
 import moment from "moment";
 import { currency, getNumber, fatorConversaoUM } from "common/utils"
 import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
@@ -30,6 +31,7 @@ const divToPrintStryle = {
 }
 const pageStyle = {
   /*backgroundColor: 'lightgray',*/
+  fontVariant: "normal",
   height: "210mm",
   width: "295mm",
   marginLeft: 'auto',
@@ -38,7 +40,6 @@ const pageStyle = {
   paddingLeft: 5,
   paddingTop: 15,
   paddingRight: 15,
-  fontVariant: "normal",
   color: "black",
   fontWeight: 600
   //marginBottom: 50,
@@ -46,11 +47,11 @@ const pageStyle = {
 
 const headerBox = {
   /*backgroundColor: "#b2cdff",*/
-  height: 170
+  height: 155
 };
 const headerBoxCompanie = {
   /*backgroundColor: "#ffaa3a",*/
-  height: 170,
+  height: 155,
   borderStyle: "solid",
   borderBottomStyle: "none"
 };
@@ -210,18 +211,21 @@ const Header = (props) => (
 const ClientLine = (props) => (
   <Row style={bodyRowTop}>
     <Col span={8}>
-      <Row><span style={bodyTopLabel}>Cliente:</span><span style={{ fontWeight: 600,  }}>{props.cliente}</span></Row>
-      <Row><span style={bodyTopLabel}>Fazenda:</span><span style={{ fontWeight: 600,  }}>{props.fazenda}</span></Row>
+      <Row><span style={bodyTopLabel}>Cliente:</span><span>{props.cliente}</span></Row>
+      <Row><span style={bodyTopLabel}>Fazenda:</span><span>{props.fazenda}</span></Row>
+      <Row><span style={bodyTopLabel}>Tel. Fixo:</span><span>{props.tel_fixo}</span></Row>
     </Col>
 
     <Col span={8}>
-      <Row><span style={bodyTopLabel}>CPF/CNPJ:</span><span style={{ fontWeight: 600,  }}>{props.cpf_cnpj}</span></Row>
-      <Row><span style={bodyTopLabel}>Município:</span><span style={{ fontWeight: 600,  }}>{props.municipio}</span></Row>
+      <Row><span style={bodyTopLabel}>CPF/CNPJ:</span><span>{props.cpf_cnpj}</span></Row>
+      <Row><span style={bodyTopLabel}>Município:</span><span>{props.municipio}</span></Row>
+      <Row><span style={bodyTopLabel}>Cel./WhatsApp:</span><span>{props.tel_cel}</span></Row>
     </Col>
 
     <Col span={8}>
-      <Row><span style={bodyTopLabel}>Inscr. Estadual:</span><span style={{ fontWeight: 600, }}>{props.inscrEstadual}</span></Row>
-      <Row><span style={bodyTopLabel}>UF:</span><span style={{ fontWeight: "black",  }}>{props.uf}</span></Row>
+      <Row><span style={bodyTopLabel}>Inscr. Estadual:</span><span>{props.inscrEstadual}</span></Row>
+      <Row><span style={bodyTopLabel}>UF:</span><span>{props.uf}</span></Row>
+      <Row><span style={bodyTopLabel}>E-mail</span><span>{props.email}</span></Row>
     </Col>
   </Row>
 )
@@ -269,7 +273,7 @@ const TableLinesRight = (props) => (
       <Col span={17}>
         <Row style={drawLines} span={18}>{props.coluna === "PS"
           ? (!props.data.valorTotalPS || props.data.valorTotalPS === "0,00") ? null : currency()(props.data.valorTotalPS)
-          : (!props.data.valorTotalR || props.data.valorTotalR === "0,00") ? null : currency()(props.data.valorTotalR)}
+          : (!props.data.valorTotalR || props.data.valorTotalR === "0,00") ? null : `R$ ${currency()(props.data.valorTotalR)}`}
         </Row>
       </Col>
     </div>
@@ -338,11 +342,13 @@ export default class Export extends Component {
     const id = this.props.match.params.order_id;
     const data = await OrderService.get(id);
     const dataUnit = await UnitService.list();
+    const dataClient = await ClientService.get(data.cliente.id, {fields: "tel_cel,tel_fixo,email"})
 
     this.setState(prev => ({
       ...prev,
       list: data,
       listUnit: dataUnit.docs,
+      listClient: dataClient,
       pagination: []
     }));
   }
@@ -448,7 +454,6 @@ export default class Export extends Component {
   render() {
     return (
       <div>
-{console.log(this.state)}
         <div>
           <SimpleBreadCrumb
             to={
@@ -491,8 +496,11 @@ export default class Export extends Component {
                 cpf_cnpj={this.state.list.cliente && this.state.list.cliente.cpf_cnpj}
                 inscrEstadual={this.state.list.propriedade && this.state.list.propriedade.ie}
                 fazenda={this.state.list.propriedade && this.state.list.propriedade.nome}
-                municipio={this.state.list.cidade}
-                uf={this.state.list.estado}
+                municipio={this.state.list.cidade && this.state.list.cidade}
+                uf={this.state.list.estado && this.state.list.estado}
+                tel_fixo={this.state.listClient.tel_fixo && this.state.listClient.tel_fixo}
+                tel_cel={this.state.listClient.tel_cel && this.state.listClient.tel_cel}
+                email={this.state.listClient.email && this.state.listClient.email}
               />
 
               <Row style={bodyBox}>
@@ -532,7 +540,7 @@ export default class Export extends Component {
                   <Row>
                     <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, borderRightStyle: "none", textAlign: "right", paddingRight: 10, fontWeight: "bold" }} span={13}>Totais:</Col>
                     <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, borderRightStyle: "none", textAlign: "center" }} span={6}> {(!this.state.list.pagamento.total_pedido_graos || this.state.list.pagamento.total_pedido_graos === "0,00") ? null : currency()(this.state.list.pagamento.total_pedido_graos)} </Col>
-                    <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, textAlign: "center" }} span={5}> {(!this.state.list.pagamento.total_pedido_reais || this.state.list.pagamento.total_pedido_reais === "0,00") ? null : currency()(this.state.list.pagamento.total_pedido_reais)} </Col>
+                    <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, textAlign: "center" }} span={5}> {(!this.state.list.pagamento.total_pedido_reais || this.state.list.pagamento.total_pedido_reais === "0,00") ? null : `R$ ${currency()(this.state.list.pagamento.total_pedido_reais)}`} </Col>
                   </Row>
 
                   <Row style={{ paddingTop: 5 }}>
@@ -578,8 +586,7 @@ export default class Export extends Component {
             </Row>
             ))}
           </div>
-          {/* { console.log("STATE: ", this.state) }
-          { console.log("PROPS: ", this.props) } */}
+          { console.log("STATE: ", this.state) }
       </div>
     );
   }
