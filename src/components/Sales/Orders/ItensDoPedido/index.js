@@ -126,7 +126,7 @@ class OrderItem extends Component {
           render: (text, record, index) => (
             <React.Fragment>
               <pre key={`${record.total_preco_item_reais}_${index}`}>
-                Em Reais: {currency()(record.total_preco_item_reais || 0)}
+                Em Reais: {currency()(record.total_preco_item_reais || 0, { style: "currency"})}
               </pre>
               <pre key={`${record.total_preco_item_graos}_${index}`}>
                 Em Grãos: {currency()(record.total_preco_item_graos || 0)}

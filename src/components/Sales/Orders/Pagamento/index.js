@@ -301,7 +301,10 @@ class OrderPaymentForm extends Component {
                                 {currency()(
                                   this.state.formData[
                                     `total_pedido_${normalizeString(t)}`
-                                  ] || 0
+                                  ] || 0,
+                                  {
+                                    ...(t === "REAIS" && { style: "currency" })
+                                  }
                                 )}
                               </p>
                               <p key={`resumoItem_saldo_${normalizeString(t)}`}>
@@ -309,7 +312,10 @@ class OrderPaymentForm extends Component {
                                 {currency()(
                                   this.state[
                                     `saldo_parcelar_${normalizeString(t)}`
-                                  ] || 0
+                                  ] || 0,
+                                  {
+                                    ...(t === "REAIS" && { style: "currency" })
+                                  }
                                 )}
                               </p>
                             </React.Fragment>

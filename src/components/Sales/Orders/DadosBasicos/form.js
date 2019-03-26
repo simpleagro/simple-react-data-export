@@ -18,6 +18,7 @@ import { list as AgentSalesServiceList } from "../../../../services/sales-agents
 import { getConsultant as getConsultantFromWallet } from "../../../../services/customerswallet";
 import ConfigurarFPCaracteristica from "./ConfigurarFPCaracteristica";
 import { configAPP } from "config/app";
+import { normalizeString } from "~/components/common/utils";
 
 const Option = Select.Option;
 const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
@@ -257,11 +258,39 @@ class OrderForm extends Component {
 
     this.setState(prev => ({
       ...prev,
-      propriedades: propriedades.filter(t => t.status === true),
+      propriedades: propriedades.filter(
+        t => t.status === true && t.deleted !== true
+      ),
       formData: {
         ...prev.formData,
         vendedor: {}
       }
+    }));
+  }
+
+  async onChangeCliente2(e) {
+    const { _id: id, nome, cpf_cnpj, propriedades } = JSON.parse(e);
+
+    this.props.form.setFields({
+      propriedade2: { value: null }
+    });
+
+    this.handleFormState({
+      target: {
+        name: "cliente2",
+        value: {
+          nome,
+          cpf_cnpj,
+          id
+        }
+      }
+    });
+
+    this.setState(prev => ({
+      ...prev,
+      propriedades: propriedades.filter(
+        t => t.status === true && t.deleted !== true
+      )
     }));
   }
 
@@ -553,6 +582,56 @@ class OrderForm extends Component {
               </Select>
             )}
           </Form.Item>
+          {this.state.formData.tipo_venda &&
+            this.ehVendaAgenciada() && (
+              <React.Fragment>
+                <Form.Item label="Agente de Venda" {...formItemLayout}>
+                  {getFieldDecorator("agente_venda", {
+                    rules: [
+                      { required: true, message: "Este campo é obrigatório!" }
+                    ],
+                    initialValue:
+                      this.state.formData.agente_venda &&
+                      this.state.formData.agente_venda.nome
+                  })(
+                    <Select
+                      name="agente_venda"
+                      filterOption={(input, option) =>
+                        option.props.children
+                          .toLowerCase()
+                          .indexOf(input.toLowerCase()) >= 0
+                      }
+                      onSearch={this.searchAgent}
+                      showAction={["focus", "click"]}
+                      notFoundContent={
+                        fetchingAgents ? <Spin size="small" /> : null
+                      }
+                      showSearch
+                      placeholder="Selecione..."
+                      onChange={e => this.onChangeAgente(e)}>
+                      {this.state.agents &&
+                        this.state.agents.map(c => (
+                          <Option key={c._id} value={JSON.stringify(c)}>
+                            {c.nome}
+                          </Option>
+                        ))}
+                    </Select>
+                  )}
+                </Form.Item>
+                <SFFPorcentagem
+                  initialValue={this.state.formData.comissao_agente}
+                  name="comissao_agente"
+                  label="Comissão"
+                  formItemLayout={formItemLayout}
+                  getFieldDecorator={getFieldDecorator}
+                  handleFormState={this.handleFormState}
+                />
+              </React.Fragment>
+            )}
+
+          {this.state.formData.tipo_venda &&
+            this.ehVendaDistribuidor() &&
+            this.geraCamposTipoVendaDistribuidor(formItemLayout)}
           <Form.Item label="Uso da Semente" {...formItemLayout}>
             {getFieldDecorator("uso_semente", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
@@ -678,52 +757,6 @@ class OrderForm extends Component {
               </Select>
             )}
           </Form.Item>
-          {this.state.formData.tipo_venda &&
-            this.ehVendaAgenciada() && (
-              <React.Fragment>
-                <Form.Item label="Agente de Venda" {...formItemLayout}>
-                  {getFieldDecorator("agente_venda", {
-                    rules: [
-                      { required: true, message: "Este campo é obrigatório!" }
-                    ],
-                    initialValue:
-                      this.state.formData.agente_venda &&
-                      this.state.formData.agente_venda.nome
-                  })(
-                    <Select
-                      name="agente_venda"
-                      filterOption={(input, option) =>
-                        option.props.children
-                          .toLowerCase()
-                          .indexOf(input.toLowerCase()) >= 0
-                      }
-                      onSearch={this.searchAgent}
-                      showAction={["focus", "click"]}
-                      notFoundContent={
-                        fetchingAgents ? <Spin size="small" /> : null
-                      }
-                      showSearch
-                      placeholder="Selecione..."
-                      onChange={e => this.onChangeAgente(e)}>
-                      {this.state.agents &&
-                        this.state.agents.map(c => (
-                          <Option key={c._id} value={JSON.stringify(c)}>
-                            {c.nome}
-                          </Option>
-                        ))}
-                    </Select>
-                  )}
-                </Form.Item>
-                <SFFPorcentagem
-                  initialValue={this.state.formData.comissao_agente}
-                  name="comissao_agente"
-                  label="Comissão"
-                  formItemLayout={formItemLayout}
-                  getFieldDecorator={getFieldDecorator}
-                  handleFormState={this.handleFormState}
-                />
-              </React.Fragment>
-            )}
           {/* São Francisco */}
           {configAPP.usarConfiguracaoFPCaracteristica() && (
             <ConfigurarFPCaracteristica
@@ -736,6 +769,87 @@ class OrderForm extends Component {
           {/* São Francisco */}
         </Form>
       </div>
+    );
+  }
+
+  geraCamposTipoVendaDistribuidor(formItemLayout) {
+    const { fetchingClients } = this.state;
+    const { getFieldDecorator } = this.props.form;
+    return (
+      <React.Fragment>
+        <Form.Item label="Cliente 2" {...formItemLayout}>
+          {getFieldDecorator("cliente2", {
+            rules: [{ required: true, message: "Este campo é obrigatório!" }],
+            initialValue:
+              this.state.formData.cliente2 && this.state.formData.cliente2.nome
+          })(
+            <Select
+              name="cliente2"
+              onSearch={this.searchClient}
+              showAction={["focus", "click"]}
+              notFoundContent={fetchingClients ? <Spin size="small" /> : null}
+              showSearch
+              placeholder="Selecione..."
+              onChange={e => this.onChangeCliente2(e)}>
+              {this.state.clients &&
+                this.state.clients.map(c => (
+                  <Option key={c._id} value={JSON.stringify(c)}>
+                    {c.nome} - {c.cpf_cnpj}
+                  </Option>
+                ))}
+            </Select>
+          )}
+        </Form.Item>
+        <Form.Item
+          label="Propriedade 2"
+          {...formItemLayout}
+          help={
+            this.state.formData.cliente2 === undefined
+              ? "Selecione primeiro um cliente 2!"
+              : ""
+          }
+          validateStatus={
+            this.state.formData.cliente2 === undefined ? "warning" : ""
+          }>
+          {getFieldDecorator("propriedade2", {
+            rules: [{ required: true, message: "Este campo é obrigatório!" }],
+            initialValue:
+              this.state.formData.propriedade2 &&
+              this.state.formData.propriedade2.nome
+          })(
+            <Select
+              disabled={this.state.formData.cliente2 === undefined}
+              name="propriedade2"
+              showAction={["focus", "click"]}
+              showSearch
+              placeholder="Selecione..."
+              // labelInValue
+              filterOption={(input, option) =>
+                option.props.children
+                  .toLowerCase()
+                  .indexOf(input.toLowerCase()) >= 0
+              }
+              onChange={e => this.onChangePropriedade2(e)}>
+              {this.state.propriedades && this.state.propriedades.length > 0
+                ? this.state.propriedades.map(p => (
+                    <Option
+                      title={`${p.nome}/${p.ie}`}
+                      key={p._id}
+                      value={JSON.stringify({
+                        nome: p.nome,
+                        ie: p.ie,
+                        id: p._id,
+                        estado: p.estado,
+                        cidade: p.cidade
+                      })}>
+                      {p.nome} / {p.ie}
+                    </Option>
+                  ))
+                : ""}
+            </Select>
+          )}
+        </Form.Item>
+      </React.Fragment>
     );
   }
 
@@ -765,8 +879,28 @@ class OrderForm extends Component {
     }));
   }
 
+  async onChangePropriedade2(e) {
+    const { estado, cidade, ...propriedade } = JSON.parse(e);
+    this.setState(prev => ({
+      ...prev,
+      formData: {
+        ...prev.formData,
+        propriedade2: propriedade,
+        cidade2: cidade,
+        estado2: estado
+      }
+    }));
+  }
+
   ehVendaAgenciada() {
     return this.state.formData.tipo_venda.toUpperCase().includes("AGENCIADA"); // tratando como um padrão de CONSTANTE
+  }
+
+  ehVendaDistribuidor() {
+    // remove acentos, lowercase
+    return normalizeString(this.state.formData.tipo_venda).includes(
+      "distribuidor"
+    );
   }
 }
 
