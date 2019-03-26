@@ -757,6 +757,7 @@ class OrderItemForm extends Component {
               //   : undefined
             })(
               <Input
+                readOnly={obj.chave === "royalties"}
                 disabled={
                   !this.state.variacoesSelecionadas ||
                   !this.state.variacoesSelecionadas.hasOwnProperty(

@@ -80,7 +80,8 @@ class CalculoFrete extends Component {
       );
       return;
     }
-    let preco_frete = 0;
+    let preco_frete = 0,
+      preco_frete_orig = 0;
     tab.range_km.forEach(range => {
       if (
         parseInt(range.km_de) <= parseInt(distancia) &&
@@ -92,6 +93,7 @@ class CalculoFrete extends Component {
             parseInt(volume.pesokg_ate) >= peso
           ) {
             preco_frete = getNumber(volume.preco);
+            preco_frete_orig = getNumber(volume.preco);
           }
         });
       }
@@ -131,7 +133,8 @@ class CalculoFrete extends Component {
 
     this.props.dadosPedidoFrete({
       ...this.state.formData,
-      total_pedido_frete: preco_frete
+      total_pedido_frete: preco_frete,
+      preco_frete_tabela: preco_frete_orig,
     });
 
     if (configAPP.usarConfiguracaoFPCaracteristica()) {
@@ -140,7 +143,9 @@ class CalculoFrete extends Component {
 
     setTimeout(() => {
       this.setState({
-        calculandoFrete: false
+        calculandoFrete: false,
+        total_pedido_frete: preco_frete,
+        preco_frete_tabela: preco_frete_orig,
       });
     }, 300);
   };
@@ -172,12 +177,14 @@ class CalculoFrete extends Component {
   };
 
   handleFormState = async event => {
+    event.persist();
     if (!event.target.name) return;
     let form = Object.assign({}, this.state.formData, {
       [event.target.name]: event.target.value
     });
     await this.setState(prev => ({ ...prev, formData: form }));
-    this.calcularFrete();
+
+    if (event.target.name !== "roteiro") this.calcularFrete();
   };
 
   async gerarParcelasAutomaticasVencimento() {
@@ -318,6 +325,48 @@ class CalculoFrete extends Component {
                       this.state.formData.peso ||
                       (this.props.pedido && this.props.pedido.peso)
                     }
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={8} type="flex" justify="space-between" align="middle">
+              <Col span={12}>
+                <Form.Item label="Preço Total Frete">
+                  <Input
+                    readOnly
+                    value={
+                      this.state.total_pedido_frete ||
+                      (this.props.pedido &&
+                        this.props.pedido.total_pedido_frete)
+                    }
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="Preço Tabela Frete">
+                  <Input
+                    readOnly
+                    name="preco_frete_tabela"
+                    value={
+                      this.state.preco_frete_tabela ||
+                      (this.props.pedido &&
+                        this.props.pedido.preco_frete_tabela)
+                    }
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <Form.Item label="Roteiro">
+                  <Input.TextArea
+                    rows="5"
+                    placeholder="Informe os pontos do roteiro um a um, por linha, para melhor entendimento do roteiro"
+                    value={
+                      this.state.formData.roteiro ||
+                      (this.props.pedido && this.props.pedido.roteiro)
+                    }
+                    name="roteiro"
                   />
                 </Form.Item>
               </Col>

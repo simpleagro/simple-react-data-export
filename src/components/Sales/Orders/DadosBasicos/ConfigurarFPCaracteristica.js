@@ -15,33 +15,6 @@ class ConfigurarFPCaracteristica extends Component {
           <Col span={5}>
             <Card title="Data Vencimento">
               <React.Fragment>
-                <Form.Item label="Royalties">
-                  {getFieldDecorator("venc_royalties", {
-                    initialValue: this.props.formData.venc_royalties
-                      ? moment(this.props.formData.venc_royalties, "YYYY-MM-DD")
-                      : undefined
-                  })(
-
-                    <DatePicker
-                      disabled={!!this.props.formData.itens.length}
-                      onChange={(data, dataString) =>
-                        this.props.handleFormState({
-                          target: {
-                            name: "venc_royalties",
-                            value: dataString
-                              ? moment(dataString, "DD/MM/YYYY").format(
-                                  "YYYY-MM-DD"
-                                )
-                              : undefined
-                          }
-                        })
-                      }
-                      allowClear
-                      format={"DD/MM/YYYY"}
-                      name="venc_royalties"
-                    />
-                  )}
-                </Form.Item>
                 <Form.Item label="Germoplasma">
                   {getFieldDecorator("venc_germoplasma", {
                     initialValue: this.props.formData.venc_germoplasma
@@ -66,6 +39,33 @@ class ConfigurarFPCaracteristica extends Component {
                       allowClear
                       format={"DD/MM/YYYY"}
                       name="venc_germoplasma"
+                    />
+                  )}
+                </Form.Item>
+                <Form.Item label="Royalties">
+                  {getFieldDecorator("venc_royalties", {
+                    initialValue: this.props.formData.venc_royalties
+                      ? moment(this.props.formData.venc_royalties, "YYYY-MM-DD")
+                      : undefined
+                  })(
+
+                    <DatePicker
+                      disabled={!!this.props.formData.itens.length}
+                      onChange={(data, dataString) =>
+                        this.props.handleFormState({
+                          target: {
+                            name: "venc_royalties",
+                            value: dataString
+                              ? moment(dataString, "DD/MM/YYYY").format(
+                                  "YYYY-MM-DD"
+                                )
+                              : undefined
+                          }
+                        })
+                      }
+                      allowClear
+                      format={"DD/MM/YYYY"}
+                      name="venc_royalties"
                     />
                   )}
                 </Form.Item>
@@ -128,43 +128,6 @@ class ConfigurarFPCaracteristica extends Component {
           <Col span={7} pull={6}>
             <Card title="Forma de Pagamento" bordered={false}>
               <React.Fragment>
-                <Form.Item label="Royalties">
-                  {getFieldDecorator("pgto_royalties", {
-                    rules: [
-                      {
-                        required: this.props.formData.venc_royalties,
-                        message: "Este campo é obrigatório!"
-                      }
-                    ],
-                    initialValue: this.props.formData.pgto_royalties
-                  })(
-                    <Select
-                      disabled={!!this.props.formData.itens.length}
-                      name="pgto_royalties"
-                      showAction={["focus", "click"]}
-                      showSearch
-                      placeholder="Selecione..."
-                      filterOption={(input, option) =>
-                        option.props.children
-                          .toLowerCase()
-                          .indexOf(input.toLowerCase()) >= 0
-                      }
-                      onChange={e => {
-                        this.props.handleFormState({
-                          target: {
-                            name: "pgto_royalties",
-                            value: e
-                          }
-                        });
-                      }}>
-                      {["REAIS"].map((s, index) => (
-                        <Option key={`pgto_r_${index}`} value={s}>
-                          {s}
-                        </Option>
-                      ))}
-                    </Select>
-                  )}
-                </Form.Item>
                 <Form.Item label="Germoplasma">
                   {getFieldDecorator("pgto_germoplasma", {
                     rules: [
@@ -196,6 +159,43 @@ class ConfigurarFPCaracteristica extends Component {
                       }}>
                       {["REAIS", "GRÃOS"].map((s, index) => (
                         <Option key={`pgto_g_${index}`} value={s}>
+                          {s}
+                        </Option>
+                      ))}
+                    </Select>
+                  )}
+                </Form.Item>
+                <Form.Item label="Royalties">
+                  {getFieldDecorator("pgto_royalties", {
+                    rules: [
+                      {
+                        required: this.props.formData.venc_royalties,
+                        message: "Este campo é obrigatório!"
+                      }
+                    ],
+                    initialValue: this.props.formData.pgto_royalties
+                  })(
+                    <Select
+                      disabled={!!this.props.formData.itens.length}
+                      name="pgto_royalties"
+                      showAction={["focus", "click"]}
+                      showSearch
+                      placeholder="Selecione..."
+                      filterOption={(input, option) =>
+                        option.props.children
+                          .toLowerCase()
+                          .indexOf(input.toLowerCase()) >= 0
+                      }
+                      onChange={e => {
+                        this.props.handleFormState({
+                          target: {
+                            name: "pgto_royalties",
+                            value: e
+                          }
+                        });
+                      }}>
+                      {["REAIS"].map((s, index) => (
+                        <Option key={`pgto_r_${index}`} value={s}>
                           {s}
                         </Option>
                       ))}

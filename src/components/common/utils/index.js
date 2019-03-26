@@ -54,18 +54,21 @@ const zeroEsquerda = data => {
 export const fatorConversaoUM = (um_array, um_pai, um_primaria) => {
   let flag = true;
 
-   let _um_pai = um_pai ? um_pai.toLowerCase() : um_pai
-   let _um_primaria = um_primaria ? um_primaria.toLowerCase() : um_primaria
-   let um_verificar_obj = um_array.find(item => item.sigla.toLowerCase() == _um_pai);
-   let um_verificar = um_verificar_obj ? um_verificar_obj._id : '';
-   let um_primaria_obj = um_array.find(item => item.sigla.toLowerCase() == _um_primaria)
+  let _um_pai = um_pai ? um_pai.toLowerCase() : um_pai;
+  let _um_primaria = um_primaria ? um_primaria.toLowerCase() : um_primaria;
+  let um_verificar_obj = um_array.find(
+    item => item.sigla.toLowerCase() == _um_pai
+  );
+  let um_verificar = um_verificar_obj ? um_verificar_obj._id : "";
+  let um_primaria_obj = um_array.find(
+    item => item.sigla.toLowerCase() == _um_primaria
+  );
 
   //let um_verificar_obj = um_array.find(item => item.sigla.toLowerCase() == um_pai.toLowerCase());
   //let um_verificar = um_verificar_obj ? um_verificar_obj._id : "";
   //let um_primaria_obj = um_array.find(item => item.sigla.toLowerCase() == um_primaria.toLowerCase());
   let resultado = {};
   let aux_fc = 1;
-
 
   if (um_primaria_obj) {
     while (flag) {
@@ -117,19 +120,20 @@ export const valorFinalJurosCompostos = (
   precision = 1
 ) => {
   capital = getNumber(capital);
-  return currency()(Number(capital * Math.pow(1 + parseFloat(taxa) / 100, periodo)));
+  return currency()(
+    Number(capital * Math.pow(1 + parseFloat(taxa) / 100, periodo))
+  );
 };
 
 // usando https://hacks.mozilla.org/2014/12/introducing-the-javascript-internationalization-api/
-export const currency = (locale = "pt-BR") => (
-  value,
-  options = {
+export const currency = (locale = "pt-BR") => (value, options) => {
+  const defaultOpts = {
     style: "decimal",
     currency: "BRL",
-    minimumFractionDigits: 2
-  }
-) => {
-  const formatter = new Intl.NumberFormat(locale, options);
+    minimumFractionDigits: 2,
+    ...options
+  };
+  const formatter = new Intl.NumberFormat(locale, defaultOpts);
 
   return formatter.format(getNumber(value));
 };
@@ -142,8 +146,8 @@ export const getNumber = n => {
           .toString()
           .replace(/\./g, "")
           .replace(",", ".")
-      ).toFixed(2)*1
-    : parseFloat(n).toFixed(2)*1;
+      ).toFixed(2) * 1
+    : parseFloat(n).toFixed(2) * 1;
 };
 
 export const normalizeString = str => {
