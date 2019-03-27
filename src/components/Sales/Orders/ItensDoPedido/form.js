@@ -631,17 +631,11 @@ class OrderItemForm extends Component {
               )}
             </Form.Item>
 
-            <Form.Item
-            label="Observações"
-            {...formItemLayout}>
-            {getFieldDecorator(`obs_item`, {
-              initialValue: this.state.formData.obs_item
-            })(
-              <Input.TextArea
-                name={`obs_item`}
-              />
-            )}
-          </Form.Item>
+            <Form.Item label="Observações" {...formItemLayout}>
+              {getFieldDecorator(`obs_item`, {
+                initialValue: this.state.formData.obs_item
+              })(<Input.TextArea name={`obs_item`} />)}
+            </Form.Item>
 
             {/* <Form.Item label="Preço Final Item" {...formItemLayout}>
               {getFieldDecorator("preco_final_item", {
@@ -810,9 +804,7 @@ class OrderItemForm extends Component {
             initialValue={this.state.formData[`desconto_${obj.chave}`]}
             disabled={
               !this.state.variacoesSelecionadas ||
-              !this.state.variacoesSelecionadas.hasOwnProperty(
-                variacao.chave
-              )
+              !this.state.variacoesSelecionadas.hasOwnProperty(variacao.chave)
             }
             readOnly={obj.chave === "royalties"}
             name={`desconto_${obj.chave}`}
@@ -925,16 +917,22 @@ class OrderItemForm extends Component {
                 p.status === true &&
                 p.deleted === false
             );
+
+            // convertendo para calcular baseado apenas em dia mes ano
+            let vencVariacaoChave = moment
+              .parseZone(this.props.pedido[`venc_${variacao.chave}`])
+              .format("DD/MM/YYYY");
+
+            let tabelaDataBase = moment
+              .parseZone(tabelaCaract[0].data_base)
+              .format("DD/MM/YYYY");
+            // *******************************
+
             let preco = (valorVariacao && valorVariacao.valor) || 0;
             const periodo = configAPP.usarCalculoDataBaseMes()
-              ? moment(this.props.pedido[`venc_${variacao.chave}`]).diff(
-                  tabelaCaract[0].data_base,
-                  "month"
-                )
-              : moment(this.props.pedido[`venc_${variacao.chave}`]).diff(
-                  tabelaCaract[0].data_base,
-                  "days"
-                ) / (configAPP.quantidadeDeDiasCalculoDataBase() || 30);
+              ? moment(vencVariacaoChave).diff(tabelaDataBase, "month")
+              : moment(vencVariacaoChave).diff(tabelaDataBase, "days") /
+                (configAPP.quantidadeDeDiasCalculoDataBase() || 30);
             const taxa =
               periodo && periodo > 0
                 ? getNumber(tabelaCaract[0].taxa_adicao)
@@ -1009,15 +1007,25 @@ class OrderItemForm extends Component {
               // A data base pode ser padrão ou marcado por data royalties, germoplasma ... etc
               let dataBaseCalculo =
                 tabelaPreco.data_base_por_regra === true
-                  ? tabelaPreco[`data_base_${rpb.chave}`]
-                  : tabelaPreco.data_base;
+                  ? moment
+                      .parseZone(tabelaPreco[`data_base_${rpb.chave}`])
+                      .format("DD/MM/YYYY")
+                  : moment
+                      .parseZone(tabelaPreco.data_base)
+                      .format("DD/MM/YYYY");
+
+              // convertendo para calcular baseado apenas em dia mes ano
+              let vencVariacaoChave = moment
+                .parseZone(this.props.pedido[`venc_${rpb.chave}`])
+                .format("DD/MM/YYYY");
+              // *******************************
 
               let periodo = configAPP.usarCalculoDataBaseMes()
-                ? moment(this.props.pedido[`venc_${rpb.chave}`]).diff(
+                ? moment(vencVariacaoChave).diff(
                     dataBaseCalculo,
                     "month"
                   )
-                : moment(this.props.pedido[`venc_${rpb.chave}`]).diff(
+                : moment(vencVariacaoChave).diff(
                     dataBaseCalculo,
                     "days"
                   ) / (configAPP.quantidadeDeDiasCalculoDataBase() || 30);

@@ -91,7 +91,7 @@ const ModalForm = Form.create()(
           return <Form.Item label="Data Base">
             {getFieldDecorator("data_base", {
               initialValue: this.state.formData.data_base
-                ? moment(this.state.formData.data_base)
+                ? moment.parseZone(this.state.formData.data_base)
                 : undefined
             })(
               <DatePicker
@@ -113,7 +113,7 @@ const ModalForm = Form.create()(
             <Form.Item label={`Data Base ${regra_preco.label}`}>
               {getFieldDecorator(`data_base_${regra_preco.chave}`, {
                 initialValue: this.state.formData[`data_base_${regra_preco.chave}`]
-                  ? moment(this.state.formData[`data_base_${regra_preco.chave}`])
+                  ? moment.parseZone(this.state.formData[`data_base_${regra_preco.chave}`])
                   : undefined
               })(
                 <DatePicker
@@ -272,7 +272,7 @@ const ModalForm = Form.create()(
               <Form.Item label="Data Validade de">
                 {getFieldDecorator("data_validade_de", {
                   initialValue: this.state.formData.data_validade_de
-                    ? moment(this.state.formData.data_validade_de)
+                    ? moment.parseZone(this.state.formData.data_validade_de)
                     : undefined
                 })(
                   <DatePicker
@@ -291,7 +291,7 @@ const ModalForm = Form.create()(
               <Form.Item label="Data Validade até">
                 {getFieldDecorator("data_validade_ate", {
                   initialValue: this.state.formData.data_validade_ate
-                    ? moment(this.state.formData.data_validade_ate)
+                    ? moment.parseZone(this.state.formData.data_validade_ate)
                     : undefined
                 })(
                   <DatePicker
