@@ -451,6 +451,16 @@ export default class Export extends Component {
     ;
   }
 
+  somaTotal(vals){
+    let obj = {
+      somaVolumes: 0,
+      somaReais: 0
+    }
+    vals.map((e) => (obj.somaReais+=getNumber(e.total_preco_item_reais), obj.somaVolumes+=getNumber(e.total_preco_item_graos)))
+    console.log("TOTAL de REAIS:", obj)
+    return obj
+  }
+
   render() {
     return (
       <div>
@@ -539,8 +549,8 @@ export default class Export extends Component {
 
                   <Row>
                     <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, borderRightStyle: "none", textAlign: "right", paddingRight: 10, fontWeight: "bold" }} span={13}>Totais:</Col>
-                    <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, borderRightStyle: "none", textAlign: "center" }} span={6}> {(!this.state.list.pagamento.total_pedido_graos || this.state.list.pagamento.total_pedido_graos === "0,00") ? null : currency()(this.state.list.pagamento.total_pedido_graos)} </Col>
-                    <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, textAlign: "center" }} span={5}> {(!this.state.list.pagamento.total_pedido_reais || this.state.list.pagamento.total_pedido_reais === "0,00") ? null : `R$ ${currency()(this.state.list.pagamento.total_pedido_reais)}`} </Col>
+                    <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, borderRightStyle: "none", textAlign: "center" }} span={6}> {this.somaTotal(this.state.list.itens).somaVolumes > 0 ? currency()(this.somaTotal(this.state.list.itens).somaVolumes) : null} </Col>
+                    <Col style={{ borderStyle: "solid", borderWidth: 2, borderTopStyle: "none", height: 20, textAlign: "center" }} span={5}> {this.somaTotal(this.state.list.itens).somaReais > 0 ? `R$ ${currency()(this.somaTotal(this.state.list.itens).somaReais)}` : null} </Col>
                   </Row>
 
                   <Row style={{ paddingTop: 5 }}>
