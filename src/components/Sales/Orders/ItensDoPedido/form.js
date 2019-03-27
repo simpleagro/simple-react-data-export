@@ -930,8 +930,9 @@ class OrderItemForm extends Component {
 
             let preco = (valorVariacao && valorVariacao.valor) || 0;
             const periodo = configAPP.usarCalculoDataBaseMes()
-              ? moment(vencVariacaoChave).diff(tabelaDataBase, "month")
-              : moment(vencVariacaoChave).diff(tabelaDataBase, "days") /
+
+              ? moment(vencVariacaoChave, "DD/MM/YYYY").diff(moment(tabelaDataBase, "DD/MM/YYYY"), "month")
+              : moment(vencVariacaoChave, "DD/MM/YYYY").diff(moment(tabelaDataBase, "DD/MM/YYYY"), "days") /
                 (configAPP.quantidadeDeDiasCalculoDataBase() || 30);
             const taxa =
               periodo && periodo > 0
@@ -1021,14 +1022,9 @@ class OrderItemForm extends Component {
               // *******************************
 
               let periodo = configAPP.usarCalculoDataBaseMes()
-                ? moment(vencVariacaoChave).diff(
-                    dataBaseCalculo,
-                    "month"
-                  )
-                : moment(vencVariacaoChave).diff(
-                    dataBaseCalculo,
-                    "days"
-                  ) / (configAPP.quantidadeDeDiasCalculoDataBase() || 30);
+                ?
+                moment(vencVariacaoChave, "DD/MM/YYYY").diff(moment(dataBaseCalculo, "DD/MM/YYYY"), "month")
+                : moment(vencVariacaoChave, "DD/MM/YYYY").diff(moment(dataBaseCalculo, "DD/MM/YYYY"), "days") / (configAPP.quantidadeDeDiasCalculoDataBase() || 30);
 
               const taxa =
                 periodo && periodo > 0
