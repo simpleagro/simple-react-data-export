@@ -69,6 +69,7 @@ const ModalForm = Form.create()(
               </Form.Item>
               <Form.Item label="Data Base">
                 {getFieldDecorator("data_base", {
+                  rules: [{ required: true, message: "Este campo é obrigatório!" }],
                   initialValue: this.state.formData.data_base
                     ? moment(this.state.formData.data_base)
                     : undefined
