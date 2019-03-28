@@ -36,6 +36,7 @@ import configuracoes from "./Menus/configuracoes";
 import fornecedores from "./Menus/fornecedores";
 import regioes from "./Menus/regioes";
 import indicadores from "./Menus/indicadores";
+import aprovacaoPedidos from "./Menus/aprovacao-pedidos";
 
 const loadable = loader =>
   Loadable({
@@ -66,6 +67,7 @@ const menus = {
     ...usuarios
   },
   sales: {
+    ...aprovacaoPedidos,
     ...agenteVendas,
     ...carteiraDeClientes,
     ...clientes,
