@@ -2,12 +2,105 @@ import React, { Component } from "react";
 import { Form, Card, Col, Row, Select, DatePicker } from "antd";
 import moment from "moment";
 import PropTypes from "prop-types";
+import { connect } from "react-redux";
+import { date2Db } from "common/utils";
 
 const { Option } = Select;
 
 class ConfigurarFPCaracteristica extends Component {
-    render() {
+  geraSeletorDeData(variacao) {
+    const { preco_base_regra } = this.props.grupoProduto || {};
+    const { getFieldDecorator } = this.props.form;
 
+    const {
+      usar_datas_fixas: usarDatasFixas,
+      venc_datas_fixas: vencDatasFixas
+    } =
+      (preco_base_regra &&
+        preco_base_regra.find(regra => regra.chave === variacao)) ||
+      false;
+
+    if (
+      (this.props.userRules &&
+        this.props.userRules.some(
+          p =>
+            p.subject === "Order" &&
+            p.actions.includes(
+              "usarCalendarioNaDataVencimentoDeCaractNoCabDoPedido"
+            )
+        )) ||
+      !usarDatasFixas
+    )
+      return (
+        <React.Fragment>
+          {getFieldDecorator(`venc_${variacao}`, {
+            initialValue: this.props.formData[`venc_${variacao}`]
+              ? moment(this.props.formData[`venc_${variacao}`], "YYYY-MM-DD")
+              : undefined
+          })(
+            <DatePicker
+              disabled={!!this.props.formData.itens.length}
+              onChange={data =>
+                this.props.handleFormState({
+                  target: {
+                    name: `venc_${variacao}`,
+                    value: data.format("YYYY-MM-DD")
+                  }
+                })
+              }
+              allowClear
+              format={"DD/MM/YYYY"}
+              name={`venc_${variacao}`}
+              style={{ width: "100%" }}
+            />
+          )}
+        </React.Fragment>
+      );
+
+    return (
+      <React.Fragment>
+        {getFieldDecorator(`venc_${variacao}`, {
+          initialValue: this.props.formData[`venc_${variacao}`]
+            ? moment(
+                this.props.formData[`venc_${variacao}`],
+                "YYYY-MM-DD"
+              ).format("DD/MM/YYYY")
+            : undefined
+        })(
+          <Select
+            disabled={!!this.props.formData.itens.length}
+            name={`venc_${variacao}`}
+            showAction={["focus", "click"]}
+            showSearch
+            placeholder="Selecione..."
+            filterOption={(input, option) =>
+              option.props.children
+                .toLowerCase()
+                .indexOf(input.toLowerCase()) >= 0
+            }
+            onChange={e => {
+              this.props.handleFormState({
+                target: {
+                  name: `venc_${variacao}`,
+                  value: date2Db(e, undefined, "YYYY-MM-DD")
+                }
+              });
+            }}>
+            {vencDatasFixas &&
+              vencDatasFixas.map((d, index) => {
+                return (
+                  <Option key={`${index}`} value={d}>
+                    {d}
+                  </Option>
+                );
+              })}
+          </Select>
+        )}
+      </React.Fragment>
+    );
+  }
+
+  render() {
     const { getFieldDecorator } = this.props.form;
     return (
       <div style={{ background: "#ECECEC", padding: "30px" }}>
@@ -16,111 +109,19 @@ class ConfigurarFPCaracteristica extends Component {
             <Card title="Data Vencimento">
               <React.Fragment>
                 <Form.Item label="Germoplasma">
-                  {getFieldDecorator("venc_germoplasma", {
-                    initialValue: this.props.formData.venc_germoplasma
-                      ? moment(
-                          this.props.formData.venc_germoplasma,
-                          "YYYY-MM-DD"
-                        )
-                      : undefined
-                  })(
-                    <DatePicker
-                    disabled={!!this.props.formData.itens.length}
-                      onChange={(data, dataString) =>
-                        this.props.handleFormState({
-                          target: {
-                            name: "venc_germoplasma",
-                            value: moment(dataString, "DD/MM/YYYY").format(
-                              "YYYY-MM-DD"
-                            )
-                          }
-                        })
-                      }
-                      allowClear
-                      format={"DD/MM/YYYY"}
-                      name="venc_germoplasma"
-                    />
-                  )}
+                  {this.geraSeletorDeData("germoplasma")}
                 </Form.Item>
                 <Form.Item label="Royalties">
-                  {getFieldDecorator("venc_royalties", {
-                    initialValue: this.props.formData.venc_royalties
-                      ? moment(this.props.formData.venc_royalties, "YYYY-MM-DD")
-                      : undefined
-                  })(
-
-                    <DatePicker
-                      disabled={!!this.props.formData.itens.length}
-                      onChange={(data, dataString) =>
-                        this.props.handleFormState({
-                          target: {
-                            name: "venc_royalties",
-                            value: dataString
-                              ? moment(dataString, "DD/MM/YYYY").format(
-                                  "YYYY-MM-DD"
-                                )
-                              : undefined
-                          }
-                        })
-                      }
-                      allowClear
-                      format={"DD/MM/YYYY"}
-                      name="venc_royalties"
-                    />
-                  )}
+                  {this.geraSeletorDeData("royalties")}
                 </Form.Item>
                 <Form.Item label="Tratamento">
-                  {getFieldDecorator("venc_tratamento", {
-                    initialValue: this.props.formData.venc_tratamento
-                      ? moment(
-                          this.props.formData.venc_tratamento,
-                          "YYYY-MM-DD"
-                        )
-                      : undefined
-                  })(
-                    <DatePicker
-                    disabled={!!this.props.formData.itens.length}
-                      onChange={(data, dataString) =>
-                        this.props.handleFormState({
-                          target: {
-                            name: "venc_tratamento",
-                            value: moment(dataString, "DD/MM/YYYY").format(
-                              "YYYY-MM-DD"
-                            )
-                          }
-                        })
-                      }
-                      allowClear
-                      format={"DD/MM/YYYY"}
-                      name="venc_tratamento"
-                    />
-                  )}
+                  {this.geraSeletorDeData("tratamento")}
                 </Form.Item>
               </React.Fragment>
 
               {this.props.showFrete && (
                 <Form.Item label="Frete">
-                  {getFieldDecorator("venc_frete", {
-                    initialValue: this.props.formData.venc_frete
-                      ? moment(this.props.formData.venc_frete, "YYYY-MM-DD")
-                      : undefined
-                  })(
-                    <DatePicker
-                      onChange={(data, dataString) =>
-                        this.props.handleFormState({
-                          target: {
-                            name: "venc_frete",
-                            value: moment(dataString, "DD/MM/YYYY").format(
-                              "YYYY-MM-DD"
-                            )
-                          }
-                        })
-                      }
-                      allowClear
-                      format={"DD/MM/YYYY"}
-                      name="venc_frete"
-                    />
-                  )}
+                  {this.geraSeletorDeData("frete")}
                 </Form.Item>
               )}
             </Card>
@@ -213,7 +214,7 @@ class ConfigurarFPCaracteristica extends Component {
                     initialValue: this.props.formData.pgto_tratamento
                   })(
                     <Select
-                    disabled={!!this.props.formData.itens.length}
+                      disabled={!!this.props.formData.itens.length}
                       name="pgto_tratamento"
                       showAction={["focus", "click"]}
                       showSearch
@@ -298,4 +299,13 @@ ConfigurarFPCaracteristica.propTypes = {
   formData: PropTypes.object.isRequired
 };
 
-export default ConfigurarFPCaracteristica;
+const mapStateToProps = ({ painelState }) => {
+  return {
+    userRules:
+      Object.keys(painelState.userData.rules).length > 0
+        ? painelState.userData.rules
+        : []
+  };
+};
+
+export default connect(mapStateToProps)(ConfigurarFPCaracteristica);

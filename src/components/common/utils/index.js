@@ -1,4 +1,5 @@
 import moment from "moment";
+window.moment = moment;
 
 export const addMaskNumber = number => {
   try {
@@ -123,10 +124,11 @@ export const valorFinalJurosCompostos = (
 ) => {
   capital = getNumber(capital, precision);
   return currency()(
-    Number(capital * Math.pow(1 + parseFloat(taxa) / 100, periodo))
-  ,{
-    minimumFractionDigits: precision
-  });
+    Number(capital * Math.pow(1 + parseFloat(taxa) / 100, periodo)),
+    {
+      minimumFractionDigits: precision
+    }
+  );
 };
 
 // usando https://hacks.mozilla.org/2014/12/introducing-the-javascript-internationalization-api/
@@ -185,7 +187,12 @@ export const simpleDate = (date, format) => {
   return moment.parseZone(date, format);
 };
 
-export const date2Db = (date, formatIn = "DD/MM/YYYY") => {
+export const date2Db = (date, formatIn = "DD/MM/YYYY", formatOut) => {
+  if (formatOut)
+    return moment(date, formatIn)
+      .utc(true)
+      .format(formatOut);
+
   return moment(date, formatIn)
     .utc(true)
     .toISOString();
