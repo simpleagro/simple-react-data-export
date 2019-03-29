@@ -9,9 +9,6 @@ API_URL = `${process.env.REACT_APP_API_IP.replace(
   ""
 )}:${process.env.REACT_APP_API_PORT.replace(/\s/g, "")}/api`;
 
-API_URL = "https://homologacao.simpleagro.com.br/api";
-console.log("API_URL", API_URL)
-
 const cookies = new Cookies();
 
 const baseApi = axios.create({
