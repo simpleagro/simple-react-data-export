@@ -8,16 +8,20 @@ import { date2Db } from "common/utils";
 const { Option } = Select;
 
 class ConfigurarFPCaracteristica extends Component {
-  geraSeletorDeData(variacao) {
-    const { preco_base_regra } = this.props.grupoProduto || {};
+  geraSeletorDeData(variacao, tipoTabela = "TABELA_BASE") {
+    const { preco_base_regra, caracteristicas } = this.props.grupoProduto || {};
     const { getFieldDecorator } = this.props.form;
 
     const {
       usar_datas_fixas: usarDatasFixas,
       venc_datas_fixas: vencDatasFixas
     } =
-      (preco_base_regra &&
+      (tipoTabela === "TABELA_BASE" &&
+        preco_base_regra &&
         preco_base_regra.find(regra => regra.chave === variacao)) ||
+      (tipoTabela === "TABELA_CARACTERISTICA" &&
+        caracteristicas &&
+        caracteristicas.find(regra => regra.chave === variacao)) ||
       false;
 
     if (
@@ -115,7 +119,10 @@ class ConfigurarFPCaracteristica extends Component {
                   {this.geraSeletorDeData("royalties")}
                 </Form.Item>
                 <Form.Item label="Tratamento">
-                  {this.geraSeletorDeData("tratamento")}
+                  {this.geraSeletorDeData(
+                    "tratamento",
+                    "TABELA_CARACTERISTICA"
+                  )}
                 </Form.Item>
               </React.Fragment>
 

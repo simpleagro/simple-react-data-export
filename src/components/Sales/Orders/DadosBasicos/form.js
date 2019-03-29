@@ -117,7 +117,7 @@ class OrderForm extends Component {
     if (configAPP.usarConfiguracaoFPCaracteristica()) {
       const grupoProduto = await ProductGroupServiceList({
         nome: `/^soja$/i`,
-        fields:'preco_base_regra'
+        fields:'preco_base_regra, caracteristicas'
       }).then(result => result.docs[0]);
       this.setState({
         grupoProduto

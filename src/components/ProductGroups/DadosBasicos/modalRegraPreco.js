@@ -1,13 +1,11 @@
 import React from "react";
-import { Select, Modal, Form, Input, Button, Checkbox, DatePicker } from "antd";
-import moment from "moment";
-import FormItem from "antd/lib/form/FormItem";
+import { Modal, Form, Input, Button, Checkbox } from "antd";
+import DataFixaVencimentosPedido from "common/DataFixaVencimentosPedido";
 
 const ModalForm = Form.create()(
   class extends React.Component {
     state = {
-      formData: {},
-      dataSelecionada: undefined
+      formData: {}
     };
 
     onDeselect = (e, opt) => {
@@ -27,6 +25,16 @@ const ModalForm = Form.create()(
       }));
     };
 
+    onClearDataFixa = () => {
+      this.setState(prev => ({
+        ...prev,
+        formData: {
+          ...prev.formData,
+          venc_datas_fixas: []
+        }
+      }));
+    };
+
     onChangeDataFixa = (date, dateString) => {
       this.setState(prev => ({
         ...prev,
@@ -41,8 +49,7 @@ const ModalForm = Form.create()(
                   dateString
                 ]
               : [dateString]
-        },
-        dataSelecionada: undefined
+        }
       }));
     };
 
@@ -129,69 +136,14 @@ const ModalForm = Form.create()(
                 </Checkbox>
               )}
             </Form.Item>
-            <Form.Item>
-              {getFieldDecorator("usar_datas_fixas", {
-                initialValue: this.state.formData.usar_datas_fixas
-              })(
-                <Checkbox
-                  checked={this.state.formData.usar_datas_fixas}
-                  onChange={e => {
-                    this.onHadleChange({
-                      target: {
-                        name: "usar_datas_fixas",
-                        value: e.target.checked
-                      }
-                    });
-                    if (!e.target.checked || e.target.checked === false) {
-                      this.setState(prev => ({
-                        ...prev,
-                        formData: {
-                          ...prev.formData,
-                          dataSelecionada: undefined,
-                          venc_datas_fixas: []
-                        }
-                      }));
-                    }
-                  }}>
-                  Usar datas fixas para vencimentos?
-                </Checkbox>
-              )}
-            </Form.Item>
-            {this.state.formData.usar_datas_fixas && (
-              <div style={{ background: "#eeeeee", padding: 10 }}>
-                <p>Selecione as datas fixas de vencimento:</p>
-                <DatePicker
-                  style={{ paddingBottom: 3 }}
-                  name="datas_fixas_picker"
-                  onChange={this.onChangeDataFixa}
-                  allowClear={false}
-                  format="DD/MM/YYYY"
-                  value={this.state.dataSelecionada}
-                />
-
-                <Form.Item>
-                  {getFieldDecorator("obrigatorio", {
-                    rules: [
-                      {
-                        required: this.state.formData.usar_datas_fixas || false,
-                        message: "Este campo é obrigatório!"
-                      }
-                    ],
-                    initialValue:
-                      this.state.formData &&
-                      this.state.formData.venc_datas_fixas
-                  })(
-                    <Select
-                      onDeselect={this.onDeselect}
-                      mode="tags"
-                      name="venc_datas_fixas"
-                      style={{ width: "100%" }}
-                      placeholder="Utilize o campo acima para adicionar as datas"
-                    />
-                  )}
-                </Form.Item>
-              </div>
-            )}
+            <DataFixaVencimentosPedido
+              onDeselect={this.onDeselect}
+              onChangeDataFixa={this.onChangeDataFixa}
+              onHadleChange={this.onHadleChange}
+              formData={this.state.formData}
+              onClearDataFixa={this.onClearDataFixa}
+              getFieldDecorator={getFieldDecorator}
+            />
           </Form>
         </Modal>
       );

@@ -1,5 +1,15 @@
 import React, { Component } from "react";
-import { Button, Input, Form, Affix, Checkbox, Card, List, Icon, Select } from "antd";
+import {
+  Button,
+  Input,
+  Form,
+  Affix,
+  Checkbox,
+  Card,
+  List,
+  Icon,
+  Select
+} from "antd";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 
@@ -9,8 +19,9 @@ import { PainelHeader } from "../../common/PainelHeader";
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 import * as GroupFeaturesService from "../../../services/productgroups.features";
 import styled from "styled-components";
-import ModalForm from './modal'
-import CamposExtras from '../DadosBasicos/camposExtras'
+import ModalForm from "./modal";
+import CamposExtras from "../DadosBasicos/camposExtras";
+import DataFixaVencimentosPedido from "common/DataFixaVencimentosPedido";
 
 const CardStyled = styled(Card)`
   background: #fff;
@@ -38,9 +49,7 @@ class GroupFeatureForm extends Component {
     const { id } = this.props.match.params;
 
     if (id) {
-      const formData = await GroupFeaturesService.get(this.state.group_id)(
-        id
-      );
+      const formData = await GroupFeaturesService.get(this.state.group_id)(id);
 
       if (formData)
         this.setState(prev => ({
@@ -49,8 +58,6 @@ class GroupFeatureForm extends Component {
           editMode: id ? true : false
         }));
     }
-
-
   }
 
   handleFormState = async event => {
@@ -84,7 +91,9 @@ class GroupFeatureForm extends Component {
             flashWithSuccess();
             this.props.history.push(
               this.props.match.params.group_id
-                ? `/grupos-produtos/${this.props.match.params.group_id}/caracteristicas-produtos/`
+                ? `/grupos-produtos/${
+                    this.props.match.params.group_id
+                  }/caracteristicas-produtos/`
                 : "/caracteristicas-produtos"
             );
           } catch (err) {
@@ -101,7 +110,9 @@ class GroupFeatureForm extends Component {
             flashWithSuccess();
             this.props.history.push(
               this.props.match.params.group_id
-                ? `/grupos-produtos/${this.props.match.params.group_id}/caracteristicas-produtos/`
+                ? `/grupos-produtos/${
+                    this.props.match.params.group_id
+                  }/caracteristicas-produtos/`
                 : "/caracteristicas-produtos"
             );
           } catch (err) {
@@ -117,73 +128,79 @@ class GroupFeatureForm extends Component {
 
   showModal = () => {
     this.setState({
-      visible: true,
+      visible: true
     });
-  }
+  };
 
-  showModalCampoExtra = (record) => {
+  showModalCampoExtra = record => {
     this.setState({
       visibleCamposExtra: true,
       record,
       editarField: !!record
     });
-  }
+  };
 
-  handleOk = (item) => {
+  handleOk = item => {
     this.setState(prev => {
-      if(prev.formData.opcoes)
-        return ({
+      if (prev.formData.opcoes)
+        return {
           visible: false,
-          formData: {...prev.formData, opcoes: [...prev.formData.opcoes, item]}
-        })
+          formData: {
+            ...prev.formData,
+            opcoes: [...prev.formData.opcoes, item]
+          }
+        };
 
-      return( {
+      return {
         visible: false,
-        formData: {...prev.formData, opcoes: [item]}
-      })
+        formData: { ...prev.formData, opcoes: [item] }
+      };
     });
-  }
+  };
 
-  handleOkCampoExtra = (item) => {
+  handleOkCampoExtra = item => {
     this.setState(prev => {
-      if(prev.formData.fields){
+      if (prev.formData.fields) {
         const dados = prev.formData;
-        if(this.state.editarField){
-          dados.fields = dados.fields.filter(dado => dado != this.state.record)
+        if (this.state.editarField) {
+          dados.fields = dados.fields.filter(dado => dado != this.state.record);
         }
-        return ({
+        return {
           visibleCamposExtra: false,
-          formData: {...dados, fields: [...prev.formData.fields, item]},
+          formData: { ...dados, fields: [...prev.formData.fields, item] },
           editarField: false
-        })
+        };
       }
 
-      return( {
+      return {
         visibleCamposExtra: false,
-        formData: {...prev.formData, fields: [item]},
+        formData: { ...prev.formData, fields: [item] },
         editarField: false
-      })
+      };
     });
-  }
+  };
 
-  handleCancel = (e) => {
+  handleCancel = e => {
     this.setState({
       visible: false,
       visibleCamposExtra: false
     });
-  }
+  };
 
-  saveFormRef = (formRef) => {
+  saveFormRef = formRef => {
     this.formRef = formRef;
-  }
+  };
 
-  removerOpcao = (opcao) => {
+  removerOpcao = opcao => {
     if (opcao) {
       this.setState(prev => {
-        if(prev.formData.opcoes)
-          return ({
-            formData: {...prev.formData, opcoes: prev.formData.opcoes.filter(item => item.value !== opcao) }
-          })
+        if (prev.formData.opcoes)
+          return {
+            formData: {
+              ...prev.formData,
+              opcoes: prev.formData.opcoes.filter(item => item.value !== opcao)
+            }
+          };
       });
     }
   };
@@ -203,7 +220,7 @@ class GroupFeatureForm extends Component {
 
       this.setState(prev => ({
         ...prev,
-        formData: {...prev.formData, fields: _fields }
+        formData: { ...prev.formData, fields: _fields }
       }));
 
       flashWithSuccess(
@@ -218,16 +235,66 @@ class GroupFeatureForm extends Component {
     }
   };
 
-  removeRecord = (record) => {
+  removeRecord = record => {
     if (record) {
       this.setState(prev => {
-        if(prev.formData.fields)
-          return ({
-            formData: {...prev.formData, fields: prev.formData.fields.filter(item => item.chave !== record.chave) }
-          })
+        if (prev.formData.fields)
+          return {
+            formData: {
+              ...prev.formData,
+              fields: prev.formData.fields.filter(
+                item => item.chave !== record.chave
+              )
+            }
+          };
       });
     }
-  }
+  };
+
+  // configuração de datas fixas SSF
+  onDeselect = (e, opt) => {
+    this.setState(prev => ({
+      ...prev,
+      formData: {
+        ...prev.formData,
+        venc_datas_fixas:
+          prev.formData && prev.formData.venc_datas_fixas
+            ? [
+                ...prev.formData.venc_datas_fixas.filter(
+                  d => d !== opt.props.children
+                )
+              ]
+            : []
+      }
+    }));
+  };
+
+  onClearDataFixa = () => {
+    this.setState(prev => ({
+      ...prev,
+      formData: {
+        ...prev.formData,
+        venc_datas_fixas: []
+      }
+    }));
+  };
+
+  onChangeDataFixa = (date, dateString) => {
+    this.setState(prev => ({
+      ...prev,
+      formData: {
+        ...prev.formData,
+        venc_datas_fixas:
+          prev.formData && prev.formData.venc_datas_fixas
+            ? [
+                ...prev.formData.venc_datas_fixas.filter(d => d !== dateString),
+                dateString
+              ]
+            : [dateString]
+      }
+    }));
+  };
+  // *******************************
 
   render() {
     const { getFieldDecorator } = this.props.form;
@@ -236,7 +303,7 @@ class GroupFeatureForm extends Component {
       wrapperCol: { span: 12 }
     };
     const tailFormItemLayout = {
-      wrapperCol: { span: 12, offset: 2 },
+      wrapperCol: { span: 12, offset: 2 }
     };
 
     return (
@@ -244,7 +311,9 @@ class GroupFeatureForm extends Component {
         <SimpleBreadCrumb
           to={
             this.props.match.params.group_id
-              ? `/grupos-produtos/${this.props.match.params.group_id}/caracteristicas-produtos`
+              ? `/grupos-produtos/${
+                  this.props.match.params.group_id
+                }/caracteristicas-produtos`
               : "/caracteristicas-produtos"
           }
           history={this.props.history}
@@ -252,7 +321,11 @@ class GroupFeatureForm extends Component {
 
         <Affix offsetTop={65}>
           <PainelHeader
-            title={this.state.editMode ? "Editar Característica" : "Nova Característica"}>
+            title={
+              this.state.editMode
+                ? "Editar Característica"
+                : "Nova Característica"
+            }>
             <Button
               type="primary"
               icon="save"
@@ -265,86 +338,103 @@ class GroupFeatureForm extends Component {
 
         <Form onChange={this.handleFormState}>
           <Form.Item label="Nome" {...formItemLayout}>
-            {getFieldDecorator('label', {
+            {getFieldDecorator("label", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.label
-            })(
-              <Input
-                name="label"
-                autoFocus
-              />
-            )}
+            })(<Input name="label" autoFocus />)}
           </Form.Item>
           <Form.Item label="Chave" {...formItemLayout}>
-            {getFieldDecorator('chave', {
+            {getFieldDecorator("chave", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.chave
-            })(
-              <Input
-                name="chave"
-              />
-            )}
+            })(<Input name="chave" />)}
           </Form.Item>
           <Form.Item {...tailFormItemLayout}>
             {getFieldDecorator("obrigatorio", {
-                initialValue: this.state.formData.obrigatorio
+              initialValue: this.state.formData.obrigatorio
             })(
-            <Checkbox
+              <Checkbox
                 checked={this.state.formData.obrigatorio}
                 onChange={e =>
-                this.handleFormState({
+                  this.handleFormState({
                     target: {
-                    name: "obrigatorio",
-                    value: e.target.checked
+                      name: "obrigatorio",
+                      value: e.target.checked
                     }
-                })
+                  })
                 }>
                 Característica obrigatória?
-            </Checkbox>
+              </Checkbox>
             )}
           </Form.Item>
           <Form.Item {...tailFormItemLayout}>
             {getFieldDecorator("variacao_preco", {
-                initialValue: this.state.formData.variacao_preco
+              initialValue: this.state.formData.variacao_preco
             })(
-            <Checkbox
+              <Checkbox
                 checked={this.state.formData.variacao_preco}
                 onChange={e =>
-                this.handleFormState({
-                    target: {
-                    name: "variacao_preco",
-                    value: e.target.checked
-                    }
-                })
-                }>
-                Possui Variação de Preço?
-            </Checkbox>
-            )}
-          </Form.Item>
-          {this.state.formData.variacao_preco && <Form.Item label="Tipo Variação Preço" {...formItemLayout}>
-            {getFieldDecorator("tipo_preco", {
-              initialValue: this.state.formData.tipo_preco
-            })(
-              <Select
-                name="tipo_preco"
-                showAction={["focus", "click"]}
-                showSearch
-                placeholder="Selecione um tipo..."
-                onChange={e =>
                   this.handleFormState({
-                    target: { name: "tipo_preco", value: e }
+                    target: {
+                      name: "variacao_preco",
+                      value: e.target.checked
+                    }
                   })
                 }>
-                <Select.Option value="TABELA_BASE">Tabela Preço Base</Select.Option>
-                <Select.Option value="TABELA_CARACTERISTICA">Tabela Preço Característica</Select.Option>
-              </Select>
+                Possui Variação de Preço?
+              </Checkbox>
             )}
-          </Form.Item>}
+          </Form.Item>
+          {this.state.formData.variacao_preco && (
+            <Form.Item label="Tipo Variação Preço" {...formItemLayout}>
+              {getFieldDecorator("tipo_preco", {
+                initialValue: this.state.formData.tipo_preco
+              })(
+                <Select
+                  name="tipo_preco"
+                  showAction={["focus", "click"]}
+                  showSearch
+                  placeholder="Selecione um tipo..."
+                  onChange={e =>
+                    this.handleFormState({
+                      target: { name: "tipo_preco", value: e }
+                    })
+                  }>
+                  <Select.Option value="TABELA_BASE">
+                    Tabela Preço Base
+                  </Select.Option>
+                  <Select.Option value="TABELA_CARACTERISTICA">
+                    Tabela Preço Característica
+                  </Select.Option>
+                </Select>
+              )}
+            </Form.Item>
+          )}
+          {this.state.formData.tipo_preco &&
+            this.state.formData.tipo_preco === "TABELA_CARACTERISTICA" && (
+              <div
+                style={{
+                  marginBottom: "30px",
+                  paddingLeft: "8%",
+                  width: "62%"
+                }}>
+                <DataFixaVencimentosPedido
+                  onDeselect={this.onDeselect}
+                  onChangeDataFixa={this.onChangeDataFixa}
+                  onHadleChange={this.handleFormState}
+                  formData={this.state.formData}
+                  onClearDataFixa={this.onClearDataFixa}
+                  getFieldDecorator={getFieldDecorator}
+                  formItemLayout={formItemLayout}
+                  tailFormItemLayout={tailFormItemLayout}
+                />
+              </div>
+            )}
         </Form>
-        <div style={{marginBottom: '30px'}} >
+        <div style={{ marginBottom: "30px" }}>
           <CamposExtras
             showModal={this.showModalCampoExtra}
-            loadingData= {this.state.loadingData}
+            loadingData={this.state.loadingData}
             changeStatus={this.changeStatus}
             removeRecord={this.removeRecord}
             formData={this.state.formData}
@@ -362,22 +452,26 @@ class GroupFeatureForm extends Component {
           title="Opções"
           bordered
           extra={
-            <Button
-              type="primary"
-              icon="plus"
-              onClick={() => this.showModal()}
-            >
+            <Button type="primary" icon="plus" onClick={() => this.showModal()}>
               Adicionar
             </Button>
-          }
-        >
+          }>
           <List
             bordered
             size="small"
             dataSource={this.state.formData.opcoes || []}
-            renderItem={item => (<List.Item actions={[
-              <Icon type="close-circle" theme="filled" onClick={ () => this.removerOpcao(item.value)} />
-            ]}>{item.label}</List.Item>)}
+            renderItem={item => (
+              <List.Item
+                actions={[
+                  <Icon
+                    type="close-circle"
+                    theme="filled"
+                    onClick={() => this.removerOpcao(item.value)}
+                  />
+                ]}>
+                {item.label}
+              </List.Item>
+            )}
           />
         </CardStyled>
 
@@ -387,7 +481,6 @@ class GroupFeatureForm extends Component {
           onCreate={this.handleOk}
           wrappedComponentRef={this.saveFormRef}
         />
-
       </div>
     );
   }
