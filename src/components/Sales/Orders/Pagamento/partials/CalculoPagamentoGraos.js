@@ -5,6 +5,7 @@ import moment from "moment";
 import "moment/locale/pt-br";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
+import { simpleDate, date2Db } from "common/utils";
 
 import { dadosPedido } from "actions/pedidoActions";
 import * as IBGEService from "services/ibge";
@@ -107,7 +108,7 @@ class CalculoPagamentoGraos extends Component {
                       (this.props.pedido &&
                         this.props.pedido.pagamento &&
                         this.props.pedido.pagamento.data_pgto_graos)
-                        ? moment(this.props.pedido.pagamento.data_pgto_graos)
+                        ? simpleDate(this.props.pedido.pagamento.data_pgto_graos)
                         : undefined
                   })(
                     <DatePicker
@@ -116,11 +117,7 @@ class CalculoPagamentoGraos extends Component {
                         this.handleFormState({
                           target: {
                             name: "data_pgto_graos",
-                            value: dataString
-                              ? moment(dataString, "DD/MM/YYYY").format(
-                                  "YYYY-MM-DD"
-                                )
-                              : undefined
+                            value: date2Db(data)
                           }
                         })
                       }

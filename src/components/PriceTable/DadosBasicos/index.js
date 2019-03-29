@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Divider, Button, Icon, Popconfirm, Tooltip, Badge } from "antd";
+import { Divider, Button, Icon, Popconfirm, Tooltip, Badge, Row, Col } from "antd";
 
 import * as PriceTableService from "../../../services/pricetable";
 import * as PTGroupService from "../../../services/pricetable.group";
@@ -12,21 +12,6 @@ import ModalForm from "./modal"
 import ModalFormGroup from "../../common/ModalProductGroup"
 import { formatDate } from '../../common/utils'
 import { simpleTableSearch } from "../../../lib/simpleTableSearch"
-
-import { ExportToCsv } from "export-to-csv";
-
-const options = {
-  fieldSeparator: ',',
-  quoteStrings: '"',
-  decimalSeparator: '.',
-  showLabels: true,
-  showTitle: true,
-  title: 'My Awesome CSV',
-  useTextFile: false,
-  useBom: true,
-  useKeysAsHeaders: true
-}
-const csvExporter = new ExportToCsv(options);
 
 class PriceTable extends Component {
   constructor(props) {
@@ -578,75 +563,20 @@ class PriceTable extends Component {
     this.formRef = formRef;
   }
 
-  toCsv(){
-
-    //Example data given in question text
-    var data = this.state.list
-    var obj = []
-
-    this.state.list.map((e, i) => console.log(">", e))
-
-    this.state.list && obj.push(Object.keys(this.state.list[0]))
-    console.log("KEYS: ", obj.sort())
-    this.state.list.map((el) => obj.push(Object.values(el)))
-    console.log("VALUES: ", obj)
-
-    // Building the CSV from the Data two-dimensional array
-    // Each column is separated by ";" and new line "\n" for next row
-    var csvContent = '';
-    obj.forEach(function(infoArray, index) {
-      var dataString = infoArray.join(';');
-      csvContent += index < data.length ? dataString + '\n' : dataString;
-    });
-
-    // The download function takes a CSV string, the filename and mimeType as parameters
-    // Scroll/look down at the bottom of this snippet to see how download is called
-    var download = function(content, fileName, mimeType) {
-      var a = document.createElement('a');
-      mimeType = mimeType || 'application/octet-stream';
-
-      if (navigator.msSaveBlob) { // IE10
-        navigator.msSaveBlob(new Blob([content], {
-          type: mimeType
-        }), fileName);
-      } else if (URL && 'download' in a) { //html5 A[download]
-        a.href = URL.createObjectURL(new Blob([content], {
-          type: mimeType
-        }));
-        a.setAttribute('download', fileName);
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      }
-    }
-    //download(csvContent, 'dowload.csv', 'text/csv;encoding:utf-8');
-    console.log("csvContent", csvContent)
-  }
-
-  toPDF(){
-    let obj = this.state.list
-    console.log(obj)
-  }
-
   render() {
     return (
       <div>
         <PainelHeader title="Tabela de Preço">
+
           {/* <Button
-            type="secundary"
-            icon="file-text"
-            style={{ marginRight: 10 }}
-            onClick={ () => this.toCsv() }
+            type="primary"
+            icon="download"
+            style={{marginRight: 10}}
+            onClick={() =>
+              this.props.history.push(`/tabela-preco/exportar`)
+            }
           >
-            Exportar para CSV
-          </Button>
-          <Button
-            type="secundary"
-            icon="file-pdf"
-            style={{ marginRight: 10 }}
-            onClick={ () => this.toPDF() }
-          >
-            Exportar para PDF
+            Exportar
           </Button> */}
           <Button
             type="primary"
@@ -681,7 +611,7 @@ class PriceTable extends Component {
           wrappedComponentRef={this.saveFormRef}
           record={this.state.record}
         />
-          { console.log("STATE: ", this.state) }
+
       </div>
     );
   }

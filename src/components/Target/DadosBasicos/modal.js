@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Form, Input, Button, Select, DatePicker } from 'antd';
+import { Modal, Form, Input, Button, Select } from 'antd';
 import locale from "antd/lib/date-picker/locale/pt_BR";
 import * as SeasonsServices from '../../../services/seasons'
 import moment from "moment";

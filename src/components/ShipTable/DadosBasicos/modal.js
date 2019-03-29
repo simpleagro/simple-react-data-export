@@ -1,9 +1,10 @@
 import React from 'react'
 import { Modal, Form, Input, Button, Select, DatePicker } from 'antd';
-import * as IBGEService from "../../../services/ibge";
+import * as IBGEService from "services/ibge";
 import locale from "antd/lib/date-picker/locale/pt_BR";
 import moment from "moment";
 import "moment/locale/pt-br";
+import { simpleDate, date2Db } from "common/utils";
 
 const ModalForm = Form.create()(
     class extends React.Component {
@@ -70,9 +71,7 @@ const ModalForm = Form.create()(
               <Form.Item label="Data Base">
                 {getFieldDecorator("data_base", {
                   rules: [{ required: true, message: "Este campo é obrigatório!" }],
-                  initialValue: this.state.formData.data_base
-                    ? moment(this.state.formData.data_base)
-                    : undefined
+                  initialValue: simpleDate(this.state.formData.data_base)
                 })(
                   <DatePicker
                     format="DD/MM/YYYY"
@@ -80,7 +79,7 @@ const ModalForm = Form.create()(
                     style={{width: '100%'}}
                     onChange={e => {
                       this.onHadleChange({
-                        target: { name: "data_base", value: e }
+                        target: { name: "data_base", value: date2Db(e) }
                       })}
                     }
                     name="data_base"

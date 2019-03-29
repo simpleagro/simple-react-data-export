@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, Form, Input, Button, Select, DatePicker, Checkbox } from "antd";
+import { Modal, Form, Button, Select } from "antd";
 import { debounce } from "lodash/debounce";
 
 import * as IBGEService from "services/ibge";

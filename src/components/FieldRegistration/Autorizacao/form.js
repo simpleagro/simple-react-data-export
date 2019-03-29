@@ -9,12 +9,13 @@ import {
   DatePicker,
 } from "antd";
 
-import { flashWithSuccess } from "../../common/FlashMessages";
-import parseErrors from "../../../lib/parseErrors";
-import { PainelHeader } from "../../common/PainelHeader";
-import * as AuthorizationService from "../../../services/field-registration.transport-authorization";
-import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
+import { flashWithSuccess } from "common/FlashMessages";
+import parseErrors from "lib/parseErrors";
+import { PainelHeader } from "common/PainelHeader";
+import * as AuthorizationService from "services/field-registration.transport-authorization";
+import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
 import moment from "moment";
+import { simpleDate, date2Db } from "common/utils";
 
 class AuthorizationForm extends Component {
   constructor(props) {
@@ -159,18 +160,13 @@ class AuthorizationForm extends Component {
           <Form.Item label="Data" {...formItemLayout}>
             {getFieldDecorator("data", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.data ? moment(
-                this.state.formData.data
-                  ? this.state.formData.data
-                  : new Date(), "YYYY-MM-DD"
-                ) : null
+              initialValue: simpleDate(this.state.formData.data)
             })(<DatePicker
                   onChange={(data, dataString) =>
                     this.handleFormState({
                       target: {
                         name: "data",
-                        value: moment(dataString, "DD/MM/YYYY").format("YYYY-MM-DD"
-                        )}})}
+                        value: date2Db(data)}})}
                   allowClear
                   format={"DD/MM/YYYY"}
                   style={{ width: 200 }}
@@ -209,19 +205,14 @@ class AuthorizationForm extends Component {
           <Form.Item label="Saída do Caminhão" {...formItemLayout}>
             {getFieldDecorator("saida_caminhao", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.saida_caminhao ? moment(
-                this.state.formData.saida_caminhao
-                  ? this.state.formData.saida_caminhao
-                  : new Date(), "YYYY-MM-DD"
-                ) : null
+              initialValue: simpleDate(this.state.formData.saida_caminhao, "DD/MM/YYYY HH:mm")
             })(<DatePicker
                 showTime
                 onChange={(data, dataString) =>
                   this.handleFormState({
                     target: {
                       name: "saida_caminhao",
-                      value: moment(dataString, "DD/MM/YYYY HH:mm").format("YYYY-MM-DD HH:mm"
-                      )}})}
+                      value: date2Db(data)}})}
                 allowClear
                 format={"DD/MM/YYYY HH:mm"}
                 style={{ width: 200 }}

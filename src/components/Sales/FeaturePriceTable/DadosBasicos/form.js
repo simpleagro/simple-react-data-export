@@ -18,7 +18,7 @@ import * as FeaturePriceTableService from "services/feature-table-prices";
 import * as ProductGroupService from "services/productgroups";
 import * as SeasonsService from "services/seasons";
 import * as UnitMeasureService from "services/units-measures";
-import { simpleDate } from "common/utils";
+import { simpleDate, date2Db } from "common/utils";
 
 const Option = Select.Option;
 
@@ -263,23 +263,14 @@ class FeaturePriceTable extends Component {
           <Form.Item label="Data Base" {...formItemLayout}>
             {getFieldDecorator("data_base", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.data_base
-                ? simpleDate(
-                    this.state.formData.data_base
-                      ? this.state.formData.data_base
-                      : new Date(),
-                    "YYYY-MM-DD"
-                  )
-                : null
+              initialValue: simpleDate(this.state.formData.data_base)
             })(
               <DatePicker
                 onChange={(data, dataString) =>
                   this.handleFormState({
                     target: {
                       name: "data_base",
-                      value: simpleDate(dataString, "DD/MM/YYYY").format(
-                        "YYYY-MM-DD"
-                      )
+                      value: date2Db(data)
                     }
                   })
                 }
@@ -309,23 +300,14 @@ class FeaturePriceTable extends Component {
           <Form.Item label="Validade de" {...formItemLayout}>
             {getFieldDecorator("data_validade_de", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.data_validade_de
-                ? simpleDate(
-                    this.state.formData.data_validade_de
-                      ? this.state.formData.data_validade_de
-                      : new Date(),
-                    "YYYY-MM-DD"
-                  )
-                : null
+              initialValue: simpleDate(this.state.formData.data_validade_de)
             })(
               <DatePicker
                 onChange={(data, dataString) =>
                   this.handleFormState({
                     target: {
                       name: "data_validade_de",
-                      value: simpleDate(dataString, "DD/MM/YYYY").format(
-                        "YYYY-MM-DD"
-                      )
+                      value: date2Db(data)
                     }
                   })
                 }
@@ -339,23 +321,14 @@ class FeaturePriceTable extends Component {
           <Form.Item label="Validade até" {...formItemLayout}>
             {getFieldDecorator("data_validade_ate", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.data_validade_ate
-                ? simpleDate(
-                    this.state.formData.data_validade_ate
-                      ? this.state.formData.data_validade_ate
-                      : new Date(),
-                    "YYYY-MM-DD"
-                  )
-                : null
+              initialValue: simpleDate(this.state.formData.data_validade_ate)
             })(
               <DatePicker
                 onChange={(data, dataString) =>
                   this.handleFormState({
                     target: {
                       name: "data_validade_ate",
-                      value: simpleDate(dataString, "DD/MM/YYYY").format(
-                        "YYYY-MM-DD"
-                      )
+                      value: date2Db(data)
                     }
                   })
                 }

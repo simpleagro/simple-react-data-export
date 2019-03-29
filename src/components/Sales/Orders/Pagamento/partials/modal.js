@@ -5,6 +5,7 @@ import { list as ListFormOfPayments } from "services/form-of-payment";
 import { list as ListTypeOfPayments } from "services/type-of-payment";
 import moment from "moment";
 import "moment/locale/pt-br";
+import { simpleDate, date2Db } from "common/utils";
 
 const ModalForm = Form.create()(
   class extends React.Component {
@@ -100,9 +101,7 @@ const ModalForm = Form.create()(
                 rules: [
                   { required: true, message: "Este campo é obrigatório!" }
                 ],
-                initialValue: this.state.formData.data_vencimento
-                  ? moment(this.state.formData.data_vencimento)
-                  : undefined
+                initialValue: simpleDate(this.state.formData.data_vencimento)
               })(
                 <DatePicker
                   format="DD/MM/YYYY"
@@ -110,7 +109,7 @@ const ModalForm = Form.create()(
                   style={{ width: "100%" }}
                   onChange={e =>
                     this.onHandleChange({
-                      target: { name: "data_vencimento", value: e }
+                      target: { name: "data_vencimento", value: date2Db(e) }
                     })
                   }
                   name="data_vencimento"

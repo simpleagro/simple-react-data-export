@@ -9,13 +9,14 @@ import {
   Checkbox
 } from "antd";
 
-import { flashWithSuccess } from "../../common/FlashMessages";
-import parseErrors from "../../../lib/parseErrors";
-import { PainelHeader } from "../../common/PainelHeader";
-import * as PreHarvestService from "../../../services/field-registration.pre-harvest";
-import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
+import { flashWithSuccess } from "common/FlashMessages";
+import parseErrors from "lib/parseErrors";
+import { PainelHeader } from "common/PainelHeader";
+import * as PreHarvestService from "services/field-registration.pre-harvest";
+import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
 import moment from "moment";
 import TextArea from "antd/lib/input/TextArea";
+import { simpleDate, date2Db } from "common/utils";
 
 class PreHarvestForm extends Component {
   constructor(props) {
@@ -207,18 +208,13 @@ class PreHarvestForm extends Component {
           <Form.Item label="Data" {...formItemLayout}>
             {getFieldDecorator("data", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.data ? moment(
-                this.state.formData.data
-                  ? this.state.formData.data
-                  : new Date(), "YYYY-MM-DD"
-                ) : null
+              initialValue: simpleDate(this.state.formData.data)
             })(<DatePicker
               onChange={(data, dataString) =>
                 this.handleFormState({
                   target: {
                     name: "data",
-                    value: moment(dataString, "DD/MM/YYYY").format("YYYY-MM-DD"
-                    )}})}
+                    value: date2Db(data)}})}
               allowClear
               format={"DD/MM/YYYY"}
               style={{ width: 200 }}
@@ -236,18 +232,13 @@ class PreHarvestForm extends Component {
           <Form.Item label="Data da Colheita" {...formItemLayout}>
             {getFieldDecorator("data_colheita", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.data_colheita ? moment(
-                this.state.formData.data_colheita
-                  ? this.state.formData.data_colheita
-                  : new Date(), "YYYY-MM-DD"
-                ) : null
+              initialValue: simpleDate(this.state.formData.data_colheita)
             })(<DatePicker
               onChange={(data, dataString) =>
                 this.handleFormState({
                   target: {
                     name: "data_colheita",
-                    value: moment(dataString, "DD/MM/YYYY").format("YYYY-MM-DD"
-                    )}})}
+                    value: date2Db(data)}})}
               allowClear
               format={"DD/MM/YYYY"}
               style={{ width: 200 }}
