@@ -1,3 +1,6 @@
+import moment from "moment";
+window.moment = moment;
+
 export const addMaskNumber = number => {
   try {
     number = number.replace(/[^\d]+/g, "");
@@ -117,11 +120,14 @@ export const valorFinalJurosCompostos = (
   capital,
   taxa = 0.0,
   periodo,
-  precision = 1
+  precision = 2
 ) => {
-  capital = getNumber(capital);
+  capital = getNumber(capital, precision);
   return currency()(
-    Number(capital * Math.pow(1 + parseFloat(taxa) / 100, periodo))
+    Number(capital * Math.pow(1 + parseFloat(taxa) / 100, periodo)),
+    {
+      minimumFractionDigits: precision
+    }
   );
 };
 
@@ -135,10 +141,10 @@ export const currency = (locale = "pt-BR") => (value, options) => {
   };
   const formatter = new Intl.NumberFormat(locale, defaultOpts);
 
-  return formatter.format(getNumber(value));
+  return formatter.format(getNumber(value, defaultOpts.minimumFractionDigits));
 };
 
-export const getNumber = n => {
+export const getNumber = (n, precision = 2) => {
   if (!n) return n;
   return isNaN(n)
     ? Number(
@@ -146,8 +152,8 @@ export const getNumber = n => {
           .toString()
           .replace(/\./g, "")
           .replace(",", ".")
-      ).toFixed(2) * 1
-    : parseFloat(n).toFixed(2) * 1;
+      ).toFixed(precision) * 1
+    : parseFloat(n).toFixed(precision) * 1;
 };
 
 export const normalizeString = str => {
@@ -175,4 +181,19 @@ export const addMaskNumeroPonto = number => {
     return number;
   }
   return number;
+};
+
+export const simpleDate = (date, format) => {
+  return moment.parseZone(date, format);
+};
+
+export const date2Db = (date, formatIn = "DD/MM/YYYY", formatOut) => {
+  if (formatOut)
+    return moment(date, formatIn)
+      .utc(true)
+      .format(formatOut);
+
+  return moment(date, formatIn)
+    .utc(true)
+    .toISOString();
 };

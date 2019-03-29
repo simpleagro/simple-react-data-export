@@ -9,7 +9,8 @@ import {
   fatorConversaoUM,
   currency,
   getNumber,
-  valorFinalJurosCompostos
+  valorFinalJurosCompostos,
+  simpleDate
 } from "common/utils";
 import { list as ListShipTableOrderItemsService } from "services/shiptable";
 import * as OrderPaymentService from "services/orders.payment";
@@ -93,7 +94,7 @@ class CalculoFrete extends Component {
             parseInt(volume.pesokg_ate) >= peso
           ) {
             preco_frete = getNumber(volume.preco);
-            preco_frete_orig = getNumber(volume.preco);
+            // preco_frete_orig = getNumber(volume.preco);
           }
         });
       }
@@ -109,14 +110,34 @@ class CalculoFrete extends Component {
       return;
     }
 
+    // convertendo para calcular baseado apenas em dia mes ano
     let data_venc_frete = configAPP.usarConfiguracaoFPCaracteristica()
-      ? this.props.pedido[`venc_frete`]
-      : new Date();
+      ? simpleDate(this.props.pedido[`venc_frete`]).format("DD/MM/YYYY")
+      : null;
+
+    let freteDataBase = configAPP.usarConfiguracaoFPCaracteristica()
+      ? simpleDate(tab.data_base).format("DD/MM/YYYY")
+      : null;
+
+    if (!freteDataBase) {
+      flashModalWithError(
+        `Não foi configurado data de vencimento para a tabela de frete`
+      );
+      this.setState({ calculandoFrete: false });
+      return;
+    }
+
+    if (!data_venc_frete) {
+      console.log(
+        "ainda não configurado data de vencimento diferente da regra SSF"
+      );
+      return;
+    }
 
     const periodo = configAPP.usarCalculoDataBaseMes()
-      ? moment(data_venc_frete).diff(tab.data_base, "month")
+      ? moment(data_venc_frete, "DD/MM/YYYY").diff(moment(freteDataBase, "DD/MM/YYYY"), "month")
       : Math.round(
-          moment(data_venc_frete).diff(tab.data_base, "days") /
+          moment(data_venc_frete, "DD/MM/YYYY").diff(moment(freteDataBase, "DD/MM/YYYY"), "days") /
             (configAPP.quantidadeDeDiasCalculoDataBase() || 30)
         );
     const taxa =
@@ -125,16 +146,18 @@ class CalculoFrete extends Component {
         : getNumber(tab.taxa_supressao);
 
     if (periodo)
-      preco_frete = valorFinalJurosCompostos(preco_frete, taxa, periodo);
+      preco_frete = valorFinalJurosCompostos(preco_frete, taxa, periodo, 4);
 
-    preco_frete = getNumber(preco_frete) * peso;
+    preco_frete_orig = currency()(preco_frete, { minimumFractionDigits: 4 });
+
+    preco_frete = getNumber(preco_frete, 4) * peso;
 
     preco_frete = currency()(preco_frete);
 
     this.props.dadosPedidoFrete({
       ...this.state.formData,
       total_pedido_frete: preco_frete,
-      preco_frete_tabela: preco_frete_orig,
+      preco_frete_tabela: preco_frete_orig
     });
 
     if (configAPP.usarConfiguracaoFPCaracteristica()) {
@@ -145,7 +168,7 @@ class CalculoFrete extends Component {
       this.setState({
         calculandoFrete: false,
         total_pedido_frete: preco_frete,
-        preco_frete_tabela: preco_frete_orig,
+        preco_frete_tabela: preco_frete_orig
       });
     }, 300);
   };
