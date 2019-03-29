@@ -26,7 +26,8 @@ import {
   valorFinalJurosCompostos,
   currency,
   normalizeString,
-  getNumber
+  getNumber,
+  simpleDate
 } from "common/utils";
 import parseErrors from "../../../../lib/parseErrors";
 import { PainelHeader } from "../../../common/PainelHeader";
@@ -919,21 +920,27 @@ class OrderItemForm extends Component {
             );
 
             // convertendo para calcular baseado apenas em dia mes ano
-            let vencVariacaoChave = moment
-              .parseZone(this.props.pedido[`venc_${variacao.chave}`])
-              .format("DD/MM/YYYY");
+            let vencVariacaoChave = simpleDate(
+              this.props.pedido[`venc_${variacao.chave}`]
+            ).format("DD/MM/YYYY");
 
-            let tabelaDataBase = moment
-              .parseZone(tabelaCaract[0].data_base)
-              .format("DD/MM/YYYY");
+            let tabelaDataBase = simpleDate(tabelaCaract[0].data_base).format(
+              "DD/MM/YYYY"
+            );
             // *******************************
 
             let preco = (valorVariacao && valorVariacao.valor) || 0;
             const periodo = configAPP.usarCalculoDataBaseMes()
-
-              ? moment(vencVariacaoChave, "DD/MM/YYYY").diff(moment(tabelaDataBase, "DD/MM/YYYY"), "month")
-              : moment(vencVariacaoChave, "DD/MM/YYYY").diff(moment(tabelaDataBase, "DD/MM/YYYY"), "days") /
-                (configAPP.quantidadeDeDiasCalculoDataBase() || 30);
+              ? this.calcularDiffDatas(
+                  vencVariacaoChave,
+                  tabelaDataBase,
+                  "month"
+                )
+              : this.calcularDiffDatas(
+                  vencVariacaoChave,
+                  tabelaDataBase,
+                  "days"
+                ) / (configAPP.quantidadeDeDiasCalculoDataBase() || 30);
             const taxa =
               periodo && periodo > 0
                 ? getNumber(tabelaCaract[0].taxa_adicao)
@@ -1008,23 +1015,28 @@ class OrderItemForm extends Component {
               // A data base pode ser padrão ou marcado por data royalties, germoplasma ... etc
               let dataBaseCalculo =
                 tabelaPreco.data_base_por_regra === true
-                  ? moment
-                      .parseZone(tabelaPreco[`data_base_${rpb.chave}`])
-                      .format("DD/MM/YYYY")
-                  : moment
-                      .parseZone(tabelaPreco.data_base)
-                      .format("DD/MM/YYYY");
+                  ? simpleDate(tabelaPreco[`data_base_${rpb.chave}`]).format(
+                      "DD/MM/YYYY"
+                    )
+                  : simpleDate(tabelaPreco.data_base).format("DD/MM/YYYY");
 
               // convertendo para calcular baseado apenas em dia mes ano
-              let vencVariacaoChave = moment
-                .parseZone(this.props.pedido[`venc_${rpb.chave}`])
-                .format("DD/MM/YYYY");
+              let vencVariacaoChave = simpleDate(
+                this.props.pedido[`venc_${rpb.chave}`]
+              ).format("DD/MM/YYYY");
               // *******************************
 
               let periodo = configAPP.usarCalculoDataBaseMes()
-                ?
-                moment(vencVariacaoChave, "DD/MM/YYYY").diff(moment(dataBaseCalculo, "DD/MM/YYYY"), "month")
-                : moment(vencVariacaoChave, "DD/MM/YYYY").diff(moment(dataBaseCalculo, "DD/MM/YYYY"), "days") / (configAPP.quantidadeDeDiasCalculoDataBase() || 30);
+                ? this.calcularDiffDatas(
+                    vencVariacaoChave,
+                    dataBaseCalculo,
+                    "month"
+                  )
+                : this.calcularDiffDatas(
+                    vencVariacaoChave,
+                    dataBaseCalculo,
+                    "days"
+                  ) / (configAPP.quantidadeDeDiasCalculoDataBase() || 30);
 
               const taxa =
                 periodo && periodo > 0
@@ -1056,6 +1068,13 @@ class OrderItemForm extends Component {
     } finally {
       this.setState({ [`loadingVariacoes_${variacao.chave}`]: false });
     }
+  }
+
+  calcularDiffDatas(vencVariacaoChave, tabelaDataBase, tipo) {
+    return moment(vencVariacaoChave, "DD/MM/YYYY").diff(
+      moment(tabelaDataBase, "DD/MM/YYYY"),
+      tipo
+    );
   }
 
   async getFatorConversaoTabelaPrecoCaract(chave) {

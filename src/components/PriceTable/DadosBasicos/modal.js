@@ -3,8 +3,8 @@ import { Modal, Form, Input, Button, Select, DatePicker, Checkbox } from 'antd';
 import * as GroupsServices from "../../../services/productgroups";
 import * as SeasonsServices from "../../../services/seasons";
 import { list as ZoneListService } from "services/zone";
+import { simpleDate,date2Db } from "common/utils";
 import locale from "antd/lib/date-picker/locale/pt_BR";
-import moment from "moment";
 import "moment/locale/pt-br";
 
 const ModalForm = Form.create()(
@@ -90,9 +90,7 @@ const ModalForm = Form.create()(
         if(!por_regra_base) {
           return <Form.Item label="Data Base">
             {getFieldDecorator("data_base", {
-              initialValue: this.state.formData.data_base
-                ? moment.parseZone(this.state.formData.data_base)
-                : undefined
+              initialValue: simpleDate(this.state.formData.data_base)
             })(
               <DatePicker
                 format="DD/MM/YYYY"
@@ -100,7 +98,7 @@ const ModalForm = Form.create()(
                 style={{width: '100%'}}
                 onChange={e => {
                   this.onHadleChange({
-                    target: { name: "data_base", value: e }
+                    target: { name: "data_base", value: date2Db(e)}
                   })}
                 }
                 name="data_base"
@@ -113,7 +111,7 @@ const ModalForm = Form.create()(
             <Form.Item label={`Data Base ${regra_preco.label}`}>
               {getFieldDecorator(`data_base_${regra_preco.chave}`, {
                 initialValue: this.state.formData[`data_base_${regra_preco.chave}`]
-                  ? moment.parseZone(this.state.formData[`data_base_${regra_preco.chave}`])
+                  ? simpleDate(this.state.formData[`data_base_${regra_preco.chave}`])
                   : undefined
               })(
                 <DatePicker
@@ -122,7 +120,7 @@ const ModalForm = Form.create()(
                   style={{width: '100%'}}
                   onChange={e => {
                     this.onHadleChange({
-                      target: { name: `data_base_${regra_preco.chave}`, value: e }
+                      target: { name: `data_base_${regra_preco.chave}`, value: date2Db(e) }
                     })}
                   }
                   name={`data_base_${regra_preco.chave}`}
@@ -272,16 +270,18 @@ const ModalForm = Form.create()(
               <Form.Item label="Data Validade de">
                 {getFieldDecorator("data_validade_de", {
                   initialValue: this.state.formData.data_validade_de
-                    ? moment.parseZone(this.state.formData.data_validade_de)
+                    ? simpleDate(this.state.formData.data_validade_de)
                     : undefined
                 })(
                   <DatePicker
                     format="DD/MM/YYYY"
+                    disabledTime={true}
+                    showTime={false}
                     locale={locale}
                     style={{width: '100%'}}
-                    onChange={e => {
+                    onChange={(e) => {
                       this.onHadleChange({
-                        target: { name: "data_validade_de", value: e }
+                        target: { name: "data_validade_de", value: date2Db(e) }
                       })}
                     }
                     name="data_validade_de"
@@ -291,7 +291,7 @@ const ModalForm = Form.create()(
               <Form.Item label="Data Validade até">
                 {getFieldDecorator("data_validade_ate", {
                   initialValue: this.state.formData.data_validade_ate
-                    ? moment.parseZone(this.state.formData.data_validade_ate)
+                    ? simpleDate(this.state.formData.data_validade_ate)
                     : undefined
                 })(
                   <DatePicker
@@ -300,7 +300,7 @@ const ModalForm = Form.create()(
                     style={{width: '100%'}}
                     onChange={e => {
                       this.onHadleChange({
-                        target: { name: "data_validade_ate", value: e }
+                        target: { name: "data_validade_ate", value: date2Db(e) }
                       })}
                     }
                     name="data_validade_ate"

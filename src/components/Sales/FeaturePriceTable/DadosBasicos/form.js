@@ -18,6 +18,7 @@ import * as FeaturePriceTableService from "services/feature-table-prices";
 import * as ProductGroupService from "services/productgroups";
 import * as SeasonsService from "services/seasons";
 import * as UnitMeasureService from "services/units-measures";
+import { simpleDate } from "common/utils";
 
 const Option = Select.Option;
 
@@ -263,7 +264,7 @@ class FeaturePriceTable extends Component {
             {getFieldDecorator("data_base", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.data_base
-                ? moment.parseZone(
+                ? simpleDate(
                     this.state.formData.data_base
                       ? this.state.formData.data_base
                       : new Date(),
@@ -276,7 +277,7 @@ class FeaturePriceTable extends Component {
                   this.handleFormState({
                     target: {
                       name: "data_base",
-                      value: moment.parseZone(dataString, "DD/MM/YYYY").format(
+                      value: simpleDate(dataString, "DD/MM/YYYY").format(
                         "YYYY-MM-DD"
                       )
                     }
@@ -309,7 +310,7 @@ class FeaturePriceTable extends Component {
             {getFieldDecorator("data_validade_de", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.data_validade_de
-                ? moment.parseZone(
+                ? simpleDate(
                     this.state.formData.data_validade_de
                       ? this.state.formData.data_validade_de
                       : new Date(),
@@ -322,7 +323,7 @@ class FeaturePriceTable extends Component {
                   this.handleFormState({
                     target: {
                       name: "data_validade_de",
-                      value: moment.parseZone(dataString, "DD/MM/YYYY").format(
+                      value: simpleDate(dataString, "DD/MM/YYYY").format(
                         "YYYY-MM-DD"
                       )
                     }
@@ -339,7 +340,7 @@ class FeaturePriceTable extends Component {
             {getFieldDecorator("data_validade_ate", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.data_validade_ate
-                ? moment.parseZone(
+                ? simpleDate(
                     this.state.formData.data_validade_ate
                       ? this.state.formData.data_validade_ate
                       : new Date(),
@@ -352,7 +353,7 @@ class FeaturePriceTable extends Component {
                   this.handleFormState({
                     target: {
                       name: "data_validade_ate",
-                      value: moment.parseZone(dataString, "DD/MM/YYYY").format(
+                      value: simpleDate(dataString, "DD/MM/YYYY").format(
                         "YYYY-MM-DD"
                       )
                     }

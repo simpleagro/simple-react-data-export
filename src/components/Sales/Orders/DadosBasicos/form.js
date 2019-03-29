@@ -15,6 +15,7 @@ import { list as TypesOfSaleServiceList } from "../../../../services/types-of-sa
 import { list as SeedUseServiceList } from "../../../../services/seed-use";
 import { list as PriceTableServiceList } from "../../../../services/pricetable";
 import { list as AgentSalesServiceList } from "../../../../services/sales-agents";
+import { list as ProductGroupServiceList } from "services/productgroups";
 import { getConsultant as getConsultantFromWallet } from "../../../../services/customerswallet";
 import ConfigurarFPCaracteristica from "./ConfigurarFPCaracteristica";
 import { configAPP } from "config/app";
@@ -43,7 +44,8 @@ class OrderForm extends Component {
       fetchingAgents: false,
 
       clients: [],
-      tiposDeFrete: ["FOB", "CIF"]
+      tiposDeFrete: ["FOB", "CIF"],
+      grupoProduto: null
     };
   }
 
@@ -100,16 +102,6 @@ class OrderForm extends Component {
       fields: "descricao",
       status: true
     }).then(response => response.docs);
-    // const formasDePagamento = await FormOfPaymentServiceList({
-    //   limit: -1,
-    //   fields: "descricao",
-    //   status: true
-    // }).then(response => response.docs);
-    // const tiposDePagamento = await TypeOfPaymentServiceList({
-    //   limit: -1,
-    //   fields: "descricao",
-    //   status: true
-    // }).then(response => response.docs);
     const tabelasDePreco = await PriceTableServiceList({
       limit: -1,
       fields: "nome",
@@ -119,6 +111,18 @@ class OrderForm extends Component {
     const agents = await this.fetchAgents({
       fields: "nome,cpf_cnpj,-endereco,-cidade,-estado,-agente_pai"
     }).then(response => response.docs);
+
+    // para permitir a seleção do grupo soja, apenas soja, para SSF
+    // e então usar as datas fixas de vencimento
+    if (configAPP.usarConfiguracaoFPCaracteristica()) {
+      const grupoProduto = await ProductGroupServiceList({
+        nome: `/^soja$/i`,
+        fields:'preco_base_regra'
+      }).then(result => result.docs[0]);
+      this.setState({
+        grupoProduto
+      });
+    }
 
     this.setState(prev => ({
       ...prev,
@@ -764,6 +768,7 @@ class OrderForm extends Component {
               handleFormState={this.handleFormState}
               form={this.props.form}
               formData={this.state.formData}
+              grupoProduto={this.state.grupoProduto}
             />
           )}
           {/* São Francisco */}
