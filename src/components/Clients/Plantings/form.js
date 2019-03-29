@@ -15,15 +15,15 @@ import {
 import { connect } from "react-redux";
 import moment from "moment";
 
-import { addMaskReais } from "../../common/utils";
-import { flashWithSuccess } from "../../common/FlashMessages";
-import parseErrors from "../../../lib/parseErrors";
-import { PainelHeader } from "../../common/PainelHeader";
-import * as ClientService from "../../../services/clients";
-import * as SeasonService from "../../../services/seasons";
-import * as ClientPlantingService from "../../../services/clients.plantings";
-import * as ProductGroupService from "../../../services/productgroups";
-import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
+import { addMaskReais, simpleDate, date2Db } from "common/utils";
+import { flashWithSuccess } from "common/FlashMessages";
+import parseErrors from "lib/parseErrors";
+import { PainelHeader } from "common/PainelHeader";
+import * as ClientService from "services/clients";
+import * as SeasonService from "services/seasons";
+import * as ClientPlantingService from "services/clients.plantings";
+import * as ProductGroupService from "services/productgroups";
+import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
 //#endregion
 
 const Option = Select.Option;
@@ -519,21 +519,14 @@ class ClientPlantingForm extends Component {
           <Form.Item label="Data de Início" {...formItemLayout}>
             {getFieldDecorator("data_inicio", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: moment(
-                this.state.formData.data_inicio
-                  ? this.state.formData.data_inicio
-                  : new Date(),
-                "YYYY-MM-DD"
-              )
+              initialValue: simpleDate(this.state.formData.data_inicio)
             })(
               <DatePicker
                 onChange={(data, dataString) =>
                   this.handleFormState({
                     target: {
                       name: "data_inicio",
-                      value: moment(dataString, "DD/MM/YYYY").format(
-                        "YYYY-MM-DD"
-                      )
+                      value: date2Db(data)
                     }
                   })
                 }
@@ -549,23 +542,14 @@ class ClientPlantingForm extends Component {
               rules: [
                 { required: false, message: "Este campo é obrigatório!" }
               ],
-              initialValue: this.state.formData.data_fim
-                ? moment(
-                    this.state.formData.data_fim
-                      ? this.state.formData.data_fim
-                      : new Date(),
-                    "YYYY-MM-DD"
-                  )
-                : undefined
+              initialValue: simpleDate(this.state.formData.data_fim)
             })(
               <DatePicker
                 onChange={(data, dataString) =>
                   this.handleFormState({
                     target: {
                       name: "data_fim",
-                      value: dataString
-                        ? moment(dataString, "DD/MM/YYYY").format("YYYY-MM-DD")
-                        : null
+                      value: date2Db(data)
                     }
                   })
                 }

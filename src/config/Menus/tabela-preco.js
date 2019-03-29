@@ -25,6 +25,14 @@ const menus = {
     key: "/tabela-preco/grupo-produto/produtos/caracteristicas",
     path: "/tabela-preco/:pricetable_id/grupo-produto/:productgroup_id/produtos/:product_id/caracteristicas",
     showMenu: false
+  },
+  "/tabela-preco/exportar": {
+    component: SimpleLoadable(() =>
+      import("../../components/PriceTable/Export")
+    ),
+    key: "/tabela-preco/exportar",
+    path: "/tabela-preco/exportar",
+    showMenu: false
   }
 };
 

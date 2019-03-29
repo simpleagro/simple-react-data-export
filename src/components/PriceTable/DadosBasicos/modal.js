@@ -1,7 +1,7 @@
 import React from 'react'
 import { Modal, Form, Input, Button, Select, DatePicker, Checkbox } from 'antd';
-import * as GroupsServices from "../../../services/productgroups";
-import * as SeasonsServices from "../../../services/seasons";
+import * as GroupsServices from "services/productgroups";
+import * as SeasonsServices from "services/seasons";
 import { list as ZoneListService } from "services/zone";
 import { simpleDate,date2Db } from "common/utils";
 import locale from "antd/lib/date-picker/locale/pt_BR";

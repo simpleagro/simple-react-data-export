@@ -23,6 +23,7 @@ import * as ConsultantService from "services/consultants";
 import * as IBGEService from "services/ibge";
 import moment from "moment";
 import debounce from "lodash/debounce";
+import { simpleDate, date2Db } from "common/utils";
 
 const Option = Select.Option;
 
@@ -692,23 +693,14 @@ class FieldRegistrationForm extends Component {
           <Form.Item label="Plantio" {...formItemLayout}>
             {getFieldDecorator("data_plantio", {
               // rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.data_plantio
-                ? moment(
-                    this.state.formData.data_plantio
-                      ? this.state.formData.data_plantio
-                      : new Date(),
-                    "YYYY-MM-DD"
-                  )
-                : null
+              initialValue: simpleDate(this.state.formData.data_plantio)
             })(
               <DatePicker
                 onChange={(data, dataString) =>
                   this.handleFormState({
                     target: {
                       name: "data_plantio",
-                      value: moment(dataString, "DD/MM/YYYY").format(
-                        "YYYY-MM-DD"
-                      )
+                      value: date2Db(data)
                     }
                   })
                 }
@@ -722,23 +714,14 @@ class FieldRegistrationForm extends Component {
           <Form.Item label="Inicio da Colheira" {...formItemLayout}>
             {getFieldDecorator("data_inicio_colheita", {
               // rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.data_inicio_colheita
-                ? moment(
-                    this.state.formData.data_inicio_colheita
-                      ? this.state.formData.data_inicio_colheita
-                      : new Date(),
-                    "YYYY-MM-DD"
-                  )
-                : null
+              initialValue: simpleDate(this.state.formData.data_inicio_colheita)
             })(
               <DatePicker
                 onChange={(data, dataString) =>
                   this.handleFormState({
                     target: {
                       name: "data_inicio_colheita",
-                      value: moment(dataString, "DD/MM/YYYY").format(
-                        "YYYY-MM-DD"
-                      )
+                      value: date2Db(data)
                     }
                   })
                 }
@@ -752,23 +735,14 @@ class FieldRegistrationForm extends Component {
           <Form.Item label="Fim da Colheita" {...formItemLayout}>
             {getFieldDecorator("data_fim_colheita", {
               // rules: [{ required: true, message: "Este campo é obrigatório!" }],
-              initialValue: this.state.formData.data_fim_colheita
-                ? moment(
-                    this.state.formData.data_fim_colheita
-                      ? this.state.formData.data_fim_colheita
-                      : new Date(),
-                    "YYYY-MM-DD"
-                  )
-                : null
+              initialValue: simpleDate(this.state.formData.data_fim_colheita)
             })(
               <DatePicker
                 onChange={(data, dataString) =>
                   this.handleFormState({
                     target: {
                       name: "data_fim_colheita",
-                      value: moment(dataString, "DD/MM/YYYY").format(
-                        "YYYY-MM-DD"
-                      )
+                      value: date2Db(data)
                     }
                   })
                 }

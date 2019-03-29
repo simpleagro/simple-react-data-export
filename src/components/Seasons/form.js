@@ -5,11 +5,12 @@ import "moment/locale/pt-br";
 
 import { Button, Input, Form, Affix, DatePicker } from "antd";
 
-import { flashWithSuccess } from "../common/FlashMessages";
-import parseErrors from "../../lib/parseErrors";
-import { PainelHeader } from "../common/PainelHeader";
-import * as SeasonService from "../../services/seasons";
-import { SimpleBreadCrumb } from "../common/SimpleBreadCrumb";
+import { flashWithSuccess } from "common/FlashMessages";
+import parseErrors from "lib/parseErrors";
+import { PainelHeader } from "common/PainelHeader";
+import * as SeasonService from "services/seasons";
+import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
+import { simpleDate, date2Db } from "common/utils";
 
 class SeasonForm extends Component {
   constructor(props) {
@@ -139,16 +140,14 @@ class SeasonForm extends Component {
           </Form.Item>
           <Form.Item label="Data de início" {...formItemLayout}>
             {getFieldDecorator("inicio", {
-              initialValue: this.state.formData.inicio
-                ? moment(this.state.formData.inicio)
-                : null
+              initialValue: simpleDate(this.state.formData.inicio)
             })(
               <DatePicker
                 format="DD/MM/YYYY"
                 locale={locale}
                 onChange={e =>
                   this.handleFormState({
-                    target: { name: "inicio", value: e }
+                    target: { name: "inicio", value: date2Db(e) }
                   })
                 }
                 name="inicio"
@@ -157,16 +156,14 @@ class SeasonForm extends Component {
           </Form.Item>
           <Form.Item label="Data de fim" {...formItemLayout}>
             {getFieldDecorator("fim", {
-              initialValue: this.state.formData.fim
-                ? moment(this.state.formData.fim)
-                : null
+              initialValue: simpleDate(this.state.formData.fim)
             })(
               <DatePicker
                 format="DD/MM/YYYY"
                 locale={locale}
                 onChange={e =>
                   this.handleFormState({
-                    target: { name: "fim", value: e }
+                    target: { name: "fim", value: date2Db(e) }
                   })
                 }
                 name="fim"

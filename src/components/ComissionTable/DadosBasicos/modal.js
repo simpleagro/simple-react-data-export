@@ -1,10 +1,11 @@
 import React from 'react'
 import { Modal, Form, Input, Button, Select, DatePicker } from 'antd';
-//import * as GroupsServices from "../../../services/productgroups";
-import * as SeasonsServices from "../../../services/seasons";
+//import * as GroupsServices from "services/productgroups";
+import * as SeasonsServices from "services/seasons";
 import locale from "antd/lib/date-picker/locale/pt_BR";
 import moment from "moment";
 import "moment/locale/pt-br";
+import { simpleDate, date2Db } from "common/utils";
 
 const ModalForm = Form.create()(
     class extends React.Component {
@@ -122,9 +123,7 @@ const ModalForm = Form.create()(
               </Form.Item>
               <Form.Item label="Data Validade de">
                 {getFieldDecorator("data_validade_de", {
-                  initialValue: this.state.formData.data_validade_de
-                    ? moment(this.state.formData.data_validade_de)
-                    : undefined
+                  initialValue: simpleDate(this.state.formData.data_validade_de)
                 })(
                   <DatePicker
                     format="DD/MM/YYYY"
@@ -132,7 +131,7 @@ const ModalForm = Form.create()(
                     style={{width: '100%'}}
                     onChange={e => {
                       this.onHadleChange({
-                        target: { name: "data_validade_de", value: e }
+                        target: { name: "data_validade_de", value: date2Db(e) }
                       })}
                     }
                     name="data_validade_de"
@@ -141,9 +140,7 @@ const ModalForm = Form.create()(
               </Form.Item>
               <Form.Item label="Data Validade até">
                 {getFieldDecorator("data_validade_ate", {
-                  initialValue: this.state.formData.data_validade_ate
-                    ? moment(this.state.formData.data_validade_ate)
-                    : undefined
+                  initialValue: simpleDate(this.state.formData.data_validade_ate)
                 })(
                   <DatePicker
                     format="DD/MM/YYYY"
@@ -151,7 +148,7 @@ const ModalForm = Form.create()(
                     style={{width: '100%'}}
                     onChange={e => {
                       this.onHadleChange({
-                        target: { name: "data_validade_ate", value: e }
+                        target: { name: "data_validade_ate", value: date2Db(e) }
                       })}
                     }
                     name="data_validade_ate"

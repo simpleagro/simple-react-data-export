@@ -3,7 +3,7 @@ import { Form, Card, Col, Row, Select, DatePicker } from "antd";
 import moment from "moment";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { date2Db } from "common/utils";
+import { simpleDate, date2Db } from "common/utils";
 
 const { Option } = Select;
 
@@ -34,9 +34,7 @@ class ConfigurarFPCaracteristica extends Component {
       return (
         <React.Fragment>
           {getFieldDecorator(`venc_${variacao}`, {
-            initialValue: this.props.formData[`venc_${variacao}`]
-              ? moment(this.props.formData[`venc_${variacao}`], "YYYY-MM-DD")
-              : undefined
+            initialValue: simpleDate(this.props.formData[`venc_${variacao}`])
           })(
             <DatePicker
               disabled={!!this.props.formData.itens.length}
@@ -44,7 +42,7 @@ class ConfigurarFPCaracteristica extends Component {
                 this.props.handleFormState({
                   target: {
                     name: `venc_${variacao}`,
-                    value: data.format("YYYY-MM-DD")
+                    value: date2Db(data)
                   }
                 })
               }

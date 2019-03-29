@@ -23,7 +23,7 @@ import * as OrderPaymentService from "services/orders.payment";
 import { list as ListUnitMeasureService } from "services/units-measures";
 import { list as ListShipTableOrderItemsService } from "services/shiptable";
 import SimpleTable from "common/SimpleTable";
-import { fatorConversaoUM, currency, getNumber } from "common/utils";
+import { fatorConversaoUM, currency, getNumber, simpleDate, date2Db } from "common/utils";
 import { flashWithSuccess, flashWithError } from "common/FlashMessages";
 import parseErrors from "lib/parseErrors";
 import { SimpleBreadCrumb } from "common/SimpleBreadCrumb";
@@ -570,12 +570,7 @@ class OrderPaymentForm extends Component {
                         <Col span={8}>
                           <Form.Item label="Data Pagamento">
                             {getFieldDecorator("data_pgto_graos", {
-                              initialValue: this.state.formData.data_pgto_graos
-                                ? moment(
-                                    this.state.formData.data_pgto_graos,
-                                    "YYYY-MM-DD"
-                                  )
-                                : undefined
+                              initialValue: simpleDate(this.state.formData.data_pgto_graos)
                             })(
                               <DatePicker
                                 style={{ width: "100%" }}
@@ -583,12 +578,7 @@ class OrderPaymentForm extends Component {
                                   this.handleGraosFormState({
                                     target: {
                                       name: "data_pgto_graos",
-                                      value: dataString
-                                        ? moment(
-                                            dataString,
-                                            "DD/MM/YYYY"
-                                          ).format("YYYY-MM-DD")
-                                        : undefined
+                                      value: date2Db(data)
                                     }
                                   })
                                 }
