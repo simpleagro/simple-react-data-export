@@ -5,10 +5,8 @@ import { currency } from "common/utils"
 import moment from "moment"
 
 const ModalPedido = (props) => {
-  const { visible, onCancel } = props;
+  const { visible, onCancel, onApproval } = props;
   const pedido_selecionado = props.pedido || {}
-
-  console.log(props.groupData)
 
   const gerarParcelas = (parcelas) => {
     return parcelas.map(parcela => 
@@ -27,6 +25,11 @@ const ModalPedido = (props) => {
         <Card key={item._id} style={{width: '99%', marginTop: 10, marginBottom: 10}} bodyStyle={{ padding: 10 }}>
           <div>Produto: {item.produto.nome}</div>
           {gerarVariacaoProduto(item, props.groupData)}
+          <div style={{background:'#ecf0f1', paddingLeft: 5, paddingRight: 5}}>
+            {gerarInputPrecoBase(item, props.groupData)}
+            {gerarInputPrecoCaract(item, props.groupData)}
+            {item.preco_item && item.desconto_item && gerarInputPreco(item)}
+          </div>
           {item.quantidade && <div>Quantidade: {currency()(item.quantidade, {minimumFractionDigits: 0})}</div>}
           {item.total_preco_item_graos && <div>Preço Grãos: {currency()(item.total_preco_item_graos, {minimumFractionDigits: 0})}</div>}
           {item.total_preco_item_reais && <div>Preço Reais: R$ {currency()(item.total_preco_item_reais)}</div>}
@@ -47,11 +50,68 @@ const ModalPedido = (props) => {
       if(grupo && grupo.caracteristicas){
         return grupo.caracteristicas.map( caracteristica => {
           if(item[caracteristica.chave] != undefined )
-            return <div key={caracteristica.label} >{`${caracteristica.label}: ${item[caracteristica.chave].label}`}</div>
+            return  <div key={caracteristica.label} >
+                      <div>{`${caracteristica.label}: ${item[caracteristica.chave].label}`}</div>
+                    </div>
           }
         )
       }
     }
+  }
+
+  const gerarInputPrecoBase = (item, product_group = []) => {
+    if (item && item.grupo_produto) {
+      let listaProdutos = product_group.find(
+        grupo => grupo._id == item.grupo_produto.id
+      );
+      if (listaProdutos) {
+        let group_regras_preco = listaProdutos.preco_base_regra;
+        return group_regras_preco.map( regra_preco => 
+          <div key={`${regra_preco.chave}`}>
+            <div>
+              {`Preço ${regra_preco.label}: ${item[`preco_${regra_preco.chave}`]}`}
+            </div>
+            <div>
+              {`Desconto ${regra_preco.label} (%): ${item[`desconto_${regra_preco.chave}`]}`}
+            </div>
+          </div>
+        )
+      }
+    }
+  }
+
+  const gerarInputPrecoCaract = (item, product_group = []) => {
+    if (item && item.grupo_produto) {
+      let listaProdutos = product_group.find(
+        grupo => grupo._id == item.grupo_produto.id
+      );
+      if (listaProdutos) {
+        let group_regras_preco = listaProdutos.caracteristicas.filter(caract => caract.tipo_preco == 'TABELA_CARACTERISTICA');
+        return group_regras_preco.map( regra_preco => 
+          <div key={`${regra_preco.chave}`}>
+            <div>
+              {`Preço ${regra_preco.label}: ${item[`preco_${regra_preco.chave}`]}`}
+            </div>
+            <div>
+              {`Desconto ${regra_preco.label} (%): ${item[`desconto_${regra_preco.chave}`]}`}
+            </div>
+          </div>
+        )
+      }
+    }
+  }
+
+  const gerarInputPreco = (item) => {
+    return (
+      <div key={`preco_item`}>
+        <div>
+          {`Preço Item: ${item[`preco_item`]}`}
+        </div>
+        <div>
+          {`Desconto Item (%): ${item[`desconto_item`]}`}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -63,8 +123,8 @@ const ModalPedido = (props) => {
       onCancel={onCancel}
       maskClosable={false}
       footer={[
-        <Button key="back" type="danger" onClick={() => {}}>Reprovar</Button>,
-        <Button key="submit" type="primary" onClick={() => {}}>Aprovar</Button>
+        <Button key="back" type="danger" onClick={() => {onApproval(pedido_selecionado, "Reprovado")}}>Reprovar</Button>,
+        <Button key="submit" type="primary" onClick={() => {onApproval(pedido_selecionado, "Aprovado")}}>Aprovar</Button>
       ]}
     >
       <div style={{width:'100%'}}>
