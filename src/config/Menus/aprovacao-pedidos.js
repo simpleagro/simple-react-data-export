@@ -7,7 +7,7 @@ const menus = {
     label: "Aprovação Pedidos",
     icon: "check-square",
     showMenu: true,
-    rule: 'Indicator'
+    rule: 'Approval'
   }/* ,
   "/aprovacao/:id/edit": {
     component: SimpleLoadable(() => import("../../components/Sales/Orders/DadosBasicos/form")),
