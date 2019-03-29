@@ -169,6 +169,49 @@ class Approval extends Component {
     });
   }
 
+  handleApproval = async (item, status) => {
+    await this.getDatabase();
+    //await this.setStatus();
+    //this.setState({ savingForm: true });
+    try {
+      const pedido = Object.assign({}, {_id: item._id, status_pedido: status });
+      //console.log(pedido)
+      const updated = await OrderService.update(pedido);
+      const data = await OrderService.list({
+        sort: "-numero", status_pedido: "Aguardando Aprovação"
+      });
+
+      this.setState({
+        //openForm: false,
+        //editMode: false,
+        visible: false,
+        list: data.docs
+      });
+
+      flashWithSuccess(`Pedido ${status} com sucesso!`);
+    } catch (err) {
+      if (err && err.response && err.response.data) parseErrors(err);
+      //console.log("Erro interno ao aprovar um pedido", err);
+    } /* finally {
+      this.setState({ savingForm: false });
+    } */
+  }
+
+  getDatabase = () => {
+    const link = window.location.href;
+    const suffixRegex = /(([http]*[s]*[:][/][/])+)/g;
+    const linkRegex = /((.simpleagro.com.br)+(:[0-9]*)([/a-z0-9]*)*)/g;
+
+    let newLink = link.replace(suffixRegex, "").replace(linkRegex, "");
+
+    this.setState(prevState => ({
+      formData: {
+        ...prevState.formData,
+        database: newLink
+      }
+    }));
+  };
+
   render() {
     return (
       <div>
@@ -184,10 +227,10 @@ class Approval extends Component {
         <ModalPedido
           visible={this.state.visible}
           onCancel={this.handleCancel}
-          onCreate={this.handleOk}
           wrappedComponentRef={this.saveFormRef}
           pedido={this.state.record}
           groupData={this.state.groupData}
+          onApproval={this.handleApproval}
         />
       </div>
     );
