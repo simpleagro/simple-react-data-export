@@ -184,10 +184,15 @@ export const addMaskNumeroPonto = number => {
 };
 
 export const simpleDate = (date, format) => {
+  if (!date) return undefined;
   return moment.parseZone(date, format);
 };
 
-export const date2Db = (date, formatIn = "DD/MM/YYYY", formatOut) => {
+export const date2Db = (
+  date,
+  formatIn = "DD/MM/YYYY",
+  formatOut = "YYYY-MM-DD"
+) => {
   if (formatOut)
     return moment(date, formatIn)
       .utc(true)

@@ -3,7 +3,7 @@ import { Modal, Form, Input, Button, Select, DatePicker, Checkbox } from 'antd';
 import * as GroupsServices from "../../../services/productgroups";
 import * as SeasonsServices from "../../../services/seasons";
 import { list as ZoneListService } from "services/zone";
-import { simpleDate } from "common/utils";
+import { simpleDate,date2Db } from "common/utils";
 import locale from "antd/lib/date-picker/locale/pt_BR";
 import "moment/locale/pt-br";
 
@@ -90,9 +90,7 @@ const ModalForm = Form.create()(
         if(!por_regra_base) {
           return <Form.Item label="Data Base">
             {getFieldDecorator("data_base", {
-              initialValue: this.state.formData.data_base
-                ? simpleDate(this.state.formData.data_base)
-                : undefined
+              initialValue: simpleDate(this.state.formData.data_base)
             })(
               <DatePicker
                 format="DD/MM/YYYY"
@@ -100,7 +98,7 @@ const ModalForm = Form.create()(
                 style={{width: '100%'}}
                 onChange={e => {
                   this.onHadleChange({
-                    target: { name: "data_base", value: e.format("YYYY-MM-DD") }
+                    target: { name: "data_base", value: date2Db(e)}
                   })}
                 }
                 name="data_base"
@@ -122,7 +120,7 @@ const ModalForm = Form.create()(
                   style={{width: '100%'}}
                   onChange={e => {
                     this.onHadleChange({
-                      target: { name: `data_base_${regra_preco.chave}`, value: e.format("YYYY-MM-DD") }
+                      target: { name: `data_base_${regra_preco.chave}`, value: date2Db(e) }
                     })}
                   }
                   name={`data_base_${regra_preco.chave}`}
@@ -283,7 +281,7 @@ const ModalForm = Form.create()(
                     style={{width: '100%'}}
                     onChange={(e) => {
                       this.onHadleChange({
-                        target: { name: "data_validade_de", value: e.format("YYYY-MM-DD") }
+                        target: { name: "data_validade_de", value: date2Db(e) }
                       })}
                     }
                     name="data_validade_de"
@@ -302,7 +300,7 @@ const ModalForm = Form.create()(
                     style={{width: '100%'}}
                     onChange={e => {
                       this.onHadleChange({
-                        target: { name: "data_validade_ate", value: e.format("YYYY-MM-DD") }
+                        target: { name: "data_validade_ate", value: date2Db(e) }
                       })}
                     }
                     name="data_validade_ate"
