@@ -353,7 +353,7 @@ export default class Export extends Component {
     }));
   }
 
-  setTable2(){
+  setTable(){
     let obj = [], count = 0, max = maxLinesTable, newObj = [], posInit = 0, posEnd = max
 
     this.state.list.itens &&
@@ -363,9 +363,9 @@ export default class Export extends Component {
         descricaoProduto: element.produto.nome,
         peneira: element.peneira.label,
         tratamento: element.tratamento.label,
-        valorUnitPS: (element.quantidade && element.total_preco_item_graos) ? currency()(getNumber(element.total_preco_item_graos) / element.quantidade) : null,
+        valorUnitPS: (element.quantidade && element.total_preco_item_graos) ? currency()(getNumber(element.total_preco_item_graos) / (element.quantidade * fatorConversaoUM(this.state.listUnit && this.state.listUnit, element.embalagem.value, 'kg'))) : null,
         valorTotalPS: element.total_preco_item_graos ? element.total_preco_item_graos : null,
-        valorUnitR: element.quantidade && element.total_preco_item_reais ? currency()(getNumber(element.total_preco_item_reais) / element.quantidade) : null,
+        valorUnitR: element.quantidade && element.total_preco_item_reais ? currency()(getNumber(element.total_preco_item_reais) / (element.quantidade * fatorConversaoUM(this.state.listUnit && this.state.listUnit, element.embalagem.value, 'kg')) ) : null,
         valorTotalR: element.total_preco_item_reais ? element.total_preco_item_reais : null
       })), count++))
 
@@ -487,11 +487,11 @@ export default class Export extends Component {
         </Affix>
 
 
-        <Row style={{ textAlign: "center", fontWeight: "bold" }}>Total de Paginas: {this.setTable2().length}</Row>
+        <Row style={{ textAlign: "center", fontWeight: "bold" }}>Total de Paginas: {this.setTable().length}</Row>
 
         <div id="divToPrint" style={divToPrintStryle}>
 
-          {this.setTable2().map((page, indexPage) => (
+          {this.setTable().map((page, indexPage) => (
             <Row key={indexPage} style={pageStyle}>
 
               <Header
