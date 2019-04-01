@@ -4,6 +4,6 @@ export const configAPP = {
   usarCalculoDataBaseMes: () => false, // sf, default true
   quantidadeDeDiasCalculoDataBase: () => 30,
   usarDescontoGeralItem: () => false, // ssf false outros true
-  usarComissoesDeAgentesDeVendasDinamicas: () => true // ssf true default false
+  usarComissoesDeAgentesDeVendasDinamicas: () => false // ssf true default false
 };
 
