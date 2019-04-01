@@ -30,10 +30,7 @@ export const changeStatus = (_id, status) => {
   api.put(`${baseURL}/${_id}`, { status }).then(response => response.data);
 };
 
-export const getByUfCity = uf => city =>
-    api
-      .get(
-        `${baseURL}/getlocationsbyufcidade/${uf}/${city}`
-      )
-      .then(response => response.data);
-
+export const getByUfCity = uf => (city, aqp) =>
+  api
+    .get(`${baseURL}/getlocationsbyufcidade/${uf}/${city}`, { params: aqp })
+    .then(response => response.data);

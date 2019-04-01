@@ -17,6 +17,7 @@ import { list as PriceTableServiceList } from "../../../../services/pricetable";
 import { list as AgentSalesServiceList } from "../../../../services/sales-agents";
 import { list as ProductGroupServiceList } from "services/productgroups";
 import { list as ShipTableServiceList } from "services/shiptable";
+import { list as ZonesServiceList } from "services/zone";
 import { getConsultant as getConsultantFromWallet } from "../../../../services/customerswallet";
 import ConfigurarFPCaracteristica from "./ConfigurarFPCaracteristica";
 import { configAPP } from "config/app";
@@ -105,7 +106,7 @@ class OrderForm extends Component {
     }).then(response => response.docs);
     const tabelasDePreco = await PriceTableServiceList({
       limit: -1,
-      fields: "nome",
+      fields: "nome, regiao",
       status: true
     }).then(response => response.docs);
     const tabelaBaseFrete = await ShipTableServiceList({
@@ -930,6 +931,20 @@ class OrderForm extends Component {
       }
     }));
 
+    // selecionar automaticamente uma tabela de preço pela região
+    const regiaoTabelaPreco = await ZonesServiceList({
+      estado,
+      limit: 1
+    }).then(response => response.docs);
+
+    const pegaTabelaDePreco = this.state.tabelasDePreco.find(tb => {
+      const regiao = regiaoTabelaPreco.find(reg =>
+        reg.cidades.some(c => c.nome.includes(cidade))
+      );
+      if (tb.regiao && tb.regiao.id === regiao._id) return true;
+    });
+    // **********************************************************************
+
     const vendedor = await this.pegaVendedorPelaCarteiraDoCliente(
       this.state.formData.cliente.id,
       propriedade.id
@@ -939,7 +954,11 @@ class OrderForm extends Component {
       ...prev,
       formData: {
         ...prev.formData,
-        vendedor
+        vendedor,
+        tabela_preco_base: {
+          id: pegaTabelaDePreco._id,
+          nome: pegaTabelaDePreco.nome
+        }
       }
     }));
   }
