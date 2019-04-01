@@ -8,6 +8,7 @@ import { PainelHeader } from "../../common/PainelHeader";
 import { SFFPorcentagem } from "../../common/formFields/SFFPorcentagem";
 import * as AgentSalesService from "../../../services/sales-agents";
 import * as IBGEService from "../../../services/ibge";
+import { configAPP } from "config/app";
 
 const Option = Select.Option;
 
@@ -276,13 +277,37 @@ class AgentSalesForm extends Component {
             })(<Input name="cep" />)}
           </Form.Item>
 
-          <SFFPorcentagem
-            name="comissao"
-            label="Comissão"
-            formItemLayout={formItemLayout}
-            getFieldDecorator={getFieldDecorator}
-            handleFormState={this.handleFormState}
-          />
+          {!configAPP.usarComissoesDeAgentesDeVendasDinamicas() && (
+            <SFFPorcentagem
+            initialValue={this.state.formData.comissao}
+              name="comissao"
+              label="Comissão"
+              formItemLayout={formItemLayout}
+              getFieldDecorator={getFieldDecorator}
+              handleFormState={this.handleFormState}
+            />
+          )}
+
+          {configAPP.usarComissoesDeAgentesDeVendasDinamicas() && (
+            <React.Fragment>
+              <SFFPorcentagem
+                initialValue={this.state.formData.comissao_agente_germoplasma}
+                name="comissao_agente_germoplasma"
+                label="Comissão Germoplasma"
+                formItemLayout={formItemLayout}
+                getFieldDecorator={getFieldDecorator}
+                handleFormState={this.handleFormState}
+              />
+              <SFFPorcentagem
+                initialValue={this.state.formData.comissao_agente_tratamento}
+                name="comissao_agente_tratamento"
+                label="Comissão Tratamento"
+                formItemLayout={formItemLayout}
+                getFieldDecorator={getFieldDecorator}
+                handleFormState={this.handleFormState}
+              />
+            </React.Fragment>
+          )}
         </Form>
       </div>
     );

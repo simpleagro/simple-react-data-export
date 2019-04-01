@@ -49,8 +49,8 @@ class CalculoPagamentoGraos extends Component {
       ...prev,
       formData: {
         ...prev.formData,
-        entrega_estado: this.props.pedido.estado,
-        entrega_cidade: this.props.pedido.cidade,
+        estado_entrega: this.props.pedido.estado,
+        cidade_entrega: this.props.pedido.cidade,
         peso_graos: currency()(
           this.props.pedido.itens
             .map(t => t[`total_preco_item_graos`])
@@ -68,7 +68,7 @@ class CalculoPagamentoGraos extends Component {
   async listaCidadesPorEstado(estado) {
     await this.setState({ fetchingCidade: true, cidades: [], cidade: "" });
     await this.handleFormState({
-      target: { name: "entrega_estado", value: estado }
+      target: { name: "estado_entrega", value: estado }
     });
     const cidades = await IBGEService.listaCidadesPorEstado(estado);
     this.setState(prev => ({ ...prev, cidades, fetchingCidade: false }));
@@ -78,11 +78,11 @@ class CalculoPagamentoGraos extends Component {
     // console.log(cidade);
 
     await this.handleFormState({
-      target: { name: "entrega_cidade", value: cidade }
+      target: { name: "cidade_entrega", value: cidade }
     });
 
-    const locais = await ZonesByUfCity(this.state.formData.entrega_estado)(
-      this.state.formData.entrega_cidade
+    const locais = await ZonesByUfCity(this.state.formData.estado_entrega)(
+      this.state.formData.cidade_entrega
     );
 
     await this.setState(prev => ({
@@ -151,15 +151,15 @@ class CalculoPagamentoGraos extends Component {
               <Col span={12}>
                 <Form.Item label="Estado">
                   <Select
-                    name="entrega_estado"
+                    name="estado_entrega"
                     showSearch
                     value={
-                      this.state.formData.entrega_estado ||
+                      this.state.formData.estado_entrega ||
                       (this.props.pedido &&
                         this.props.pedido.estado) ||
                         (this.props.pedido &&
                           this.props.pedido.pagamento &&
-                          this.props.pedido.pagamento.entrega_estado)
+                          this.props.pedido.pagamento.estado_entrega)
                     }
                     onSelect={e => this.listaCidadesPorEstado(e)}>
                     {this.state.estados.map(uf => (
@@ -173,19 +173,19 @@ class CalculoPagamentoGraos extends Component {
               <Col span={12}>
                 <Form.Item label="Cidade">
                   <Select
-                    disabled={this.state.formData.entrega_estado === undefined}
-                    name="entrega_cidade"
+                    disabled={this.state.formData.estado_entrega === undefined}
+                    name="cidade_entrega"
                     showSearch
                     onSelect={e => {
                       this.onChangeSelectCidade(e);
                     }}
                     value={
-                      this.state.formData.entrega_cidade ||
+                      this.state.formData.cidade_entrega ||
                       (this.props.pedido &&
                         this.props.pedido.cidade) ||
                       (this.props.pedido &&
                         this.props.pedido.pagamento &&
-                        this.props.pedido.pagamento.entrega_cidade)
+                        this.props.pedido.pagamento.cidade_entrega)
                     }>
                     {this.state.cidades.map((c, index) => (
                       <Select.Option key={index} value={c.nome}>

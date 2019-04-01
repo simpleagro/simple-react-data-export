@@ -105,7 +105,7 @@ class ConfigurarFPCaracteristica extends Component {
   render() {
     const { getFieldDecorator } = this.props.form;
     return (
-      <div style={{ background: "#ECECEC", padding: "30px" }}>
+      <div style={{ background: "#ECECEC", padding: "30px", marginBottom: 30 }}>
         <Row gutter={0} type="flex" justify="space-around" align="middle">
           <Col span={5}>
             <Card title="Data Vencimento">
@@ -259,6 +259,7 @@ class ConfigurarFPCaracteristica extends Component {
                     initialValue: this.props.formData.pgto_frete
                   })(
                     <Select
+                    disabled={!!this.props.formData.itens.length}
                       name="pgto_frete"
                       showAction={["focus", "click"]}
                       showSearch

@@ -109,7 +109,8 @@ class OrderForm extends Component {
     }).then(response => response.docs);
 
     const agents = await this.fetchAgents({
-      fields: "nome,cpf_cnpj,-endereco,-cidade,-estado,-agente_pai"
+      fields:
+        "nome,cpf_cnpj,-endereco,-cidade,-estado,-agente_pai,comissao_agente_germoplasma,comissao_agente_tratamento"
     }).then(response => response.docs);
 
     // para permitir a seleção do grupo soja, apenas soja, para SSF
@@ -117,7 +118,7 @@ class OrderForm extends Component {
     if (configAPP.usarConfiguracaoFPCaracteristica()) {
       const grupoProduto = await ProductGroupServiceList({
         nome: `/^soja$/i`,
-        fields:'preco_base_regra, caracteristicas'
+        fields: "preco_base_regra, caracteristicas"
       }).then(result => result.docs[0]);
       this.setState({
         grupoProduto
@@ -311,7 +312,13 @@ class OrderForm extends Component {
   }
 
   onChangeAgente(e) {
-    const { _id: id, nome, cpf_cnpj } = JSON.parse(e);
+    const {
+      _id: id,
+      nome,
+      cpf_cnpj,
+      comissao_agente_tratamento,
+      comissao_agente_germoplasma
+    } = JSON.parse(e);
 
     this.handleFormState({
       target: {
@@ -323,6 +330,24 @@ class OrderForm extends Component {
         }
       }
     });
+
+    setTimeout(() => {
+      this.handleFormState({
+        target: {
+          name: "comissao_agente_tratamento",
+          value: comissao_agente_tratamento
+        }
+      });
+    }, 0);
+
+    setTimeout(() => {
+      this.handleFormState({
+        target: {
+          name: "comissao_agente_germoplasma",
+          value: comissao_agente_germoplasma
+        }
+      });
+    }, 0);
   }
 
   render() {
@@ -622,14 +647,40 @@ class OrderForm extends Component {
                     </Select>
                   )}
                 </Form.Item>
-                <SFFPorcentagem
-                  initialValue={this.state.formData.comissao_agente}
-                  name="comissao_agente"
-                  label="Comissão"
-                  formItemLayout={formItemLayout}
-                  getFieldDecorator={getFieldDecorator}
-                  handleFormState={this.handleFormState}
-                />
+                {!configAPP.usarComissoesDeAgentesDeVendasDinamicas() && (
+                  <SFFPorcentagem
+                    initialValue={this.state.formData.comissao_agente}
+                    name="comissao_agente"
+                    label="Comissão"
+                    formItemLayout={formItemLayout}
+                    getFieldDecorator={getFieldDecorator}
+                    handleFormState={this.handleFormState}
+                  />
+                )}
+                {configAPP.usarComissoesDeAgentesDeVendasDinamicas() && (
+                  <React.Fragment>
+                    <SFFPorcentagem
+                      initialValue={
+                        this.state.formData.comissao_agente_germoplasma
+                      }
+                      name="comissao_agente_germoplasma"
+                      label="Comissão Germoplasma"
+                      formItemLayout={formItemLayout}
+                      getFieldDecorator={getFieldDecorator}
+                      handleFormState={this.handleFormState}
+                    />
+                    <SFFPorcentagem
+                      initialValue={
+                        this.state.formData.comissao_agente_tratamento
+                      }
+                      name="comissao_agente_tratamento"
+                      label="Comissão Tratamento"
+                      formItemLayout={formItemLayout}
+                      getFieldDecorator={getFieldDecorator}
+                      handleFormState={this.handleFormState}
+                    />
+                  </React.Fragment>
+                )}
               </React.Fragment>
             )}
 

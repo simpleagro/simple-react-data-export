@@ -3,6 +3,7 @@ export const configAPP = {
   detalharPrecoPorCaracteristica: () => true, //default false
   usarCalculoDataBaseMes: () => false, // sf, default true
   quantidadeDeDiasCalculoDataBase: () => 30,
-  usarDescontoGeralItem: () => false // ssf false outros true
+  usarDescontoGeralItem: () => false, // ssf false outros true
+  usarComissoesDeAgentesDeVendasDinamicas: () => true // ssf true default false
 };
 
