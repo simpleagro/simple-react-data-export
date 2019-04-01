@@ -11,17 +11,19 @@ class ConfigurarFPCaracteristica extends Component {
   geraSeletorDeData(variacao, tipoTabela = "TABELA_BASE") {
     const { preco_base_regra, caracteristicas } = this.props.grupoProduto || {};
     const { getFieldDecorator } = this.props.form;
+    const { tabelaFreteBase } = this.props;
 
-    const {
+    let {
       usar_datas_fixas: usarDatasFixas,
       venc_datas_fixas: vencDatasFixas
     } =
-      (tipoTabela === "TABELA_BASE" &&
+      (variacao !== "frete" && tipoTabela === "TABELA_BASE" &&
         preco_base_regra &&
         preco_base_regra.find(regra => regra.chave === variacao)) ||
-      (tipoTabela === "TABELA_CARACTERISTICA" &&
+        (variacao !== "frete" && tipoTabela === "TABELA_CARACTERISTICA" &&
         caracteristicas &&
         caracteristicas.find(regra => regra.chave === variacao)) ||
+        (variacao === "frete" && this.props.tabelaFreteBase) ||
       false;
 
     if (

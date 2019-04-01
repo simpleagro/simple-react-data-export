@@ -16,6 +16,7 @@ import { list as SeedUseServiceList } from "../../../../services/seed-use";
 import { list as PriceTableServiceList } from "../../../../services/pricetable";
 import { list as AgentSalesServiceList } from "../../../../services/sales-agents";
 import { list as ProductGroupServiceList } from "services/productgroups";
+import { list as ShipTableServiceList } from "services/shiptable";
 import { getConsultant as getConsultantFromWallet } from "../../../../services/customerswallet";
 import ConfigurarFPCaracteristica from "./ConfigurarFPCaracteristica";
 import { configAPP } from "config/app";
@@ -107,6 +108,12 @@ class OrderForm extends Component {
       fields: "nome",
       status: true
     }).then(response => response.docs);
+    const tabelaBaseFrete = await ShipTableServiceList({
+      limit: -1,
+      fields: "usar_datas_fixas, venc_datas_fixas",
+      eh_tabela_base_frete: true,
+      status: true
+    }).then(response => response.docs[0]);
 
     const agents = await this.fetchAgents({
       fields:
@@ -129,6 +136,7 @@ class OrderForm extends Component {
       ...prev,
       listSeasons: safras,
       clients,
+      tabelaBaseFrete,
       garantias,
       tiposDeVendas,
       usosDaSemente,
@@ -820,6 +828,7 @@ class OrderForm extends Component {
               form={this.props.form}
               formData={this.state.formData}
               grupoProduto={this.state.grupoProduto}
+              tabelaFreteBase={this.state.tabelaBaseFrete}
             />
           )}
           {/* São Francisco */}
