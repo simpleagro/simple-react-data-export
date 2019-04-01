@@ -20,7 +20,8 @@ import moment from "moment";
 
 import {
   flashWithSuccess,
-  flashWithError
+  flashWithError,
+  flashModalWithError
 } from "../../../common/FlashMessages";
 import {
   valorFinalJurosCompostos,
@@ -64,11 +65,20 @@ class OrderItemForm extends Component {
       gruposDeProdutos: [],
       tabelaPrecos: [],
       produtos: [],
-      order_id: this.props.match.params.order_id
+      order_id: this.props.match.params.order_id,
+      variacoes: [],
+      usar_qtde_multipla_um_primaria_item_pedido: false,
+      unidadesDeMedida: []
     };
     window.calcularResumo = this.calcularResumo.bind(this);
     this.calcularResumo = debounce(this.calcularResumo, 300);
+    this.calcularQuantidadeMultipla = debounce(
+      this.calcularQuantidadeMultipla,
+      300
+    );
   }
+
+  async componentDidUpdate(prevProps, prevState) {}
 
   async componentDidMount() {
     const { id } = this.props.match.params;
@@ -85,7 +95,8 @@ class OrderItemForm extends Component {
     }
 
     const gruposDeProdutos = await ProductGroupService.list({
-      fields: "nome, produtos, caracteristicas, preco_base_regra",
+      fields:
+        "nome, produtos, caracteristicas, preco_base_regra, usar_qtde_multipla_um_primaria_item_pedido",
       limit: -1
     }).then(response => response.docs);
 
@@ -96,11 +107,16 @@ class OrderItemForm extends Component {
     }).then(response => response.docs);
 
     // const pedido = await OrderService.get(order_id, {fields})
+    const unidadesDeMedida = await ListUnitsMeasures({
+      limit: -1,
+      status: true
+    }).then(response => response.docs);
 
     this.setState(prev => ({
       ...prev,
       gruposDeProdutos,
-      tabelaPrecos
+      tabelaPrecos,
+      unidadesDeMedida
     }));
 
     if (id) {
@@ -135,6 +151,20 @@ class OrderItemForm extends Component {
     this.props.form.validateFields(async err => {
       if (err) return;
       else {
+        if (
+          this.state.usar_qtde_multipla_um_primaria_item_pedido &&
+          this.state.formData.quantidade % 1 !== 0
+        ) {
+          this.props.form.setFields({
+            quantidade: {
+              errors: [
+                new Error("Quantidade deve ser um número múltiplo da embalagem")
+              ]
+            }
+          });
+          return;
+        }
+
         this.setState({ savingForm: true });
         if (!this.state.editMode) {
           if (Object.keys(this.state.formData).length === 0)
@@ -191,7 +221,9 @@ class OrderItemForm extends Component {
     await this.setState(prev => ({
       ...prev,
       produtos: e.produtos,
-      variacoes: []
+      variacoes: [],
+      usar_qtde_multipla_um_primaria_item_pedido:
+        e.usar_qtde_multipla_um_primaria_item_pedido
     }));
     this.props.form.resetFields(["produto"]);
   }
@@ -226,7 +258,6 @@ class OrderItemForm extends Component {
 
     let variacoes = grupo.caracteristicas.map((c, index, arr) => {
       if (this.state.formData[c.chave]) {
-        //        debugger;
         this.setState(prev => ({
           ...prev,
           variacoesSelecionadas: {
@@ -482,106 +513,117 @@ class OrderItemForm extends Component {
               )}
             </Form.Item>
 
-            {this.state.variacoes && (
-              <Card
-                title="Variações do Produto"
-                extra={
-                  <Button onClick={() => this.resetVariacoes()}>
-                    Limpar Variações
-                  </Button>
-                }
-                bordered
-                style={{ marginBottom: 20 }}>
-                {this.state.variacoes
-                  // .sort((a, b) => (b.obrigatorio ? 1 : -1))
-                  .map((v, index, arr) => {
-                    return v.opcoes.length ? (
-                      <React.Fragment key={`variacao_fragm_${index}`}>
-                        <Spin
-                          tip={"Carregando variações para " + v.label}
-                          key="spin_loading_inputs_variacoes"
-                          spinning={
-                            this.state[`loadingVariacoes_${v.chave}`] === true
-                          }>
-                          <Form.Item
-                            label={v.label}
-                            key={v.chave}
-                            {...formItemLayout}>
-                            {getFieldDecorator(v.chave, {
-                              valuePropName: "value",
-                              rules: [
-                                {
-                                  required: v.obrigatorio,
-                                  message: "Este campo é obrigatório!"
-                                }
-                              ],
-                              initialValue: JSON.stringify(
-                                this.state.formData[v.chave]
-                              )
-                            })(
-                              <Select
-                                // disabled={
-                                //   index === 0
-                                //     ? false
-                                //     : this.state.formData[v.prevField] === undefined
-                                // }
-                                name={v.chave}
-                                showAction={["focus", "click"]}
-                                showSearch
-                                allowClear
-                                // onFocus={() => this.getVals(v.chave)}
-                                style={{ width: 200 }}
-                                onChange={async e => {
-                                  e = JSON.parse(e);
-                                  this.setState(prev => ({
-                                    ...prev,
-                                    variacoesSelecionadas: {
-                                      ...prev.variacoesSelecionadas,
-                                      ...{ [v.chave]: e.value }
-                                    }
-                                  }));
-                                  await this.handleFormState({
-                                    target: {
-                                      name: v.chave,
-                                      value: e
-                                    }
-                                  });
-                                  arr
-                                    .map(v => v.chave)
-                                    .splice(index + 1)
-                                    .map(v2 => {
-                                      this.setState(prev => ({
-                                        ...prev,
-                                        formData: {
-                                          ...prev.formData,
-                                          [v2]: undefined
-                                        }
-                                      }));
-                                      this.getVals(v2);
+            {this.state.variacoes &&
+              this.state.variacoes.length > 0 && (
+                <Card
+                  title="Variações do Produto"
+                  extra={
+                    <Button onClick={() => this.resetVariacoes()}>
+                      Limpar Variações
+                    </Button>
+                  }
+                  bordered
+                  style={{ marginBottom: 20 }}>
+                  {this.state.variacoes
+                    // .sort((a, b) => (b.obrigatorio ? 1 : -1))
+                    .map((v, index, arr) => {
+                      return v.opcoes.length ? (
+                        <React.Fragment key={`variacao_fragm_${index}`}>
+                          <Spin
+                            tip={"Carregando variações para " + v.label}
+                            key="spin_loading_inputs_variacoes"
+                            spinning={
+                              this.state[`loadingVariacoes_${v.chave}`] === true
+                            }>
+                            <Form.Item
+                              label={v.label}
+                              key={v.chave}
+                              {...formItemLayout}>
+                              {getFieldDecorator(v.chave, {
+                                valuePropName: "value",
+                                rules: [
+                                  {
+                                    required: v.obrigatorio,
+                                    message: "Este campo é obrigatório!"
+                                  }
+                                ],
+                                initialValue: JSON.stringify(
+                                  this.state.formData[v.chave]
+                                )
+                              })(
+                                <Select
+                                  // disabled={
+                                  //   index === 0
+                                  //     ? false
+                                  //     : this.state.formData[v.prevField] === undefined
+                                  // }
+                                  name={v.chave}
+                                  showAction={["focus", "click"]}
+                                  showSearch
+                                  allowClear
+                                  // onFocus={() => this.getVals(v.chave)}
+                                  style={{ width: 200 }}
+                                  onChange={async e => {
+                                    e = JSON.parse(e);
+                                    this.setState(prev => ({
+                                      ...prev,
+                                      variacoesSelecionadas: {
+                                        ...prev.variacoesSelecionadas,
+                                        ...{ [v.chave]: e.value }
+                                      }
+                                    }));
+                                    await this.handleFormState({
+                                      target: {
+                                        name: v.chave,
+                                        value: e
+                                      }
                                     });
-                                  this.atualizaValorVariacao(v, e.value);
-                                }}
-                                placeholder="Selecione...">
-                                {v.opcoes.map((o, index) => (
-                                  <Option
-                                    key={`${v.chave}_${index}`}
-                                    value={JSON.stringify(o)}>
-                                    {o.label}
-                                  </Option>
-                                ))}
-                              </Select>
-                            )}
-                          </Form.Item>
+                                    arr
+                                      .map(v => v.chave)
+                                      .splice(index + 1)
+                                      .map(v2 => {
+                                        this.setState(prev => ({
+                                          ...prev,
+                                          formData: {
+                                            ...prev.formData,
+                                            [v2]: undefined
+                                          }
+                                        }));
+                                        this.getVals(v2);
+                                      });
+                                    this.atualizaValorVariacao(v, e.value);
 
-                          {this.geraVariacoesInputsDinamicos(v)}
-                        </Spin>
-                      </React.Fragment>
-                    ) : (
-                      ""
-                    );
-                  })}
-              </Card>
-            )}
+                                    if (
+                                      v.chave === "embalagem" &&
+                                      this.state
+                                        .usar_qtde_multipla_um_primaria_item_pedido
+                                    ) {
+                                      this.calcularQuantidadeMultipla(
+                                        this.state.formData.quantidade_kg
+                                      );
+                                    }
+                                  }}
+                                  placeholder="Selecione...">
+                                  {v.opcoes.map((o, index) => (
+                                    <Option
+                                      key={`${v.chave}_${index}`}
+                                      value={JSON.stringify(o)}>
+                                      {o.label}
+                                    </Option>
+                                  ))}
+                                </Select>
+                              )}
+                            </Form.Item>
+
+                            {this.geraVariacoesInputsDinamicos(v)}
+                          </Spin>
+                        </React.Fragment>
+                      ) : (
+                        ""
+                      );
+                    })}
+                </Card>
+              )}
             {/* <Form.Item label="Área" {...formItemLayout}>
               {getFieldDecorator("area", {
                 rules: [
@@ -611,6 +653,29 @@ class OrderItemForm extends Component {
               />
             )}
 
+            {this.state.usar_qtde_multipla_um_primaria_item_pedido && (
+              <Form.Item label="Quantidade (kg)" {...formItemLayout}>
+                {getFieldDecorator("quantidade_kg", {
+                  rules: [
+                    { required: true, message: "Este campo é obrigatório!" }
+                  ],
+                  initialValue: this.state.formData.quantidade_kg || 1
+                })(
+                  <InputNumber
+                    onChange={async e => {
+                      if (isNaN(e)) return;
+                      await this.handleFormState({
+                        target: { name: "quantidade_kg", value: e }
+                      });
+                      this.calcularQuantidadeMultipla(e);
+                    }}
+                    style={{ width: "100%" }}
+                    name="quantidade_kg"
+                  />
+                )}
+              </Form.Item>
+            )}
+
             <Form.Item label="Quantidade" {...formItemLayout}>
               {getFieldDecorator("quantidade", {
                 rules: [
@@ -619,12 +684,15 @@ class OrderItemForm extends Component {
                 initialValue: this.state.formData.quantidade || 1
               })(
                 <InputNumber
-                  onKeyUp={() => this.calcularResumo()}
+                  onKeyUp={e => {
+                    this.calcularResumo();
+                  }}
                   onChange={async e => {
                     if (isNaN(e)) return;
                     await this.handleFormState({
                       target: { name: "quantidade", value: e }
                     });
+                    this.calcularQuantidadeMultipla(e, true);
                   }}
                   style={{ width: 200 }}
                   name="quantidade"
@@ -723,6 +791,76 @@ class OrderItemForm extends Component {
         </div>
       </SimpleLazyLoader>
     );
+  }
+
+  async calcularQuantidadeMultipla(qtd = 1, multiplicar = false) {
+    const embalagem =
+      this.state.formData.embalagem && this.state.formData.embalagem.value;
+
+    const unidConvertFim = this.state.produtos.find(
+      p => p._id === this.state.formData.produto.id
+    );
+
+    if (!unidConvertFim) {
+      flashWithError(
+        "[QuantMultiplaUndPri] - Não encontrei unidade de medida primária para o produto"
+      );
+      return;
+    }
+
+    const fatorConversao = fatorConversaoUM(
+      this.state.unidadesDeMedida,
+      this.state.formData.embalagem.value,
+      unidConvertFim.u_m_primaria.value
+    );
+
+    if (fatorConversao === "erro") {
+      flashWithError(
+        `[QuantMultiplaUndPri] - Não consegui calcular o fator de conversão: ${
+          this.state.formData.embalagem.value
+        } para ${unidConvertFim.u_m_primaria.value}`
+      );
+      return;
+    }
+
+    this.setState(prev => ({
+      ...prev,
+      formData: {
+        ...prev.formData,
+        ...(multiplicar === false
+          ? {
+              quantidade: getNumber(qtd) / fatorConversao
+            }
+          : { quantidade_kg: getNumber(qtd) * fatorConversao })
+      }
+    }));
+
+    if (!multiplicar) {
+      if ((qtd / fatorConversao) % 1 !== 0) {
+        flashWithError(
+          `[QuantMultiplaUndPri] - Quantidade deve ser múltiplo da embalagem`
+        );
+        setTimeout(() => {
+          this.props.form.setFields({
+            quantidade: {
+              errors: [
+                new Error("Quantidade deve ser um número múltiplo da embalagem")
+              ]
+            }
+          });
+        }, 300);
+      } else {
+        setTimeout(() => {
+          this.props.form.setFields({
+            quantidade: {
+              errors: false
+            }
+          });
+        }, 300);
+      }
+    }
+
+    this.calcularResumo();
   }
 
   geraVariacoesInputsDinamicos(variacao) {
@@ -1086,12 +1224,7 @@ class OrderItemForm extends Component {
 
     // Se a unid. medida que veio da tabela de preço base for diferente, fazer conversão *******
     if (embalagem && unid_med_preco !== embalagem.value) {
-      const unidadesDeMedida = await ListUnitsMeasures({
-        limit: -1,
-        status: true
-      }).then(response => response.docs);
-
-      if (!unidadesDeMedida) {
+      if (!this.state.unidadesDeMedida) {
         flashWithError(
           `Não existem unidades de medidas disponíveis para realizar a conversão de ${
             embalagem.label
@@ -1099,7 +1232,7 @@ class OrderItemForm extends Component {
         );
       } else {
         fatorConversao = fatorConversaoUM(
-          unidadesDeMedida,
+          this.state.unidadesDeMedida,
           embalagem.value,
           unid_med_preco
         );
@@ -1138,12 +1271,7 @@ class OrderItemForm extends Component {
         produtoTabelaPreco &&
         produtoTabelaPreco.u_m_preco !== embalagem.value
       ) {
-        const unidadesDeMedida = await ListUnitsMeasures({
-          limit: -1,
-          status: true
-        }).then(response => response.docs);
-
-        if (!unidadesDeMedida) {
+        if (!this.state.unidadesDeMedida) {
           flashWithError(
             `Não existem unidades de medidas disponíveis para realizar a conversão de ${
               embalagem.label
@@ -1151,7 +1279,7 @@ class OrderItemForm extends Component {
           );
         } else {
           fatorConversao = fatorConversaoUM(
-            unidadesDeMedida,
+            this.state.unidadesDeMedida,
             embalagem.value,
             produtoTabelaPreco.u_m_preco
           );

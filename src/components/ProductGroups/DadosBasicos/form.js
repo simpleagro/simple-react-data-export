@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Button, Input, Form, Affix, Card } from "antd";
+import { Button, Input, Form, Affix, Checkbox } from "antd";
 
 import { flashWithSuccess } from "../../common/FlashMessages";
 import parseErrors from "../../../lib/parseErrors";
@@ -7,7 +7,7 @@ import { PainelHeader } from "../../common/PainelHeader";
 import * as GroupService from "../../../services/productgroups";
 import { SimpleBreadCrumb } from "../../common/SimpleBreadCrumb";
 import CamposExtras from "./camposExtras";
-import RegraPreco from './regraPreco'
+import RegraPreco from "./regraPreco";
 
 class GroupForm extends Component {
   constructor(props) {
@@ -35,8 +35,6 @@ class GroupForm extends Component {
           editMode: id ? true : false
         }));
     }
-
-
   }
 
   handleFormState = event => {
@@ -70,7 +68,9 @@ class GroupForm extends Component {
             // a chamada do formulário pode vir por fluxos diferentes
             // então usamos o returnTo para verificar para onde ir
             // ou ir para o fluxo padrão
-            this.props.history.push("/grupos-produtos/" + created._id + "/caracteristicas-produtos");
+            this.props.history.push(
+              "/grupos-produtos/" + created._id + "/caracteristicas-produtos"
+            );
           } catch (err) {
             if (err && err.response && err.response.data) parseErrors(err);
             console.log("Erro interno ao adicionar um grupo de produto", err);
@@ -122,7 +122,6 @@ class GroupForm extends Component {
     }));
   };
 
-
   changeStatusFields = async (id, newStatus, chave) => {
     try {
       //await GroupService.changeStatus(id, newStatus);
@@ -138,7 +137,7 @@ class GroupForm extends Component {
 
       this.setState(prev => ({
         ...prev,
-        formData: {...prev.formData, fields: _fields }
+        formData: { ...prev.formData, fields: _fields }
       }));
 
       flashWithSuccess(
@@ -168,7 +167,7 @@ class GroupForm extends Component {
 
       this.setState(prev => ({
         ...prev,
-        formData: {...prev.formData, preco_base_regra: _preco_base_regra }
+        formData: { ...prev.formData, preco_base_regra: _preco_base_regra }
       }));
 
       flashWithSuccess(
@@ -183,105 +182,123 @@ class GroupForm extends Component {
     }
   };
 
-  removeRecordFields = (record) => {
+  removeRecordFields = record => {
     if (record) {
       this.setState(prev => {
-        if(prev.formData.fields)
-          return ({
-            formData: {...prev.formData, fields: prev.formData.fields.filter(item => item.chave !== record.chave) }
-          })
+        if (prev.formData.fields)
+          return {
+            formData: {
+              ...prev.formData,
+              fields: prev.formData.fields.filter(
+                item => item.chave !== record.chave
+              )
+            }
+          };
       });
     }
-  }
+  };
 
-  removeRecordPreco = (record) => {
+  removeRecordPreco = record => {
     if (record) {
       this.setState(prev => {
-        if(prev.formData.preco_base_regra)
-          return ({
-            formData: {...prev.formData, preco_base_regra: prev.formData.preco_base_regra.filter(item => item.chave !== record.chave) }
-          })
+        if (prev.formData.preco_base_regra)
+          return {
+            formData: {
+              ...prev.formData,
+              preco_base_regra: prev.formData.preco_base_regra.filter(
+                item => item.chave !== record.chave
+              )
+            }
+          };
       });
     }
-  }
+  };
 
-  showModal = (record) => {
+  showModal = record => {
     this.setState({
       visible: true,
       record,
       editarField: !!record
     });
-  }
+  };
 
-  showModalRegraPreco = (record) => {
+  showModalRegraPreco = record => {
     this.setState({
       visibleRegraPreco: true,
       record,
       editarField: !!record
     });
-  }
+  };
 
-  handleOkFields = (item) => {
+  handleOkFields = item => {
     this.setState(prev => {
-      if(prev.formData.fields){
+      if (prev.formData.fields) {
         const dados = prev.formData;
-        if(this.state.editarField){
-          dados.fields = dados.fields.filter(dado => dado != this.state.record)
+        if (this.state.editarField) {
+          dados.fields = dados.fields.filter(dado => dado != this.state.record);
         }
-        return ({
+        return {
           visible: false,
-          formData: {...dados, fields: [...prev.formData.fields, item]},
+          formData: { ...dados, fields: [...prev.formData.fields, item] },
           editarField: false
-        })
+        };
       }
 
-      return( {
+      return {
         visible: false,
-        formData: {...prev.formData, fields: [item]},
+        formData: { ...prev.formData, fields: [item] },
         editarField: false
-      })
+      };
     });
-  }
+  };
 
-  handleOkPreco = (item) => {
+  handleOkPreco = item => {
     this.setState(prev => {
-      if(prev.formData.preco_base_regra){
+      if (prev.formData.preco_base_regra) {
         const dados = prev.formData;
-        if(this.state.editarField){
-          dados.preco_base_regra = dados.preco_base_regra.filter(dado => dado != this.state.record)
+        if (this.state.editarField) {
+          dados.preco_base_regra = dados.preco_base_regra.filter(
+            dado => dado != this.state.record
+          );
         }
-        return ({
+        return {
           visibleRegraPreco: false,
-          formData: {...dados, preco_base_regra: [...prev.formData.preco_base_regra, item]},
+          formData: {
+            ...dados,
+            preco_base_regra: [...prev.formData.preco_base_regra, item]
+          },
           editarField: false
-        })
+        };
       }
 
-      return( {
+      return {
         visibleRegraPreco: false,
-        formData: {...prev.formData, preco_base_regra: [item]},
+        formData: { ...prev.formData, preco_base_regra: [item] },
         editarField: false
-      })
+      };
     });
-  }
+  };
 
-  handleCancel = (e) => {
+  handleCancel = e => {
     //console.log(e);
     this.setState({
       visible: false,
       visibleRegraPreco: false
     });
-  }
+  };
 
-  saveFormRef = (formRef) => {
+  saveFormRef = formRef => {
     this.formRef = formRef;
-  }
+  };
 
   render() {
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
       labelCol: { span: 3 },
       wrapperCol: { span: 12 }
+    };
+    const tailFormItemLayout = {
+      wrapperCol: { span: 12, offset: 2 }
     };
 
     return (
@@ -296,7 +313,11 @@ class GroupForm extends Component {
         />
         <Affix offsetTop={65}>
           <PainelHeader
-            title={this.state.editMode ? "Editando Grupo de Produto" : "Novo Grupo de Produto"}>
+            title={
+              this.state.editMode
+                ? "Editando Grupo de Produto"
+                : "Novo Grupo de Produto"
+            }>
             <Button
               type="primary"
               icon="save"
@@ -312,19 +333,32 @@ class GroupForm extends Component {
             {getFieldDecorator("nome", {
               rules: [{ required: true, message: "Este campo é obrigatório!" }],
               initialValue: this.state.formData.nome
-            })(
-              <Input
-                name="nome"
-                autoFocus
-              />
-            )}
+            })(<Input name="nome" autoFocus />)}
           </Form.Item>
 
+          <Form.Item {...tailFormItemLayout}>
+            {getFieldDecorator("usar_qtde_multipla_um_primaria_item_pedido", {
+              initialValue: this.state.formData.usar_qtde_multipla_um_primaria_item_pedido
+            })(
+              <Checkbox
+                checked={this.state.formData.usar_qtde_multipla_um_primaria_item_pedido}
+                onChange={e =>
+                  this.handleFormState({
+                    target: {
+                      name: "usar_qtde_multipla_um_primaria_item_pedido",
+                      value: e.target.checked
+                    }
+                  })
+                }>
+                Adicionar campo quantidade múltipla da unidade primaria do produto no item do pedido
+              </Checkbox>
+            )}
+          </Form.Item>
         </Form>
 
         <CamposExtras
           showModal={this.showModal}
-          loadingData= {this.state.loadingData}
+          loadingData={this.state.loadingData}
           changeStatus={this.changeStatusFields}
           removeRecord={this.removeRecordFields}
           formData={this.state.formData}
@@ -338,7 +372,7 @@ class GroupForm extends Component {
 
         <RegraPreco
           showModal={this.showModalRegraPreco}
-          loadingData= {this.state.loadingData}
+          loadingData={this.state.loadingData}
           changeStatus={this.changeStatusPreco}
           removeRecord={this.removeRecordPreco}
           formData={this.state.formData}
@@ -348,7 +382,6 @@ class GroupForm extends Component {
           saveFormRef={this.saveFormRef}
           record={this.state.record}
         />
-
       </div>
     );
   }
