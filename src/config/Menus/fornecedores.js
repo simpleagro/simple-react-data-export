@@ -8,7 +8,7 @@ const menus = {
     label: "Fornecedores",
     icon: "address-card",
     showMenu: true,
-    rule: 'Providers'
+    rule: 'Provider'
   },
   "/fornecedores/:id/edit": {
     component: SimpleLoadable(() => import("../../components/Sales/Providers/form")),
