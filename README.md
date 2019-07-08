@@ -104,6 +104,13 @@ For merged cell: is a array of objects. Example:
 ]
 ```
 
+Where: 
+* s => start
+* e => end
+* r => row
+* c => column
+
+
 **COLOR_SPEC**: Colors for `fill`, `font`, and `border` are specified as objects, either:
 * `{ auto: 1}` specifying automatic values
 * `{ rgb: "FFFFAA00" }` specifying a hex ARGB value
