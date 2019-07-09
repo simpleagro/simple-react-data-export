@@ -54,12 +54,17 @@ var excelSheetFromDataSet = function excelSheetFromDataSet(dataSet) {
     var rowCount = 0;
 
     dataSet.forEach(function (dataSetItem) {
+        var merges = dataSetItem.merges;
         var columns = dataSetItem.columns;
         var xSteps = typeof dataSetItem.xSteps === 'number' ? dataSetItem.xSteps : 0;
         var ySteps = typeof dataSetItem.ySteps === 'number' ? dataSetItem.ySteps : 0;
         var data = dataSetItem.data;
         if (dataSet === undefined || dataSet.length === 0) {
             return;
+        }
+
+        if(merges){
+          ws['!merges'] = merges;
         }
 
         rowCount += ySteps;
@@ -152,7 +157,7 @@ function fixRange(range, R, C, rowCount, xSteps, ySteps) {
 
     if (range.e.c < C + xSteps) {
         range.e.c = C + xSteps;
-    }
+    } 
 }
 
 var excelSheetFromAoA = function excelSheetFromAoA(data) {
