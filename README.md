@@ -92,6 +92,24 @@ top-level attributes: `fill`, `font`, `numFmt`, `alignment`, and `border`.
 |                 | diagonal       | `{ style: BORDER_STYLE, color: COLOR_SPEC }`
 |                 | diagonalUp     | `true` or `false`
 |                 | diagonalDown   | `true` or `false`
+| merges          |                | `{ s: {r: number, c: number}, e: {r: number, c: number} }`
+
+For merged cell: is a array of objects. Example:
+```javascript
+[
+    {s: {r: 0, c: 0}, e: {r: 1, c: 0} }, // Merge A1:A2
+    {s: {r: 0, c: 1}, e: {r: 0, c: 2} }, // Merge B1:C1
+    {s: {r: 5, c: 0}, e: {r: 5, c: 3} }, // Merge A6:D6
+    {s: {r: 0, c: 5}, e: {r: 8, c: 5} }  // Merge E1:E7
+]
+```
+
+Where: 
+* s => start
+* e => end
+* r => row
+* c => column
+
 
 **COLOR_SPEC**: Colors for `fill`, `font`, and `border` are specified as objects, either:
 * `{ auto: 1}` specifying automatic values
