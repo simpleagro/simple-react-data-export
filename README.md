@@ -44,7 +44,7 @@ npm install react-data-export --save
 | name          | `string`                | `""`       | `true`   | Sheet name in file 
 | data          | `array<object>`         | `null`     | `false`  | Excel Sheet data 
 | dataSet       | `array<ExcelSheetData>` | `null`     | `false`  | Excel Sheet data
-| children      | `ExcelColumn`           |  `null`    | `false`  | ExcelColumns
+| children      | `ExcelColumn`           | `null`     | `false`  | ExcelColumns
 
 **Note:** In ExcelSheet props `dataSet` has `precedence` over `data` and `children` props.
 
@@ -111,6 +111,7 @@ Where:
 * c => column
 
 
+
 **COLOR_SPEC**: Colors for `fill`, `font`, and `border` are specified as objects, either:
 * `{ auto: 1}` specifying automatic values
 * `{ rgb: "FFFFAA00" }` specifying a hex ARGB value
@@ -137,24 +138,3 @@ Borders for merged areas are specified for each cell within the merged area.  So
 * right borders for the cells on the right
 * top borders for the cells on the top
 * bottom borders for the cells on the left
-
-
-## Dependencies 
-This library uses [file-saver](https://www.npmjs.com/package/file-saver) and [xlsx](https://www.npmjs.com/package/xlsx) and using [json-loader](https://www.npmjs.com/package/json-loader) will do the magic for you.
-
-
-```javascript
-///webpack.config.js
-vendor: [
-        .....
-        'xlsx',
-        'file-saver'
-],
-.....
-node: {fs: 'empty'},
-externals: [
-    {'./cptable': 'var cptable'},
-    {'./jszip': 'jszip'}
- ]
-```
-
