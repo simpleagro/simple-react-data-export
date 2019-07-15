@@ -55,6 +55,7 @@ var excelSheetFromDataSet = function excelSheetFromDataSet(dataSet) {
 
     dataSet.forEach(function (dataSetItem) {
         var merges = dataSetItem.merges;
+        var gridLines = dataSetItem.gridLines;
         var columns = dataSetItem.columns;
         var xSteps = typeof dataSetItem.xSteps === 'number' ? dataSetItem.xSteps : 0;
         var ySteps = typeof dataSetItem.ySteps === 'number' ? dataSetItem.ySteps : 0;
@@ -65,6 +66,10 @@ var excelSheetFromDataSet = function excelSheetFromDataSet(dataSet) {
 
         if(merges){
           ws['!merges'] = merges;
+        }
+
+        if(gridLines){
+          ws['!gridLines'] = gridLines;
         }
 
         rowCount += ySteps;
