@@ -53,20 +53,7 @@
     "standard-version": "^4.4.0",
     "xlsx": "^0.14.0"
   },
-  "scripts": {
-    "commitmsg": "commitlint -e $GIT_PARAMS",
-    "release": "standard-version",
-    "test": "npm run lint && jest .",
-    "test:coverage": "nyc npm t",
-    "coverage:html": "nyc report --reporter=html",
-    "coverage:publish": "nyc report --reporter=lcov | codecov",
-    "clean": "rm -rf ./dist && mkdir ./dist",
-    "build": "npm run test && babel src --out-dir dist",
-    "build:watch": "babel -w src --out-dir dist",
-    "lint": "eslint .",
-    "lint:watch": "esw -w lib/**",
-    "prepare": "npm run build"
-  },
+  "scripts": {},
   "commitlint": {
     "extends": [
       "@commitlint/config-conventional"
