@@ -51,7 +51,7 @@
     "react": "16.0.0",
     "react-dom": "16.0.0",
     "standard-version": "^4.4.0",
-    "xlsx": "^0.14.0"
+    "xlsx": "^0.17.0"
   },
   "scripts": {},
   "commitlint": {
